@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Affiliate Mock Console</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <section id="login-view" class="login-view">
+    <form id="login-form" class="login-panel">
+      <div>
+        <p class="eyebrow">Affiliate</p>
+        <h1>Mock Console</h1>
+      </div>
+      <label>
+        <span>账号</span>
+        <input name="username" type="text" autocomplete="username" required>
+      </label>
+      <label>
+        <span>密码</span>
+        <input name="password" type="password" autocomplete="current-password" required>
+      </label>
+      <button class="primary" type="submit">登录</button>
+    </form>
+  </section>
+
+  <main id="app-view" class="app-view hidden">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Affiliate</p>
+        <h1>Mock Console</h1>
+      </div>
+      <div class="session-actions">
+        <span id="login-name">Mock User</span>
+        <button id="logout" class="ghost" type="button">退出登录</button>
+      </div>
+    </header>
+
+    <section class="controls">
+      <label>
+        <span>角色</span>
+        <select id="role">
+          <option value="partner">Partner</option>
+          <option value="operator" selected>Operator</option>
+          <option value="compliance">Compliance</option>
+          <option value="finance">Finance</option>
+        </select>
+      </label>
+      <label>
+        <span>场景</span>
+        <select id="scenario">
+          <option value="normal-flow">Normal flow</option>
+          <option value="no-source">No source</option>
+          <option value="ib-excluded">IB excluded</option>
+          <option value="high-risk">High risk</option>
+          <option value="dynamic-hold">Dynamic hold</option>
+          <option value="chargeback">Chargeback</option>
+          <option value="kyc-pending">KYC pending</option>
+          <option value="empty-state">Empty state</option>
+          <option value="api-error">API error</option>
+        </select>
+      </label>
+      <button id="reset-state" class="secondary" type="button">重置状态</button>
+    </section>
+
+    <div class="workspace">
+      <nav class="endpoint-nav" aria-label="Endpoints">
+        <p class="section-title">Client</p>
+        <button class="endpoint selected" data-endpoint="me" type="button">Current user</button>
+        <button class="endpoint" data-endpoint="clients" type="button">Clients</button>
+        <button class="endpoint" data-endpoint="commissions" type="button">Commissions</button>
+        <p class="section-title">Operations</p>
+        <button class="endpoint" data-endpoint="partners" type="button">Partners</button>
+        <button class="endpoint" data-endpoint="audits" type="button">Partner audits</button>
+        <button class="endpoint" data-endpoint="settlements" type="button">Settlements</button>
+        <p class="section-title">Risk</p>
+        <button class="endpoint" data-endpoint="risk-events" type="button">Risk events</button>
+      </nav>
+
+      <section class="content">
+        <div class="result-header">
+          <div>
+            <p class="eyebrow" id="request-method">GET</p>
+            <h2 id="request-path">/api/v1/me</h2>
+          </div>
+          <span id="response-status" class="status">200</span>
+        </div>
+
+        <div id="metric-row" class="metric-row"></div>
+        <div id="state-panel" class="state-panel hidden"></div>
+        <div id="table-container" class="table-container"></div>
+        <pre id="json-view" class="json-view"></pre>
+      </section>
+    </div>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
