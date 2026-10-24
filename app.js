@@ -1,360 +1,452 @@
-const baseState = {
-  users: {
-    partner: {
-      userId: "U-P-001", name: "Mock Partner", role: "partner", profileComplete: true,
-      permissions: ["clients:read", "commissions:read", "withdrawals:create"]
-    },
-    operator: {
-      userId: "U-OP-001", name: "Mock Operator", role: "operator", profileComplete: true,
-      permissions: ["partners:read", "partner-audits:decide", "settlements:decide", "risk-events:decide"]
-    },
-    compliance: {
-      userId: "U-CO-001", name: "Mock Compliance", role: "compliance", profileComplete: true,
-      permissions: ["partners:read", "partner-audits:decide", "risk-events:decide"]
-    },
-    finance: {
-      userId: "U-FI-001", name: "Mock Finance", role: "finance", profileComplete: true,
-      permissions: ["partners:read", "settlements:decide"]
-    }
+const defaultState = {
+  route: "dash",
+  sidebarCollapsed: false,
+  mobileNavOpen: false,
+  language: "zh",
+  kycDismissed: false,
+  dashboardMode: "day",
+  perf: {
+    groups: ["日期"],
+    drawer: false,
+    source: "",
+    draftSource: "",
+    count: 1,
+    page: 1
   },
-  partners: [
-    { partnerId: "P-001", displayName: "Mock Partner Alpha", emailMasked: "a***@example.com", status: "active", country: "SG", riskScore: 12, riskBand: "R0", validFtd: 12 },
-    { partnerId: "P-002", displayName: "Mock Partner Beta", emailMasked: "b***@example.com", status: "pending", country: "BR", riskScore: 43, riskBand: "R2", validFtd: 1 }
-  ],
-  audits: [
-    { auditId: "pa-001", partnerId: "P-002", displayName: "Mock Partner Beta", emailMasked: "b***@example.com", status: "pending", submittedAt: "2026-10-23T08:00:00Z" }
-  ],
-  clients: [
-    { clientId: "C-001", emailMasked: "c***@example.com", country: "SG", attribution: "attributed", qualification: "qualified", realTrade: true },
-    { clientId: "C-002", emailMasked: "d***@example.com", country: "BR", attribution: "attributed", qualification: "trading", realTrade: true }
-  ],
-  commissions: [
-    { commissionId: "cm-001", partnerId: "P-001", clientId: "C-001", amount: "120.00", status: "approved", holdDays: 1, occurredAt: "2026-10-22T10:00:00Z" }
-  ],
-  summary: { withdrawable: "120.00", holding: "0.00", rejected: "0.00", paidReversed: "0.00", currency: "USD", minimumWithdrawal: "NONE" },
-  settlements: [
-    { settlementId: "st-001", partnerId: "P-001", clientId: "C-001", amount: "120.00", status: "pending", settlementDate: "2026-10-23" }
-  ],
-  riskEvents: [
-    { eventId: "re-001", partnerId: "P-002", eventType: "traffic-anomaly", severity: "medium", status: "open", detectedAt: "2026-10-23T09:00:00Z" }
-  ]
+  clientsPage: 1,
+  clientFilterOpen: true,
+  clientFilters: {
+    "注册时间": "近30天",
+    "忠诚客户": "全部",
+    "KYC": "全部",
+    "资格日期": "全部"
+  },
+  promoTab: "campaign",
+  deep: {
+    page: "注册页",
+    system: "iOS (App Store)",
+    language: "简体中文"
+  },
+  lookup: { input: "", result: null, queries: 0 },
+  assetsAccepted: false,
+  assetType: "全部",
+  applyStep: 1,
+  emailVerified: false,
+  kycDone: false,
+  agreements: [false, false, false],
+  applySubmitted: false,
+  wdTab: "withdraw"
 };
 
-const scenarios = {
-  "normal-flow": {},
-  "no-source": {
-    clients: [
-      { clientId: "C-003", emailMasked: "n***@example.com", country: "SG", attribution: "no-source", qualification: "registered", realTrade: false }
-    ]
-  },
-  "ib-excluded": {
-    clients: [
-      { clientId: "C-004", emailMasked: "i***@example.com", country: "BR", attribution: "ib-excluded", qualification: "registered", realTrade: false }
-    ]
-  },
-  "high-risk": {
-    partners: [
-      { partnerId: "P-001", displayName: "Mock Partner Alpha", emailMasked: "a***@example.com", status: "active", country: "SG", riskScore: 86, riskBand: "R4", validFtd: 12 },
-      { partnerId: "P-002", displayName: "Mock Partner Beta", emailMasked: "b***@example.com", status: "pending", country: "BR", riskScore: 43, riskBand: "R2", validFtd: 1 }
-    ],
-    riskEvents: [
-      { eventId: "re-002", partnerId: "P-001", eventType: "device-cluster", severity: "high", status: "open", detectedAt: "2026-10-23T09:20:00Z" }
-    ]
-  },
-  "dynamic-hold": {
-    commissions: [
-      { commissionId: "cm-002", partnerId: "P-001", clientId: "C-002", amount: "80.00", status: "holding", holdDays: 5, occurredAt: "2026-10-23T08:30:00Z" }
-    ],
-    summary: { withdrawable: "40.00", holding: "80.00", rejected: "0.00", paidReversed: "0.00", currency: "USD", minimumWithdrawal: "NONE" }
-  },
-  chargeback: {
-    commissions: [
-      { commissionId: "cm-003", partnerId: "P-001", clientId: "C-001", amount: "-120.00", status: "reversed", holdDays: 0, occurredAt: "2026-10-23T10:00:00Z" }
-    ],
-    summary: { withdrawable: "-120.00", holding: "0.00", rejected: "0.00", paidReversed: "120.00", currency: "USD", minimumWithdrawal: "NONE" }
-  },
-  "kyc-pending": {
-    users: {
-      partner: { userId: "U-P-002", name: "Incomplete Partner", role: "partner", profileComplete: false, permissions: ["clients:read", "commissions:read"] }
-    },
-    clients: []
-  },
-  "empty-state": {
-    partners: [], audits: [], clients: [], commissions: [], settlements: [], riskEvents: [],
-    summary: { withdrawable: "0.00", holding: "0.00", rejected: "0.00", paidReversed: "0.00", currency: "USD", minimumWithdrawal: "NONE" }
-  },
-  "api-error": {}
+const englishLabels = {
+  "仪表盘": "Dashboard",
+  "业绩数据": "Performance",
+  "客户列表": "Clients",
+  "推广链接与活动": "Campaigns",
+  "深度链接": "Deep links",
+  "素材库": "Assets",
+  "收益与提现": "Earnings",
+  "客户归属查询": "Attribution",
+  "提现": "Withdrawal",
+  "入驻申请": "Application"
 };
 
-const endpoints = {
-  me: { method: "GET", path: "/api/v1/me", roles: ["partner", "operator", "compliance", "finance"] },
-  clients: { method: "GET", path: "/api/v1/clients", roles: ["partner", "operator", "compliance"] },
-  commissions: { method: "GET", path: "/api/v1/commissions", roles: ["partner", "operator", "compliance", "finance"] },
-  partners: { method: "GET", path: "/api/v1/partners", roles: ["operator", "compliance", "finance"] },
-  audits: { method: "GET", path: "/api/v1/partner-audits", roles: ["operator", "compliance"] },
-  settlements: { method: "GET", path: "/api/v1/settlements", roles: ["operator", "finance"] },
-  "risk-events": { method: "GET", path: "/api/v1/risk-events", roles: ["operator", "compliance"] }
-};
+const elements = {};
 
-let currentRole = "operator";
-let currentScenario = "normal-flow";
-let currentEndpoint = "me";
-let state = buildState();
+function initializeElements() {
+  for (const id of [
+    "login-view", "login-form", "login-error", "app-view", "sidebar", "nav",
+    "profile-entry", "breadcrumb", "topbar-caption", "sidebar-toggle", "language-toggle",
+    "kyc-banner", "dismiss-kyc", "main", "modal-root", "toast"
+  ]) elements[id] = document.getElementById(id);
+}
 
-const elements = {
-  loginView: document.querySelector("#login-view"),
-  appView: document.querySelector("#app-view"),
-  loginForm: document.querySelector("#login-form"),
-  loginName: document.querySelector("#login-name"),
-  logout: document.querySelector("#logout"),
-  role: document.querySelector("#role"),
-  scenario: document.querySelector("#scenario"),
-  reset: document.querySelector("#reset-state"),
-  method: document.querySelector("#request-method"),
-  path: document.querySelector("#request-path"),
-  status: document.querySelector("#response-status"),
-  metrics: document.querySelector("#metric-row"),
-  statePanel: document.querySelector("#state-panel"),
-  table: document.querySelector("#table-container"),
-  json: document.querySelector("#json-view")
-};
-
-function buildState() {
-  const next = structuredClone(baseState);
-  const override = scenarios[currentScenario] || {};
-  for (const [key, value] of Object.entries(override)) {
-    if (key === "users") Object.assign(next.users, structuredClone(value));
-    else next[key] = structuredClone(value);
+function currentState() {
+  try {
+    const saved = sessionStorage.getItem("affiliate-user-mock");
+    return saved ? { ...structuredClone(defaultState), ...JSON.parse(saved) } : structuredClone(defaultState);
+  } catch {
+    return structuredClone(defaultState);
   }
-  return next;
 }
 
-function response(status, data) {
-  return { status, body: status >= 400 ? { error: data } : { data } };
+AFF.state = currentState();
+
+function persist() {
+  sessionStorage.setItem("affiliate-user-mock", JSON.stringify(AFF.state));
 }
 
-function permissionDenied() {
-  return response(403, {
-    code: "FORBIDDEN",
-    message: "Current role cannot access this resource.",
-    details: [],
-    traceId: `mock-${Math.random().toString(16).slice(2, 8)}`
-  });
+function routeMeta(route) {
+  return AFF.routes.find(item => item.id === route) || AFF.routes[0];
 }
 
-function endpointResult(name = currentEndpoint) {
-  const endpoint = endpoints[name];
-  if (!endpoint.roles.includes(currentRole)) return permissionDenied();
-  if (currentScenario === "api-error") {
-    return response(503, {
-      code: "SERVICE_UNAVAILABLE",
-      message: "Mock service intentionally returns an error in this scenario.",
-      details: [],
-      traceId: `mock-${Math.random().toString(16).slice(2, 8)}`
-    });
-  }
-
-  if (name === "me") return response(200, state.users[currentRole]);
-  if (name === "clients") return response(200, state.clients);
-  if (name === "commissions") return response(200, { items: state.commissions, summary: state.summary });
-  if (name === "partners") return response(200, state.partners);
-  if (name === "audits") return response(200, state.audits);
-  if (name === "settlements") return response(200, state.settlements);
-  if (name === "risk-events") return response(200, state.riskEvents);
-  return response(404, { code: "NOT_FOUND", message: "Endpoint not found" });
+function routeLabel(route) {
+  const meta = routeMeta(route);
+  return AFF.state.language === "en" ? (englishLabels[meta.label] || meta.label) : meta.label;
 }
 
-function tagClass(value) {
-  if (["active", "approved", "qualified", "attributed", "resolved", "low"].includes(value)) return "good";
-  if (["pending", "holding", "materials-required", "investigating", "medium"].includes(value)) return "warn";
-  if (["banned", "rejected", "reversed", "open", "escalated", "high", "no-source", "ib-excluded"].includes(value)) return "bad";
-  if (["trading", "registered"].includes(value)) return "info";
-  return "neutral";
+function renderNav() {
+  let group = "";
+  elements.nav.innerHTML = AFF.routes.map(route => {
+    const routeGroup = AFF.state.language === "en" ? "Menu" : route.group;
+    const groupHtml = route.group !== group ? `<p class="nav-group">${AFF.helpers.h(routeGroup)}</p>` : "";
+    group = route.group;
+    return `${groupHtml}<button class="nav-item ${AFF.state.route === route.id ? "active" : ""}" type="button" data-route="${route.id}"><span class="nav-icon">◆</span><span class="nav-label">${AFF.helpers.h(routeLabel(route.id))}</span></button>`;
+  }).join("");
+  elements["profile-entry"].querySelector(".nav-label").textContent = AFF.state.language === "en" ? "Profile" : "资料完善";
 }
 
 function render() {
-  const endpoint = endpoints[currentEndpoint];
-  elements.method.textContent = endpoint.method;
-  elements.path.textContent = endpoint.path;
-
-  const result = endpointResult();
-  elements.status.textContent = result.status;
-  elements.status.classList.toggle("error", result.status >= 400);
-  elements.json.textContent = JSON.stringify(result.body, null, 2);
-  renderMetrics(result);
-  renderActions();
-  renderTable(result);
+  const route = AFF.routes.some(item => item.id === AFF.state.route) ? AFF.state.route : "dash";
+  AFF.state.route = route;
+  renderNav();
+  const meta = routeMeta(route);
+  elements.breadcrumb.textContent = `${AFF.state.language === "en" ? "Menu" : meta.group} › ${routeLabel(route)}`;
+  elements["topbar-caption"].textContent = AFF.state.language === "en"
+    ? "Affiliate user mock · synthetic data only"
+    : "Affiliate 用户端演示 · 虚构数据";
+  elements.main.innerHTML = AFF.pages[route]();
+  elements["kyc-banner"].classList.toggle("hidden", AFF.state.kycDismissed || (AFF.state.kycDone && AFF.state.applyStep >= 3));
+  document.body.classList.toggle("collapsed", AFF.state.sidebarCollapsed);
+  document.body.classList.toggle("mobile-nav-open", AFF.state.mobileNavOpen);
+  document.title = `${routeLabel(route)} · Affiliate User Mock`;
+  persist();
 }
 
-function renderMetrics(result) {
-  const data = result.body.data;
-  let metrics = [];
-
-  if (currentEndpoint === "commissions" && data?.summary) {
-    metrics = [
-      ["Withdrawable", data.summary.withdrawable],
-      ["Holding", data.summary.holding],
-      ["Rejected", data.summary.rejected],
-      ["Paid reversed", data.summary.paidReversed]
-    ];
-  } else if (currentEndpoint === "partners" && Array.isArray(data)) {
-    metrics = [
-      ["Partners", String(data.length)],
-      ["Active", String(data.filter(item => item.status === "active").length)],
-      ["Pending", String(data.filter(item => item.status === "pending").length)],
-      ["R4", String(data.filter(item => item.riskBand === "R4").length)]
-    ];
-  } else if (currentEndpoint === "clients" && Array.isArray(data)) {
-    metrics = [
-      ["Clients", String(data.length)],
-      ["Attributed", String(data.filter(item => item.attribution === "attributed").length)],
-      ["No source", String(data.filter(item => item.attribution === "no-source").length)],
-      ["IB excluded", String(data.filter(item => item.attribution === "ib-excluded").length)]
-    ];
-  } else if (currentEndpoint === "me" && data) {
-    metrics = [
-      ["Role", data.role],
-      ["Profile", data.profileComplete ? "Complete" : "Incomplete"],
-      ["User ID", data.userId],
-      ["Permissions", String(data.permissions.length)]
-    ];
-  }
-
-  elements.metrics.innerHTML = metrics.map(([label, value]) => `
-    <div class="metric"><span>${label}</span><strong>${escapeHtml(String(value))}</strong></div>
-  `);
+function navigate(route) {
+  if (!AFF.routes.some(item => item.id === route)) route = "dash";
+  AFF.state.route = route;
+  AFF.state.mobileNavOpen = false;
+  location.hash = `/${route}`;
+  render();
+  elements.main.focus({ preventScroll: true });
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-function renderActions() {
-  const actionMap = {
-    audits: [
-      { label: "Approve pa-001", run: () => { const item = state.audits[0]; if (item) item.status = "approved"; } },
-      { label: "Require materials", run: () => { const item = state.audits[0]; if (item) item.status = "materials-required"; } }
-    ],
-    settlements: [
-      { label: "Approve st-001", run: () => { const item = state.settlements[0]; if (item) item.status = "approved"; } },
-      { label: "Freeze st-001", run: () => { const item = state.settlements[0]; if (item) item.status = "frozen"; } }
-    ],
-    "risk-events": [
-      { label: "Resolve event", run: () => { const item = state.riskEvents[0]; if (item) item.status = "resolved"; } },
-      { label: "Escalate event", run: () => { const item = state.riskEvents[0]; if (item) item.status = "escalated"; } }
-    ]
-  };
+function showToast(message) {
+  elements.toast.textContent = message;
+  elements.toast.classList.remove("hidden");
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => elements.toast.classList.add("hidden"), 2600);
+}
 
-  const actions = actionMap[currentEndpoint] || [];
-  elements.statePanel.innerHTML = "";
-  elements.statePanel.classList.toggle("hidden", actions.length === 0);
-  for (const action of actions) {
-    const button = document.createElement("button");
-    button.className = "action";
-    button.type = "button";
-    button.textContent = action.label;
-    button.disabled = currentScenario === "empty-state" || currentScenario === "api-error";
-    button.addEventListener("click", () => {
-      action.run();
-      render();
-    });
-    elements.statePanel.append(button);
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast("已复制");
+  } catch {
+    showToast("剪贴板不可用，请手动复制链接");
   }
 }
 
-function columnsFor(name) {
-  return {
-    me: ["userId", "name", "role", "profileComplete"],
-    clients: ["clientId", "emailMasked", "country", "attribution", "qualification", "realTrade"],
-    commissions: ["commissionId", "partnerId", "clientId", "amount", "status", "holdDays"],
-    partners: ["partnerId", "displayName", "emailMasked", "status", "country", "riskScore", "riskBand", "validFtd"],
-    audits: ["auditId", "partnerId", "displayName", "emailMasked", "status", "submittedAt"],
-    settlements: ["settlementId", "partnerId", "clientId", "amount", "status", "settlementDate"],
-    "risk-events": ["eventId", "partnerId", "eventType", "severity", "status", "detectedAt"]
-  }[name] || [];
+function showModal(html, full = false) {
+  elements["modal-root"].className = `modal-layer ${full ? "full" : ""}`;
+  elements["modal-root"].innerHTML = html;
+  document.addEventListener("keydown", escapeModal);
 }
 
-function renderTable(result) {
-  const data = result.body.data;
-  let rows = [];
-  if (currentEndpoint === "commissions" && data?.items) rows = data.items;
-  else if (Array.isArray(data)) rows = data;
-  else if (data) rows = [data];
+function closeModal() {
+  elements["modal-root"].className = "modal-layer hidden";
+  elements["modal-root"].innerHTML = "";
+  document.removeEventListener("keydown", escapeModal);
+}
 
-  const columns = columnsFor(currentEndpoint);
-  if (!columns.length || !rows.length) {
-    elements.table.innerHTML = "";
+function escapeModal(event) {
+  if (event.key === "Escape") closeModal();
+}
+
+function modalShell(title, body, actions = "") {
+  return `<div class="modal-card"><div class="modal-head"><h2>${AFF.helpers.h(title)}</h2><button class="close-button" type="button" data-action="close-modal">×</button></div>${body}${actions ? `<div class="drawer-actions">${actions}</div>` : ""}</div>`;
+}
+
+function openCampaignModal() {
+  showModal(modalShell("新建活动", `
+    <label class="field"><span>活动名称</span><input id="campaign-name" placeholder="例如：十一月 Telegram 投放"></label>
+    <p class="helper" style="margin-top:10px">活动仅作为链接分组，不配置预算、日期和出价。</p>`,
+    `<button class="button secondary" type="button" data-action="close-modal">取消</button><button class="button primary" type="button" data-action="create-campaign">保存</button>`));
+}
+
+function openAppealModal() {
+  showModal(modalShell("申诉", `
+    <div class="info-grid">
+      <div class="info-item"><span>关联流水</span><strong>2026-10-21 · 佣金拒绝</strong></div>
+      <div class="info-item"><span>拒绝原因</span><strong>QFTD-02 未达质量门槛</strong></div>
+    </div>
+    <label class="field" style="margin-top:16px"><span>申诉说明</span><textarea id="appeal-reason" rows="4" placeholder="请说明原因和证据"></textarea></label>
+    <p class="helper">申诉期15自然日，复核5个工作日；提交后不可重复提交。</p>`,
+    `<button class="button secondary" type="button" data-action="close-modal">取消</button><button class="button primary" type="button" data-action="submit-appeal">提交申诉</button>`), true);
+}
+
+function openCodeModal() {
+  showModal(modalShell("推广行为准则", `
+    <p>本演示仅保留准则摘要：不得自荐、不得违规使用品牌素材、不得诱导虚假交易。接受后仅解锁本演示素材下载。</p>`,
+    `<button class="button secondary" type="button" data-action="close-modal">关闭</button><button class="button primary" type="button" data-action="accept-code">阅读并接受</button>`));
+}
+
+function openProtocolModal() {
+  showModal(modalShell("协议摘要", `
+    <p>主协议、推广行为准则、客户归属与佣金规则均为虚构演示文本。正式协议以未来系统配置为准。</p>`,
+    `<button class="button secondary" type="button" data-action="close-modal">关闭</button>`));
+}
+
+function openClientInfo(clientId) {
+  const row = AFF.clients.find(item => item.clientId === clientId);
+  if (!row) return;
+  showModal(modalShell(`客户 ${row.clientId}`, `
+    <div class="info-grid">
+      <div class="info-item"><span>资格链</span><strong>注册 → KYC → 有效FTD → 真实交易 → 合格判定</strong></div>
+      <div class="info-item"><span>佣金链</span><strong>待检查 → 已批准 → 已支付</strong></div>
+      <div class="info-item"><span>动态Hold</span><strong>初始1天，按风险分递增</strong></div>
+      <div class="info-item"><span>结算</span><strong>日度结算</strong></div>
+      <div class="info-item"><span>归因</span><strong>${AFF.helpers.h(row.source)} / ${AFF.helpers.h(row.medium)} / ${AFF.helpers.h(row.campaign)}</strong></div>
+      <div class="info-item"><span>资金</span><strong>预计 ${row.expected} · 已付 ${row.paid} · 暂扣 ${row.held}</strong></div>
+    </div>`), true);
+}
+
+function lookup() {
+  const state = AFF.state;
+  const input = document.getElementById("lookup-input")?.value.trim() || "";
+  state.lookup.input = input;
+  if (!input) {
+    state.lookup.result = null;
+    showToast("请输入精准客户标识");
+    render();
     return;
   }
-
-  elements.table.innerHTML = `
-    <table>
-      <thead><tr>${columns.map(column => `<th>${column}</th>`).join("")}</tr></thead>
-      <tbody>
-        ${rows.map(row => `<tr>${columns.map(column => `<td>${renderCell(row[column])}</td>`).join("")}</tr>`).join("")}
-      </tbody>
-    </table>
-  `;
-}
-
-function renderCell(value) {
-  if (typeof value === "boolean") return `<span class="tag ${value ? "good" : "neutral"}">${value ? "Yes" : "No"}</span>`;
-  if (typeof value === "string" && ["active", "pending", "approved", "rejected", "holding", "reversed", "qualified", "trading", "registered", "attributed", "no-source", "ib-excluded", "materials-required", "frozen", "open", "resolved", "escalated", "low", "medium", "high"].includes(value)) {
-    return `<span class="tag ${tagClass(value)}">${value}</span>`;
+  if (state.lookup.queries >= 5) {
+    state.lookup.result = null;
+    showToast("查询频次已达演示上限，请稍后再试");
+    render();
+    return;
   }
-  return escapeHtml(value === undefined || value === null ? "" : String(value));
+  state.lookup.queries += 1;
+  state.lookup.result = AFF.lookupIndex.find(item => item.key.toLowerCase() === input.toLowerCase()) || {
+    id: "-", email: "-", owned: false, date: "-", reason: "未查询到可披露结果；请求已进入审计日志"
+  };
+  render();
 }
 
-function escapeHtml(value) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
+function handleAction(action, target) {
+  const state = AFF.state;
+  if (action === "close-modal") return closeModal();
+  if (action === "open-perf-filter") {
+    state.perf.drawer = true;
+    state.perf.draftSource = state.perf.source;
+    return render();
+  }
+  if (action === "close-perf-filter") {
+    state.perf.drawer = false;
+    return render();
+  }
+  if (action === "apply-perf-filter") {
+    state.perf.source = state.perf.draftSource;
+    state.perf.count = 1 + (state.perf.source && state.perf.source !== "全部" ? 1 : 0);
+    state.perf.drawer = false;
+    state.perf.page = 1;
+    showToast("筛选已应用");
+    return render();
+  }
+  if (action === "reset-perf-filter") {
+    state.perf.source = "";
+    state.perf.draftSource = "";
+    state.perf.count = 1;
+    state.perf.page = 1;
+    showToast("筛选已重置");
+    return render();
+  }
+  if (action === "add-perf-group") {
+    const next = AFF.performance.dimensions.find(item => !state.perf.groups.includes(item));
+    if (next) state.perf.groups.push(next);
+    return render();
+  }
+  if (action === "perf-page") {
+    state.perf.page = Number(target.dataset.page || 1);
+    return render();
+  }
+  if (action === "toggle-client-filter") {
+    state.clientFilterOpen = !state.clientFilterOpen;
+    return render();
+  }
+  if (action === "clients-page") {
+    state.clientsPage = Number(target.dataset.page || 1);
+    return render();
+  }
+  if (action === "open-campaign-modal") return openCampaignModal();
+  if (action === "create-campaign") {
+    const name = document.getElementById("campaign-name")?.value.trim();
+    if (!name) return showToast("请输入活动名称");
+    AFF.campaigns.unshift({ name, link: `https://track.example.com/r/AFF1001?camp=${encodeURIComponent(name)}`, status: "启用", registrations: 0, qualified: 0, expected: "$0" });
+    closeModal();
+    showToast("活动已创建");
+    return render();
+  }
+  if (action === "open-appeal") return openAppealModal();
+  if (action === "submit-appeal") {
+    const reason = document.getElementById("appeal-reason")?.value.trim();
+    if (reason.length < 2) return showToast("请填写申诉说明");
+    const row = AFF.commissions.rows.find(item => item.appealOpen);
+    if (row) {
+      row.appealOpen = false;
+      row.status = "申诉中";
+      row.action = "";
+    }
+    closeModal();
+    showToast("申诉已提交，进入复核");
+    return render();
+  }
+  if (action === "open-code-modal") return openCodeModal();
+  if (action === "accept-code") {
+    state.assetsAccepted = true;
+    state.agreements[1] = true;
+    closeModal();
+    showToast("准则已接受");
+    return render();
+  }
+  if (action === "open-protocol") return openProtocolModal();
+  if (action === "lookup") return lookup();
+  if (action === "verify-email") {
+    state.emailVerified = true;
+    showToast("邮箱已验证");
+    return render();
+  }
+  if (action === "simulate-kyc") {
+    state.kycDone = true;
+    showToast("KYC已同步");
+    return render();
+  }
+  if (action === "submit-apply") {
+    if (!state.emailVerified || !state.kycDone || !state.agreements.every(Boolean)) return showToast("请完成前置步骤");
+    state.applySubmitted = true;
+    showToast("申请已提交，等待运营审核");
+    return render();
+  }
 }
 
-elements.loginForm.addEventListener("submit", event => {
+function handleClick(event) {
+  const target = event.target.closest("[data-route], [data-copy], [data-dashboard-mode], [data-perf-group], [data-perf-source], [data-client-filter], [data-client-info], [data-promo-tab], [data-sub-toggle], [data-asset-type], [data-download], [data-apply-step], [data-wd-tab], [data-action]");
+  if (!target) return;
+  const dataset = target.dataset;
+  if (dataset.route) return navigate(dataset.route);
+  if (dataset.copy) return copyText(dataset.copy);
+  if (dataset.dashboardMode) {
+    AFF.state.dashboardMode = dataset.dashboardMode;
+    return render();
+  }
+  if (dataset.perfGroup) {
+    AFF.state.perf.groups = AFF.state.perf.groups.filter(group => group !== dataset.perfGroup);
+    return render();
+  }
+  if (dataset.perfSource) {
+    AFF.state.perf.draftSource = dataset.perfSource === "全部" ? "" : dataset.perfSource;
+    return render();
+  }
+  if (dataset.clientFilter) {
+    AFF.state.clientFilters[dataset.clientFilter] = dataset.value;
+    AFF.state.clientsPage = 1;
+    return render();
+  }
+  if (dataset.clientInfo) return openClientInfo(dataset.clientInfo);
+  if (dataset.promoTab) {
+    AFF.state.promoTab = dataset.promoTab;
+    return render();
+  }
+  if (dataset.subToggle) {
+    const row = AFF.subIds.find(item => item.id === dataset.subToggle);
+    row.status = row.status === "启用" ? "已封禁" : "启用";
+    row.updatedAt = "2026-10-24";
+    showToast("状态已更新");
+    return render();
+  }
+  if (dataset.assetType) {
+    AFF.state.assetType = dataset.assetType;
+    return render();
+  }
+  if (dataset.download) {
+    showToast(`开始下载：${dataset.download}`);
+    return;
+  }
+  if (dataset.applyStep) {
+    const step = Number(dataset.applyStep);
+    if (step < 1 || step > 5) return;
+    if (step > AFF.state.applyStep) {
+      if (step >= 2 && !AFF.state.emailVerified) return showToast("请先验证邮箱");
+      if (step >= 4 && !AFF.state.kycDone) return showToast("请先完成KYC");
+      if (step >= 5 && !AFF.state.agreements.every(Boolean)) return showToast("请先接受全部协议");
+    }
+    AFF.state.applyStep = step;
+    return render();
+  }
+  if (dataset.wdTab) {
+    AFF.state.wdTab = dataset.wdTab;
+    return render();
+  }
+  if (dataset.action) return handleAction(dataset.action, target);
+}
+
+function handleChange(event) {
+  const target = event.target;
+  if (target.dataset.deep) {
+    AFF.state.deep[target.dataset.deep] = target.value;
+    return render();
+  }
+  if (target.dataset.agreement !== undefined) {
+    AFF.state.agreements[Number(target.dataset.agreement)] = target.checked;
+    return render();
+  }
+}
+
+function handleLogin(event) {
   event.preventDefault();
   const username = event.currentTarget.username.value.trim();
   const password = event.currentTarget.password.value;
-  if (!username || !password) return;
-  sessionStorage.setItem("affiliate-mock-user", username);
-  showApp(username);
-});
-
-elements.logout.addEventListener("click", () => {
-  sessionStorage.removeItem("affiliate-mock-user");
-  elements.loginView.classList.remove("hidden");
-  elements.appView.classList.add("hidden");
-});
-
-elements.role.addEventListener("change", event => {
-  currentRole = event.target.value;
+  if (!username || !password) {
+    elements["login-error"].hidden = false;
+    return;
+  }
+  elements["login-error"].hidden = true;
+  sessionStorage.setItem("affiliate-user-session", username);
+  elements["login-view"].classList.add("hidden");
+  elements["app-view"].classList.remove("hidden");
   render();
-});
-
-elements.scenario.addEventListener("change", event => {
-  currentScenario = event.target.value;
-  state = buildState();
-  render();
-});
-
-elements.reset.addEventListener("click", () => {
-  state = buildState();
-  render();
-});
-
-document.querySelectorAll(".endpoint").forEach(button => {
-  button.addEventListener("click", () => {
-    document.querySelectorAll(".endpoint").forEach(item => item.classList.remove("selected"));
-    button.classList.add("selected");
-    currentEndpoint = button.dataset.endpoint;
-    render();
-  });
-});
-
-function showApp(username) {
-  elements.loginName.textContent = username;
-  elements.loginView.classList.add("hidden");
-  elements.appView.classList.remove("hidden");
-  render();
+  showToast(`已登录：${username}`);
 }
 
-const savedUser = sessionStorage.getItem("affiliate-mock-user");
-if (savedUser) showApp(savedUser);
+function restoreSession() {
+  if (!sessionStorage.getItem("affiliate-user-session")) return false;
+  elements["login-view"].classList.add("hidden");
+  elements["app-view"].classList.remove("hidden");
+  return true;
+}
+
+function initialize() {
+  initializeElements();
+  elements["login-form"].addEventListener("submit", handleLogin);
+  elements["sidebar-toggle"].addEventListener("click", () => {
+    if (window.innerWidth <= 991) {
+      AFF.state.mobileNavOpen = !AFF.state.mobileNavOpen;
+    } else {
+      AFF.state.sidebarCollapsed = !AFF.state.sidebarCollapsed;
+    }
+    render();
+  });
+  elements["dismiss-kyc"].addEventListener("click", () => {
+    AFF.state.kycDismissed = true;
+    render();
+  });
+  elements["language-toggle"].addEventListener("click", () => {
+    AFF.state.language = AFF.state.language === "zh" ? "en" : "zh";
+    render();
+  });
+  document.addEventListener("click", handleClick);
+  document.addEventListener("change", handleChange);
+  window.addEventListener("hashchange", () => {
+    const route = location.hash.replace(/^#\//, "");
+    if (route) navigate(route);
+  });
+
+  const route = location.hash.replace(/^#\//, "");
+  if (route) AFF.state.route = route;
+  if (restoreSession()) render();
+}
+
+initialize();

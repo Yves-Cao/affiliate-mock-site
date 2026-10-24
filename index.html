@@ -3,15 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Affiliate Mock Console</title>
+  <meta name="description" content="Affiliate user-side mock pages with synthetic data only.">
+  <title>Affiliate 用户端 Mock</title>
+  <link rel="icon" href="data:,">
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <section id="login-view" class="login-view">
-    <form id="login-form" class="login-panel">
+  <a class="skip-link" href="#main">跳到主要内容</a>
+
+  <section id="login-view" class="login-view" aria-label="Demo login">
+    <form id="login-form" class="login-panel" novalidate>
       <div>
         <p class="eyebrow">Affiliate</p>
-        <h1>Mock Console</h1>
+        <h1>用户端 Mock</h1>
+        <p class="login-note">任意非空账号密码仅用于演示门槛，不是安全认证。</p>
       </div>
       <label>
         <span>账号</span>
@@ -21,80 +26,70 @@
         <span>密码</span>
         <input name="password" type="password" autocomplete="current-password" required>
       </label>
-      <button class="primary" type="submit">登录</button>
+      <p id="login-error" class="form-error" hidden>请输入账号和密码。</p>
+      <button class="button primary wide" type="submit">登录</button>
     </form>
   </section>
 
-  <main id="app-view" class="app-view hidden">
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">Affiliate</p>
-        <h1>Mock Console</h1>
+  <div id="app-view" class="app-view hidden">
+    <aside id="sidebar" class="sidebar" aria-label="用户端导航">
+      <div class="brand">
+        <span class="brand-mark">A</span>
+        <span class="brand-text">
+          <strong>Affiliate</strong>
+          <small>Partner Console</small>
+        </span>
       </div>
-      <div class="session-actions">
-        <span id="login-name">Mock User</span>
-        <button id="logout" class="ghost" type="button">退出登录</button>
-      </div>
-    </header>
-
-    <section class="controls">
-      <label>
-        <span>角色</span>
-        <select id="role">
-          <option value="partner">Partner</option>
-          <option value="operator" selected>Operator</option>
-          <option value="compliance">Compliance</option>
-          <option value="finance">Finance</option>
-        </select>
-      </label>
-      <label>
-        <span>场景</span>
-        <select id="scenario">
-          <option value="normal-flow">Normal flow</option>
-          <option value="no-source">No source</option>
-          <option value="ib-excluded">IB excluded</option>
-          <option value="high-risk">High risk</option>
-          <option value="dynamic-hold">Dynamic hold</option>
-          <option value="chargeback">Chargeback</option>
-          <option value="kyc-pending">KYC pending</option>
-          <option value="empty-state">Empty state</option>
-          <option value="api-error">API error</option>
-        </select>
-      </label>
-      <button id="reset-state" class="secondary" type="button">重置状态</button>
-    </section>
+      <nav id="nav" class="nav"></nav>
+      <button id="profile-entry" class="nav-item profile-entry" type="button" data-route="apply">
+        <span class="nav-icon">·</span>
+        <span class="nav-label">资料完善</span>
+      </button>
+    </aside>
 
     <div class="workspace">
-      <nav class="endpoint-nav" aria-label="Endpoints">
-        <p class="section-title">Client</p>
-        <button class="endpoint selected" data-endpoint="me" type="button">Current user</button>
-        <button class="endpoint" data-endpoint="clients" type="button">Clients</button>
-        <button class="endpoint" data-endpoint="commissions" type="button">Commissions</button>
-        <p class="section-title">Operations</p>
-        <button class="endpoint" data-endpoint="partners" type="button">Partners</button>
-        <button class="endpoint" data-endpoint="audits" type="button">Partner audits</button>
-        <button class="endpoint" data-endpoint="settlements" type="button">Settlements</button>
-        <p class="section-title">Risk</p>
-        <button class="endpoint" data-endpoint="risk-events" type="button">Risk events</button>
-      </nav>
-
-      <section class="content">
-        <div class="result-header">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="sidebar-toggle" class="icon-button" type="button" aria-label="切换侧栏">≡</button>
           <div>
-            <p class="eyebrow" id="request-method">GET</p>
-            <h2 id="request-path">/api/v1/me</h2>
+            <p id="breadcrumb" class="breadcrumb">数据总览 › 仪表盘</p>
+            <p id="topbar-caption" class="topbar-caption">Affiliate 用户端演示 · 虚构数据</p>
           </div>
-          <span id="response-status" class="status">200</span>
         </div>
+        <div class="topbar-tools">
+          <a class="wallet" href="#/pay">
+            <span>可提现</span>
+            <strong>$12,480.50</strong>
+          </a>
+          <button class="icon-button" type="button" aria-label="帮助中心">?</button>
+          <button id="language-toggle" class="icon-button" type="button" aria-label="切换语言">中/EN</button>
+          <button class="icon-button notice" type="button" aria-label="通知">!<span></span></button>
+          <span class="avatar" aria-hidden="true">M</span>
+        </div>
+      </header>
 
-        <div id="metric-row" class="metric-row"></div>
-        <div id="state-panel" class="state-panel hidden"></div>
-        <div id="table-container" class="table-container"></div>
-        <pre id="json-view" class="json-view"></pre>
-      </section>
+      <div id="kyc-banner" class="kyc-banner">
+        <span>您的账户资料未完善，部分功能可能受限。</span>
+        <div>
+          <button id="dismiss-kyc" class="button secondary small" type="button">知道了</button>
+          <button class="button primary small" type="button" data-route="apply">去完善</button>
+        </div>
+      </div>
+
+      <main id="main" class="main" tabindex="-1"></main>
+
+      <footer class="footer">
+        <span>Affiliate User Mock</span>
+        <span>Synthetic data only</span>
+      </footer>
     </div>
-  </main>
+  </div>
 
+  <div id="modal-root" class="modal-layer hidden" role="dialog" aria-modal="true"></div>
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+  <script src="./data.js"></script>
+  <script src="./pages.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>

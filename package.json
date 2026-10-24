@@ -1,0 +1,11 @@
+{
+  "name": "affiliate-user-mock-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Public synthetic Affiliate user-side mock pages.",
+  "scripts": {
+    "serve": "node scripts/serve.cjs",
+    "check": "node --check data.js && node --check pages.js && node --check app.js",
+    "test:ui": "node scripts/visual-check.cjs"
+  }
+}
