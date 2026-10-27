@@ -1,13 +1,15 @@
 # Affiliate User Mock
 
-Public static demo for `affiliate.evecha.cn`. The site implements the twelve Affiliate user-side pages defined by the product page specifications. All account names, client IDs, campaigns, commissions, assets, and amounts are synthetic.
+Public static demo for `affiliate.evecha.cn`. The site implements the fourteen Affiliate user-side pages defined by the product page specifications. All account names, client IDs, campaigns, commissions, assets, and amounts are synthetic.
 
 ## Pages
 
 - `#/dash` Dashboard
 - `#/perf` Performance data
-- `#/clients` Client list
+- `#/clients` Client data with conversion milestones and commission details
+- `#/summary` General statistics with six summary cards and grouped reporting
 - `#/promo` Campaigns and Sub IDs
+- `#/subchannels` Subchannel creation, state, links, and performance details
 - `#/deep` Deep links
 - `#/tracker` Postback configurations, generated/manual templates, parameter mappings, local tests, and delivery history
 - `#/assets` Asset library
@@ -24,6 +26,19 @@ The demo login is a presentation gate only, not authentication. A successful moc
 Hover the top-right account avatar to open account management and logout. Account management opens as a fullscreen mock dialog and saves editable profile fields to the current browser session; logout clears the demo session.
 
 The normal user view keeps internal scenario controls out of the visible top bar.
+
+## Reporting
+
+Performance and general statistics share 20 selectable dimensions, with at most two selected at a time. Date/week/month/year are mutually exclusive. The source contains 1,440 deterministic synthetic visit records, including 960 unique clients over 90 days. All groupings, filters, totals, rates, sorting, pagination, milestone drilldowns, and CSV exports use this source. Email addresses stay masked in views and exports.
+
+Date filters select click-attribution cohorts; subsequent conversion milestones are observed through October 27, 2026, in UTC+08:00. These are cohort results, not counts of conversion events occurring in the selected dates. Commission statuses and attributed device/source fields demonstrate interaction only; production field mappings and event ingestion remain subject to the approved backend contracts.
+
+```bash
+npm run test:reports-data
+npm run test:reports
+```
+
+The browser check uses the local server on port 4179 by default; `REPORT_BASE_URL` can target another local preview. Screenshots are written to `.artifacts/reports-*.png`.
 
 ## Local Run
 
@@ -44,7 +59,7 @@ npm run test:postbacks
 npm run test:dashboard-postbacks
 ```
 
-The check covers login and registration validation, mock registration success, login, the account dropdown, fullscreen account management, logout, all twelve routes, performance filters and grouping, client details, campaign creation, Sub ID state, tracker creation and state changes, appeals, attribution lookup, asset unlock, the five-step onboarding application, the six-step partner program, withdrawal records, empty/error mock states, English navigation, and desktop/mobile layout bounds. It also fails on console errors and failed requests.
+The check covers login and registration validation, mock registration success, login, the account dropdown, fullscreen account management, logout, all fourteen routes, performance filters and grouping, client details, campaign creation, subchannel state and details, tracker creation and state changes, appeals, attribution lookup, asset unlock, the five-step onboarding application, the six-step partner program, withdrawal records, empty/error mock states, English navigation, and desktop/mobile layout bounds. It also fails on console errors and failed requests.
 
 The focused Postback check covers receiver URL validation, generated and manual templates, click parameter mapping, editing and cancellation, session persistence, simulated success/failure/timeout, retry identity, paused configurations, and desktop/mobile layouts. Screenshots are written under `.artifacts/`.
 

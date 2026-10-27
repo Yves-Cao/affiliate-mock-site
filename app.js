@@ -63,6 +63,8 @@ const defaultState = {
     detail: null
   },
   applyStep: 1,
+  programMaxStep: 1,
+  programAssetSlide: 0,
   onboarding: {
     step: 1,
     maxStep: 1,
@@ -90,8 +92,11 @@ const englishLabels = {
   "仪表盘": "Dashboard",
   "业绩数据": "Performance",
   "客户列表": "Clients",
-  "推广链接与活动": "Campaigns",
+  "客户数据": "Client data",
+  "总览数据": "General statistics",
+  "活动": "Campaigns",
   "深度链接": "Deep links",
+  "二级渠道": "Subchannels",
   "链接追踪器": "Trackers",
   "素材库": "Assets",
   "收益与提现": "Earnings",
@@ -135,6 +140,8 @@ function currentState() {
     merged.navGroups = [];
     merged.account = { ...structuredClone(defaultState.account), ...(savedState.account || {}) };
     merged.applyStep = Math.min(6, Math.max(1, Number(savedState.applyStep) || 1));
+    merged.programMaxStep = Math.min(6, Math.max(merged.applyStep, savedState.programCompleted ? 6 : 1, Number(savedState.programMaxStep) || 1));
+    merged.programAssetSlide = 0;
     const selectionVersionMatches = savedState.programCommissionSelectionVersion === defaultState.programCommissionSelectionVersion;
     merged.programCommissionCountries = selectionVersionMatches && Array.isArray(savedState.programCommissionCountries)
       ? savedState.programCommissionCountries.filter(code => AFF.partnerProgram.commissionCountries.some(item => item.code === code))
@@ -190,6 +197,13 @@ function currentState() {
 }
 
 AFF.state = currentState();
+if (Array.isArray(AFF.state.createdCampaigns)) {
+  const existingCodes = new Set(AFF.campaigns.map(item => item.code));
+  const savedCampaigns = AFF.state.createdCampaigns.filter(item =>
+    item && typeof item.code === "string" && typeof item.name === "string" && typeof item.link === "string" && !existingCodes.has(item.code)
+  );
+  AFF.campaigns.unshift(...savedCampaigns);
+}
 
 function persist() {
   sessionStorage.setItem("affiliate-user-mock", JSON.stringify(AFF.state));
@@ -216,6 +230,15 @@ function renderNav() {
     const routes = AFF.routes.filter(route => route.id !== "apply" && route.group === group);
     const groupLabel = AFF.state.language === "en" ? (englishGroupLabels[group] || group) : group;
     const open = AFF.state.navGroups.includes(group);
+    if (group === "仪表盘") {
+      return `
+        <section class="nav-section nav-direct">
+          <button class="nav-parent ${AFF.state.route === "dash" ? "active" : ""}" type="button" data-route="dash" ${AFF.state.route === "dash" ? 'aria-current="page"' : ""} title="${AFF.helpers.h(groupLabel)}">
+            <span class="nav-icon" aria-hidden="true">${navIcon("dashboard")}</span>
+            <span class="nav-label">${AFF.helpers.h(groupLabel)}</span>
+          </button>
+        </section>`;
+    }
     return `
       <section class="nav-section ${open ? "open" : ""}">
         <div class="nav-parent-row">
@@ -240,8 +263,14 @@ function renderNav() {
 
 function navIcon(name) {
   const paths = {
+    globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c4 4 4 14 0 18-4-4-4-14 0-18z"/>',
+    smartphone: '<rect x="6" y="2" width="12" height="20" rx="2"/><path d="M10 5h4M11 19h2"/>',
+    subchannels: '<circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M12 7v5M5 17v-5h14v5"/>',
+    video: '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="m10 9 5 3-5 3z"/>',
+    browser: '<rect x="3" y="3" width="18" height="17" rx="2"/><path d="M3 8h18M6 5.5h.01M9 5.5h.01M7 12h10M7 16h6"/>',
     dashboard: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
     overview: '<path d="M4 19V5"/><path d="M4 19h16"/><path d="m7 15 3-4 3 2 5-6"/>',
+    summary: '<path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15v-4M12 15V7M16 15V9"/>',
     megaphone: '<path d="m3 11 14-5v12L3 13z"/><path d="M17 9.5 21 8v8l-4-1.5"/><path d="M6 14.2 7.5 20h3L9 15.2"/>',
     wallet: '<path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6.5A2.5 2.5 0 0 1 4 16.5z"/><path d="M4 8h15a2 2 0 0 1 2 2v3H16a2 2 0 0 1 0-4h5"/><path d="M16 11h.01"/>',
     dash: '<rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/>',
@@ -294,7 +323,7 @@ function render() {
   elements["language-menu"].querySelectorAll("[data-language]").forEach(button => {
     button.setAttribute("aria-checked", String(button.dataset.language === AFF.state.language));
   });
-  document.title = `${routeLabel(route)} · Affiliate APC`;
+  document.title = `${routeLabel(route)} · Affiliate CPA`;
   persist();
 }
 
@@ -451,7 +480,7 @@ function openAccountModal() {
     <div class="account-modal">
       <header class="account-modal-head">
         <div>
-          <p>Affiliate APC</p>
+          <p>Affiliate CPA</p>
           <h2>账户管理</h2>
         </div>
         <button class="close-button" type="button" data-action="close-account-modal" aria-label="关闭账户管理">×</button>
@@ -480,7 +509,7 @@ function openAccountModal() {
         </div>
       </div>
       <footer class="account-modal-foot">
-        <span>Affiliate APC</span>
+        <span>Affiliate CPA</span>
         <div>
           <button class="button secondary" type="button" data-action="close-account-modal">取消</button>
           <button class="button primary" type="button" data-action="save-account">保存修改</button>
@@ -524,7 +553,7 @@ function logout() {
   elements["register-form"].reset();
   setAuthMode("login", false);
   history.replaceState(null, "", `${location.pathname}${location.search}#/login`);
-  document.title = "登录 · Affiliate APC";
+  document.title = "登录 · Affiliate CPA";
 }
 
 function openCampaignModal() {
@@ -532,6 +561,60 @@ function openCampaignModal() {
     <label class="field"><span>活动名称</span><input id="campaign-name" placeholder="例如：十一月 Telegram 投放"></label>
     <p class="helper" style="margin-top:10px">活动仅作为链接分组，不配置预算、日期和出价。</p>`,
     `<button class="button secondary" type="button" data-action="close-modal">取消</button><button class="button primary" type="button" data-action="create-campaign">保存</button>`));
+}
+
+function openCampaignData(code, period = "past30", focusPeriod = false) {
+  const campaign = AFF.campaigns.find(item => item.code === code);
+  if (!campaign) return;
+  const t = (zh, en) => AFF.state.language === "en" ? en : zh;
+  const { range, rows, totals } = AFF.campaignData(campaign, period);
+  const number = AFF.campaignNumber;
+  const metrics = [
+    ["clicks", t("点击量", "Clicks")], ["registrations", t("注册客户", "Registrations")],
+    ["ftd", t("FTD 客户", "FTD clients")], ["effective", t("有效 FTD", "Valid FTD")],
+    ["qualified", t("合格客户", "Qualified clients")], ["expected", t("预计佣金", "Projected commission"), "money"]
+  ];
+  const breakdown = (key, title) => {
+    const grouped = AFF.reporting.aggregate(rows, [key]).sort((a, b) => b.metrics.clicks - a.metrics.clicks);
+    return `<section class="campaign-breakdown"><h3>${title}</h3>${grouped.length ? AFF.helpers.table({
+      columns: [title, t("点击", "Clicks"), t("注册", "Registrations"), "FTD", t("有效 FTD", "Valid FTD"), t("预计佣金", "Projected commission")],
+      rows: grouped.map(row => [AFF.helpers.h(row.values[0]), ...["clicks", "registrations", "ftd", "effective"].map(metric => number(row.metrics[metric])), number(row.metrics.expected, "money")])
+    }) : `<div class="campaign-empty">${t("当前周期暂无数据", "No data for this period")}</div>`}</section>`;
+  };
+  const periods = [["today", "今日", "Today"], ["past7", "过去7天", "Last 7 days"], ["past30", "过去30天", "Last 30 days"], ["past90", "过去90天", "Last 90 days"]];
+  showModal(`<div class="campaign-data-backdrop" data-action="campaign-close-data" data-code="${AFF.helpers.h(code)}" aria-hidden="true"></div><div class="modal-card campaign-data-drawer" role="document">
+    <header class="modal-head"><div><h2>${AFF.helpers.h(campaign.name)}</h2><p>${AFF.helpers.h(campaign.code)}</p></div><button class="close-button" type="button" data-action="campaign-close-data" data-code="${AFF.helpers.h(code)}" title="${t("关闭", "Close")}" aria-label="${t("关闭", "Close")}">×</button></header>
+    <div class="campaign-data-body">
+      <div class="campaign-data-period"><label for="campaign-period">${t("时间范围", "Date range")}</label><select id="campaign-period">${periods.map(([value, zh, en]) => `<option value="${value}" ${value === period ? "selected" : ""}>${t(zh, en)}</option>`).join("")}</select><span>${range.from} — ${range.to}</span></div>
+      <section class="campaign-data-metrics">${metrics.map(([key, label, type]) => `<div><span>${label}</span><strong>${number(totals[key], type)}</strong></div>`).join("")}</section>
+      <section class="campaign-data-rates">${[["registerRate", t("点击→注册", "Click → registration")], ["ftdRate", t("注册→FTD", "Registration → FTD")], ["effectiveRate", t("FTD→有效 FTD", "FTD → valid FTD")]].map(([key, label]) => `<div><span>${label}</span><strong>${number(totals[key], "rate")}</strong></div>`).join("")}</section>
+      ${breakdown("country", t("国家/地区", "Country / region"))}
+      ${breakdown("platform", t("平台", "Platform"))}
+    </div>
+    <footer class="campaign-data-footer"><button class="button secondary" type="button" data-action="campaign-close-data" data-code="${AFF.helpers.h(code)}">${t("关闭", "Close")}</button></footer>
+  </div>`, true, `${t("活动数据", "Campaign data")} · ${campaign.name}`);
+  elements["modal-root"].classList.add("campaign-data-modal");
+  const drawer = elements["modal-root"].querySelector(".campaign-data-drawer");
+  drawer.querySelector("#campaign-period").addEventListener("change", event => openCampaignData(code, event.target.value, true));
+  drawer.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      event.stopPropagation();
+      return closeCampaignData(code);
+    }
+    if (event.key !== "Tab") return;
+    const buttons = [...drawer.querySelectorAll("button:not(:disabled), select")];
+    if (event.shiftKey && document.activeElement === buttons[0]) {
+      event.preventDefault(); buttons.at(-1).focus();
+    } else if (!event.shiftKey && document.activeElement === buttons.at(-1)) {
+      event.preventDefault(); buttons[0].focus();
+    }
+  });
+  (focusPeriod ? drawer.querySelector("#campaign-period") : drawer.querySelector(".close-button")).focus();
+}
+
+function closeCampaignData(code) {
+  closeModal();
+  document.querySelector(`[data-action="campaign-data"][data-code="${CSS.escape(code)}"]`)?.focus();
 }
 
 function openAppealModal() {
@@ -549,6 +632,10 @@ function openCodeModal() {
   showModal(modalShell("推广行为准则", `
     <p>请确认推广要求：不得自荐、不得违规使用品牌素材、不得诱导虚假交易。确认后可下载素材。</p>`,
     `<button class="button secondary" type="button" data-action="close-modal">关闭</button><button class="button primary" type="button" data-action="accept-code">阅读并接受</button>`));
+  elements["modal-root"].classList.add("asset-code-modal");
+  elements["modal-root"].querySelector(".modal-card").setAttribute("role", "dialog");
+  elements["modal-root"].querySelector(".modal-card").setAttribute("aria-modal", "true");
+  elements["modal-root"].querySelector(".close-button").focus();
 }
 
 function openDimensionModal() {
@@ -652,10 +739,22 @@ function handleAction(action, target) {
     return render();
   }
   if (action === "open-campaign-modal") return openCampaignModal();
+  if (action === "campaign-data") return openCampaignData(target.dataset.code);
+  if (action === "campaign-close-data") return closeCampaignData(target.dataset.code);
+  if (action === "campaign-page") {
+    state.campaignPage = Number(target.dataset.page || 1);
+    return render();
+  }
   if (action === "create-campaign") {
     const name = document.getElementById("campaign-name")?.value.trim();
     if (!name) return showToast("请输入活动名称");
-    AFF.campaigns.unshift({ name, link: `https://track.example.com/r/AFF1001?camp=${encodeURIComponent(name)}`, status: "启用", registrations: 0, qualified: 0, expected: "$0" });
+    if (AFF.campaigns.some(item => item.name === name)) return showToast("活动名称已存在");
+    const code = `CMP-${Math.max(1000, ...AFF.campaigns.map(item => Number(item.code.slice(4)))) + 1}`;
+    const campaign = { code, name, link: `https://track.example.com/r/AFF1001?camp=${encodeURIComponent(code)}`, status: "启用" };
+    AFF.campaigns.unshift(campaign);
+    state.createdCampaigns ||= [];
+    state.createdCampaigns.unshift(campaign);
+    state.campaignPage = 1;
     closeModal();
     showToast("活动已创建");
     return render();
@@ -693,6 +792,9 @@ function handleAction(action, target) {
     } else if (state.onboarding.step === 2) {
       state.onboarding.step = 3;
       state.onboarding.maxStep = Math.max(state.onboarding.maxStep, 3);
+    } else if (state.onboarding.step === 3 && state.onboarding.kycDone) {
+      state.onboarding.step = 4;
+      state.onboarding.maxStep = Math.max(state.onboarding.maxStep, 4);
     } else if (state.onboarding.step === 4 && state.onboarding.agreements.every(Boolean)) {
       state.onboarding.step = 5;
       state.onboarding.maxStep = Math.max(state.onboarding.maxStep, 5);
@@ -841,8 +943,21 @@ function handleAction(action, target) {
   }
   if (action === "complete-program") {
     state.programCompleted = true;
+    state.programMaxStep = 6;
     showToast("合作者计划引导已完成");
     return render();
+  }
+  if (action === "program-asset-slide") {
+    state.programAssetSlide = Math.min(2, Math.max(0, Number(target.dataset.slide) || 0));
+    return render();
+  }
+  if (action === "program-open-assets") {
+    const type = target.dataset.type || "全部";
+    if (!["全部", "横幅", "视频", "落地页", "GIF"].includes(type)) return;
+    state.assets.type = type;
+    state.assets.page = 1;
+    state.assets.detail = null;
+    return navigate("assets");
   }
   if (action === "retry-service") {
     showToast("已重新请求，当前仍暂时不可用");
@@ -952,8 +1067,11 @@ function handleClick(event) {
   }
   if (dataset.applyStep) {
     const step = Number(dataset.applyStep);
-    if (step < 1 || step > 6 || step > AFF.state.applyStep + 1) return;
+    const reached = Math.max(AFF.state.programMaxStep || 1, AFF.state.applyStep);
+    const limit = target.hasAttribute("data-program-progress") ? reached : Math.max(reached, AFF.state.applyStep + 1);
+    if (step < 1 || step > 6 || step > limit) return;
     AFF.state.applyStep = step;
+    AFF.state.programMaxStep = Math.max(reached, step);
     return render();
   }
   if (dataset.wdTab) {
@@ -1053,7 +1171,7 @@ function setAuthMode(mode, updateHash = true) {
   elements["register-error"].hidden = true;
   if (updateHash) {
     history.replaceState(null, "", `${location.pathname}${location.search}#/${authMode}`);
-  document.title = `${isRegister ? "注册" : "登录"} · Affiliate APC`;
+  document.title = `${isRegister ? "注册" : "登录"} · Affiliate CPA`;
   }
 }
 

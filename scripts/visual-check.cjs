@@ -1,12 +1,15 @@
 const { chromium } = require("playwright");
 const fs = require("node:fs");
 const path = require("node:path");
+const baseUrl = process.env.REPORT_BASE_URL || "http://127.0.0.1:4179";
 
 const routes = [
   ["dash", "仪表盘"],
   ["perf", "业绩数据"],
-  ["clients", "客户列表"],
-  ["promo", "推广链接与活动"],
+  ["clients", "客户数据"],
+  ["summary", "总览数据"],
+  ["promo", "活动"],
+  ["subchannels", "二级渠道"],
   ["deep", "深度链接"],
   ["tracker", "链接追踪器"],
   ["assets", "素材库"],
@@ -21,7 +24,9 @@ const routeGroups = {
   dash: "仪表盘",
   perf: "数据总览",
   clients: "数据总览",
+  summary: "数据总览",
   promo: "推广管理",
+  subchannels: "推广管理",
   deep: "推广管理",
   tracker: "推广管理",
   assets: "推广管理",
@@ -48,7 +53,7 @@ async function main() {
     if (!request.url().startsWith("data:")) failedRequests.push(request.url());
   });
 
-  await page.goto("http://127.0.0.1:4179/", { waitUntil: "domcontentloaded" });
+  await page.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded" });
   const loginLayout = await page.evaluate(() => {
     const view = document.querySelector(".login-view");
     const loginBg = document.querySelector(".auth-visual-login");
@@ -134,6 +139,7 @@ async function main() {
     topbarLeft: document.querySelector(".topbar").getBoundingClientRect().left,
     topbarWidth: document.querySelector(".topbar").getBoundingClientRect().width,
     brandText: document.querySelector(".topbar-brand").innerText.trim(),
+    brandImageLoaded: document.querySelector(".topbar-brand img")?.naturalWidth > 0,
     sidebarBrandCount: document.querySelectorAll(".sidebar .brand").length,
     breadcrumbCount: document.querySelectorAll(".breadcrumb").length,
     pageTitleCount: document.querySelectorAll(".page-header h1").length,
@@ -146,17 +152,18 @@ async function main() {
     expandedGroups: [...document.querySelectorAll(".nav-parent[aria-expanded='true']")].length,
     visibleChildren: [...document.querySelectorAll(".nav-children")].filter(node => getComputedStyle(node).display !== "none").length
   }));
-  if (shellState.topbarLeft !== 0 || Math.abs(shellState.topbarWidth - page.viewportSize().width) > 2 || shellState.brandText !== "A\nAffiliate APC" || shellState.sidebarBrandCount || shellState.footerCount || shellState.breadcrumbCount || shellState.pageTitleCount || !shellState.scenarioHidden || shellState.mainPaddingLeft !== "15px" || shellState.mainPaddingRight !== "15px" || Math.abs(shellState.mainWidth - 1600) > 2 || shellState.mainMaxWidth !== "1600px" || shellState.expandedGroups || shellState.visibleChildren) {
+  if (shellState.topbarLeft !== 0 || Math.abs(shellState.topbarWidth - page.viewportSize().width) > 2 || shellState.brandText !== "Affiliate CPA" || !shellState.brandImageLoaded || shellState.sidebarBrandCount || shellState.footerCount || shellState.breadcrumbCount || shellState.pageTitleCount || !shellState.scenarioHidden || shellState.mainPaddingLeft !== "15px" || shellState.mainPaddingRight !== "15px" || Math.abs(shellState.mainWidth - 1600) > 2 || shellState.mainMaxWidth !== "1600px" || shellState.expandedGroups || shellState.visibleChildren) {
     throw new Error(`Global shell state failed: ${JSON.stringify(shellState)}`);
   }
   const navStructure = await page.locator("#nav .nav-section").evaluateAll(sections => sections.map(section => ({
-    group: section.querySelector("[data-nav-group]").dataset.navGroup,
+    group: section.querySelector("[data-nav-group]")?.dataset.navGroup || "仪表盘",
     routes: [...section.querySelectorAll("[data-route]")].map(button => button.dataset.route)
   })));
   if (navStructure[0].group !== "仪表盘" || navStructure[0].routes.join(",") !== "dash" ||
-      navStructure[1].group !== "数据总览" || navStructure[1].routes.join(",") !== "perf,clients") {
+      navStructure[1].group !== "数据总览" || navStructure[1].routes.join(",") !== "perf,clients,summary") {
     throw new Error(`Dashboard navigation hierarchy failed: ${JSON.stringify(navStructure)}`);
   }
+  if (await page.locator("#nav .nav-direct .nav-children, #nav .nav-direct .nav-chevron").count()) throw new Error("Dashboard should be a direct parent entry");
   fs.mkdirSync(path.join(process.cwd(), ".artifacts"), { recursive: true });
   await page.locator("#wallet-toggle").hover();
   await page.locator("#wallet-popover").waitFor({ state: "visible" });
@@ -171,7 +178,6 @@ async function main() {
   await page.click("#wallet-popover [data-route='wd']");
   assertText(await page.title(), "提现", "Wallet withdrawal route");
   if (await page.locator("#wallet-popover").isVisible()) throw new Error("Wallet popover did not close on navigation");
-  await page.click("[data-nav-group='仪表盘']");
   await page.click("#nav [data-route='dash']");
 
   const linkAddress = page.locator(".dashboard-link-address .link-text");
@@ -210,16 +216,17 @@ async function main() {
   await page.click("[data-dashboard-link-language='English']");
   await page.reload({ waitUntil: "domcontentloaded" });
   await assertPromotionLink("standard-mt5", "en");
-  await page.context().grantPermissions(["clipboard-read", "clipboard-write"], { origin: "http://127.0.0.1:4179" });
+  await page.context().grantPermissions(["clipboard-read", "clipboard-write"], { origin: baseUrl });
   await linkCopy.click();
   await page.waitForFunction(() => document.querySelector(".dashboard-link-address [data-copy]").textContent === "已复制");
   if ((await page.evaluate(() => navigator.clipboard.readText())) !== (await linkAddress.innerText())) {
     throw new Error("Dashboard promotion link clipboard mismatch");
   }
-  await page.click("[data-nav-group='仪表盘']");
 
-  for (const width of [1920, 1110, 390]) {
+  for (const width of [1920, 1110, 991, 768, 390]) {
     await page.setViewportSize({ width, height: width === 390 ? 844 : 1080 });
+    await page.mouse.move(width - 5, 400);
+    await page.waitForTimeout(250);
     const tutorial = await page.locator(".tutorial-card").evaluate(node => {
       const main = document.querySelector("#main");
       const style = getComputedStyle(main);
@@ -239,9 +246,22 @@ async function main() {
       linkWidth: document.querySelector(".dashboard-link-controls").closest(".card").getBoundingClientRect().width
     }));
     if (!summaryPosition.last || summaryPosition.top < summaryPosition.tutorialBottom + 15 ||
-        Math.abs(summaryPosition.width - summaryPosition.linkWidth) > 2) {
+        Math.abs(summaryPosition.linkWidth - (width > 991 ? summaryPosition.width / 2 : summaryPosition.width)) > 2) {
       throw new Error(`Dashboard summary position failed at ${width}px: ${JSON.stringify(summaryPosition)}`);
     }
+    const layout = await page.evaluate(() => {
+      const rect = selector => document.querySelector(selector).getBoundingClientRect().toJSON();
+      return {
+        link: rect(".dashboard-link-card"), materials: rect(".dashboard-materials"),
+        tutorial: rect(".tutorial-card"), status: rect(".dashboard-client-status"),
+        stack: rect(".dashboard-guidance-stack"),
+        image: document.querySelector(".dashboard-material-image").naturalWidth
+      };
+    });
+    if (!layout.image || Math.abs(layout.link.width - layout.materials.width) > 2) throw new Error(`Materials sizing failed: ${JSON.stringify(layout)}`);
+    if (width > 991 && (Math.abs(layout.link.right - layout.materials.left) > 2 || Math.abs(layout.link.top - layout.materials.top) > 2)) throw new Error("Promotion panels should join on desktop");
+    if (width <= 991 && layout.materials.top < layout.link.bottom + 15) throw new Error("Promotion panels should separate and stack");
+    if (width >= 768 && Math.abs(layout.tutorial.height - layout.status.height) > 2) throw new Error("Guide and status should split the column evenly");
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     if (overflow > 2) throw new Error(`Dashboard overflow at ${width}px: ${overflow}`);
     await page.screenshot({ path: path.join(process.cwd(), ".artifacts", `dashboard-${width}.png`), fullPage: true });
@@ -258,6 +278,13 @@ async function main() {
   if ((await page.evaluate(() => document.activeElement?.dataset?.route)) !== "wd") throw new Error("Wallet keyboard navigation failed");
   await page.keyboard.press("Escape");
   await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.locator(".dashboard-client-status [data-route='lookup']").click();
+  assertText(await page.title(), "客户归属查询", "Client status route");
+  await page.click("#nav [data-route='dash']");
+  await page.locator(".dashboard-material-banner").click();
+  await page.waitForFunction(() => document.title.includes("素材库"));
+  assertText(await page.title(), "素材库", "Materials route");
+  await page.click("#nav [data-route='dash']");
   await page.locator(".tutorial-card").press("Enter");
   assertText(await page.title(), "合作者计划", "Tutorial route");
   await page.click("#nav [data-route='dash']");
@@ -320,7 +347,9 @@ async function main() {
     if (route === "apply") {
       await page.click("#profile-entry");
     } else if (route === "onboarding") {
-      await page.goto("http://127.0.0.1:4179/#/onboarding", { waitUntil: "domcontentloaded" });
+      await page.goto(`${baseUrl}/#/onboarding`, { waitUntil: "domcontentloaded" });
+    } else if (route === "dash") {
+      await page.click("#nav [data-route='dash']");
     } else {
       const parent = page.locator(`[data-nav-group='${routeGroups[route]}']`);
       if ((await parent.getAttribute("aria-expanded")) !== "true") await parent.click();
@@ -331,7 +360,7 @@ async function main() {
     if (await page.locator(".modal-layer:not(.hidden)").count()) await page.click("[data-action='close-modal']");
   }
 
-  await page.goto("http://127.0.0.1:4179/#/dash", { waitUntil: "domcontentloaded" });
+  await page.goto(`${baseUrl}/#/dash`, { waitUntil: "domcontentloaded" });
   assertText(await page.locator("#kyc-banner").innerText(), "您的账户资料未完善，部分功能可能受限。", "Onboarding banner text");
   await page.click("#kyc-banner [data-route='onboarding']");
   assertText(await page.title(), "入驻申请", "Onboarding route");
@@ -377,17 +406,17 @@ async function main() {
   assertText(await page.locator("#main").innerText(), "已验证", "Onboarding back navigation");
 
   await page.click("[data-route='perf']");
-  await page.click("[data-action='open-perf-filter']");
-  await page.selectOption("[data-perf-filter='source']", "Telegram");
-  await page.click("[data-action='apply-perf-filter']");
-  await page.click("[data-action='add-perf-group']");
-  await page.click("[data-perf-group-add='国家']");
+  await page.click("[data-rp-action='filters']");
+  await page.selectOption("[data-rp-filter='source']", "Telegram");
+  await page.click("[data-rp-action='apply']");
+  await page.click("[data-rp-action='groups']");
+  await page.click("[data-rp-add-group='country']");
   assertText(await page.locator("#main").innerText(), "国家", "Performance grouping");
 
   await page.click("[data-route='clients']");
-  await page.click("[data-client-info='C-10241']");
-  assertText(await page.locator(".modal-layer").innerText(), "动态Hold", "Client detail");
-  await page.click("[data-action='close-modal']");
+  await page.locator("[data-rp-client]").first().click();
+  assertText(await page.locator(".report-drawer").innerText(), "转化进度", "Client detail");
+  await page.locator(".report-drawer [data-rp-action='close']").first().click();
 
   await page.click("[data-route='promo']");
   await page.click("[data-action='open-campaign-modal']");
@@ -397,9 +426,14 @@ async function main() {
   await page.fill("#campaign-name", "十一月测试");
   await page.click("[data-action='create-campaign']");
   assertText(await page.locator("#main").innerText(), "十一月测试", "Campaign creation");
-  await page.click("[data-promo-tab='sub']");
-  await page.click("[data-sub-toggle='tg_group_01']");
-  assertText(await page.locator("#main").innerText(), "已封禁", "Sub ID state");
+  await page.click("[data-route='subchannels']");
+  await page.fill("[data-sc-filter='search']", "tg_group_01");
+  await page.locator("[data-sc-filter-form] button[type='submit']").click();
+  await page.click("[data-sc-toggle='tg_group_01']");
+  assertText(await page.locator(".sc-table tbody tr").innerText(), "已封禁", "Sub ID state");
+  await page.locator("[data-sc-detail='tg_group_01']").click();
+  assertText(await page.locator(".sc-drawer").innerText(), "渠道表现", "Subchannel detail");
+  await page.locator(".sc-drawer header [data-sc-action='close']").click();
 
   await page.click("[data-route='tracker']");
   assertText(await page.locator("#main").innerText(), "回传配置", "Tracker page");
@@ -429,19 +463,19 @@ async function main() {
   assertText(await page.locator("#main").innerText(), "30天归因窗口", "Attribution lookup");
 
   await page.click("[data-route='assets']");
-  assertText(await page.locator("#main").innerText(), "素材区已锁定", "Asset gate");
+  assertText(await page.locator("#main").innerText(), "使用素材前，请先阅读推广行为准则", "Asset gate");
   const mosaicPreviews = await page.locator(".asset-banner-card .asset-preview, .asset-video-card .asset-preview, .asset-gif-card .asset-preview").evaluateAll(nodes => nodes.map(node => {
     const rect = node.getBoundingClientRect();
-    const placeholder = node.querySelector(".mosaic-placeholder");
+    const placeholder = node.querySelector(".asset-placeholder-image");
     return {
       ratio: getComputedStyle(node).aspectRatio,
       actualRatio: rect.width / rect.height,
-      text: placeholder?.textContent,
-      background: placeholder ? getComputedStyle(placeholder).backgroundImage : ""
+      source: placeholder?.getAttribute("src"),
+      local: placeholder ? new URL(placeholder.src).origin === location.origin : false
     };
   }));
   if (mosaicPreviews.length !== 9 ||
-      mosaicPreviews.some(item => item.ratio !== "4 / 3" || Math.abs(item.actualRatio - 4 / 3) > .01 || item.text !== "" || !item.background.includes("repeating-conic-gradient"))) {
+      mosaicPreviews.some(item => item.ratio !== "4 / 3" || Math.abs(item.actualRatio - 4 / 3) > .01 || !item.local || !/^\.\/assets\/placeholder-(markets|mobile|campaign)\.png$/.test(item.source))) {
     throw new Error(`Mosaic preview geometry failed: ${JSON.stringify(mosaicPreviews)}`);
   }
   if ((await page.locator(".asset-actions [data-download]:enabled").count()) !== 0) {
@@ -795,13 +829,16 @@ async function main() {
   }
 
   await page.click(".action-row .button.primary");
-  assertText(await page.locator("#main").innerText(), "素材库重点", "Program materials page");
-  await page.click("[data-program-asset='device'][data-value='iOS']");
-  await page.click("[data-program-asset='platform'][data-value='YouTube']");
-  await page.click("[data-program-asset='type'][data-value='落地页']");
-  programText = await page.locator("#main").innerText();
-  assertText(programText, "iOS评测落地页", "Asset filters");
-  assertText(programText, "当前 1 / 12 个素材", "Asset filter count");
+  assertText(await page.locator("#main").innerText(), "丰富的创意素材库", "Program materials page");
+  for (const index of [1, 2, 0]) {
+    await page.locator(`.program-slide-dot[data-slide='${index}']`).click();
+    await page.waitForFunction(() => {
+      const image = document.querySelector(".program-material-slide img");
+      return image.complete && image.naturalWidth > 0;
+    });
+    if (await page.locator(`.program-slide-dot[data-slide='${index}']`).getAttribute("aria-current") !== "true") throw new Error("Material carousel selection failed");
+  }
+  if (await page.locator(".program-material-categories [data-action='program-open-assets']").count() !== 4) throw new Error("Material category entries failed");
 
   await page.click(".action-row .button.primary");
   programText = await page.locator("#main").innerText();
@@ -811,12 +848,12 @@ async function main() {
   assertText(programText, "查看整体数据", "Guide dashboard entry");
 
   await page.click(".action-row .button.primary");
-  assertText(await page.locator("#main").innerText(), "复制分享简介", "Share page");
-  const shareText = await page.locator(".share-text").inputValue();
-  if (!shareText.includes("GTC FX Affiliate") || !shareText.includes("https://track.example.com/r/AFF1001")) throw new Error("Share intro content failed");
-  await page.click("[data-copy]");
+  assertText(await page.locator("#main").innerText(), "分享您的链接，开始赚取收入", "Share page");
+  const shareLinks = await page.locator(".program-share-link a").evaluateAll(nodes => nodes.map(node => node.href));
+  if (shareLinks.length !== 2 || new URL(shareLinks[0]).searchParams.get("platform") !== "web" || new URL(shareLinks[1]).searchParams.get("platform") !== "app") throw new Error("Web and mobile share links failed");
+  await page.locator(".program-share-link [data-copy]").first().click();
   await page.waitForTimeout(150);
-  if ((await page.locator("[data-copy]").innerText()) !== "已复制") throw new Error("Share copy feedback failed");
+  if ((await page.evaluate(() => navigator.clipboard.readText())) !== shareLinks[0]) throw new Error("Share link clipboard failed");
   await page.click("[data-action='complete-program']");
   assertText(await page.locator("#main").innerText(), "已完成引导", "Program completion");
   await page.click("#sidebar-toggle");
@@ -890,9 +927,6 @@ async function main() {
   await page.click("#language-toggle");
   await page.click("[data-language='en']");
   await page.click("#sidebar-toggle");
-  if ((await page.locator("[data-nav-group='仪表盘']").getAttribute("aria-expanded")) !== "true") {
-    await page.click("[data-nav-group='仪表盘']");
-  }
   assertText(await page.locator("#nav").innerText(), "Dashboard", "Mobile navigation");
   await page.click("[data-route='dash']");
   const mobileOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);

@@ -3,8 +3,10 @@ window.AFF = window.AFF || {};
 AFF.routes = [
   { id: "dash", group: "仪表盘", label: "仪表盘" },
   { id: "perf", group: "数据总览", label: "业绩数据" },
-  { id: "clients", group: "数据总览", label: "客户列表" },
-  { id: "promo", group: "推广管理", label: "推广链接与活动" },
+  { id: "clients", group: "数据总览", label: "客户数据" },
+  { id: "summary", group: "数据总览", label: "总览数据" },
+  { id: "promo", group: "推广管理", label: "活动" },
+  { id: "subchannels", group: "推广管理", label: "二级渠道" },
   { id: "deep", group: "推广管理", label: "深度链接" },
   { id: "tracker", group: "推广管理", label: "链接追踪器" },
   { id: "assets", group: "推广管理", label: "素材库" },
@@ -34,7 +36,7 @@ AFF.users = {
 AFF.dashboard = {
   metrics: [
     { label: "钱包余额（可提现）", value: "$12,480.50" },
-    { label: "未激活客户", value: "247", hint: "已注册 · 尚未判定为有效FTD" },
+    { label: "注册客户", value: "960", hint: "未激活客户：247" },
     { label: "合格客户（本月）", value: "182", hint: "▲ 23 较上月" }
   ],
   totalRevenue: "$34,215.00",
@@ -257,9 +259,12 @@ AFF.clients = [
 ];
 
 AFF.campaigns = [
-  { name: "十月 Telegram 投放", link: "https://track.example.com/r/AFF1001?camp=oct-tg", status: "启用", registrations: 402, qualified: 88, expected: "$8,800" },
-  { name: "财经博客内容位", link: "https://track.example.com/r/AFF1001?camp=blog", status: "启用", registrations: 187, qualified: 43, expected: "$4,300" },
-  { name: "九月信息流测试", link: "https://track.example.com/r/AFF1001?camp=sep-test", status: "暂停", registrations: 142, qualified: 39, expected: "$2,700" }
+  { code: "CMP-1001", name: "秋季交易指南", link: "https://track.example.com/r/AFF1001?camp=CMP-1001", status: "启用" },
+  { code: "CMP-1002", name: "市场观察周刊", link: "https://track.example.com/r/AFF1001?camp=CMP-1002", status: "启用" },
+  { code: "CMP-1003", name: "移动交易体验", link: "https://track.example.com/r/AFF1001?camp=CMP-1003", status: "启用" },
+  { code: "CMP-1004", name: "新客户入门", link: "https://track.example.com/r/AFF1001?camp=CMP-1004", status: "启用" },
+  { code: "CMP-1005", name: "社区直播专场", link: "https://track.example.com/r/AFF1001?camp=CMP-1005", status: "暂停" },
+  { code: "CMP-1006", name: "全球市场专题", link: "https://track.example.com/r/AFF1001?camp=CMP-1006", status: "启用" }
 ];
 
 AFF.trackers = [
@@ -282,9 +287,16 @@ AFF.trackers = [
 ];
 
 AFF.subIds = [
-  { id: "tg_group_01", status: "启用", updatedAt: "2026-10-22" },
-  { id: "sg_search_02", status: "启用", updatedAt: "2026-10-21" },
-  { id: "br_social_03", status: "已封禁", updatedAt: "2026-10-18" }
+  { id: "tg_group_01", name: "Telegram 社群", status: "启用", updatedAt: "2026-10-22", campaignId: "" },
+  { id: "sg_search_02", name: "新加坡搜索推广", status: "启用", updatedAt: "2026-10-21", campaignId: "" },
+  { id: "br_social_03", name: "巴西社交推广", status: "已封禁", updatedAt: "2026-10-18", campaignId: "" },
+  ...Array.from({ length: 18 }, (_, index) => ({
+    id: `placement_${String(index + 1).padStart(2, "0")}`,
+    name: `${["网站展示位", "社群内容位", "视频推广位"][index % 3]} ${String(index + 1).padStart(2, "0")}`,
+    status: index % 7 === 6 ? "已封禁" : "启用",
+    updatedAt: `2026-10-${String(27 - index).padStart(2, "0")}`,
+    campaignId: ""
+  }))
 ];
 
 AFF.commissions = {

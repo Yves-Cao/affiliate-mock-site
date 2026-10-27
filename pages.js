@@ -108,7 +108,8 @@ AFF.pages.dash = () => {
           ${item.hint ? `<small>${AFF.helpers.h(item.hint)}</small>` : ""}
         </article>`).join("")}
     </div>
-      <section class="card">
+    <div class="dashboard-promotion-grid">
+      <section class="card dashboard-link-card">
         <div class="panel-header"><h2>我的推广链接</h2><button class="button secondary small" type="button" data-route="deep">深度链接设置</button></div>
         <div class="panel-body dashboard-link-controls">
           ${linkPicker("page", "到达页面", state.dashboardLinkPage, state.dashboardLinkPagePickerOpen, state.dashboardLinkPageQuery, "搜索到达页面")}
@@ -119,14 +120,38 @@ AFF.pages.dash = () => {
           </div>
         </div>
       </section>
+      <section class="card dashboard-materials">
+        <div class="panel-header"><h2>${state.language === "en" ? "Reach more people with our promotional materials" : "使用为您带来更多流量的素材"}</h2></div>
+        <a class="dashboard-material-banner" href="#/assets">
+          <div class="dashboard-material-copy">
+            <span class="dashboard-material-label">Affiliate CPA</span>
+            <strong>${state.language === "en" ? "Download our ready-to-use materials" : "下载由我们提供的现成素材"}</strong>
+            <span class="dashboard-material-types">${state.language === "en" ? "Banners · Videos · Landing pages · GIFs" : "横幅 · 视频 · 落地页 · GIF"}</span>
+            <span class="dashboard-material-cta">${state.language === "en" ? "Browse materials" : "浏览素材"} <span aria-hidden="true">→</span></span>
+          </div>
+          <img src="assets/auth-visual.jpg" alt="" class="dashboard-material-image">
+        </a>
+      </section>
+    </div>
     <div class="dashboard-support-grid">
+      <div class="dashboard-guidance-stack">
       <article class="card tutorial-card" data-route="apply" tabindex="0" role="button" aria-label="利用我们为您提供的优化建议，提升收入">
       <div class="tutorial-copy">
-        <span class="eyebrow">新手教程</span>
+        <span class="eyebrow">${state.language === "en" ? "Recommendations" : "使用建议"}</span>
         <h2>利用我们为您提供的优化建议，提升收入</h2>
         <p>从高转化地区、推广链接和素材选择开始，逐步找到更适合您的推广方式。</p>
       </div>
       </article>
+      <section class="card dashboard-client-status">
+        <div class="panel-header">
+          <h2><span class="dashboard-status-icon" aria-hidden="true">${navIcon("clients")}</span>${state.language === "en" ? "Check client status" : "查看客户状态"}</h2>
+        </div>
+        <div class="panel-body dashboard-status-body">
+          <p>${state.language === "en" ? "Check whether a client is linked to your partner account." : "查询客户是否已关联您的合作者账户。"}</p>
+          <button class="button secondary" type="button" data-route="lookup">${state.language === "en" ? "Check" : "检查"}</button>
+        </div>
+      </section>
+      </div>
       ${AFF.postbacks.renderDashboard()}
     </div>
       <section class="card dashboard-summary">
@@ -278,22 +303,43 @@ AFF.pages.clients = () => {
     </section>`;
 };
 
+AFF.campaignData = (campaign, period = "past30") => {
+  const range = AFF.reports.range(period);
+  const rows = AFF.reporting.filterRows({ ...range, campaignCode: campaign.code });
+  return { range, rows, totals: AFF.reporting.totals(rows) };
+};
+
+AFF.campaignNumber = (value, type = "count") => {
+  if (value === null || value === undefined) return "—";
+  if (type === "rate") return `${(value * 100).toFixed(1)}%`;
+  return new Intl.NumberFormat("en-US", type === "money" ? { style: "currency", currency: "USD" } : {}).format(value);
+};
+
 AFF.pages.promo = () => {
   const state = AFF.state;
-  const campaignRows = AFF.campaigns.map(row => [row.name, `<span class="link-text">${AFF.helpers.h(row.link)}</span>`, AFF.helpers.tag(row.status), row.registrations, row.qualified, row.expected, `<button class="button secondary small" type="button" data-copy="${AFF.helpers.h(row.link)}">复制</button>`]);
-  const subRows = AFF.subIds.map(row => [row.id, AFF.helpers.tag(row.status), row.updatedAt, `<button class="button secondary small" type="button" data-sub-toggle="${row.id}">${row.status === "启用" ? "封禁" : "解封"}</button>`]);
+  const t = (zh, en) => state.language === "en" ? en : zh;
+  const copyIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3"/></svg>';
+  const page = Math.min(Math.max(1, state.campaignPage || 1), Math.max(1, Math.ceil(AFF.campaigns.length / 10)));
+  state.campaignPage = page;
+  const campaignRows = AFF.campaigns.slice((page - 1) * 10, page * 10).map(row => {
+    const { totals } = AFF.campaignData(row);
+    return [
+      `<strong>${AFF.helpers.h(row.name)}</strong><small>${AFF.helpers.h(row.code)}</small>`,
+      `<div class="campaign-link"><span title="${AFF.helpers.h(row.link)}">${AFF.helpers.h(row.link)}</span><button class="icon-button campaign-copy" type="button" data-copy="${AFF.helpers.h(row.link)}" title="${t("复制链接", "Copy link")}" aria-label="${t("复制链接", "Copy link")}">${copyIcon}</button></div>`,
+      AFF.helpers.tag(row.status),
+      ...["clicks", "registrations", "ftd", "effective"].map(key => AFF.campaignNumber(totals[key])),
+      AFF.campaignNumber(totals.expected, "money"),
+      `<button class="button secondary small" type="button" data-action="campaign-data" data-code="${AFF.helpers.h(row.code)}">${t("查看数据", "View data")}</button>`
+    ];
+  });
   return `
-    ${AFF.helpers.pageHeader("推广链接与活动", "活动是链接分组，Sub ID 用于二级渠道统计。", `<button class="button primary" type="button" data-action="open-campaign-modal">创建新活动</button>`)}
-    ${state.promoTab === "campaign" ? `
-      <section class="card">${AFF.helpers.table({ columns: ["活动", "链接", "状态", "注册", "合格", "预计收益", "操作"], rows: campaignRows, numeric: [3, 4, 5] })}</section>` : `
-      ${AFF.helpers.cards([{ label: "Sub ID总数", value: AFF.subIds.length }, { label: "启用中", value: AFF.subIds.filter(item => item.status === "启用").length }, { label: "已封禁", value: AFF.subIds.filter(item => item.status === "已封禁").length }])}
-      <section class="card">${AFF.helpers.table({ columns: ["Sub ID", "链接状态", "更新日期", "操作"], rows: subRows })}</section>`}
-    <div class="toolbar" style="margin-top:14px;border:1px solid var(--border);border-radius:6px;background:#fff">
-      <div class="tabs">
-        <button class="${state.promoTab === "campaign" ? "active" : ""}" type="button" data-promo-tab="campaign">活动</button>
-        <button class="${state.promoTab === "sub" ? "active" : ""}" type="button" data-promo-tab="sub">Sub ID</button>
-      </div>
-      <p class="helper">Sub ID 仅做渠道统计，不承诺多级分佣。</p>
+    <div class="campaign-page">
+    ${AFF.helpers.pageHeader("活动", "", `<button class="button primary" type="button" data-action="open-campaign-modal">${t("创建新活动", "Create campaign")}</button>`)}
+    <div class="toolbar campaign-toolbar">
+      <strong>${t("活动", "Campaigns")}</strong>
+      <span class="helper">${t("过去30天", "Last 30 days")} · ${AFF.reports.range("past30").from} — ${AFF.reporting.now}</span>
+    </div>
+    <section class="card campaign-list">${AFF.helpers.table({ columns: [t("活动", "Campaign"), t("链接", "Link"), t("状态", "Status"), t("点击", "Clicks"), t("注册", "Registrations"), "FTD", t("有效 FTD", "Valid FTD"), t("预计佣金", "Projected commission"), t("操作", "Action")], rows: campaignRows, footer: AFF.helpers.pagination(AFF.campaigns.length, page, "campaign-page") })}</section>
     </div>`;
 };
 
@@ -309,14 +355,24 @@ AFF.pages.deep = () => {
     </label>`;
   return `
     ${AFF.helpers.pageHeader("深度链接", "按目标页与语言生成电脑端、移动端直达链接。")}
-    <div class="grid-2">
-      <section class="card"><div class="panel-header"><h2>电脑端</h2></div><div class="panel-body link-box">
-        ${control("目标页", "desktop", "page", AFF.deepLinks.pages)}${control("语言", "desktop", "language", AFF.deepLinks.languages)}
-        <div class="link-text">${AFF.helpers.h(desktop)}</div><button class="button primary" type="button" data-copy="${AFF.helpers.h(desktop)}">复制链接</button>
+    <div class="deep-link-page">
+      <section class="card"><div class="panel-header"><h2>电脑端</h2></div><div class="panel-body deep-link-body">
+        <div class="deep-link-fields deep-link-desktop-fields">
+          ${control("目标页", "desktop", "page", AFF.deepLinks.pages)}${control("语言", "desktop", "language", AFF.deepLinks.languages)}
+        </div>
+        <div class="deep-link-result">
+          <div class="link-text">${AFF.helpers.h(desktop)}</div>
+          <button class="button primary small" type="button" data-copy="${AFF.helpers.h(desktop)}">复制链接</button>
+        </div>
       </div></section>
-      <section class="card"><div class="panel-header"><h2>移动端</h2></div><div class="panel-body link-box">
-        ${control("目标系统", "mobile", "system", AFF.deepLinks.systems)}${control("目标页", "mobile", "page", AFF.deepLinks.pages)}${control("语言", "mobile", "language", AFF.deepLinks.languages)}
-        <div class="link-text">${AFF.helpers.h(mobile)}</div><button class="button primary" type="button" data-copy="${AFF.helpers.h(mobile)}">复制链接</button>
+      <section class="card"><div class="panel-header"><h2>移动端</h2></div><div class="panel-body deep-link-body">
+        <div class="deep-link-fields">
+          ${control("目标系统", "mobile", "system", AFF.deepLinks.systems)}${control("目标页", "mobile", "page", AFF.deepLinks.pages)}${control("语言", "mobile", "language", AFF.deepLinks.languages)}
+        </div>
+        <div class="deep-link-result">
+          <div class="link-text">${AFF.helpers.h(mobile)}</div>
+          <button class="button primary small" type="button" data-copy="${AFF.helpers.h(mobile)}">复制链接</button>
+        </div>
       </div></section>
     </div>`;
 };
@@ -365,6 +421,14 @@ AFF.filteredAssets = () => {
 
 AFF.visibleAssets = () => AFF.filteredAssets().slice(0, AFF.state.assets.page * 12);
 
+AFF.assetPreviewImage = item => {
+  const images = ["markets", "mobile", "campaign"];
+  const index = Math.max(0, AFF.assets.findIndex(asset => asset.id === item.id));
+  return `./assets/placeholder-${images[index % images.length]}.png`;
+};
+
+AFF.assetPreview = item => `<img class="asset-placeholder-image" src="${AFF.assetPreviewImage(item)}" alt="" loading="lazy">`;
+
 AFF.assetVariantRow = (values, label) => `
   <div class="asset-variant-row" aria-label="${AFF.helpers.h(label)}">
     <strong>${AFF.helpers.h(label)}</strong>
@@ -401,7 +465,7 @@ AFF.assetTrackingUrl = (item, options = {}) => {
 
 AFF.assetAnchorTag = (item, options = {}) => {
   const link = AFF.assetTrackingUrl(item, options);
-  return `<a href="${link}" target="_blank" rel="noopener noreferrer">了解 Affiliate APC</a>`;
+  return `<a href="${link}" target="_blank" rel="noopener noreferrer">了解 Affiliate CPA</a>`;
 };
 
 AFF.assetLandingUrl = (item, detail) => {
@@ -445,7 +509,7 @@ AFF.pages.assets = () => {
           return `
         <article class="asset-card asset-banner-card">
           <button class="asset-preview asset-preview-button" type="button" data-action="open-asset-detail" data-asset-id="${AFF.helpers.h(item.id)}" ${state.assetsAccepted ? "" : "disabled"} aria-label="查看${AFF.helpers.h(item.name)}尺寸与语言">
-            <span class="mosaic-placeholder" aria-hidden="true"></span>
+            ${AFF.assetPreview(item)}
           </button>
           <div class="asset-body">
             ${AFF.assetVariantRow(item.sizes, "尺寸")}
@@ -457,7 +521,7 @@ AFF.pages.assets = () => {
           return `
         <article class="asset-card asset-landing-card">
           <button class="asset-preview asset-preview-button" type="button" data-action="open-asset-detail" data-asset-id="${AFF.helpers.h(item.id)}" ${state.assetsAccepted ? "" : "disabled"} aria-label="查看${AFF.helpers.h(item.name)}语言与网址">
-            <span aria-hidden="true">X</span>
+            ${AFF.assetPreview(item)}
           </button>
           <div class="asset-body">
             ${AFF.assetVariantRow(item.languages, "语言")}
@@ -468,7 +532,7 @@ AFF.pages.assets = () => {
           return `
         <article class="asset-card asset-gif-card">
           <button class="asset-preview asset-preview-button" type="button" data-action="open-asset-detail" data-asset-id="${AFF.helpers.h(item.id)}" ${state.assetsAccepted ? "" : "disabled"} aria-label="查看${AFF.helpers.h(item.name)}语言与尺寸">
-            <span class="mosaic-placeholder" aria-hidden="true"></span>
+            ${AFF.assetPreview(item)}
           </button>
           <div class="asset-body">
             ${AFF.assetVariantRow(item.languages, "语言")}
@@ -480,7 +544,7 @@ AFF.pages.assets = () => {
           return `
         <article class="asset-card asset-video-card">
           <button class="asset-preview asset-preview-button" type="button" data-action="open-asset-detail" data-asset-id="${AFF.helpers.h(item.id)}" ${state.assetsAccepted ? "" : "disabled"} aria-label="查看${AFF.helpers.h(item.name)}尺寸与语言">
-            <span class="mosaic-placeholder" aria-hidden="true"></span>
+            ${AFF.assetPreview(item)}
           </button>
           <div class="asset-body">
             ${AFF.assetVariantRow(item.sizes, "尺寸")}
@@ -491,7 +555,7 @@ AFF.pages.assets = () => {
         return "";
       }).join("")}</div>` : `<div class="empty-state"><strong>暂无素材</strong><span>尝试调整筛选条件</span><button class="button secondary" type="button" data-action="reset-asset-filters">重置筛选</button></div>`}
       ${visible.length < filtered.length ? `<div class="asset-load-more"><button class="button secondary" type="button" data-action="load-more-assets">加载更多素材</button></div>` : ""}
-      ${state.assetsAccepted ? "" : `<div class="gate"><div class="gate-card"><strong>素材区已锁定</strong><p>请先阅读并接受《推广行为准则》后再下载素材。</p><button class="button primary" type="button" data-action="open-code-modal">阅读并接受准则</button></div></div>`}
+      ${state.assetsAccepted ? "" : `<div class="gate"><div class="gate-card" role="dialog" aria-labelledby="asset-gate-title"><strong id="asset-gate-title">使用素材前，请先阅读推广行为准则</strong><p>了解素材使用与推广要求，接受准则后即可预览、下载和复制素材代码。</p><button class="button primary" type="button" data-action="open-code-modal">阅读并接受准则</button></div></div>`}
     </div></section>
     ${state.assets.detail ? AFF.pages.assetDetail() : ""}`;
 };
@@ -512,7 +576,7 @@ AFF.pages.assetDetail = () => {
   <aside class="filter-drawer asset-detail-drawer asset-gif-drawer" aria-label="GIF素材详情">
     <div class="panel-header"><h2>${AFF.helpers.h(item.name)}</h2><button class="close-button" type="button" data-action="close-asset-detail" aria-label="关闭素材详情">×</button></div>
     <div class="asset-gif-layout">
-      <div class="asset-gif-preview" aria-label="GIF大预览占位"><span aria-hidden="true">X</span></div>
+      <div class="asset-gif-preview" aria-label="GIF大预览">${AFF.assetPreview(item)}</div>
       <div class="asset-gif-settings">
         <div class="asset-gif-fields">
           ${fields.map(([key, label, values]) => `
@@ -542,7 +606,7 @@ AFF.pages.assetDetail = () => {
     <div class="panel-header"><h2>${AFF.helpers.h(item.name)}</h2><button class="close-button" type="button" data-action="close-asset-detail" aria-label="关闭素材详情">×</button></div>
     <div class="asset-landing-layout">
       <div class="asset-landing-preview" tabindex="0" role="region" aria-label="落地页长图预览">
-        ${Array.from({ length: 12 }, (_, index) => `<section><span aria-hidden="true">X</span><strong>第 ${index + 1} 屏</strong></section>`).join("")}
+        ${Array.from({ length: 12 }, (_, index) => `<section>${AFF.assetPreview(item)}<strong>第 ${index + 1} 屏</strong></section>`).join("")}
       </div>
       <div class="asset-landing-settings">
         <label class="field"><span>语言</span>
@@ -591,7 +655,7 @@ AFF.pages.assetDetail = () => {
           <label class="asset-switch"><input type="checkbox" role="switch" ${detail[key] ? "checked" : ""} data-asset-video-option="${key}"><span aria-hidden="true"></span><em>${AFF.helpers.h(label)}</em></label>`).join("")}
       </div>
       <button class="asset-video-preview ${detail.playing ? "playing" : ""}" type="button" data-action="toggle-video-preview" aria-label="${detail.playing ? "暂停视频" : "播放视频"}">
-        <span class="video-placeholder" aria-hidden="true">X</span>
+        ${AFF.assetPreview(item)}
         <span class="video-control" aria-hidden="true">${detail.playing ? "❚❚" : "▶"}</span>
         <span class="video-progress" aria-hidden="true"><i></i></span>
       </button>
@@ -625,7 +689,7 @@ AFF.pages.assetDetail = () => {
             </select>
           </label>`).join("")}
       </div>
-      <div class="asset-detail-preview" aria-label="大预览占位"><span aria-hidden="true">X</span></div>
+      <div class="asset-detail-preview" aria-label="素材大预览">${AFF.assetPreview(item)}</div>
       <div class="asset-detail-code">
         <span>a标签完整文本</span>
         <code id="asset-anchor-code">${AFF.helpers.h(anchorTag)}</code>
@@ -765,9 +829,6 @@ AFF.pages.onboarding = () => {
             </div>
           </div>
         </div>
-        <div class="onboarding-actions">
-          <button class="button primary" type="button" data-action="onboarding-next" ${state.onboarding.emailVerified ? "" : "disabled"}>下一步</button>
-        </div>
       </section>`;
 
     if (current === 2) return `
@@ -777,9 +838,6 @@ AFF.pages.onboarding = () => {
           <div class="info-item"><span>姓名</span><strong>${AFF.helpers.h(state.account.displayName)}</strong></div>
           <div class="info-item"><span>国家</span><strong>${AFF.helpers.h(state.account.country)}</strong></div>
           <div class="info-item"><span>推广渠道类型</span><strong>${AFF.helpers.h(state.account.channel)}</strong></div>
-        </div>
-        <div class="onboarding-actions">
-          <button class="button primary" type="button" data-action="onboarding-next">下一步</button>
         </div>
       </section>`;
 
@@ -810,9 +868,6 @@ AFF.pages.onboarding = () => {
               <button class="button secondary small" type="button" data-action="open-onboarding-agreement" data-agreement-index="${index + 1}">查看协议</button>
             </label>`).join("")}
         </div>
-        <div class="onboarding-actions">
-          <button class="button primary" type="button" data-action="onboarding-next" ${allAgreed ? "" : "disabled"}>下一步</button>
-        </div>
       </section>`;
 
     return `
@@ -822,7 +877,7 @@ AFF.pages.onboarding = () => {
           <div class="onboarding-submitted">
             <div><span class="tag tag-info">待审核</span><strong>已提交</strong></div>
             <p>审核结果将通过站内消息与邮件通知。</p>
-          </div>` : `<button class="button primary" type="button" data-action="submit-onboarding">提交审核</button>`}
+          </div>` : ""}
       </section>`;
   };
 
@@ -835,6 +890,12 @@ AFF.pages.onboarding = () => {
         return `<button class="step ${status}" type="button" data-action="onboarding-go" data-onboarding-step="${number}" ${number > max ? "disabled" : ""}><span class="step-number">${number < current || (number !== current && number <= max) ? "✓" : number}</span><span class="step-label">${AFF.helpers.h(label)}</span></button>`;
       }).join("")}</div>
       ${stepContent()}
+      <div class="onboarding-actions">
+        <button class="button secondary" type="button" data-action="onboarding-go" data-onboarding-step="${current - 1}" ${current <= 1 ? "disabled" : ""}>上一步</button>
+        ${current < 5
+          ? `<button class="button primary" type="button" data-action="onboarding-next" ${(current === 1 && !state.onboarding.emailVerified) || (current === 3 && !state.onboarding.kycDone) || (current === 4 && !allAgreed) ? "disabled" : ""}>下一步</button>`
+          : `<button class="button primary" type="button" data-action="submit-onboarding" ${state.onboarding.submitted ? "disabled" : ""}>${state.onboarding.submitted ? "已提交" : "提交审核"}</button>`}
+      </div>
     </div></section>
     ${activeAgreement ? `
       <div class="modal-layer">
@@ -854,14 +915,15 @@ AFF.pages.onboarding = () => {
 AFF.pages.apply = () => {
   const state = AFF.state;
   const steps = ["查看佣金奖励", "高转化地区", "查看支持地区", "素材库总览", "系统使用指引", "分享简介链接"];
+  const reached = Math.max(state.programMaxStep || 1, state.applyStep);
   const content = AFF.pages.applyStep();
   return `
     ${AFF.helpers.pageHeader("合作者计划", "按国家看佣金、选市场、查端支持、取素材、学系统并分享链接。")}
     <section class="card program-steps-card"><div class="panel-body">
       <div class="steps">${steps.map((label, index) => {
         const number = index + 1;
-        const status = number < state.applyStep ? "done" : number === state.applyStep ? "current" : "disabled";
-        return `<button class="step ${status}" type="button" data-apply-step="${number}" ${number > state.applyStep ? "disabled" : ""}><span class="step-number">${number < state.applyStep ? "✓" : number}</span><span class="step-label">${label}</span></button>`;
+        const status = number === state.applyStep ? "current" : number <= reached ? "done" : "disabled";
+        return `<button class="step ${status}" type="button" data-apply-step="${number}" data-program-progress ${number > reached ? "disabled" : ""} ${number === state.applyStep ? 'aria-current="step"' : ""}><span class="step-number">${status === "done" ? "✓" : number}</span><span class="step-label">${label}</span></button>`;
       }).join("")}</div>
     </div></section>
     ${state.applyStep === 1 || state.applyStep === 2 || state.applyStep === 3 ? content : `<section class="card program-step-card"><div class="panel-body">${content}</div></section>`}
@@ -1026,32 +1088,48 @@ AFF.pages.applyStep = () => {
     </div>`;
     })()}`;
 
-  if (state.applyStep === 4) return `
-    <div class="program-section-head">
-      <div><h3>素材库重点</h3><p>按设备、社交平台、素材类型和分辨率筛选，快速找到适合渠道的素材。</p></div>
-      ${AFF.helpers.tag(state.assetsAccepted ? "已解锁" : "待解锁")}
-    </div>
-    ${[
-      ["device", ["全部", "网站", "安卓", "iOS"]],
-      ["platform", ["全部", "抖音", "YouTube", "Telegram"]],
-      ["type", ["全部", "落地页", "横幅广告", "视频", "GIF"]]
-    ].map(([key, values]) => `
-      <div class="program-filter-group"><span>${key === "device" ? "设备" : key === "platform" ? "社交平台" : "素材类型"}</span>
-        <div class="chips">${values.map(value => `<button class="chip ${state.programAssetFilters[key] === value ? "active" : ""}" type="button" data-program-asset="${key}" data-value="${AFF.helpers.h(value)}">${value}</button>`).join("")}</div>
-      </div>`).join("")}
-    ${(() => {
-      const filters = state.programAssetFilters;
-      const rows = AFF.partnerProgram.assets.filter(item =>
-        (filters.device === "全部" || item.device === filters.device) &&
-        (filters.platform === "全部" || item.platform === filters.platform) &&
-        (filters.type === "全部" || item.type === filters.type)
-      );
-      return `${AFF.helpers.table({
-        columns: ["素材", "设备", "社交平台", "素材类型", "分辨率"],
-        rows: rows.length ? rows.map(item => [item.name, item.device, item.platform, item.type, item.resolution]) : [["暂无数据", "-", "-", "-", "-"]]
-      })}<p class="helper">当前 ${rows.length} / ${AFF.partnerProgram.assets.length} 个素材</p>`;
-    })()}
-    <div class="action-row"><span class="helper">素材下载状态与推广行为准则绑定。</span><button class="button secondary" type="button" data-route="assets">进入完整素材库</button></div>`;
+  if (state.applyStep === 4) {
+    const slides = [
+      { image: "placeholder-markets.png", title: "适合不同渠道的推广创意", text: "从网站横幅到社交内容，让推广更高效。" },
+      { image: "placeholder-mobile.png", title: "用视频讲好您的推广内容", text: "为横向和纵向场景选择合适的视频素材。" },
+      { image: "placeholder-campaign.png", title: "让每次点击都有合适的落点", text: "选择适合受众语言的落地页，连接您的推广流量。" }
+    ];
+    const index = Math.min(slides.length - 1, Math.max(0, state.programAssetSlide || 0));
+    const slide = slides[index];
+    const categories = [["横幅", "横幅广告", "assets"], ["视频", "视频", "video"], ["落地页", "落地页", "browser"], ["GIF", "GIF", "overview"]];
+    return `
+      <div class="program-intro">
+        <h2>丰富的创意素材库</h2>
+        <p>多种语言与格式的推广素材，帮助您为网站、应用和社交渠道准备合适的内容。</p>
+      </div>
+      <div class="program-channel-list">
+        <div><strong>网站与移动应用</strong><span>网页端 · iOS · Android</span></div>
+        <div><strong>社交媒体与内容社区</strong><span>Instagram · TikTok · YouTube · Telegram</span></div>
+      </div>
+      <section class="program-material-carousel" aria-roledescription="轮播" aria-label="推广素材预览">
+        <div class="program-material-slide">
+          <img src="./assets/${slide.image}" alt="${AFF.helpers.h(slide.title)}">
+          <div class="program-material-caption"><strong>${slide.title}</strong><span>${slide.text}</span></div>
+        </div>
+        <div class="program-carousel-controls">
+          <button class="icon-button" type="button" data-action="program-asset-slide" data-slide="${(index + slides.length - 1) % slides.length}" aria-label="上一张素材" title="上一张素材">‹</button>
+          <div>${slides.map((item, number) => `<button class="program-slide-dot ${number === index ? "active" : ""}" type="button" data-action="program-asset-slide" data-slide="${number}" aria-label="第${number + 1}张素材" ${number === index ? 'aria-current="true"' : ""}></button>`).join("")}</div>
+          <button class="icon-button" type="button" data-action="program-asset-slide" data-slide="${(index + 1) % slides.length}" aria-label="下一张素材" title="下一张素材">›</button>
+        </div>
+      </section>
+      <div class="program-material-description">
+        <p>横幅、视频、落地页和 GIF 覆盖多种推广场景。进入素材库后，您可以按语言、尺寸和平台选择素材，下载文件或复制推广代码。</p>
+        <p>推广前，建议检查素材语言与投放地区是否一致，并定期查看素材库中的最新内容。</p>
+        <button class="program-text-link" type="button" data-action="program-open-assets">前往素材库 <span aria-hidden="true">→</span></button>
+      </div>
+      <div class="program-material-categories">${categories.map(([type, label, icon]) => `
+        <button type="button" data-action="program-open-assets" data-type="${type}">
+          <span class="program-category-icon" aria-hidden="true">${type === "GIF" ? "GIF" : navIcon(icon)}</span>
+          <strong>${label}</strong>
+          <small>${AFF.assets.filter(item => item.type === type).length} 份素材</small>
+        </button>`).join("")}
+      </div>`;
+  }
 
   if (state.applyStep === 5) return `
     <div class="program-section-head">
@@ -1068,36 +1146,38 @@ AFF.pages.applyStep = () => {
         <button class="button secondary" type="button" data-route="perf">进入业绩数据</button>
       </article>
       <article>
-        <span>入口 03</span><strong>查看整体数据</strong><p>从仪表盘看钱包余额、未激活客户、总收益、合格客户和时间范围汇总。</p>
+        <span>入口 03</span><strong>查看整体数据</strong><p>从仪表盘看钱包余额、注册客户、未激活数量、总收益、合格客户和时间范围汇总。</p>
         <button class="button secondary" type="button" data-route="dash">进入仪表盘</button>
       </article>
     </div>`;
 
+  const webLink = new URL(AFF.dashboard.link);
+  webLink.searchParams.set("platform", "web");
+  webLink.searchParams.set("lang", state.language === "en" ? "en" : "zh-cn");
+  const mobileLink = new URL(webLink);
+  mobileLink.searchParams.set("platform", "app");
+  const copyIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3"/></svg>';
   return `
-    ${(() => {
-      const shareText = `${AFF.partnerProgram.shareIntro}${AFF.dashboard.link}`;
-      return `
-    <div class="program-hero">
-      <div>
-        <span>最后一步</span>
-        <strong>复制分享简介</strong>
-        <p>给客户一段可直接发送的简介和链接，也可以进入深度链接配置目标页与应用商店。</p>
-      </div>
-      ${AFF.helpers.tag(state.programCompleted ? "已完成" : "进行中")}
+    <div class="program-intro">
+      <h2>分享您的链接，开始赚取收入</h2>
+      <p>复制您的专属推广链接，分享到网站、社交平台或社群，追踪客户转化与佣金。</p>
     </div>
-    <div class="link-box program-link-panel">
-      <textarea class="share-text" rows="5" readonly aria-label="分享简介">${AFF.helpers.h(shareText)}</textarea>
-      <div class="program-link-actions">
-        <button class="button primary" type="button" data-copy="${AFF.helpers.h(shareText)}">复制简介和链接</button>
-        <button class="button secondary" type="button" data-route="deep">配置深度链接</button>
+    <div class="program-share-body">
+      <p>推广准备已就绪。客户通过您的专属链接注册后，您可以在仪表盘查看推广效果；符合佣金条件的转化将计入您的收益。请选择适合投放场景的链接。</p>
+      <div class="program-share-links">
+        ${[["网页链接", "适用于网站与桌面浏览器", webLink.href, "globe"], ["移动/手机链接", "适用于应用与移动端推广", mobileLink.href, "smartphone"]].map(([label, hint, url, icon]) => `
+          <div class="program-share-link">
+            <span class="program-share-icon" aria-hidden="true">${navIcon(icon)}</span>
+            <div><strong>${label}</strong><span>${hint}</span><a href="${AFF.helpers.h(url)}" target="_blank" rel="noopener" title="${AFF.helpers.h(url)}">${AFF.helpers.h(url)}</a></div>
+            <button class="icon-button program-copy-button" type="button" data-copy="${AFF.helpers.h(url)}" aria-label="复制${label}" title="复制${label}">${copyIcon}</button>
+          </div>`).join("")}
       </div>
-    </div>
-    <div class="info-grid">
-      <div class="info-item"><span>简介用途</span><strong>社交私信、社群公告、内容评论区</strong></div>
-      <div class="info-item"><span>归因窗口</span><strong>30天首次点击</strong></div>
-      <div class="info-item wide"><span>合规提示</span><strong>不得承诺收益；正式话术需经合规评审后配置。</strong></div>
+      <p class="program-share-note">您可以随时返回仪表盘获取推广链接。投放前请查看支持地区，并根据受众的语言、设备和目标页面选择对应链接。</p>
+      <div class="program-share-shortcuts">
+        <button class="program-text-link" type="button" data-route="deep">配置专属深度链接 <span aria-hidden="true">→</span></button>
+        <button class="program-text-link" type="button" data-route="dash">返回仪表盘 <span aria-hidden="true">→</span></button>
+      </div>
     </div>`;
-    })()}`;
 };
 
 AFF.pages.wd = () => {

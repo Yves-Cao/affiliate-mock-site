@@ -5,7 +5,9 @@
   "description": "Public synthetic Affiliate user-side mock pages.",
   "scripts": {
     "serve": "node scripts/serve.cjs",
-    "check": "node --check data.js && node --check pages.js && node --check postbacks.js && node --check app.js",
+    "check": "node --check data.js && node --check report-data.js && node --check pages.js && node --check reports.js && node --check postbacks.js && node --check subchannels.js && node --check app.js",
+    "test:reports-data": "node scripts/report-data-check.cjs",
+    "test:reports": "node scripts/reports-check.cjs",
     "test:ui": "node scripts/visual-check.cjs",
     "test:postbacks": "node scripts/postback-check.cjs",
     "test:dashboard-postbacks": "node scripts/dashboard-postbacks-check.cjs"
