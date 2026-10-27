@@ -3,68 +3,163 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Affiliate user-side mock pages with synthetic data only.">
-  <title>Affiliate 用户端 Mock</title>
+  <meta name="description" content="Affiliate partner console for campaigns, clients, commissions and withdrawals.">
+  <title>Affiliate APC</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./postbacks.css">
 </head>
 <body>
   <a class="skip-link" href="#main">跳到主要内容</a>
 
-  <section id="login-view" class="login-view" aria-label="Demo login">
-    <form id="login-form" class="login-panel" novalidate>
-      <div>
-        <p class="eyebrow">Affiliate</p>
-        <h1>用户端 Mock</h1>
-        <p class="login-note">任意非空账号密码仅用于演示门槛，不是安全认证。</p>
+  <section id="login-view" class="login-view login-mode" aria-label="Affiliate demo authentication">
+    <aside class="auth-visual auth-visual-login" aria-label="Affiliate login background">
+      <img src="./assets/login-bg.jpg" alt="" role="presentation">
+    </aside>
+    <aside class="auth-visual auth-visual-register" aria-label="Affiliate register visual">
+      <img src="./assets/auth-visual.jpg" alt="" role="presentation">
+    </aside>
+    <div class="auth-panel">
+      <div class="auth-tabs" role="tablist" aria-label="登录或注册">
+        <button id="login-tab" class="auth-tab active" type="button" role="tab" aria-selected="true" aria-controls="login-form">登录</button>
+        <button id="register-tab" class="auth-tab" type="button" role="tab" aria-selected="false" aria-controls="register-form">注册</button>
       </div>
-      <label>
-        <span>账号</span>
-        <input name="username" type="text" autocomplete="username" required>
-      </label>
-      <label>
-        <span>密码</span>
-        <input name="password" type="password" autocomplete="current-password" required>
-      </label>
-      <p id="login-error" class="form-error" hidden>请输入账号和密码。</p>
-      <button class="button primary wide" type="submit">登录</button>
-    </form>
+
+      <form id="login-form" class="login-panel" role="tabpanel" aria-labelledby="login-tab" novalidate>
+        <div>
+          <p class="eyebrow">Affiliate Partner</p>
+          <h1>登录账户</h1>
+        </div>
+        <label>
+          <span>邮箱</span>
+          <input name="email" type="email" autocomplete="email" placeholder="name@example.com" required>
+        </label>
+        <label>
+          <span>密码</span>
+          <input name="password" type="password" autocomplete="current-password" required>
+        </label>
+        <p id="login-error" class="form-error" hidden>请输入邮箱和密码。</p>
+        <button class="button primary wide" type="submit">登录</button>
+        <p class="auth-switch">还没有账户？<button type="button" data-auth-switch="register">创建账户</button></p>
+      </form>
+
+      <form id="register-form" class="login-panel hidden" role="tabpanel" aria-labelledby="register-tab" novalidate>
+        <div>
+          <p class="eyebrow">Affiliate Partner</p>
+          <h1>创建账户</h1>
+          <p class="login-note">注册信息仅保存在当前浏览器会话中。</p>
+        </div>
+        <label>
+          <span>邮箱</span>
+          <input name="email" type="email" autocomplete="email" placeholder="name@example.com" required>
+        </label>
+        <label>
+          <span>密码</span>
+          <input name="password" type="password" autocomplete="new-password" required>
+        </label>
+        <label>
+          <span>确认密码</span>
+          <input name="confirmPassword" type="password" autocomplete="new-password" required>
+        </label>
+        <label>
+          <span>国家</span>
+          <select name="country" required>
+            <option value="">请选择国家</option>
+            <option value="新加坡">新加坡</option>
+            <option value="马来西亚">马来西亚</option>
+            <option value="巴西">巴西</option>
+            <option value="其他">其他</option>
+          </select>
+        </label>
+        <p id="register-error" class="form-error" hidden></p>
+        <button class="button primary wide" type="submit">注册</button>
+        <div class="legal-declaration">
+          <p>在创建账户时，我确认：(1) 您确认已年满 18 周岁，并同意我们的《条款与条件》及《隐私政策》；(2) 我同意 GTCFX 可在合理时间内与我联系；(3) 我的电话号码未被列入“禁止来电登记名录”（Do Not Call Register，简称 DNCR）。我声明，我并非“政治公众人物”（Politically Exposed Person，简称 PEP），也从未担任过任何重要公职。此外，我确认我从未因洗钱、欺诈、贿赂、腐败或其他任何刑事犯罪而被定罪，且目前未涉及任何正在进行的监管程序或法律诉讼。</p>
+        </div>
+        <p class="auth-switch">已有账户？<button type="button" data-auth-switch="login">直接登录</button></p>
+      </form>
+    </div>
   </section>
 
   <div id="app-view" class="app-view hidden">
     <aside id="sidebar" class="sidebar" aria-label="用户端导航">
-      <div class="brand">
-        <span class="brand-mark">A</span>
-        <span class="brand-text">
-          <strong>Affiliate</strong>
-          <small>Partner Console</small>
-        </span>
-      </div>
       <nav id="nav" class="nav"></nav>
+      <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-label="收起侧栏" aria-expanded="true">
+        <span aria-hidden="true">«</span>
+      </button>
       <button id="profile-entry" class="nav-item profile-entry" type="button" data-route="apply">
-        <span class="nav-icon">·</span>
-        <span class="nav-label">资料完善</span>
+        <span class="nav-icon" aria-hidden="true"></span>
+        <span class="nav-label">合作者计划</span>
       </button>
     </aside>
 
     <div class="workspace">
       <header class="topbar">
-        <div class="topbar-left">
-          <button id="sidebar-toggle" class="icon-button" type="button" aria-label="切换侧栏">≡</button>
-          <div>
-            <p id="breadcrumb" class="breadcrumb">数据总览 › 仪表盘</p>
-            <p id="topbar-caption" class="topbar-caption">Affiliate 用户端演示 · 虚构数据</p>
-          </div>
+        <div class="brand topbar-brand">
+          <span class="brand-mark">A</span>
+          <span class="brand-text"><strong>Affiliate APC</strong></span>
         </div>
+        <div class="topbar-spacer" aria-hidden="true"></div>
         <div class="topbar-tools">
-          <a class="wallet" href="#/pay">
-            <span>可提现</span>
-            <strong>$12,480.50</strong>
-          </a>
-          <button class="icon-button" type="button" aria-label="帮助中心">?</button>
-          <button id="language-toggle" class="icon-button" type="button" aria-label="切换语言">中/EN</button>
-          <button class="icon-button notice" type="button" aria-label="通知">!<span></span></button>
-          <span class="avatar" aria-hidden="true">M</span>
+          <div class="wallet-menu" id="wallet-menu">
+            <button class="wallet" id="wallet-toggle" type="button" aria-expanded="false" aria-controls="wallet-popover">
+              <span>可提现</span>
+              <strong id="wallet-balance">$12,480.50</strong>
+            </button>
+            <section class="wallet-popover" id="wallet-popover" aria-label="钱包概览" hidden>
+              <div class="wallet-popover-balance"><span>可提现余额</span><strong id="wallet-popover-balance">$12,480.50</strong></div>
+              <div class="wallet-popover-total"><span>总收益</span><strong id="wallet-total-revenue">$34,215.00</strong></div>
+              <button class="button primary" type="button" data-route="wd">提现</button>
+            </section>
+          </div>
+          <button class="icon-button circular" type="button" aria-label="帮助中心">
+            <span aria-hidden="true">?</span>
+          </button>
+          <label class="scenario-control hidden" for="scenario-select">
+            <span>Mock状态</span>
+            <select id="scenario-select">
+              <option value="normal-flow">正常</option>
+              <option value="empty-state">空态</option>
+              <option value="api-error">异常</option>
+            </select>
+          </label>
+          <div class="topbar-menu" id="language-menu">
+            <button id="language-toggle" class="icon-button circular" type="button" aria-label="选择语言" aria-haspopup="menu" aria-expanded="false">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="9"/>
+                <path d="M3 12h18"/>
+                <path d="M12 3a15 15 0 0 1 4 9 15 15 0 0 1-4 9 15 15 0 0 1-4-9 15 15 0 0 1 4-9z"/>
+              </svg>
+            </button>
+            <div class="topbar-dropdown" role="menu" aria-label="语言">
+              <button type="button" role="menuitemradio" aria-checked="true" data-language="zh">简体中文</button>
+              <button type="button" role="menuitemradio" aria-checked="false" data-language="en">English</button>
+            </div>
+          </div>
+          <div class="account-menu" id="account-menu">
+            <button class="avatar" id="avatar-button" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="账户菜单">M</button>
+            <div class="account-dropdown" id="account-dropdown" role="menu" aria-label="账户操作">
+              <button class="account-menu-item" type="button" role="menuitem" data-action="open-account">
+                <span class="account-menu-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </span>
+                <span>账户管理</span>
+              </button>
+              <button class="account-menu-item" type="button" role="menuitem" data-action="logout">
+                <span class="account-menu-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" x2="9" y1="12" y2="12"/>
+                  </svg>
+                </span>
+                <span>退出登录</span>
+              </button>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -72,16 +167,12 @@
         <span>您的账户资料未完善，部分功能可能受限。</span>
         <div>
           <button id="dismiss-kyc" class="button secondary small" type="button">知道了</button>
-          <button class="button primary small" type="button" data-route="apply">去完善</button>
+          <button class="button primary small" type="button" data-route="onboarding">去完成</button>
         </div>
       </div>
 
       <main id="main" class="main" tabindex="-1"></main>
 
-      <footer class="footer">
-        <span>Affiliate User Mock</span>
-        <span>Synthetic data only</span>
-      </footer>
     </div>
   </div>
 
@@ -90,6 +181,7 @@
 
   <script src="./data.js"></script>
   <script src="./pages.js"></script>
+  <script src="./postbacks.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>
