@@ -40,6 +40,13 @@ for (const row of data.rows) {
     assert.ok(row.effectiveAt && row.tradedAt);
     assert.ok(row.qualifiedAt >= row.effectiveAt && row.qualifiedAt >= row.tradedAt);
   }
+  assert.equal(Boolean(row.expected), Boolean(row.commissionId));
+  if (["rejected", "reversed"].includes(row.commissionStatus)) {
+    assert.ok(row.commissionId && row.commissionReasonCode && row.commissionReason && row.commissionReasonEn);
+  } else {
+    assert.equal(row.commissionReason, "");
+    assert.equal(row.commissionReasonCode, "");
+  }
   assert.equal(["held", "approved", "rejected", "reversed"].filter(key => row[key] > 0).length, row.qualifiedAt && row.commissionStatus !== "pending" ? 1 : 0);
   for (const key of ["ftdAmount", "expected", "held", "approved", "rejected", "reversed"]) {
     assert.ok(Number.isFinite(row[key]) && row[key] >= 0);

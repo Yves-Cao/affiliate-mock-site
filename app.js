@@ -66,6 +66,7 @@ const defaultState = {
   programMaxStep: 1,
   programAssetSlide: 0,
   onboarding: {
+    name: "",
     step: 1,
     maxStep: 1,
     emailVerified: false,
@@ -100,7 +101,9 @@ const englishLabels = {
   "链接追踪器": "Trackers",
   "素材库": "Assets",
   "收益与提现": "Earnings",
+  "收益数据": "Earnings data",
   "客户归属查询": "Attribution",
+  "归属查询": "Attribution lookup",
   "提现": "Withdrawal",
   "合作者计划": "Partner Program",
   "入驻申请": "Onboarding Application"
@@ -119,6 +122,17 @@ let accountMenuCloseTimer = null;
 let walletCloseTimer = null;
 let authMode = "login";
 let sidebarHoverOpen = false;
+let onboardingPicker = "";
+let onboardingQuery = "";
+
+function closeOnboardingPicker(restoreFocus = false) {
+  const trigger = document.querySelector(".onboarding-picker.open .dashboard-link-picker-button");
+  onboardingPicker = "";
+  onboardingQuery = "";
+  document.querySelectorAll(".onboarding-picker.open").forEach(picker => picker.classList.remove("open"));
+  trigger?.setAttribute("aria-expanded", "false");
+  if (restoreFocus) trigger?.focus();
+}
 
 function initializeElements() {
   for (const id of [
@@ -203,6 +217,9 @@ if (Array.isArray(AFF.state.createdCampaigns)) {
     item && typeof item.code === "string" && typeof item.name === "string" && typeof item.link === "string" && !existingCodes.has(item.code)
   );
   AFF.campaigns.unshift(...savedCampaigns);
+  savedCampaigns.forEach(campaign => {
+    try { AFF.campaignLinks.register(campaign); } catch { /* Keep the saved campaign visible if browser storage is unavailable. */ }
+  });
 }
 
 function persist() {
@@ -329,7 +346,7 @@ function render() {
 
 function syncSidebarToggle() {
   const sidebarExpanded = window.innerWidth <= 991
-    ? AFF.state.mobileNavOpen
+    ? AFF.state.mobileNavOpen || sidebarHoverOpen
     : !AFF.state.sidebarCollapsed || sidebarHoverOpen;
   elements["sidebar-toggle"].textContent = sidebarExpanded ? "«" : "»";
   elements["sidebar-toggle"].setAttribute("aria-expanded", String(sidebarExpanded));
@@ -355,6 +372,7 @@ function statePage(route) {
 }
 
 function navigate(route) {
+  closeOnboardingPicker();
   if (!AFF.routes.some(item => item.id === route)) route = "dash";
   setWalletOpen(false);
   AFF.state.route = route;
@@ -557,10 +575,27 @@ function logout() {
 }
 
 function openCampaignModal() {
-  showModal(modalShell("新建活动", `
-    <label class="field"><span>活动名称</span><input id="campaign-name" placeholder="例如：十一月 Telegram 投放"></label>
-    <p class="helper" style="margin-top:10px">活动仅作为链接分组，不配置预算、日期和出价。</p>`,
-    `<button class="button secondary" type="button" data-action="close-modal">取消</button><button class="button primary" type="button" data-action="create-campaign">保存</button>`));
+  const t = (zh, en) => AFF.state.language === "en" ? en : zh;
+  showModal(modalShell(t("新建活动", "Create campaign"), `
+    <label class="field"><span>${t("活动名称", "Campaign name")}</span><input id="campaign-name" maxlength="80" placeholder="${t("例如：十一月 Telegram 投放", "e.g. November Telegram campaign")}"></label>
+    <p class="helper" style="margin-top:10px">${t("活动用于管理推广链接，创建后默认为活跃状态。", "Campaigns organize promotional links and are active when created.")}</p>`,
+    `<button class="button secondary" type="button" data-action="close-modal">${t("取消", "Cancel")}</button><button class="button primary" type="button" data-action="create-campaign">${t("保存", "Save")}</button>`));
+  document.getElementById("campaign-name").focus();
+}
+
+function openCampaignStatus(code) {
+  const campaign = AFF.campaigns.find(item => item.code === code);
+  if (!campaign) return;
+  const t = (zh, en) => AFF.state.language === "en" ? en : zh;
+  const archived = AFF.campaignLinks.status(campaign) === "archived";
+  const next = archived ? "active" : "archived";
+  showModal(modalShell(t(archived ? "设为活跃" : "归档活动", archived ? "Activate campaign" : "Archive campaign"), `
+    <p>${AFF.helpers.h(campaign.name)} · ${AFF.helpers.h(campaign.code)}</p>
+    <p>${archived
+      ? t("恢复后，此活动的推广链接将重新生效，历史数据保持不变。", "This campaign's promotional links will work again. Historical data will be retained.")
+      : t("归档后，此活动的推广链接及关联二级渠道链接将失效。历史数据仍可查看，也可以稍后恢复活跃状态。", "This campaign's promotional links and associated subchannel links will stop working. Historical data will remain available, and you can reactivate the campaign later.")}</p>`,
+    `<button class="button secondary" type="button" data-action="close-modal">${t("取消", "Cancel")}</button><button class="button primary" type="button" data-action="campaign-confirm-status" data-code="${AFF.helpers.h(code)}" data-status="${next}">${t(archived ? "设为活跃" : "确认归档", archived ? "Activate" : "Confirm archive")}</button>`));
+  elements["modal-root"].querySelector("[data-action='close-modal']").focus();
 }
 
 function openCampaignData(code, period = "past30", focusPeriod = false) {
@@ -571,14 +606,14 @@ function openCampaignData(code, period = "past30", focusPeriod = false) {
   const number = AFF.campaignNumber;
   const metrics = [
     ["clicks", t("点击量", "Clicks")], ["registrations", t("注册客户", "Registrations")],
-    ["ftd", t("FTD 客户", "FTD clients")], ["effective", t("有效 FTD", "Valid FTD")],
+    ["ftd", t("FTD 客户", "FTD clients")], ["effective", t("有效客户", "Valid FTD clients")],
     ["qualified", t("合格客户", "Qualified clients")], ["expected", t("预计佣金", "Projected commission"), "money"]
   ];
   const breakdown = (key, title) => {
     const grouped = AFF.reporting.aggregate(rows, [key]).sort((a, b) => b.metrics.clicks - a.metrics.clicks);
     return `<section class="campaign-breakdown"><h3>${title}</h3>${grouped.length ? AFF.helpers.table({
-      columns: [title, t("点击", "Clicks"), t("注册", "Registrations"), "FTD", t("有效 FTD", "Valid FTD"), t("预计佣金", "Projected commission")],
-      rows: grouped.map(row => [AFF.helpers.h(row.values[0]), ...["clicks", "registrations", "ftd", "effective"].map(metric => number(row.metrics[metric])), number(row.metrics.expected, "money")])
+      columns: [title, t("点击", "Clicks"), t("注册客户", "Registrations"), t("FTD客户", "FTD clients"), t("有效客户", "Valid FTD clients"), t("合格客户", "Qualified clients"), t("预计佣金", "Projected commission")],
+      rows: grouped.map(row => [AFF.helpers.h(row.values[0]), number(row.metrics.clicks), ...["registrations", "ftd", "effective", "qualified"].map(metric => AFF.campaignMetric(campaign, metric, row.metrics[metric], period, key, row.values[0])), number(row.metrics.expected, "money")])
     }) : `<div class="campaign-empty">${t("当前周期暂无数据", "No data for this period")}</div>`}</section>`;
   };
   const periods = [["today", "今日", "Today"], ["past7", "过去7天", "Last 7 days"], ["past30", "过去30天", "Last 30 days"], ["past90", "过去90天", "Last 90 days"]];
@@ -586,7 +621,7 @@ function openCampaignData(code, period = "past30", focusPeriod = false) {
     <header class="modal-head"><div><h2>${AFF.helpers.h(campaign.name)}</h2><p>${AFF.helpers.h(campaign.code)}</p></div><button class="close-button" type="button" data-action="campaign-close-data" data-code="${AFF.helpers.h(code)}" title="${t("关闭", "Close")}" aria-label="${t("关闭", "Close")}">×</button></header>
     <div class="campaign-data-body">
       <div class="campaign-data-period"><label for="campaign-period">${t("时间范围", "Date range")}</label><select id="campaign-period">${periods.map(([value, zh, en]) => `<option value="${value}" ${value === period ? "selected" : ""}>${t(zh, en)}</option>`).join("")}</select><span>${range.from} — ${range.to}</span></div>
-      <section class="campaign-data-metrics">${metrics.map(([key, label, type]) => `<div><span>${label}</span><strong>${number(totals[key], type)}</strong></div>`).join("")}</section>
+      <section class="campaign-data-metrics">${metrics.map(([key, label, type]) => `<div><span>${label}</span>${["registrations", "ftd", "effective", "qualified"].includes(key) ? AFF.campaignMetric(campaign, key, totals[key], period) : `<strong>${number(totals[key], type)}</strong>`}</div>`).join("")}</section>
       <section class="campaign-data-rates">${[["registerRate", t("点击→注册", "Click → registration")], ["ftdRate", t("注册→FTD", "Registration → FTD")], ["effectiveRate", t("FTD→有效 FTD", "FTD → valid FTD")]].map(([key, label]) => `<div><span>${label}</span><strong>${number(totals[key], "rate")}</strong></div>`).join("")}</section>
       ${breakdown("country", t("国家/地区", "Country / region"))}
       ${breakdown("platform", t("平台", "Platform"))}
@@ -738,19 +773,57 @@ function handleAction(action, target) {
     state.clientsPage = Number(target.dataset.page || 1);
     return render();
   }
+  if (action === "dashboard-clients") {
+    const { metric, period } = target.dataset;
+    if (!["registrations", "effective", "qualified", "revenue"].includes(metric) ||
+        !["all", "month", "today", "past7", "past30", "lastWeek", "lastMonth"].includes(period)) return;
+    const filters = { ...AFF.dashboardData(period).range };
+    if (metric === "revenue") filters.commissionStatus = "approved";
+    return AFF.reports.openClients(filters, metric === "revenue" ? "registrations" : metric);
+  }
   if (action === "open-campaign-modal") return openCampaignModal();
   if (action === "campaign-data") return openCampaignData(target.dataset.code);
   if (action === "campaign-close-data") return closeCampaignData(target.dataset.code);
+  if (action === "campaign-clients") {
+    const campaign = AFF.campaigns.find(item => item.code === target.dataset.code);
+    if (!campaign || !["registrations", "ftd", "effective", "qualified"].includes(target.dataset.metric)) return;
+    const filters = { ...AFF.reports.range(target.dataset.period || "past30"), campaignCode: campaign.code };
+    if (["country", "platform"].includes(target.dataset.dimension)) filters[target.dataset.dimension] = target.dataset.value;
+    closeModal();
+    return AFF.reports.openClients(filters, target.dataset.metric);
+  }
+  if (action === "campaign-status") return openCampaignStatus(target.dataset.code);
+  if (action === "campaign-confirm-status") {
+    const campaign = AFF.campaigns.find(item => item.code === target.dataset.code);
+    if (!campaign || !["active", "archived"].includes(target.dataset.status)) return;
+    const t = (zh, en) => state.language === "en" ? en : zh;
+    try {
+      AFF.campaignLinks.setStatus(campaign, target.dataset.status);
+    } catch {
+      return showToast(t("状态保存失败，请重试。", "Could not save the status. Please try again."));
+    }
+    closeModal();
+    render();
+    document.querySelector(`[data-action="campaign-status"][data-code="${CSS.escape(campaign.code)}"]`)?.focus();
+    return showToast(target.dataset.status === "archived" ? t("活动已归档，链接已失效", "Campaign archived. Its links are inactive.") : t("活动已设为活跃，链接已恢复", "Campaign activated. Its links work again."));
+  }
   if (action === "campaign-page") {
     state.campaignPage = Number(target.dataset.page || 1);
     return render();
   }
   if (action === "create-campaign") {
     const name = document.getElementById("campaign-name")?.value.trim();
-    if (!name) return showToast("请输入活动名称");
+    if (!name || name.length > 80) return showToast("请输入不超过80个字符的活动名称");
     if (AFF.campaigns.some(item => item.name === name)) return showToast("活动名称已存在");
-    const code = `CMP-${Math.max(1000, ...AFF.campaigns.map(item => Number(item.code.slice(4)))) + 1}`;
+    let nextCode = Math.max(1000, ...AFF.campaigns.map(item => Number(item.code.slice(4)) || 0)) + 1;
+    while (AFF.campaignLinks.find(`CMP-${nextCode}`)) nextCode += 1;
+    const code = `CMP-${nextCode}`;
     const campaign = { code, name, link: `https://track.example.com/r/AFF1001?camp=${encodeURIComponent(code)}`, status: "启用" };
+    try {
+      AFF.campaignLinks.register(campaign);
+    } catch {
+      return showToast("活动保存失败，请重试。");
+    }
     AFF.campaigns.unshift(campaign);
     state.createdCampaigns ||= [];
     state.createdCampaigns.unshift(campaign);
@@ -790,6 +863,14 @@ function handleAction(action, target) {
       state.onboarding.step = 2;
       state.onboarding.maxStep = Math.max(state.onboarding.maxStep, 2);
     } else if (state.onboarding.step === 2) {
+      const name = document.querySelector("[data-onboarding-name]");
+      if (!state.onboarding.name.trim()) {
+        name?.setCustomValidity("请填写姓名");
+        name?.reportValidity();
+        return;
+      }
+      state.onboarding.name = state.onboarding.name.trim();
+      state.account.displayName = state.onboarding.name;
       state.onboarding.step = 3;
       state.onboarding.maxStep = Math.max(state.onboarding.maxStep, 3);
     } else if (state.onboarding.step === 3 && state.onboarding.kycDone) {
@@ -799,12 +880,33 @@ function handleAction(action, target) {
       state.onboarding.step = 5;
       state.onboarding.maxStep = Math.max(state.onboarding.maxStep, 5);
     }
+    closeOnboardingPicker();
     return render();
   }
   if (action === "onboarding-go") {
+    closeOnboardingPicker();
     const step = Number(target.dataset.onboardingStep);
     if (step >= 1 && step <= state.onboarding.maxStep) state.onboarding.step = step;
     return render();
+  }
+  if (action === "toggle-onboarding-picker") {
+    const field = target.dataset.onboardingField;
+    if (!["country", "channel"].includes(field)) return;
+    onboardingPicker = onboardingPicker === field ? "" : field;
+    onboardingQuery = "";
+    render();
+    if (onboardingPicker) requestAnimationFrame(() => document.querySelector(`[data-onboarding-search="${field}"]`)?.focus());
+    return;
+  }
+  if (action === "select-onboarding-option") {
+    const field = target.dataset.onboardingField;
+    const value = target.dataset.value;
+    if (!["country", "channel"].includes(field) || !AFF.onboardingOptions(field).some(item => item.value === value)) return;
+    state.account[field] = value;
+    closeOnboardingPicker();
+    render();
+    document.querySelector(`[data-action="toggle-onboarding-picker"][data-onboarding-field="${field}"]`)?.focus();
+    return;
   }
   if (action === "open-client-kyc") {
     showToast("演示：跳转客户端完成 KYC 实名认证");
@@ -1133,6 +1235,19 @@ function handleChange(event) {
 function handleInput(event) {
   if (AFF.postbacks?.handleInput(event)) return;
   const target = event.target;
+  if (target.hasAttribute("data-onboarding-name")) {
+    AFF.state.onboarding.name = target.value;
+    target.setCustomValidity("");
+    persist();
+    return;
+  }
+  if (target.dataset.onboardingSearch) {
+    const field = target.dataset.onboardingSearch;
+    onboardingQuery = target.value;
+    const list = document.querySelector(`[data-onboarding-options="${field}"]`);
+    if (list) list.innerHTML = AFF.renderOnboardingOptions(field, onboardingQuery);
+    return;
+  }
   if (target.dataset.countrySearch !== undefined) {
     AFF.state.programCountryQuery = target.value;
     const list = document.querySelector("[data-country-option-list]");
@@ -1318,21 +1433,24 @@ function initialize() {
       AFF.state.mobileNavOpen = !AFF.state.mobileNavOpen;
     } else {
       AFF.state.sidebarCollapsed = !AFF.state.sidebarCollapsed;
-      setSidebarHover(false);
     }
+    setSidebarHover(false);
     render();
   });
+  const sidebarHoverMedia = window.matchMedia("(hover: hover) and (pointer: fine)");
   const setSidebarHover = open => {
-    if (window.innerWidth <= 991) open = false;
-    sidebarHoverOpen = open && AFF.state.sidebarCollapsed;
+    const compact = window.innerWidth <= 991 ? !AFF.state.mobileNavOpen : AFF.state.sidebarCollapsed;
+    sidebarHoverOpen = open && sidebarHoverMedia.matches && compact;
     document.body.classList.toggle("sidebar-hover-open", sidebarHoverOpen);
     syncSidebarToggle();
   };
   elements.sidebar.addEventListener("mouseenter", () => setSidebarHover(true));
   elements.sidebar.addEventListener("mouseleave", () => setSidebarHover(false));
-  window.addEventListener("resize", () => {
-    if (window.innerWidth <= 991) setSidebarHover(false);
+  document.addEventListener("pointermove", event => {
+    if (sidebarHoverOpen && !elements.sidebar.contains(event.target)) setSidebarHover(false);
   });
+  sidebarHoverMedia.addEventListener("change", () => setSidebarHover(false));
+  window.addEventListener("resize", () => setSidebarHover(elements.sidebar.matches(":hover")));
   const languageMenu = elements["language-menu"];
   const setLanguageMenu = open => {
     if (open && (AFF.state.programCountryPickerOpen || AFF.state.programSupportPickerOpen)) {
@@ -1368,6 +1486,10 @@ function initialize() {
   });
   document.addEventListener("click", handleClick);
   document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && onboardingPicker) {
+      closeOnboardingPicker(true);
+      return;
+    }
     if (!["Enter", " "].includes(event.key)) return;
     const tutorial = event.target.closest(".tutorial-card");
     if (!tutorial) return;
@@ -1377,6 +1499,7 @@ function initialize() {
   document.addEventListener("change", handleChange);
   document.addEventListener("input", handleInput);
   document.addEventListener("click", event => {
+    if (!event.target.closest(".onboarding-picker")) closeOnboardingPicker();
     if (event.target.closest(".country-picker, .dashboard-link-picker")) return;
     if (
       !AFF.state.programCountryPickerOpen &&

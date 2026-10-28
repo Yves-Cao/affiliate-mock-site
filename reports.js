@@ -14,6 +14,7 @@
     summary: ["registrations", "ftd", "effective", "qualified", "ftdRate", "effectiveRate", "expected", "approved"]
   };
   let returnFocus = null;
+  let holdHelpTimer = null;
   const initializedStates = new WeakSet();
 
   function dateShift(value, days) {
@@ -48,7 +49,7 @@
     }
     const value = AFF.state.reports[route];
     if (!initializedStates.has(value)) {
-      value.drawer = null; value.client = null; value.picker = false;
+      value.drawer = null; value.client = null; value.picker = false; value.appeal = false; value.appealDraft = "";
       if (!value.columnsCustomized && previousMetricDefaults[route]?.join(",") === value.columns.join(",")) {
         value.columns = [...metricDefaults[route]];
       }
@@ -61,6 +62,7 @@
   }
 
   function renderPage(focusSelector) {
+    clearTimeout(holdHelpTimer);
     render();
     if (focusSelector) document.querySelector(focusSelector)?.focus();
   }
@@ -112,6 +114,102 @@
 
   function badge(values) {
     return `<span class="tag tag-${values[2]}">${h(t(values[0], values[1]))}</span>`;
+  }
+
+  function canAppeal(row) {
+    return row?.commissionId && ["rejected", "reversed"].includes(row.commissionStatus);
+  }
+
+  function appealRecord(row) {
+    return AFF.state.clientCommissionAppeals?.[row.commissionId];
+  }
+
+  function appealButton(row) {
+    if (!canAppeal(row)) return "";
+    return `<button class="button secondary small" type="button" data-rp-appeal="${h(row.clientId)}" ${appealRecord(row) ? "disabled" : ""}>${t(appealRecord(row) ? "申诉中" : "申诉", appealRecord(row) ? "Under appeal" : "Appeal")}</button>`;
+  }
+
+  function commissionReason(row) {
+    if (!canAppeal(row)) return "";
+    return `<p class="report-commission-reason">${h(t(row.commissionReason, row.commissionReasonEn))}</p>`;
+  }
+
+  function commissionHelp() {
+    return `<div id="rp-commission-help" class="report-commission-help" role="tooltip" hidden>
+      <strong>${t("预计佣金与暂扣说明", "Estimated commission and holds")}</strong>
+      <p>${t("预计佣金是参考金额，不等于可提现余额，最终以审核和结算结果为准。", "Estimated commission is a reference amount, not an available balance. Final amounts depend on review and settlement.")}</p>
+      <p>${t("佣金处于暂扣状态，可能是因为：", "A commission may be on hold because:")}</p>
+      <ul><li>${t("仍在佣金观察期内；", "The commission observation period is ongoing;")}</li><li>${t("入金、交易或身份资料仍待核验；", "Deposit, trading or identity details need verification;")}</li><li>${t("退款、拒付或账户异常需要进一步复核。", "Refunds, chargebacks or account issues need further review.")}</li></ul>
+      <p>${t("以上为常见原因说明，不代表某笔佣金的具体审核结论。", "These are common reasons, not a review decision about any specific commission.")}</p>
+    </div>`;
+  }
+
+  function closeCommissionHelp() {
+    const help = document.querySelector("#rp-commission-help");
+    if (help) help.hidden = true;
+    document.querySelector("[data-rp-action='commission-help']")?.setAttribute("aria-expanded", "false");
+  }
+
+  function positionCommissionHelp() {
+    const help = document.querySelector("#rp-commission-help");
+    const button = document.querySelector("[data-rp-action='commission-help']");
+    if (!help || help.hidden || !button) return;
+    const box = button.getBoundingClientRect();
+    const table = button.closest(".report-table-scroll").getBoundingClientRect();
+    if (box.right < table.left || box.left > table.right || box.bottom < 0 || box.top > innerHeight) return closeCommissionHelp();
+    const width = help.offsetWidth;
+    help.style.left = `${Math.max(12, Math.min(box.right - width, innerWidth - width - 12))}px`;
+    const below = box.bottom + 8;
+    help.style.top = `${Math.max(12, below + help.offsetHeight <= innerHeight - 12 ? below : box.top - help.offsetHeight - 8)}px`;
+  }
+
+  function toggleCommissionHelp(button) {
+    const help = document.querySelector("#rp-commission-help");
+    if (!help) return;
+    const open = help.hidden;
+    help.hidden = !open;
+    button.setAttribute("aria-expanded", String(open));
+    if (open) positionCommissionHelp();
+  }
+
+  function holdHelp(row) {
+    if (row.commissionStatus !== "held" || !row.expected) return badge(commissionStatus(row));
+    return `<div class="report-hold-anchor">${badge(commissionStatus(row))}
+      <button class="report-hold-button" type="button" data-rp-action="hold-help" aria-label="${t("暂扣规则说明", "Hold rules")}" aria-expanded="false" aria-controls="rp-hold-help" aria-describedby="rp-hold-help">?</button>
+      <section id="rp-hold-help" class="report-commission-help report-hold-help" role="tooltip" hidden>
+        <strong>${t("暂扣原因与天数说明", "Hold reasons and duration")}</strong>${AFF.earnings.holdRules()}
+      </section></div>`;
+  }
+
+  function setHoldHelp(open) {
+    clearTimeout(holdHelpTimer);
+    const popup = document.getElementById("rp-hold-help");
+    const trigger = document.querySelector("[data-rp-action='hold-help']");
+    if (!popup || !trigger) return;
+    if (open && !popup.hidden) return;
+    popup.hidden = !open;
+    trigger.setAttribute("aria-expanded", String(open));
+    if (!open) return;
+    const rect = trigger.getBoundingClientRect();
+    const drawer = trigger.closest(".report-drawer");
+    const topLimit = drawer.querySelector("header").getBoundingClientRect().bottom + 8;
+    const bottomLimit = drawer.querySelector("footer").getBoundingClientRect().top - 8;
+    popup.style.maxHeight = `${Math.max(80, bottomLimit - topLimit)}px`;
+    const above = Math.max(0, rect.top - topLimit - 8);
+    const below = Math.max(0, bottomLimit - rect.bottom - 8);
+    const showBelow = popup.getBoundingClientRect().height <= below || below >= above;
+    popup.style.maxHeight = `${Math.max(80, showBelow ? below : above)}px`;
+    const bounds = popup.getBoundingClientRect();
+    const top = showBelow ? rect.bottom + 8 : rect.top - bounds.height - 8;
+    popup.style.top = `${Math.max(topLimit, Math.min(top, bottomLimit - bounds.height))}px`;
+    const leftLimit = Math.max(12, drawer.getBoundingClientRect().left + 12);
+    popup.style.left = `${Math.max(leftLimit, Math.min(rect.right - bounds.width, innerWidth - bounds.width - 12))}px`;
+  }
+
+  function leaveHoldHelp(event) {
+    const anchor = event.target.closest(".report-hold-anchor");
+    if (!anchor || anchor.contains(event.relatedTarget)) return;
+    holdHelpTimer = setTimeout(() => setHoldHelp(false), 120);
   }
 
   function filtered(s = state()) {
@@ -233,9 +331,9 @@
     }).join("")}</div>`;
   }
 
-  function heading(key, text, numeric = false) {
+  function heading(key, text, numeric = false, help = false) {
     const s = state();
-    return `<th scope="col" class="${numeric ? "numeric" : ""}" aria-sort="${s.sort === key ? (s.direction === "asc" ? "ascending" : "descending") : "none"}"><button type="button" data-rp-sort="${key}">${h(text)}<span aria-hidden="true">${s.sort === key ? (s.direction === "asc" ? "↑" : "↓") : "↕"}</span></button></th>`;
+    return `<th scope="col" class="${numeric ? "numeric" : ""}" aria-sort="${s.sort === key ? (s.direction === "asc" ? "ascending" : "descending") : "none"}"><button type="button" data-rp-sort="${key}">${h(text)}<span aria-hidden="true">${s.sort === key ? (s.direction === "asc" ? "↑" : "↓") : "↕"}</span></button>${help ? `<button class="report-help-button" type="button" data-rp-action="commission-help" aria-label="${t("预计佣金与暂扣说明", "Estimated commission and holds")}" aria-expanded="false" aria-controls="rp-commission-help" aria-describedby="rp-commission-help" title="${t("查看预计佣金与暂扣说明", "About estimated commission and holds")}">?</button>` : ""}</th>`;
   }
 
   function pagination(total, s) {
@@ -282,15 +380,16 @@
       ["clientId", t("客户编号 / 邮箱", "Client / Email")], ["registeredAt", t("注册时间", "Registered")],
       ["country", t("国家/地区", "Country / Region")], ["platform", t("平台", "Platform")],
       ["campaign", t("活动", "Campaign")], ["kyc", "KYC"], ["stage", t("转化阶段", "Conversion stage")],
-      ["expected", t("预计佣金", "Expected commission"), true], ["commissionStatus", t("佣金状态", "Commission status")]
+      ["expected", t("预计佣金", "Expected commission"), true, true], ["commissionStatus", t("佣金状态", "Commission status")]
     ];
-    return `<div class="report-table-scroll" tabindex="0" aria-label="${t("客户数据表", "Client data table")}"><table class="report-table report-client-table">
+    return `<div class="report-table-scroll report-client-scroll" tabindex="0" aria-label="${t("客户数据表", "Client data table")}"><table class="report-table report-client-table">
+      <colgroup>${heads.map(([key]) => `<col class="report-client-col-${key}">`).join("")}<col class="report-client-col-actions"></colgroup>
       <thead><tr>${heads.map(item => heading(...item)).join("")}<th>${t("操作", "Action")}</th></tr></thead>
       <tbody>${rows.slice((s.page - 1) * s.pageSize, s.page * s.pageSize).map(row => `<tr>
         <td><button class="report-text-button" data-rp-client="${h(row.clientId)}" type="button">${h(row.clientId)}</button><small>${h(row.email)}</small></td>
         <td>${h(row.registeredAt)}</td><td>${h(row.country)}</td><td>${h(row.platform)}</td><td class="report-campaign-cell" title="${h(row.campaign)}">${h(row.campaign)}</td>
         <td>${AFF.helpers.tag(row.kyc)}</td><td>${badge(status(row))}</td><td class="numeric">${format(row.expected, "money")}</td>
-        <td>${badge(commissionStatus(row))}</td><td><button class="button secondary small" data-rp-client="${h(row.clientId)}" type="button">${t("详情", "Details")}</button></td>
+        <td class="report-commission-cell">${badge(commissionStatus(row))}</td><td><div class="report-client-actions"><button class="button secondary small" data-rp-client="${h(row.clientId)}" type="button">${t("详情", "Details")}</button>${appealButton(row)}</div></td>
       </tr>`).join("")}</tbody></table>${rows.length ? "" : emptyState()}</div>${footer}`;
   }
 
@@ -351,10 +450,19 @@
         <section class="report-detail-section"><h3>${t("推广来源", "Promotion attribution")}</h3><dl class="report-detail-grid">
           ${data.dimensions.filter(item => !timeKeys.includes(item.key) && !["country", "platform", "os"].includes(item.key)).map(item => field(t(item.label, item.en), row[item.key])).join("")}
         </dl></section>
-        <section class="report-detail-section"><h3>${t("佣金信息", "Commission information")}</h3>${badge(commissionStatus(row))}<dl class="report-detail-grid">
+        <section class="report-detail-section"><h3>${t("佣金信息", "Commission information")}</h3>${holdHelp(row)}<dl class="report-detail-grid">
           ${["expected", "held", "approved", "rejected", "reversed"].map(key => field(label(key), format(row[key], "money"))).join("")}
-        </dl></section>
-      </div><footer><button class="button secondary" type="button" data-rp-action="close">${t("关闭", "Close")}</button></footer>
+        </dl>${commissionReason(row)}${canAppeal(row) ? `<p class="report-commission-reference">${h(row.commissionId)} · ${h(row.commissionReasonCode)}</p>` : ""}
+        ${appealRecord(row) ? `<p class="report-appeal-status" role="status">${t("申诉已提交，等待复核。原佣金状态与金额在复核完成前保持不变。", "Appeal submitted for review. The original commission status and amount remain unchanged pending a decision.")}</p>` : ""}
+        </section>
+        ${s.appeal ? `<section class="report-detail-section report-appeal-form"><h3>${t("佣金申诉", "Commission appeal")}</h3>
+          <label class="field" for="rp-appeal-reason"><span>${t("申诉说明（必填）", "Explanation (required)")}</span><textarea id="rp-appeal-reason" data-rp-appeal-reason rows="5" maxlength="2000" required aria-describedby="rp-appeal-error" placeholder="${t("请说明您对本次佣金处理有异议的原因", "Explain why you disagree with this commission decision")}">${h(s.appealDraft || "")}</textarea></label>
+          <p id="rp-appeal-error" class="report-validation" role="alert">${h(s.error || "")}</p>
+          <p class="report-commission-reference">${t("提交申诉不会自动恢复佣金或变更可提现余额。", "Submitting an appeal does not automatically restore the commission or change the available balance.")}</p>
+        </section>` : ""}
+      </div><footer><button class="button secondary" type="button" data-rp-action="close">${t("关闭", "Close")}</button>
+        ${s.appeal ? `<button class="button primary" type="button" data-rp-action="submit-client-appeal">${t("提交申诉", "Submit appeal")}</button>` : appealButton(row)}
+      </footer>
     </aside>`;
   }
 
@@ -369,13 +477,14 @@
         ${AFF.state.route === "clients" ? customerTable(rows, s) : reportTable(rows, source, s)}
       </section>
       <div class="report-footnote">${t("时区", "Timezone")} ${h(data.fields.timezone)} · ${t("金额", "Currency")} USD<span>${t("数据截至", "Data through")} ${data.now} 23:59</span></div>
+      ${AFF.state.route === "clients" ? commissionHelp() : ""}
       ${s.drawer ? drawer(s) : s.client ? clientDrawer(s) : ""}
     </div>`;
   }
 
   function close() {
     const s = state();
-    s.drawer = null; s.client = null; s.picker = false; s.error = "";
+    s.drawer = null; s.client = null; s.picker = false; s.error = ""; s.appeal = false; s.appealDraft = "";
     renderPage(returnFocus);
   }
 
@@ -383,9 +492,9 @@
     const s = state();
     const clients = AFF.state.route === "clients";
     const keys = clients
-      ? ["clientId", "email", "registeredAt", "country", "platform", "campaign", "kyc", "ftdAt", "effectiveAt", "qualifiedAt", "commissionStatus", "expected", "held", "approved", "rejected", "reversed"]
+      ? ["clientId", "email", "registeredAt", "country", "platform", "campaign", "kyc", "ftdAt", "effectiveAt", "qualifiedAt", "commissionStatus", "expected", "held", "approved", "rejected", "reversed", "commissionId", "commissionReasonCode", "commissionReason"]
       : [...s.groups, ...s.columns];
-    const titles = clients ? ["客户编号", "脱敏邮箱", "注册时间", "国家/地区", "平台", "活动", "KYC", "FTD时间", "有效FTD时间", "合格时间", "佣金状态", "预计佣金", "暂扣佣金", "已入账佣金", "已拒绝佣金", "冲正金额"] : keys.map(label);
+    const titles = clients ? ["客户编号", "脱敏邮箱", "注册时间", "国家/地区", "平台", "活动", "KYC", "FTD时间", "有效FTD时间", "合格时间", "佣金状态", "预计佣金", "暂扣佣金", "已入账佣金", "已拒绝佣金", "冲正金额", "佣金编号", "处理原因码", "处理原因"] : keys.map(label);
     const csvCell = value => {
       let text = String(value ?? "");
       if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`;
@@ -418,18 +527,24 @@
         filters.to = to < filters.to ? to : filters.to;
       } else filters[key] = value;
     });
+    openClients(filters, metric);
+  }
+
+  function openClients(filters, metric = "registrations") {
+    if (!["registrations", "ftd", "effective", "qualified"].includes(metric)) return;
     const clients = state("clients");
-    clients.filters = filters;
-    clients.metric = metric;
-    clients.preset = "custom";
-    clients.page = 1;
-    clients.drawer = null; clients.client = null;
+    Object.assign(clients, {
+      filters: { ...filters }, metric, preset: "custom", page: 1,
+      drawer: null, client: null, picker: false, appeal: false, appealDraft: "", error: ""
+    });
     navigate("clients");
   }
 
   function onClick(event) {
     if (!routeKeys.includes(AFF.state.route)) return;
-    const target = event.target.closest("[data-rp-action], [data-rp-add-group], [data-rp-remove-group], [data-rp-sort], [data-rp-page], [data-rp-clear], [data-rp-client], [data-rp-drill-metric]");
+    if (!event.target.closest(".report-hold-anchor")) setHoldHelp(false);
+    if (!event.target.closest("#rp-commission-help, [data-rp-action='commission-help']")) closeCommissionHelp();
+    const target = event.target.closest("[data-rp-action], [data-rp-add-group], [data-rp-remove-group], [data-rp-sort], [data-rp-page], [data-rp-clear], [data-rp-client], [data-rp-appeal], [data-rp-drill-metric]");
     const s = state();
     if (!target) {
       if (s.picker && !event.target.closest(".report-picker")) {
@@ -442,6 +557,34 @@
     }
     if (target.disabled) return;
     const d = target.dataset;
+    if (d.rpAction === "hold-help") {
+      const mouse = event.pointerType === "mouse" || (event.detail > 0 && matchMedia("(hover: hover)").matches);
+      return setHoldHelp(mouse || document.getElementById("rp-hold-help").hidden);
+    }
+    if (d.rpAction === "commission-help") return toggleCommissionHelp(target);
+    if (d.rpAppeal) {
+      const row = data.rows.find(item => item.clientId === d.rpAppeal);
+      if (!canAppeal(row) || appealRecord(row)) return;
+      if (!s.client) returnFocus = `[data-rp-appeal="${d.rpAppeal}"]`;
+      s.client = row.clientId; s.drawer = null; s.appeal = true; s.appealDraft = ""; s.error = "";
+      return renderPage("#rp-appeal-reason");
+    }
+    if (d.rpAction === "submit-client-appeal") {
+      const row = data.rows.find(item => item.clientId === s.client);
+      if (!s.appeal || !canAppeal(row) || appealRecord(row)) return;
+      const explanation = document.querySelector("#rp-appeal-reason")?.value.trim() || "";
+      if (!explanation) {
+        document.querySelector("#rp-appeal-error").textContent = t("请填写申诉说明", "Enter an explanation");
+        document.querySelector("#rp-appeal-reason").setAttribute("aria-invalid", "true");
+        document.querySelector("#rp-appeal-reason").focus();
+        return;
+      }
+      AFF.state.clientCommissionAppeals ||= {};
+      AFF.state.clientCommissionAppeals[row.commissionId] = { clientId: row.clientId, commissionId: row.commissionId, status: "pending", explanation, submittedAt: new Date().toISOString() };
+      s.appeal = false; s.appealDraft = ""; s.error = "";
+      showToast(t("申诉已提交，等待复核", "Appeal submitted for review"));
+      return renderPage(".report-drawer .report-icon");
+    }
     if (d.rpDrillMetric) return drill(d.rpDrillMetric, d.rpRow);
     if (d.rpAddGroup) {
       let groups = s.groups.filter(key => !timeKeys.includes(d.rpAddGroup) || !timeKeys.includes(key));
@@ -455,7 +598,7 @@
     } else if (d.rpPage) s.page = Number(d.rpPage);
     else if (d.rpClear) { delete s.filters[d.rpClear]; s.page = 1; s.metric = null; }
     else if (d.rpClient) {
-      returnFocus = `[data-rp-client="${d.rpClient}"]`; s.client = d.rpClient; s.picker = false;
+      returnFocus = `[data-rp-client="${d.rpClient}"]`; s.client = d.rpClient; s.picker = false; s.appeal = false; s.error = "";
       return renderPage(".report-drawer .report-icon");
     } else {
       const action = d.rpAction;
@@ -504,6 +647,19 @@
   }
 
   document.addEventListener("click", onClick);
+  document.addEventListener("pointerover", event => {
+    if (event.pointerType === "mouse" && event.target.closest(".report-hold-anchor")) setHoldHelp(true);
+  });
+  document.addEventListener("pointerout", event => {
+    if (event.pointerType === "mouse") leaveHoldHelp(event);
+  });
+  document.addEventListener("focusin", event => {
+    if (event.target.closest(".report-hold-anchor") && event.target.matches(":focus-visible")) setHoldHelp(true);
+  });
+  document.addEventListener("focusout", leaveHoldHelp);
+  document.addEventListener("scroll", event => {
+    if (event.target.classList?.contains("report-drawer-body")) setHoldHelp(false);
+  }, true);
   document.addEventListener("change", event => {
     if (!routeKeys.includes(AFF.state.route)) return;
     const node = event.target;
@@ -525,6 +681,12 @@
   });
   document.addEventListener("input", event => {
     if (!routeKeys.includes(AFF.state.route)) return;
+    if (event.target.matches("[data-rp-appeal-reason]")) {
+      state().appealDraft = event.target.value;
+      event.target.removeAttribute("aria-invalid");
+      document.querySelector("#rp-appeal-error").textContent = "";
+      return;
+    }
     if (event.target.matches("[data-rp-filter]")) state().draft[event.target.dataset.rpFilter] = event.target.value;
     if (!event.target.matches("[data-rp-group-search]")) return;
     const s = state(); s.groupQuery = event.target.value;
@@ -535,9 +697,19 @@
     if (!routeKeys.includes(AFF.state.route)) return;
     const s = state();
     const dialog = document.querySelector(".report-drawer");
+    if (event.key === "Escape" && document.querySelector("#rp-hold-help:not([hidden])")) {
+      event.preventDefault();
+      setHoldHelp(false);
+      return;
+    }
+    if (event.key === "Escape" && document.querySelector("#rp-commission-help:not([hidden])")) {
+      closeCommissionHelp();
+      document.querySelector("[data-rp-action='commission-help']")?.focus();
+      return;
+    }
     if (event.key === "Escape" && (dialog || s.picker)) { event.preventDefault(); close(); }
     if (event.key === "Tab" && dialog) {
-      const nodes = [...dialog.querySelectorAll("button:not(:disabled), input:not(:disabled), select:not(:disabled)")];
+      const nodes = [...dialog.querySelectorAll("button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled)")];
       const first = nodes[0]; const last = nodes[nodes.length - 1];
       if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
@@ -545,10 +717,13 @@
   });
   window.addEventListener("hashchange", () => {
     if (!AFF.state.reports) return;
-    Object.values(AFF.state.reports).forEach(item => { item.drawer = null; item.picker = false; item.client = null; });
+    Object.values(AFF.state.reports).forEach(item => { item.drawer = null; item.picker = false; item.client = null; item.appeal = false; item.appealDraft = ""; });
   });
+  window.addEventListener("resize", closeCommissionHelp);
+  window.addEventListener("resize", () => setHoldHelp(false));
+  document.addEventListener("scroll", positionCommissionHelp, true);
 
-  AFF.reports = { state, filtered: () => filtered(), tableRows, range };
+  AFF.reports = { state, filtered: () => filtered(), tableRows, range, openClients };
   AFF.pages.perf = page;
   AFF.pages.summary = page;
   AFF.pages.clients = page;

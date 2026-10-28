@@ -180,6 +180,25 @@
     });
   }
   rows.sort((left, right) => right.date.localeCompare(left.date) || left.id.localeCompare(right.id));
+  const commissionReasons = {
+    rejected: [
+      ["CLIENT-DUPLICATE", "复核发现客户身份重复，不符合新客户计佣条件。", "Review found a duplicate client identity that does not qualify for a new-client commission."],
+      ["DEPOSIT-INELIGIBLE", "复核发现首次入金不符合适用奖励条件。", "Review found that the first deposit does not meet the applicable reward conditions."],
+      ["SOURCE-INELIGIBLE", "推广来源不符合佣金结算要求。", "The promotion source does not meet commission settlement requirements."]
+    ],
+    reversed: [
+      ["DEPOSIT-REFUNDED", "首次入金发生退款，关联佣金已冲正。", "The first deposit was refunded and the related commission was reversed."],
+      ["DEPOSIT-CHARGEBACK", "首次入金发生拒付，关联佣金已冲正。", "The first deposit was charged back and the related commission was reversed."],
+      ["ELIGIBILITY-REVIEW", "客户资格复核结果变更，原佣金已冲正。", "A client eligibility review changed the original decision and the commission was reversed."]
+    ]
+  };
+  rows.forEach((row, index) => {
+    row.commissionId = row.expected ? `COM-${row.clientId}` : null;
+    const reason = commissionReasons[row.commissionStatus]?.[index % 3];
+    row.commissionReasonCode = reason?.[0] || "";
+    row.commissionReason = reason?.[1] || "";
+    row.commissionReasonEn = reason?.[2] || "";
+  });
 
   function value(row, key) {
     if (key === "week") {

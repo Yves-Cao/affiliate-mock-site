@@ -55,8 +55,24 @@ AFF.helpers = {
 
 AFF.pages = {};
 
+AFF.dashboardData = (period = "past30") => {
+  const data = AFF.reporting;
+  const range = period === "all" ? { from: data.from, to: data.now }
+    : period === "month" ? { from: `${data.now.slice(0, 7)}-01`, to: data.now }
+    : AFF.reports.range(period) || AFF.reports.range("past30");
+  const rows = data.filterRows(range);
+  return {
+    range, totals: data.totals(rows),
+    inactive: rows.filter(row => row.clientId && !row.effectiveAt).length
+  };
+};
+
 AFF.pages.dash = () => {
   const state = AFF.state;
+  const t = (zh, en) => state.language === "en" ? en : zh;
+  const number = value => new Intl.NumberFormat("en-US").format(value);
+  const money = value => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
+  const clientButton = (metric, value, period, label) => `<button class="dashboard-number-link" type="button" data-action="dashboard-clients" data-metric="${metric}" data-period="${period}" title="${AFF.helpers.h(label)}">${value}</button>`;
   const pageCodes = {
     "注册页": "register",
     "首页": "home",
@@ -69,13 +85,18 @@ AFF.pages.dash = () => {
   promotionUrl.searchParams.set("page", pageCodes[state.dashboardLinkPage] || "register");
   promotionUrl.searchParams.set("lang", languageCodes[state.dashboardLinkLanguage] || "zh-cn");
   const promotionLink = promotionUrl.href;
-  const summary = AFF.dashboard.summaryPeriods[state.dashboardPeriod] || AFF.dashboard.summaryPeriods.past30;
+  const summaryPeriod = ["today", "past7", "past30", "lastWeek", "lastMonth"].includes(state.dashboardPeriod)
+    ? state.dashboardPeriod : "past30";
+  const summary = AFF.dashboardData(summaryPeriod).totals;
+  const allClients = AFF.dashboardData("all");
+  const monthClients = AFF.dashboardData("month").totals;
+  const qualifiedChange = monthClients.qualified - AFF.dashboardData("lastMonth").totals.qualified;
   const periodOptions = [
-    ["today", "今日"],
-    ["past7", "过去7天"],
-    ["past30", "过去30天"],
-    ["lastWeek", "上周"],
-    ["lastMonth", "上月"]
+    ["today", t("今日", "Today")],
+    ["past7", t("过去7天", "Last 7 days")],
+    ["past30", t("过去30天", "Last 30 days")],
+    ["lastWeek", t("上周", "Last week")],
+    ["lastMonth", t("上月", "Last month")]
   ];
   const linkPicker = (field, label, value, isOpen, query, placeholder) => `
     <div class="dashboard-link-picker ${isOpen ? "open" : ""}">
@@ -89,7 +110,6 @@ AFF.pages.dash = () => {
       </div>
     </div>`;
   const walletMetric = AFF.dashboard.metrics[0];
-  const otherMetrics = AFF.dashboard.metrics.slice(1);
   return `
     ${AFF.helpers.pageHeader("仪表盘", "我能提多少钱、客户激活情况、去哪拿链接。")}
     <div class="cards dashboard-metrics">
@@ -101,12 +121,16 @@ AFF.pages.dash = () => {
         <strong>${AFF.helpers.h(walletMetric.value)}</strong>
         <small>总收益：${AFF.helpers.h(AFF.dashboard.totalRevenue)}</small>
       </article>
-      ${otherMetrics.map(item => `
-        <article class="card metric">
-          <span>${AFF.helpers.h(item.label)}</span>
-          <strong>${AFF.helpers.h(item.value)}</strong>
-          ${item.hint ? `<small>${AFF.helpers.h(item.hint)}</small>` : ""}
-        </article>`).join("")}
+      <article class="card metric">
+        <span>${t("注册客户", "Registered clients")}</span>
+        ${clientButton("registrations", number(allClients.totals.registrations), "all", t("查看注册客户", "View registered clients"))}
+        <small>${t("未激活客户", "Inactive clients")}：${number(allClients.inactive)}</small>
+      </article>
+      <article class="card metric">
+        <span>${t("合格客户（本月）", "Qualified clients (this month)")}</span>
+        ${clientButton("qualified", number(monthClients.qualified), "month", t("查看本月合格客户", "View this month's qualified clients"))}
+        <small>${qualifiedChange >= 0 ? "▲" : "▼"} ${number(Math.abs(qualifiedChange))} ${t("较上月", "vs. last month")}</small>
+      </article>
     </div>
     <div class="dashboard-promotion-grid">
       <section class="card dashboard-link-card">
@@ -156,21 +180,21 @@ AFF.pages.dash = () => {
     </div>
       <section class="card dashboard-summary">
         <div class="panel-header">
-          <h2>推广数据汇总</h2>
+          <h2>${t("推广数据汇总", "Promotion summary")}</h2>
           <label class="dashboard-summary-filter">
-            <span>时间范围</span>
-            <select data-dashboard-period aria-label="数据时间范围">
-              ${periodOptions.map(([value, label]) => `<option value="${value}" ${state.dashboardPeriod === value ? "selected" : ""}>${label}</option>`).join("")}
+            <span>${t("时间范围", "Date range")}</span>
+            <select data-dashboard-period aria-label="${t("数据时间范围", "Data date range")}">
+              ${periodOptions.map(([value, label]) => `<option value="${value}" ${summaryPeriod === value ? "selected" : ""}>${label}</option>`).join("")}
             </select>
           </label>
         </div>
         <div class="dashboard-summary-table-wrap">
           <table class="dashboard-summary-table">
-            <thead><tr><th>数据项</th><th>合计数量</th></tr></thead>
+            <thead><tr><th>${t("数据项", "Metric")}</th><th>${t("合计数量", "Total")}</th></tr></thead>
             <tbody>
-              <tr><td>注册量</td><td>${AFF.helpers.h(summary.registrations)}</td></tr>
-              <tr><td>有效FTD数量</td><td>${AFF.helpers.h(summary.qualified)}</td></tr>
-              <tr><td>收入金额</td><td>${AFF.helpers.h(summary.revenue)}</td></tr>
+              <tr><td>${t("注册量", "Registrations")}</td><td>${clientButton("registrations", number(summary.registrations), summaryPeriod, t("查看注册客户", "View registered clients"))}</td></tr>
+              <tr><td>${t("有效FTD数量", "Valid FTD clients")}</td><td>${clientButton("effective", number(summary.effective), summaryPeriod, t("查看有效FTD客户", "View valid FTD clients"))}</td></tr>
+              <tr><td>${t("已入账收入", "Credited revenue")}</td><td>${clientButton("revenue", money(summary.approved), summaryPeriod, t("查看收入对应客户", "View clients contributing to revenue"))}</td></tr>
             </tbody>
           </table>
         </div>
@@ -315,6 +339,13 @@ AFF.campaignNumber = (value, type = "count") => {
   return new Intl.NumberFormat("en-US", type === "money" ? { style: "currency", currency: "USD" } : {}).format(value);
 };
 
+AFF.campaignMetric = (campaign, metric, value, period = "past30", dimension = "", dimensionValue = "") => {
+  const h = AFF.helpers.h;
+  const label = AFF.reporting.metrics.find(item => item.key === metric);
+  const title = AFF.state.language === "en" ? `View ${label.en}` : `查看${label.label}`;
+  return `<button class="campaign-number-link" type="button" data-action="campaign-clients" data-code="${h(campaign.code)}" data-metric="${h(metric)}" data-period="${h(period)}" ${dimension ? `data-dimension="${h(dimension)}" data-value="${h(dimensionValue)}"` : ""} title="${h(title)}">${AFF.campaignNumber(value)}</button>`;
+};
+
 AFF.pages.promo = () => {
   const state = AFF.state;
   const t = (zh, en) => state.language === "en" ? en : zh;
@@ -323,23 +354,26 @@ AFF.pages.promo = () => {
   state.campaignPage = page;
   const campaignRows = AFF.campaigns.slice((page - 1) * 10, page * 10).map(row => {
     const { totals } = AFF.campaignData(row);
+    const link = AFF.campaignLinks.url(row);
+    const archived = AFF.campaignLinks.status(row) === "archived";
     return [
       `<strong>${AFF.helpers.h(row.name)}</strong><small>${AFF.helpers.h(row.code)}</small>`,
-      `<div class="campaign-link"><span title="${AFF.helpers.h(row.link)}">${AFF.helpers.h(row.link)}</span><button class="icon-button campaign-copy" type="button" data-copy="${AFF.helpers.h(row.link)}" title="${t("复制链接", "Copy link")}" aria-label="${t("复制链接", "Copy link")}">${copyIcon}</button></div>`,
-      AFF.helpers.tag(row.status),
-      ...["clicks", "registrations", "ftd", "effective"].map(key => AFF.campaignNumber(totals[key])),
+      `<div class="campaign-link"><a href="${AFF.helpers.h(link)}" target="_blank" rel="noopener" title="${AFF.helpers.h(link)}">${AFF.helpers.h(link)}</a><button class="icon-button campaign-copy" type="button" data-copy="${AFF.helpers.h(link)}" title="${t("复制链接", "Copy link")}" aria-label="${t("复制链接", "Copy link")}">${copyIcon}</button></div>`,
+      `<span class="tag tag-${archived ? "muted" : "ok"}">${archived ? t("归档", "Archived") : t("活跃", "Active")}</span>`,
+      AFF.campaignNumber(totals.clicks),
+      ...["registrations", "ftd", "effective", "qualified"].map(key => AFF.campaignMetric(row, key, totals[key])),
       AFF.campaignNumber(totals.expected, "money"),
-      `<button class="button secondary small" type="button" data-action="campaign-data" data-code="${AFF.helpers.h(row.code)}">${t("查看数据", "View data")}</button>`
+      `<div class="table-actions"><button class="button secondary small" type="button" data-action="campaign-data" data-code="${AFF.helpers.h(row.code)}">${t("查看数据", "View data")}</button><button class="button secondary small" type="button" data-action="campaign-status" data-code="${AFF.helpers.h(row.code)}">${archived ? t("设为活跃", "Activate") : t("归档", "Archive")}</button></div>`
     ];
   });
   return `
     <div class="campaign-page">
-    ${AFF.helpers.pageHeader("活动", "", `<button class="button primary" type="button" data-action="open-campaign-modal">${t("创建新活动", "Create campaign")}</button>`)}
+    <div class="page-actions page-actions-top page-actions-start"><button class="button primary" type="button" data-action="open-campaign-modal">${t("创建新活动", "Create campaign")}</button></div>
     <div class="toolbar campaign-toolbar">
       <strong>${t("活动", "Campaigns")}</strong>
       <span class="helper">${t("过去30天", "Last 30 days")} · ${AFF.reports.range("past30").from} — ${AFF.reporting.now}</span>
     </div>
-    <section class="card campaign-list">${AFF.helpers.table({ columns: [t("活动", "Campaign"), t("链接", "Link"), t("状态", "Status"), t("点击", "Clicks"), t("注册", "Registrations"), "FTD", t("有效 FTD", "Valid FTD"), t("预计佣金", "Projected commission"), t("操作", "Action")], rows: campaignRows, footer: AFF.helpers.pagination(AFF.campaigns.length, page, "campaign-page") })}</section>
+    <section class="card campaign-list">${AFF.helpers.table({ columns: [t("活动", "Campaign"), t("链接", "Link"), t("状态", "Status"), t("点击", "Clicks"), t("注册客户", "Registrations"), t("FTD客户", "FTD clients"), t("有效客户", "Valid FTD clients"), t("合格客户", "Qualified clients"), t("预计佣金", "Projected commission"), t("操作", "Action")], rows: campaignRows, footer: AFF.helpers.pagination(AFF.campaigns.length, page, "campaign-page") })}</section>
     </div>`;
 };
 
@@ -396,7 +430,7 @@ AFF.pages.lookup = () => {
   const state = AFF.state;
   const result = state.lookup.result;
   return `
-    ${AFF.helpers.pageHeader("客户归属查询", "输入精准客户标识，查询归属状态与原因。")}
+    ${AFF.helpers.pageHeader("归属查询", "输入精准客户标识，查询归属状态与原因。")}
     <section class="card">
       <div class="toolbar">
         <label class="field" style="flex:1 1 320px"><span>注册邮箱 / 交易账号 / 投资钱包账号</span>
@@ -494,7 +528,6 @@ AFF.pages.assets = () => {
   const visible = AFF.visibleAssets();
   const typeOptions = ["全部", "横幅", "视频", "落地页", "GIF"];
   return `
-    ${AFF.helpers.pageHeader("素材库", "未接受《推广行为准则》前锁定下载。", state.assetsAccepted ? "" : `<button class="button primary" type="button" data-action="open-code-modal">阅读并接受准则</button>`)}
     <section class="card asset-tabs-card">
       <div class="tabs asset-tabs" role="tablist" aria-label="素材类型">
         ${typeOptions.map(type => `<button class="${state.assets.type === type ? "active" : ""}" type="button" role="tab" aria-selected="${state.assets.type === type}" data-assets-filter="type" data-value="${AFF.helpers.h(type)}">${AFF.helpers.h(type)}</button>`).join("")}
@@ -808,6 +841,31 @@ AFF.renderSupportCountryOptions = () => {
   }).join("");
 };
 
+AFF.onboardingOptions = field => {
+  if (field === "channel") return ["内容与社群", "付费广告", "邮件营销", "线下活动"].map(value => ({ value, label: value, search: value }));
+  const chinese = new Intl.DisplayNames(["zh-CN"], { type: "region" });
+  const english = new Intl.DisplayNames(["en"], { type: "region" });
+  const codes = [...new Set(["SG", "CN", "MY", "BR", "HK", "TW", "GB", "US", "AU", "CA", ...AFF.partnerProgram.commissionCountries.map(item => item.code)])];
+  const options = codes.map(code => ({
+    value: chinese.of(code),
+    label: AFF.state.language === "en" ? english.of(code) : chinese.of(code),
+    search: `${chinese.of(code)} ${english.of(code)} ${code}`
+  }));
+  options.push({ value: "其他", label: AFF.state.language === "en" ? "Other" : "其他", search: "其他 Other" });
+  const current = AFF.state.account.country;
+  if (current && !options.some(item => item.value === current)) options.unshift({ value: current, label: current, search: current });
+  return options;
+};
+
+AFF.renderOnboardingOptions = (field, query = "") => {
+  const options = AFF.onboardingOptions(field).filter(item => item.search.toLowerCase().includes(query.trim().toLowerCase()));
+  if (!options.length) return `<div class="country-empty">暂无匹配结果</div>`;
+  return options.map(item => {
+    const selected = AFF.state.account[field] === item.value;
+    return `<button class="dashboard-link-option ${selected ? "selected" : ""}" type="button" role="option" aria-selected="${selected}" data-action="select-onboarding-option" data-onboarding-field="${field}" data-value="${AFF.helpers.h(item.value)}"><span>${AFF.helpers.h(item.label)}</span><strong>${selected ? "✓" : ""}</strong></button>`;
+  }).join("");
+};
+
 AFF.pages.onboarding = () => {
   const state = AFF.state;
   const steps = ["注册账号", "填写基本资料", "KYC 实名认证", "接受协议与准则", "提交审核"];
@@ -815,6 +873,20 @@ AFF.pages.onboarding = () => {
   const max = state.onboarding.maxStep;
   const allAgreed = state.onboarding.agreements.every(Boolean);
   const activeAgreement = AFF.onboardingAgreements[state.onboarding.agreementModal - 1];
+  const profilePicker = (field, label) => {
+    const selected = AFF.onboardingOptions(field).find(item => item.value === state.account[field]);
+    const open = onboardingPicker === field;
+    return `<div class="dashboard-link-picker onboarding-picker ${open ? "open" : ""}">
+      <span class="field-label" id="onboarding-${field}-label">${label}</span>
+      <button class="dashboard-link-picker-button" type="button" data-action="toggle-onboarding-picker" data-onboarding-field="${field}" aria-labelledby="onboarding-${field}-label onboarding-${field}-value" aria-haspopup="listbox" aria-controls="onboarding-${field}-options" aria-expanded="${open}">
+        <span id="onboarding-${field}-value">${AFF.helpers.h(selected?.label || `请选择${label}`)}</span><small aria-hidden="true">▾</small>
+      </button>
+      <div class="dashboard-link-options" id="onboarding-${field}-options">
+        <input data-onboarding-search="${field}" type="search" placeholder="搜索${label}" aria-label="搜索${label}" value="${AFF.helpers.h(open ? onboardingQuery : "")}">
+        <div class="dashboard-link-option-list" role="listbox" aria-label="${label}" data-onboarding-options="${field}">${AFF.renderOnboardingOptions(field, open ? onboardingQuery : "")}</div>
+      </div>
+    </div>`;
+  };
 
   const stepContent = () => {
     if (current === 1) return `
@@ -833,11 +905,11 @@ AFF.pages.onboarding = () => {
 
     if (current === 2) return `
       <section class="onboarding-step">
-        <div class="commission-page-head"><div><h2>基本资料</h2><p>资料来自注册账户与账户管理设置。</p></div></div>
+        <div class="commission-page-head"><div><h2>基本资料</h2><p>请填写您的姓名，并确认国家及推广渠道类型。</p></div></div>
         <div class="onboarding-field-grid">
-          <div class="info-item"><span>姓名</span><strong>${AFF.helpers.h(state.account.displayName)}</strong></div>
-          <div class="info-item"><span>国家</span><strong>${AFF.helpers.h(state.account.country)}</strong></div>
-          <div class="info-item"><span>推广渠道类型</span><strong>${AFF.helpers.h(state.account.channel)}</strong></div>
+          <label class="onboarding-name"><span class="field-label">姓名</span><input name="onboarding-name" data-onboarding-name type="text" autocomplete="name" maxlength="80" required placeholder="请输入姓名" value="${AFF.helpers.h(state.onboarding.name)}"></label>
+          ${profilePicker("country", "国家")}
+          ${profilePicker("channel", "推广渠道类型")}
         </div>
       </section>`;
 
@@ -882,7 +954,7 @@ AFF.pages.onboarding = () => {
   };
 
   return `
-    <section class="card program-steps-card"><div class="panel-body">
+    <section class="card program-steps-card onboarding-card"><div class="panel-body">
       <div class="commission-page-head onboarding-head"><div><h2>入驻申请</h2><p>客户端准入流程：注册 → 资料 → KYC → 协议 → 提交审核。</p></div></div>
       <div class="steps">${steps.map((label, index) => {
         const number = index + 1;
@@ -1102,10 +1174,7 @@ AFF.pages.applyStep = () => {
         <h2>丰富的创意素材库</h2>
         <p>多种语言与格式的推广素材，帮助您为网站、应用和社交渠道准备合适的内容。</p>
       </div>
-      <div class="program-channel-list">
-        <div><strong>网站与移动应用</strong><span>网页端 · iOS · Android</span></div>
-        <div><strong>社交媒体与内容社区</strong><span>Instagram · TikTok · YouTube · Telegram</span></div>
-      </div>
+      <div class="program-material-layout">
       <section class="program-material-carousel" aria-roledescription="轮播" aria-label="推广素材预览">
         <div class="program-material-slide">
           <img src="./assets/${slide.image}" alt="${AFF.helpers.h(slide.title)}">
@@ -1117,10 +1186,17 @@ AFF.pages.applyStep = () => {
           <button class="icon-button" type="button" data-action="program-asset-slide" data-slide="${(index + 1) % slides.length}" aria-label="下一张素材" title="下一张素材">›</button>
         </div>
       </section>
-      <div class="program-material-description">
+      <div class="program-material-details">
+        <div class="program-channel-list">
+          <div><strong>网站与移动应用</strong><span>网页端 · iOS · Android</span></div>
+          <div><strong>社交媒体与内容社区</strong><span>Instagram · TikTok · YouTube · Telegram</span></div>
+        </div>
+        <div class="program-material-description">
         <p>横幅、视频、落地页和 GIF 覆盖多种推广场景。进入素材库后，您可以按语言、尺寸和平台选择素材，下载文件或复制推广代码。</p>
         <p>推广前，建议检查素材语言与投放地区是否一致，并定期查看素材库中的最新内容。</p>
         <button class="program-text-link" type="button" data-action="program-open-assets">前往素材库 <span aria-hidden="true">→</span></button>
+        </div>
+      </div>
       </div>
       <div class="program-material-categories">${categories.map(([type, label, icon]) => `
         <button type="button" data-action="program-open-assets" data-type="${type}">
@@ -1156,7 +1232,6 @@ AFF.pages.applyStep = () => {
   webLink.searchParams.set("lang", state.language === "en" ? "en" : "zh-cn");
   const mobileLink = new URL(webLink);
   mobileLink.searchParams.set("platform", "app");
-  const copyIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3"/></svg>';
   return `
     <div class="program-intro">
       <h2>分享您的链接，开始赚取收入</h2>
@@ -1169,13 +1244,12 @@ AFF.pages.applyStep = () => {
           <div class="program-share-link">
             <span class="program-share-icon" aria-hidden="true">${navIcon(icon)}</span>
             <div><strong>${label}</strong><span>${hint}</span><a href="${AFF.helpers.h(url)}" target="_blank" rel="noopener" title="${AFF.helpers.h(url)}">${AFF.helpers.h(url)}</a></div>
-            <button class="icon-button program-copy-button" type="button" data-copy="${AFF.helpers.h(url)}" aria-label="复制${label}" title="复制${label}">${copyIcon}</button>
+            <button class="button primary small" type="button" data-copy="${AFF.helpers.h(url)}" aria-label="复制${label}">复制链接</button>
           </div>`).join("")}
       </div>
       <p class="program-share-note">您可以随时返回仪表盘获取推广链接。投放前请查看支持地区，并根据受众的语言、设备和目标页面选择对应链接。</p>
       <div class="program-share-shortcuts">
         <button class="program-text-link" type="button" data-route="deep">配置专属深度链接 <span aria-hidden="true">→</span></button>
-        <button class="program-text-link" type="button" data-route="dash">返回仪表盘 <span aria-hidden="true">→</span></button>
       </div>
     </div>`;
 };

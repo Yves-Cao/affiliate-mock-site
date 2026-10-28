@@ -323,7 +323,7 @@ AFF.postbacks = (() => {
   function renderPage() {
     const store = state();
     return `<div class="postback-page">
-      <div class="page-actions page-actions-top"><button class="button primary" type="button" data-action="open-tracker-modal">${icon("add")}${t("新建回传", "Create postback")}</button></div>
+      <div class="page-actions page-actions-top page-actions-start"><button class="button primary" type="button" data-action="open-tracker-modal">${icon("add")}${t("新建回传", "Create postback")}</button></div>
       ${AFF.helpers.cards([
         { label: t("追踪器总数", "Total trackers"), value: store.configs.length },
         { label: t("启用中", "Enabled"), value: store.configs.filter(config => config.status === "启用").length },

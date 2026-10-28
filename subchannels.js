@@ -42,12 +42,9 @@
   }
 
   function link(row) {
+    const campaign = AFF.campaigns.find(item => [item.code, item.id, item.name].filter(Boolean).includes(row.campaignId));
+    if (campaign) return AFF.campaignLinks.url(campaign, { subid: row.id });
     const url = new URL(AFF.dashboard.link);
-    const campaign = AFF.campaigns.find(item => (item.id || item.name) === row.campaignId);
-    if (campaign) {
-      const code = new URL(campaign.link).searchParams.get("camp") || campaign.id || campaign.name;
-      url.searchParams.set("camp", code);
-    }
     url.searchParams.set("subid", row.id);
     return url.href;
   }
@@ -121,7 +118,7 @@
     const footer = pagination(rows.length);
     const visible = rows.slice((s.page - 1) * s.pageSize, s.page * s.pageSize);
     return `<div class="sc-page">
-      <div class="page-actions page-actions-top"><button class="button primary" type="button" data-sc-action="create">${icon("add")}${t("创建二级渠道", "Create subchannel")}</button></div>
+      <div class="page-actions page-actions-top page-actions-start"><button class="button primary" type="button" data-sc-action="create">${icon("add")}${t("创建二级渠道", "Create subchannel")}</button></div>
       <div class="sc-stats">${[
         [t("二级渠道总数", "Total subchannels"), s.rows.length],
         [t("启用中", "Enabled"), s.rows.filter(row => row.status === "启用").length],

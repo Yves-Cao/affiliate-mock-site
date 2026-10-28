@@ -13,8 +13,8 @@ const routes = [
   ["deep", "深度链接"],
   ["tracker", "链接追踪器"],
   ["assets", "素材库"],
-  ["pay", "收益与提现"],
-  ["lookup", "客户归属查询"],
+  ["pay", "收益数据"],
+  ["lookup", "归属查询"],
   ["wd", "提现"],
   ["apply", "合作者计划"],
   ["onboarding", "入驻申请"]
@@ -31,7 +31,7 @@ const routeGroups = {
   tracker: "推广管理",
   assets: "推广管理",
   pay: "收益中心",
-  lookup: "收益中心",
+  lookup: "推广管理",
   wd: "收益中心"
 };
 
@@ -279,7 +279,7 @@ async function main() {
   await page.keyboard.press("Escape");
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.locator(".dashboard-client-status [data-route='lookup']").click();
-  assertText(await page.title(), "客户归属查询", "Client status route");
+  assertText(await page.title(), "归属查询", "Client status route");
   await page.click("#nav [data-route='dash']");
   await page.locator(".dashboard-material-banner").click();
   await page.waitForFunction(() => document.title.includes("素材库"));
@@ -378,6 +378,7 @@ async function main() {
   onboardingText = await page.locator("#main").innerText();
   assertText(onboardingText, "基本资料", "Onboarding profile title");
   assertText(onboardingText, "推广渠道类型", "Onboarding profile channel");
+  await page.fill("[data-onboarding-name]", "Affiliate Partner");
   await page.click("[data-action='onboarding-next']");
   onboardingText = await page.locator("#main").innerText();
   assertText(onboardingText, "KYC 实名认证", "Onboarding KYC title");
@@ -450,11 +451,12 @@ async function main() {
   if ((await page.evaluate(() => navigator.clipboard.readText())) !== await trackerRow.locator(".postback-url").innerText()) throw new Error("Tracker copy URL failed");
 
   await page.click("[data-route='pay']");
-  await page.click("[data-action='open-appeal']");
-  await page.click("[data-action='submit-appeal']");
-  await page.fill("#appeal-reason", "补充证据");
-  await page.click("[data-action='submit-appeal']");
+  await page.locator("[data-earn-appeal]").first().click();
+  await page.click("[data-earn-action='submit-appeal']");
+  await page.fill("#earn-appeal-reason", "补充证据");
+  await page.click("[data-earn-action='submit-appeal']");
   assertText(await page.locator("#main").innerText(), "申诉中", "Appeal submission");
+  await page.locator(".earn-drawer > header [data-earn-action='close']").click();
 
   await page.click("[data-route='lookup']");
   await page.waitForTimeout(250);
@@ -830,6 +832,17 @@ async function main() {
 
   await page.click(".action-row .button.primary");
   assertText(await page.locator("#main").innerText(), "丰富的创意素材库", "Program materials page");
+  const materialLayout = await page.locator(".program-material-layout").evaluate(node => {
+    const preview = node.querySelector(".program-material-carousel").getBoundingClientRect();
+    const details = node.querySelector(".program-material-details").getBoundingClientRect();
+    return { previewRight: preview.right, previewTop: preview.top, detailsLeft: details.left, detailsTop: details.top };
+  });
+  if (materialLayout.detailsLeft < materialLayout.previewRight || Math.abs(materialLayout.previewTop - materialLayout.detailsTop) > 1) {
+    throw new Error(`Program desktop material layout failed: ${JSON.stringify(materialLayout)}`);
+  }
+  const promotionRoutes = await page.locator('[data-nav-group="推广管理"]').evaluate(node =>
+    Array.from(node.closest(".nav-section").querySelectorAll("[data-route]")).map(item => item.dataset.route));
+  if (promotionRoutes.join("|") !== "assets|promo|subchannels|deep|tracker|lookup") throw new Error(`Promotion menu order failed: ${promotionRoutes}`);
   for (const index of [1, 2, 0]) {
     await page.locator(`.program-slide-dot[data-slide='${index}']`).click();
     await page.waitForFunction(() => {
@@ -897,7 +910,7 @@ async function main() {
   await page.click("#sidebar-toggle");
 
   await page.click("[data-route='wd']");
-  await page.click("[data-wd-tab='records']");
+  await page.click("[data-withdraw-tab='records']");
   assertText(await page.locator("#main").innerText(), "申请日期", "Withdrawal records");
 
   await page.evaluate(() => {

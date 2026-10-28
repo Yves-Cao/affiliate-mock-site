@@ -65,6 +65,93 @@
 .report-client-table td small { display: block; color: var(--muted); font-size: 11px; margin-top: 3px; }
 .report-client-table th:last-child, .report-client-table td:last-child { position: sticky; right: 0; z-index: 3; box-shadow: -6px 0 8px -8px var(--side-icon); }
 .report-client-table th:last-child { z-index: 5; }
+.report-table-scroll.report-client-scroll { max-height: none; overflow-x: auto; overflow-y: hidden; }
+.report-client-scroll .report-client-table { width: 100%; min-width: 1160px; table-layout: fixed; }
+.report-client-col-clientId { width: 164px; }
+.report-client-col-registeredAt { width: 102px; }
+.report-client-col-country { width: 100px; }
+.report-client-col-platform { width: 74px; }
+.report-client-col-campaign { width: 120px; }
+.report-client-col-kyc { width: 74px; }
+.report-client-col-stage { width: 96px; }
+.report-client-col-expected { width: 136px; }
+.report-client-col-commissionStatus { width: 178px; }
+.report-client-col-actions { width: 116px; }
+.report-client-scroll .report-client-table th,
+.report-client-scroll .report-client-table td {
+  min-width: 0;
+  padding: 12px 10px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.report-client-scroll .report-client-table thead th button { gap: 6px; text-align: left; }
+.report-client-scroll .report-client-table td.report-campaign-cell,
+.report-client-scroll .report-client-table td.report-commission-cell { max-width: none; overflow: visible; }
+.report-client-scroll .report-client-table td:last-child { background: var(--surface); }
+.report-client-scroll .report-client-table tr:hover td:last-child { background: var(--row-hover); }
+.report-table thead th button.report-help-button {
+  display: inline-flex;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-left: 6px;
+  border: 1px solid var(--control-border);
+  border-radius: 50%;
+  color: var(--muted);
+  font-size: 12px;
+}
+.report-commission-help {
+  position: fixed;
+  z-index: 46;
+  width: min(350px, calc(100vw - 24px));
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--body-text);
+  box-shadow: var(--shadow);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.report-commission-help[hidden] { display: none; }
+.report-commission-help strong { color: var(--blue-black); }
+.report-commission-help p { margin: 8px 0 0; }
+.report-commission-help ul { margin: 6px 0 0; padding-left: 20px; }
+.report-hold-anchor { display: inline-flex; align-items: center; gap: 6px; }
+.report-hold-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--control-border);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 13px;
+  cursor: help;
+}
+.report-hold-button:hover, .report-hold-button:focus-visible { color: var(--brand); border-color: var(--brand); }
+.report-hold-help {
+  width: min(420px, calc(100vw - 36px));
+  padding: 18px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-color: var(--control-border);
+  box-shadow: 0 8px 28px rgba(15,23,42,.16);
+}
+.report-hold-help dl { margin: 12px 0 0; }
+.report-hold-help dl > div + div { margin-top: 12px; }
+.report-hold-help dt { color: var(--blue-black); font-weight: 600; }
+.report-hold-help dd { margin: 4px 0 0; }
+.report-client-actions { display: flex; align-items: center; gap: 8px; }
+.report-table td.report-commission-cell { min-width: 240px; max-width: 280px; white-space: normal; }
+.report-commission-reason { margin: 6px 0 0; color: var(--body-text); font-size: 12px; line-height: 1.6; white-space: normal; overflow-wrap: anywhere; }
+.report-commission-reference { margin: 10px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.report-appeal-status { padding: 12px; color: var(--brand); background: var(--info-bg); font-size: 13px; line-height: 1.6; }
+.report-appeal-form textarea { width: 100%; min-height: 130px; padding: 10px; resize: vertical; border: 1px solid var(--control-border); border-radius: 4px; color: var(--body-text); background: var(--surface); font: inherit; font-size: 13px; }
+.report-appeal-form textarea[aria-invalid="true"] { border-color: var(--danger); }
 .report-campaign-cell { max-width: 210px; overflow: hidden; text-overflow: ellipsis; }
 .report-drawer { position: fixed; inset: 0 0 0 auto; z-index: 44; width: min(680px, 94vw); display: flex; flex-direction: column; background: var(--surface); border-left: 1px solid var(--border); box-shadow: -12px 0 40px rgba(15,27,61,.16); }
 .report-drawer > header { display: flex; justify-content: space-between; align-items: center; flex: none; padding: 20px 24px; border-bottom: 1px solid var(--border); gap: 12px; }
@@ -123,6 +210,11 @@
   .report-drawer > header, .report-drawer-body { padding: 18px; }
   .report-drawer footer { padding: 14px 18px; }
   .report-drawer button { min-height: 36px; }
+  .report-drawer .report-hold-button { width: 36px; }
+  .report-client-actions .button { min-height: 36px; }
+  .report-client-table th:first-child, .report-client-table td:first-child { position: static; }
+  .report-table-scroll:has(.report-client-table) { scroll-padding-inline: 8px 148px; }
+  .report-table thead th button.report-help-button { min-width: 36px; min-height: 36px; }
   .report-filter-grid { grid-template-columns: 1fr; }
   .report-table-scroll { max-height: 600px; }
   .report-timeline li { flex-wrap: wrap; gap: 2px 12px; }

@@ -220,6 +220,45 @@ async function main() {
     await page.keyboard.press("Escape");
     assert.equal(await page.locator(".report-drawer").count(), 0);
     assert.ok(await page.evaluate(() => Boolean(document.activeElement?.dataset.rpClient)));
+    const commissionTotals = await page.evaluate(() => AFF.reporting.totals(AFF.reporting.rows));
+    await page.locator("[data-rp-action='commission-help']").click();
+    assert.ok(await page.locator("#rp-commission-help").isVisible());
+    assert.match(await page.locator("#rp-commission-help").innerText(), /观察期[\s\S]*核验[\s\S]*退款/);
+    await page.keyboard.press("Escape");
+    assert.ok(await page.locator("#rp-commission-help").isHidden());
+    for (const commissionStatus of ["rejected", "reversed"]) {
+      await page.click("[data-rp-action='filters']");
+      await page.selectOption("[data-rp-filter='commissionStatus']", commissionStatus);
+      await page.click("[data-rp-action='apply']");
+      assert.ok(await getTotal() > 1);
+      const record = await page.evaluate(() => AFF.reports.tableRows()[0]);
+      const row = page.locator(".report-client-table tbody tr").first();
+      assert.equal(await row.locator(".report-commission-reason").count(), 0);
+      await row.locator("[data-rp-appeal]").click();
+      assert.match(await page.locator(".report-drawer").innerText(), new RegExp(record.commissionId));
+      assert.match(await page.locator(".report-drawer").innerText(), new RegExp(record.commissionReason));
+      await page.click("[data-rp-action='submit-client-appeal']");
+      assert.equal(await page.locator("#rp-appeal-error").innerText(), "请填写申诉说明");
+      await page.fill("#rp-appeal-reason", "请求复核该佣金的处理结果");
+      await page.keyboard.press("Escape");
+      assert.equal(await page.evaluate(id => AFF.state.clientCommissionAppeals?.[id], record.commissionId), undefined);
+      await row.locator("[data-rp-appeal]").click();
+      await page.fill("#rp-appeal-reason", "请根据相关入金及客户资料重新核实。");
+      await page.click("[data-rp-action='submit-client-appeal']");
+      assert.match(await page.locator(".report-drawer").innerText(), /申诉已提交/);
+      const appeal = await page.evaluate(id => AFF.state.clientCommissionAppeals[id], record.commissionId);
+      assert.equal(appeal.clientId, record.clientId);
+      assert.equal(appeal.commissionId, record.commissionId);
+      assert.equal(appeal.status, "pending");
+      assert.equal(await page.evaluate(id => AFF.reporting.rows.find(item => item.commissionId === id).commissionStatus, record.commissionId), commissionStatus);
+      await page.keyboard.press("Escape");
+      assert.ok(await row.locator("[data-rp-appeal]").isDisabled());
+      assert.ok(await page.locator(".report-client-table tbody tr").nth(1).locator("[data-rp-appeal]").isEnabled());
+      await page.reload();
+      assert.ok(await page.locator(".report-client-table tbody tr").first().locator("[data-rp-appeal]").isDisabled());
+      await page.click("[data-rp-clear='commissionStatus']");
+    }
+    assert.deepEqual(await page.evaluate(() => AFF.reporting.totals(AFF.reporting.rows)), commissionTotals);
     const originalCampaign = await page.evaluate(() => {
       const row = AFF.reporting.rows.find(item => item.clientId);
       const original = { id: row.id, campaign: row.campaign };
@@ -268,6 +307,14 @@ async function main() {
           assert.ok(Math.abs(bounds.sidebar - 68) < 2 && bounds.mainLeft >= 68, `${id} sidebar overlaps mobile content: ${JSON.stringify(bounds)}`);
         }
         assert.ok(await page.locator(".report-table").isVisible());
+        if (id === "clients") {
+          await page.click("[data-rp-action='commission-help']");
+          await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+          assert.ok(await page.locator("#rp-commission-help").isVisible(), `Commission help must stay open after scrolling into view at ${width}px`);
+          const helpBounds = await page.locator("#rp-commission-help").boundingBox();
+          assert.ok(helpBounds.x >= 0 && helpBounds.x + helpBounds.width <= width && helpBounds.y >= 0 && helpBounds.y + helpBounds.height <= page.viewportSize().height);
+          await page.keyboard.press("Escape");
+        }
         await page.screenshot({ path: path.join(artifacts, `reports-${id}-${width}.png`), fullPage: true });
       }
       await page.click("[data-rp-action='filters']");
