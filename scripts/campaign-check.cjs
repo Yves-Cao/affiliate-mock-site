@@ -5,7 +5,7 @@ const { chromium } = require("playwright");
 
 const baseUrl = process.env.CAMPAIGN_BASE_URL || "http://127.0.0.1:4179";
 const artifacts = path.join(process.cwd(), ".artifacts");
-const clientMetrics = ["registrations", "ftd", "effective", "qualified"];
+const clientMetrics = ["registrations", "ftd", "effective", "quality"];
 
 async function main() {
   fs.mkdirSync(artifacts, { recursive: true });
@@ -64,7 +64,7 @@ async function main() {
       const filters = { ...AFF.reports.range(period || "past30"), campaignCode: code };
       if (dimension) filters[dimension] = value;
       const source = AFF.reporting.filterRows(filters);
-      const milestone = { ftd: "ftdAt", effective: "effectiveAt", qualified: "qualifiedAt" }[metric];
+      const milestone = { ftd: "ftdAt", effective: "effectiveAt", quality: "qualityAt" }[metric];
       return {
         filters,
         count: AFF.reporting.totals(source)[metric],
@@ -79,7 +79,7 @@ async function main() {
           from: "2026-10-01", to: "2026-10-01",
           search: "must-be-replaced", stage: "Registered", commissionStatus: "reversed"
         },
-        metric: "qualified", page: 9
+        metric: "quality", page: 9
       });
     });
     await button.click();
@@ -238,8 +238,8 @@ async function main() {
         ), "mobile-list/effective");
         await openData("CMP-1001", "past90");
         await assertDrill(page.locator(
-          '.campaign-breakdown [data-action="campaign-clients"][data-dimension="platform"][data-metric="qualified"]'
-        ).first(), "mobile-platform/qualified");
+          '.campaign-breakdown [data-action="campaign-clients"][data-dimension="platform"][data-metric="quality"]'
+        ).first(), "mobile-platform/quality");
       }
       for (const [id, selector] of [
         ["promo", "[data-action='open-campaign-modal']"],

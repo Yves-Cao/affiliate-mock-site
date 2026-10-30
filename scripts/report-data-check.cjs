@@ -41,14 +41,26 @@ for (const row of data.rows) {
     assert.ok(row.qualifiedAt >= row.effectiveAt && row.qualifiedAt >= row.tradedAt);
   }
   assert.equal(Boolean(row.expected), Boolean(row.commissionId));
+  if (row.effectiveAt) {
+    assert.ok(row.expected > 0 && row.commissionId, `${row.clientId} must generate commission at valid FTD`);
+    assert.match(row.tier, /^L[1-4]$/, `${row.clientId} valid FTD must have a commission tier`);
+    const gross = data.commissionPrice(row.country, row.tier);
+    const expected = row.qualityAt ? gross : Math.round(gross * 0.75);
+    assert.equal(row.expected, expected, `${row.clientId} commission must match tier, country coefficient, and milestone`);
+    assert.ok(row.commissionCases.some(item => item.type === "qftd_batch" && item.amount > 0), `${row.clientId} needs the first two-segment case`);
+  }
+  if (row.qualityAt) {
+    assert.ok(row.effectiveAt && row.expected > 0, `${row.clientId} quality service cannot precede valid FTD`);
+    assert.ok(row.commissionCases.some(item => item.type === "quality_service" && item.amount > 0), `${row.clientId} needs the quality-service case`);
+  }
   if (["rejected", "reversed"].includes(row.commissionStatus)) {
     assert.ok(row.commissionId && row.commissionReasonCode && row.commissionReason && row.commissionReasonEn);
   } else {
     assert.equal(row.commissionReason, "");
     assert.equal(row.commissionReasonCode, "");
   }
-  assert.equal(["held", "approved", "rejected", "reversed"].filter(key => row[key] > 0).length, row.qualifiedAt && row.commissionStatus !== "pending" ? 1 : 0);
-  for (const key of ["ftdAmount", "expected", "held", "approved", "rejected", "reversed"]) {
+  assert.equal(["held", "approved", "paid", "rejected", "reversed"].filter(key => row[key] > 0).length, row.effectiveAt && row.commissionStatus !== "pending" ? 1 : 0);
+  for (const key of ["ftdAmount", "expected", "held", "approved", "paid", "rejected", "reversed"]) {
     assert.ok(Number.isFinite(row[key]) && row[key] >= 0);
   }
 }
@@ -75,7 +87,7 @@ for (let left = 0; left < data.dimensions.length; left += 1) {
     const groups = [a.key, b.key];
     const aggregated = data.aggregate(data.rows, groups);
     assert.ok(aggregated.length);
-    for (const key of ["clicks", "registrations", "ftd", "effective", "qualified", "traders", "ftdAmount", "expected", "held", "approved", "rejected", "reversed"]) {
+    for (const key of ["clicks", "registrations", "ftd", "effective", "qualified", "traders", "ftdAmount", "expected", "held", "approved", "paid", "rejected", "reversed"]) {
       assert.equal(aggregated.reduce((sum, row) => sum + row.metrics[key], 0), total[key], `${groups.join("+")} ${key} inconsistent`);
     }
     for (const row of aggregated) {

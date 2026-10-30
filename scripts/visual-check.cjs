@@ -11,11 +11,14 @@ const routes = [
   ["promo", "活动"],
   ["subchannels", "二级渠道"],
   ["deep", "深度链接"],
-  ["tracker", "链接追踪器"],
+  ["tracker", "回传配置"],
   ["assets", "素材库"],
   ["pay", "收益数据"],
   ["lookup", "归属查询"],
   ["wd", "提现"],
+  ["guarantee", "保证金"],
+  ["appeals", "申诉中心"],
+  ["messages", "消息中心"],
   ["apply", "合作者计划"],
   ["onboarding", "入驻申请"]
 ];
@@ -32,7 +35,10 @@ const routeGroups = {
   assets: "推广管理",
   pay: "收益中心",
   lookup: "推广管理",
-  wd: "收益中心"
+  wd: "收益中心",
+  guarantee: "收益中心",
+  appeals: "服务中心",
+  messages: "服务中心"
 };
 
 function assertText(text, expected, label) {
@@ -134,7 +140,7 @@ async function main() {
   await page.fill("#login-form input[name=password]", "demo-password");
   await page.click("#login-form button[type=submit]");
   await page.waitForSelector("#app-view:not(.hidden)");
-  assertText(await page.locator("#main").innerText(), "钱包余额", "Dashboard");
+  assertText(await page.locator("#main").innerText(), "可提现余额", "Dashboard");
   const shellState = await page.evaluate(() => ({
     topbarLeft: document.querySelector(".topbar").getBoundingClientRect().left,
     topbarWidth: document.querySelector(".topbar").getBoundingClientRect().width,
@@ -168,7 +174,7 @@ async function main() {
   await page.locator("#wallet-toggle").hover();
   await page.locator("#wallet-popover").waitFor({ state: "visible" });
   const walletText = await page.locator("#wallet-popover").innerText();
-  for (const expected of ["可提现余额", "$12,480.50", "总收益", "$34,215.00", "提现"]) {
+  for (const expected of ["可提现余额", "总收益", "提现"]) {
     assertText(walletText, expected, "Wallet popover");
   }
   await page.locator("#wallet-popover").hover();
@@ -336,8 +342,9 @@ async function main() {
   await page.waitForTimeout(100);
   await page.keyboard.press("ArrowDown");
   await page.waitForTimeout(300);
-  const focusedMenuAction = await page.evaluate(() => document.activeElement?.dataset?.action);
-  if (!focusedMenuAction) throw new Error("Account menu keyboard focus failed");
+  const focusedMenuAction = await page.evaluate(() =>
+    document.activeElement?.classList?.contains("account-menu-item") ? (document.activeElement.dataset.action || document.activeElement.getAttribute("href")) : null);
+  if (!focusedMenuAction) throw new Error(`Account menu keyboard focus failed: ${await page.evaluate(() => ({tag: document.activeElement?.tagName, class: document.activeElement?.className, text: document.activeElement?.innerText}))}`);
   if (!(await page.locator("#account-menu").evaluate(node => node.classList.contains("open")))) throw new Error("Account menu keyboard open failed");
   await page.keyboard.press("Escape");
   await page.waitForTimeout(300);
@@ -361,14 +368,15 @@ async function main() {
   }
 
   await page.goto(`${baseUrl}/#/dash`, { waitUntil: "domcontentloaded" });
-  assertText(await page.locator("#kyc-banner").innerText(), "您的账户资料未完善，部分功能可能受限。", "Onboarding banner text");
-  await page.click("#kyc-banner [data-route='onboarding']");
-  assertText(await page.title(), "入驻申请", "Onboarding route");
-  if (!(await page.locator("#kyc-banner").isHidden())) throw new Error("Onboarding banner should hide on application page");
+  assertText(await page.locator("#kyc-banner").innerText(), "首次提现前需完成收款主体、受益所有人、收款账户与税务信息。", "Withdrawal KYB banner text");
+  await page.click("#kyc-banner [data-route='wd']");
+  assertText(await page.title(), "提现", "Withdrawal route");
+  if (!(await page.locator("#kyc-banner").isHidden())) throw new Error("KYB banner should hide on withdrawal page");
+  await page.goto(`${baseUrl}/#/onboarding`, { waitUntil: "domcontentloaded" });
   let onboardingText = await page.locator("#main").innerText();
-  assertText(onboardingText, "客户端准入流程：注册 → 资料 → KYC → 协议 → 提交审核。", "Onboarding subtitle");
+  assertText(onboardingText, "注册 → 资料 → 实时硬风控 → 协议 → 启用链接。", "Onboarding subtitle");
   const onboardingSteps = await page.locator(".steps .step-label").allTextContents();
-  if (onboardingSteps.join("|") !== "注册账号|填写基本资料|KYC 实名认证|接受协议与准则|提交审核") {
+  if (onboardingSteps.join("|") !== "注册账号|基本资料与渠道|实时硬风控|接受协议与准则|启用推广链接") {
     throw new Error(`Onboarding steps failed: ${onboardingSteps}`);
   }
   if (!(await page.locator("[data-action='onboarding-next']").isDisabled())) throw new Error("Onboarding email gate failed");
@@ -381,8 +389,8 @@ async function main() {
   await page.fill("[data-onboarding-name]", "Affiliate Partner");
   await page.click("[data-action='onboarding-next']");
   onboardingText = await page.locator("#main").innerText();
-  assertText(onboardingText, "KYC 实名认证", "Onboarding KYC title");
-  assertText(onboardingText, "请前往客户端完成实名认证", "Onboarding KYC guide");
+  assertText(onboardingText, "实时硬风控", "Onboarding risk title");
+  assertText(onboardingText, "注册后先完成确定性风险检查，通过即可启用链接。", "Onboarding risk guide");
   await page.click("[data-action='open-client-kyc']");
   await page.click("[data-action='complete-onboarding-kyc']");
   onboardingText = await page.locator("#main").innerText();
@@ -398,11 +406,11 @@ async function main() {
   await page.check("[data-onboarding-agreement='2']");
   await page.click("[data-action='onboarding-next']");
   onboardingText = await page.locator("#main").innerText();
-  assertText(onboardingText, "提交审核", "Onboarding submit title");
+  assertText(onboardingText, "启用推广链接", "Onboarding submit title");
   await page.click("[data-action='submit-onboarding']");
   onboardingText = await page.locator("#main").innerText();
-  assertText(onboardingText, "待审核", "Onboarding pending status");
-  assertText(onboardingText, "审核结果将通过站内消息与邮件通知。", "Onboarding submitted note");
+  assertText(onboardingText, "已启用", "Onboarding enabled status");
+  assertText(onboardingText, "首次提现前完成KYB、收款账户与税务信息即可申请出金。", "Onboarding enabled note");
   await page.click("[data-onboarding-step='1']");
   assertText(await page.locator("#main").innerText(), "已验证", "Onboarding back navigation");
 
@@ -690,10 +698,11 @@ async function main() {
   for (const step of programSteps) assertText(stepsText, step, `Partner program step: ${step}`);
   let programText = await page.locator("#main").innerText();
   if (programText.includes("Commission Reward")) throw new Error("Commission page eyebrow should be removed");
-  assertText(programText, "不同国家佣金奖励", "Commission page title");
-  assertText(programText, "不同地区根据入金门槛提供阶梯奖励", "Commission page subtitle");
-  const commissionSubtitleFont = await page.locator(".commission-page-head > div > p").evaluate(node => getComputedStyle(node).fontSize);
-  if (commissionSubtitleFont !== "14px") throw new Error(`Commission subtitle font size failed: ${commissionSubtitleFont}`);
+  assertText(programText, "L1-L4资格档与国家系数", "Commission page title");
+  assertText(programText, "参考CPA = 资格档单价 × 国家系数；全部数值可后台配置", "Commission page subtitle");
+  if (!(await page.locator(".commission-selector-card .commission-page-head > div > p").first().isVisible())) {
+    throw new Error("Commission subtitle is not visible");
+  }
   assertText(programText, "如何获得佣金", "How to earn commission");
   assertText(programText, "如何成为有效交易者", "How to become valid trader");
   if (
@@ -714,19 +723,19 @@ async function main() {
   const defaultModuleCount = await page.locator(".commission-module").count();
   if (defaultModuleCount !== 3) throw new Error(`Default commission country count failed: ${defaultModuleCount}`);
   const defaultCountryCodes = await page.locator(".commission-module header span").allTextContents();
-  if (defaultCountryCodes.slice().sort().join(",") !== "SA,TH,VN") throw new Error(`Default highest-commission countries failed: ${defaultCountryCodes}`);
+  if (defaultCountryCodes.slice().sort().join(",") !== "NG ×1.5,SA ×1.4,TH ×1.2") throw new Error(`Default highest-commission countries failed: ${defaultCountryCodes}`);
   const commissionGridColumns = await page.locator(".commission-module-grid").evaluate(node => getComputedStyle(node).gridTemplateColumns.split(" ").length);
   if (commissionGridColumns !== 3) throw new Error(`Commission module columns failed: ${commissionGridColumns}`);
   const commissionHeaders = await page.locator(".commission-module").first().locator("th").allTextContents();
-  if (commissionHeaders.length !== 2 || !commissionHeaders.includes("入金金额") || !commissionHeaders.includes("佣金")) {
+  if (commissionHeaders.length !== 3 || !commissionHeaders.includes("资格档") || !commissionHeaders.includes("参考CPA")) {
     throw new Error(`Commission table headers failed: ${JSON.stringify(commissionHeaders)}`);
   }
 
   await page.click("[data-action='toggle-country-picker']");
   const commissionCountryCount = await page.locator(".country-option").count();
-  if (commissionCountryCount !== 103) throw new Error(`Commission country count failed: ${commissionCountryCount}`);
+  if (commissionCountryCount !== 12) throw new Error(`Commission country count failed: ${commissionCountryCount}`);
   const defaultSelectedOptions = await page.locator(".country-option[aria-selected='true']").evaluateAll(nodes => nodes.map(node => node.dataset.countryCode));
-  if (defaultSelectedOptions.slice().sort().join(",") !== "SA,TH,VN") throw new Error(`Dropdown default selection failed: ${defaultSelectedOptions}`);
+  if (defaultSelectedOptions.slice().sort().join(",") !== "NG,SA,TH") throw new Error(`Dropdown default selection failed: ${defaultSelectedOptions}`);
   const actionBarState = await page.locator(".program-action-card").evaluate(node => ({
     position: getComputedStyle(node).position,
     bottom: getComputedStyle(node).bottom
@@ -734,7 +743,7 @@ async function main() {
   if (actionBarState.position !== "fixed" || actionBarState.bottom !== "24px") throw new Error(`Floating action bar failed: ${JSON.stringify(actionBarState)}`);
   await page.click("[data-action='select-all-commission-countries']");
   await page.waitForTimeout(150);
-  if ((await page.locator(".commission-module").count()) !== 103) throw new Error("Commission select-all failed");
+  if ((await page.locator(".commission-module").count()) !== 12) throw new Error("Commission select-all failed");
   await page.click("[data-action='clear-all-commission-countries']");
   await page.waitForTimeout(150);
   if ((await page.locator(".commission-module").count()) !== 0) throw new Error("Commission clear-all failed");
@@ -743,7 +752,7 @@ async function main() {
     render();
   });
   programText = await page.locator("#main").innerText();
-  assertText(programText, "$1750", "Saudi Arabia top commission");
+  assertText(programText, "$1680", "Saudi Arabia top reference CPA");
   await page.click("#language-toggle");
   await page.click("[data-language='en']");
   await page.click("[data-action='toggle-country-picker']");

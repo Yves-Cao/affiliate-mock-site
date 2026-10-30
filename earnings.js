@@ -5,9 +5,13 @@
   const dateNumber = value => Date.parse(`${value}T00:00:00Z`);
   const shiftDate = (value, amount) => new Date(dateNumber(value) + amount * day).toISOString().slice(0, 10);
   const statusLabels = {
+    in_progress: ["进行中", "In progress", "warning"],
     pending: ["待检查", "Pending review", "muted"],
     held: ["暂扣", "On hold", "warning"],
+    manual_review: ["人工确认中", "Manual review", "warning"],
+    settled: ["已结算 / 部分支付", "Settled / partially paid", "ok"],
     approved: ["已入账", "Credited", "ok"],
+    paid: ["已支付", "Paid", "ok"],
     rejected: ["已拒绝", "Rejected", "danger"],
     reversed: ["已冲正", "Reversed", "danger"],
     frozen: ["冻结", "Frozen", "danger"]
@@ -16,6 +20,10 @@
     accrual: ["佣金应计", "Commission accrual"],
     settlement: ["佣金结算", "Commission settlement"],
     reversal: ["佣金冲正", "Commission reversal"]
+  };
+  const caseTypeLabels = {
+    qftd_batch: ["有效FTD", "Valid FTD"],
+    quality_service: ["质量服务", "Quality service"]
   };
   const holdReasons = [
     ["入金或交易记录仍在核验，佣金暂时保留。", "Deposit or trading records are still being verified, so the commission is on hold."],
@@ -28,7 +36,7 @@
   let detailHelpTimer;
 
   function defaultFilters() {
-    return { from: AFF.reporting.from, to: AFF.reporting.now, status: "", type: "" };
+    return { from: AFF.reporting.from, to: AFF.reporting.now, status: "", type: "", caseType: "" };
   }
 
   function state() {
@@ -45,44 +53,97 @@
   }
 
   function holdDetails(row) {
-    if (row.commissionStatus !== "held") return null;
-    const number = Number(row.clientId.replace(/\D/g, ""));
-    const age = Math.max(0, Math.floor((dateNumber(AFF.reporting.now) - dateNumber(row.qualifiedAt)) / day));
-    const elapsedDays = Math.min(age, number % 8);
-    const totalDays = elapsedDays + 1 + (number * 7) % 13;
-    const startedAt = shiftDate(AFF.reporting.now, -elapsedDays);
+    if (row.status !== "held") return null;
+    const number = Number(String(row.client?.clientId || "0").replace(/\D/g, ""));
+    const startedAt = row.holdStartedAt || row.confirmedAt;
+    const totalDays = row.holdDays || 1;
+    const elapsedDays = Math.max(0, Math.min(totalDays, Math.floor((dateNumber(AFF.reporting.now) - dateNumber(startedAt)) / day) + 1));
     return {
       startedAt, totalDays, elapsedDays,
-      expectedReleaseAt: shiftDate(startedAt, totalDays),
+      expectedReleaseAt: row.theoreticalReleaseAt || shiftDate(startedAt, totalDays),
       reason: holdReasons[number % holdReasons.length]
     };
   }
 
+  function segmentLabel(row) {
+    if (row.caseType === "qftd_batch") return t("有效FTD", "Valid FTD");
+    if (row.caseType === "quality_service") return t("质量服务", "Quality service");
+    return row.segments.filter(value => value !== "FTD").map(value => value === "QFTD" ? t("有效FTD", "Valid FTD") : value).join(" + ");
+  }
+
+  function clientStatusLabel(kind, value) {
+    const maps = {
+      eligibility: {
+        pending_attribution: t("待归属", "Pending attribution"), attributed: t("已归属", "Attributed"),
+        kyc_failed: t("KYC失败", "KYC failed"), risk_investigation: t("风险调查中", "Risk investigation"),
+        not_new_customer: t("非新客户", "Not a new customer"), fraud_hit: t("欺诈命中", "Fraud hit")
+      },
+      milestone: {
+        pending_attribution: t("注册", "Registration"), pending: t("KYC", "KYC"),
+        ftd_in_progress: t("FTD", "FTD"), ftd: t("FTD", "FTD"),
+        qftd_in_progress: t("有效FTD", "Valid FTD"), qftd_pending: t("有效FTD", "Valid FTD"), qftd: t("有效FTD", "Valid FTD"),
+        quality_in_progress: t("质量服务", "Quality service"), quality_pending: t("质量服务", "Quality service"), quality: t("已完成", "Completed"),
+        voided: t("已作废", "Voided")
+      },
+      fund: {
+        not_generated: t("未生成", "Not generated"), pending_review: t("待检查", "Pending review"),
+        held: t("暂扣中", "On hold"), manual_review: t("人工确认中", "Manual review"),
+        payable: t("可提现", "Payable"), paid: t("已支付", "Paid"),
+        rejected: t("已拒绝", "Rejected"), clawed_back: t("已冲正", "Clawed back"),
+        frozen: t("冻结", "Frozen"), settled_partial: t("已结算 / 部分支付", "Settled / partially paid"), disputed: t("争议处理中", "Disputed")
+      }
+    };
+    return maps[kind]?.[value] || value || "—";
+  }
+
   function records() {
-    return AFF.reporting.rows.filter(row => row.clientId && row.expected > 0).map(row => ({
-      id: row.commissionId,
-      date: row.qualifiedAt,
-      type: row.commissionStatus === "reversed" ? "reversal" : row.commissionStatus === "approved" ? "settlement" : "accrual",
-      status: row.commissionStatus,
-      amount: row.commissionStatus === "reversed" ? -row.reversed : row.expected,
-      hold: holdDetails(row),
-      client: row
-    })).sort((left, right) => right.date.localeCompare(left.date) || left.id.localeCompare(right.id));
+    return AFF.reporting.rows
+      .filter(row => row.clientId && row.commissionCases?.length)
+      .flatMap(row => row.commissionCases.map(item => ({
+        id: item.id,
+        date: item.confirmedAt,
+        caseType: item.type,
+        segments: item.segments,
+        type: item.status === "reversed" ? "reversal" : item.status === "settled" ? "settlement" : "accrual",
+        status: item.status,
+        amount: item.status === "reversed" ? -item.amount : item.amount,
+        gross: item.amount,
+        settlement: item.settlement,
+        guarantee: item.guarantee,
+        paidAmount: AFF.finance.staticWithdrawals.filter(order => order.status === "paid")
+          .flatMap(order => order.allocations)
+          .filter(allocation => allocation.commissionCaseId === item.id)
+          .reduce((sum, allocation) => sum + allocation.amount / 100, 0),
+        hold: holdDetails(item),
+        client: row
+      })))
+      .sort((left, right) => right.date.localeCompare(left.date) || left.id.localeCompare(right.id));
   }
 
   function filteredRows() {
     const f = state().filters;
+    const inProgressStatuses = ["pending", "held", "manual_review", "frozen"];
     return records().filter(row =>
       (!f.from || row.date >= f.from) && (!f.to || row.date <= f.to) &&
-      (!f.status || row.status === f.status) && (!f.type || row.type === f.type)
+      (!f.status || (f.status === "in_progress" ? inProgressStatuses.includes(row.status) : row.status === f.status)) &&
+      (!f.type || row.type === f.type) &&
+      (!f.caseType || row.caseType === f.caseType)
     );
   }
 
   function totals(rows = filteredRows()) {
     return rows.reduce((sum, row) => {
-      for (const key of ["expected", "held", "approved", "rejected", "reversed"]) sum[key] += row.client[key] || 0;
+      const amount = Math.abs(row.amount);
+      sum.expected += amount;
+      if (row.status in sum) sum[row.status] += amount;
+    if (row.status === "settled") {
+      sum.approved += row.settlement.availableAmount / 100;
+      sum.paid += row.paidAmount;
+    }
+    sum.tax += row.settlement?.taxAmount ? row.settlement.taxAmount / 100 : 0;
+    sum.guarantee += row.settlement?.guaranteeAmount ? row.settlement.guaranteeAmount / 100 : 0;
       return sum;
-    }, { expected: 0, held: 0, approved: 0, rejected: 0, reversed: 0 });
+    }, { expected: 0, held: 0, approved: 0, paid: 0, tax: 0, guarantee: 0, rejected: 0, reversed: 0 });
   }
 
   function money(value) {
@@ -92,7 +153,7 @@
   function reason(row) {
     if (row.hold) return t(...row.hold.reason);
     if (["rejected", "reversed"].includes(row.status)) return t(row.client.commissionReason, row.client.commissionReasonEn);
-    if (row.status === "approved") return t("佣金已通过审核并完成入账。", "The commission passed review and has been credited.");
+    if (row.status === "settled") return t("佣金已按税费、保证金和可提现余额拆分。", "The commission has been split into tax, guarantee, and available balance.");
     if (row.status === "frozen") return t("观察期已超过30天，等待人工审核。", "The observation period exceeded 30 days and requires manual review.");
     return t("佣金资格与结算资料正在核验，尚未完成审核。", "Commission eligibility and settlement details are being verified. Review is not complete.");
   }
@@ -144,10 +205,10 @@
     const f = state().draft;
     const options = (entries, current) => `<option value="">${t("全部", "All")}</option>${Object.entries(entries).map(([key, value]) => `<option value="${key}" ${current === key ? "selected" : ""}>${t(value[0], value[1])}</option>`).join("")}`;
     return `<form class="earn-filters" data-earn-filter-form novalidate>
-      <label><span>${t("产生开始日期", "Accrual date from")}</span><input type="date" data-earn-filter="from" value="${h(f.from)}" max="${AFF.reporting.now}" required></label>
-      <label><span>${t("产生结束日期", "Accrual date to")}</span><input type="date" data-earn-filter="to" value="${h(f.to)}" max="${AFF.reporting.now}" required></label>
+      <label><span>${t("更新日期范围", "Updated date range")}</span>${AFF.dateRange.component({ id: "earnings-range", from: f.from, to: f.to, max: AFF.reporting.now, placeholder: t("选择开始和结束日期", "Select start and end dates") })}</label>
       <label><span>${t("佣金状态", "Commission status")}</span><select data-earn-filter="status">${options(statusLabels, f.status)}</select></label>
       <label><span>${t("流水类型", "Record type")}</span><select data-earn-filter="type">${options(typeLabels, f.type)}</select></label>
+      <label><span>${t("佣金案件", "Commission case")}</span><select data-earn-filter="caseType">${options(caseTypeLabels, f.caseType)}</select></label>
       <div class="earn-filter-actions"><button class="button primary" type="submit">${t("查询", "Search")}</button><button class="button secondary" type="button" data-earn-action="reset">${t("重置", "Reset")}</button></div>
       <p id="earn-filter-error" class="earn-validation" role="alert">${h(state().error)}</p>
     </form>`;
@@ -158,7 +219,10 @@
     const items = [
       ["expected", t("预计佣金", "Estimated commission"), t("参考金额，以审核结果为准", "Reference amount, subject to review")],
       ["held", t("暂扣佣金", "Commission on hold"), t("观察期内，暂不可提现", "Under observation, not yet available")],
-      ["approved", t("已入账佣金", "Credited commission"), t("已完成佣金入账", "Commission credit completed")],
+      ["approved", t("结算净额", "Settlement net"), t("税费与保证金扣留后", "After tax and guarantee")],
+      ["tax", t("结算税费", "Settlement tax"), t("结算时扣缴", "Withheld at settlement")],
+      ["guarantee", t("滚动保证金", "Rolling guarantee"), t("结算后90自然日释放", "Released 90 days after settlement")],
+      ["paid", t("已支付佣金", "Paid commission"), t("按支付成功分摊合计", "Successful withdrawal allocations")],
       ["reversed", t("已冲正佣金", "Reversed commission"), t("关联佣金已撤销", "Related commission reversed")]
     ];
     return `<div class="earn-stats">${items.map(([key, title, hint]) => `<article class="card earn-stat"><span>${title}</span><strong data-earn-stat="${key}">${money(sum[key])}</strong><small>${hint}</small></article>`).join("")}</div>`;
@@ -176,13 +240,13 @@
     const s = state();
     const visible = rows.slice((s.page - 1) * s.pageSize, s.page * s.pageSize);
     return `<div class="earn-table-scroll" role="region" aria-label="${t("佣金流水", "Commission records")}" tabindex="0"><table class="earn-table"><thead><tr>
-      ${[t("产生日期", "Accrual date"), t("佣金编号", "Commission ID"), t("客户", "Client"), t("类型", "Type"), t("佣金金额", "Commission amount"), t("状态", "Status"), t("状态原因", "Status reason"), t("操作", "Action")].map(name => `<th scope="col">${name}</th>`).join("")}
+      ${[t("更新日期", "Updated date"), ...(s.showCommissionId ? [t("佣金编号", "Commission ID")] : []), t("客户", "Client"), t("佣金分段", "Commission segment"), t("佣金金额", "Commission amount"), t("状态", "Status"), t("状态原因", "Status reason"), t("操作", "Action")].map(name => `<th scope="col">${name}</th>`).join("")}
       </tr></thead><tbody>${visible.length ? visible.map(row => `<tr>
-        <td>${h(row.date)}</td><td>${h(row.id)}</td><td><strong>${h(row.client.clientId)}</strong><small>${h(row.client.email)}</small></td>
-        <td>${t(...typeLabels[row.type])}</td><td class="earn-amount ${row.amount < 0 ? "earn-negative" : ""}">${money(row.amount)}</td>
+        <td>${h(row.date)}</td>${s.showCommissionId ? `<td>${h(row.id)}</td>` : ""}<td><strong>${h(row.client.clientId)}</strong><small>${h(row.client.email)}</small></td>
+        <td>${h(segmentLabel(row))}</td><td class="earn-amount ${row.amount < 0 ? "earn-negative" : ""}">${money(row.amount)}</td>
         <td>${badge(row.status)}</td><td class="earn-reason">${h(reason(row))}${row.hold ? `<small>${t("暂扣", "Hold")} ${row.hold.totalDays} ${t("天", "days")} · ${t("预计释放", "Expected release")} ${row.hold.expectedReleaseAt}</small>` : ""}</td>
         <td><div class="earn-row-actions"><button class="button secondary small" type="button" data-earn-detail="${h(row.id)}">${t("详情", "Details")}</button>${appealButton(row)}</div></td>
-      </tr>`).join("") : `<tr><td class="earn-empty" colspan="8"><strong>${t("暂无佣金记录", "No commission records")}</strong><span>${t("请调整筛选条件，或重置后查看。", "Adjust the filters or reset to view records.")}</span></td></tr>`}</tbody></table></div>${pagination(rows.length)}`;
+      </tr>`).join("") : `<tr><td class="earn-empty" colspan="${s.showCommissionId ? 8 : 7}"><strong>${t("暂无佣金记录", "No commission records")}</strong><span>${t("请调整筛选条件，或重置后查看。", "Adjust the filters or reset to view records.")}</span></td></tr>`}</tbody></table></div>${pagination(rows.length)}`;
   }
 
   function field(label, value) {
@@ -202,13 +266,13 @@
     const c = row.client;
     const unavailable = t("处理时间未提供", "Processing time unavailable");
     const steps = [
-      { title: t("佣金产生", "Commission accrued"), done: true, date: c.qualifiedAt, text: `${t("CPA合格后产生预计佣金", "Estimated commission after CPA qualification")} ${money(c.expected)}` },
+      { title: t("佣金产生", "Commission accrued"), done: true, date: row.date, text: `${segmentLabel(row)} ${money(Math.abs(row.amount))}` },
       { title: t("暂扣观察", "Hold observation"), done: Boolean(row.hold), date: row.hold?.startedAt, text: row.hold ? `${row.hold.totalDays} ${t("天，预计释放", "days, expected release")} ${row.hold.expectedReleaseAt}` : t("未提供该环节记录", "No record available for this stage") },
-      { title: t("佣金审核", "Commission review"), done: ["approved", "rejected", "reversed"].includes(row.status), text: row.status === "approved" ? t("审核通过", "Approved") : row.status === "rejected" ? t("审核拒绝", "Rejected") : row.status === "reversed" ? t("复核结果为冲正；原审核记录未提供", "Review resulted in reversal; the original review record is unavailable") : t("尚未完成", "Not completed") }
+      { title: t("佣金审核", "Commission review"), done: ["settled", "approved", "paid", "rejected", "reversed"].includes(row.status), text: row.status === "settled" ? t("结算检查通过", "Settlement checks passed") : row.status === "rejected" ? t("审核拒绝", "Rejected") : row.status === "reversed" ? t("复核结果为冲正", "Review resulted in reversal") : t("尚未完成", "Not completed") }
     ];
-    if (row.status === "approved") steps.push({ title: t("佣金入账", "Commission credited"), done: true, text: `${money(c.approved)} · ${unavailable}` });
-    else if (row.status === "rejected") steps.push({ title: t("佣金拒绝", "Commission rejected"), done: true, text: `${t("不计入已入账佣金", "Excluded from credited commission")} · ${unavailable}` });
-    else if (row.status === "reversed") steps.push({ title: t("佣金冲正", "Commission reversed"), done: true, text: `${money(-c.reversed)} · ${t("原入账明细与扣回记录未提供", "Original credit and recovery records unavailable")}` });
+    if (row.status === "settled") steps.push({ title: t("结算分摊", "Settlement split"), done: true, date: row.settlement?.settledAt, text: `${t("可提现")} ${money(row.settlement.availableAmount / 100)} / ${t("税费")} ${money(row.settlement.taxAmount / 100)} / ${t("保证金")} ${money(row.settlement.guaranteeAmount / 100)}` });
+    else if (row.status === "rejected") steps.push({ title: t("佣金拒绝", "Commission rejected"), done: true, text: `${t("不计入结算净额", "Excluded from settlement net")} · ${unavailable}` });
+      else if (row.status === "reversed") steps.push({ title: t("佣金冲正", "Commission reversed"), done: true, text: `${money(-Math.abs(row.amount))} · ${t("原入账明细与扣回记录未提供", "Original credit and recovery records unavailable")}` });
     else if (row.status === "frozen") steps.push({ title: t("冻结与人工审核", "Frozen for manual review"), done: true, text: t("超过30天，人工审核结果待定", "Over 30 days; manual review pending") });
     else steps.push({ title: t("佣金入账", "Commission credit"), done: false, text: t("尚未到达", "Not reached") });
     return `<ol class="earn-flow">${steps.map(step => `<li class="${step.done ? "complete" : ""}"><div><strong>${step.title}</strong><span>${h(step.text)}</span></div><time>${h(step.date || (step.done ? unavailable : t("—", "—")))}</time></li>`).join("")}</ol>`;
@@ -223,11 +287,11 @@
     return `<div class="overlay earn-overlay" data-earn-action="close"></div><aside class="earn-drawer" role="dialog" aria-modal="true" aria-labelledby="earn-detail-title">
       <header><div><h2 id="earn-detail-title">${t("佣金详情", "Commission details")}</h2><p>${h(row.id)}</p></div><button class="earn-icon-button" type="button" data-earn-action="close" aria-label="${t("关闭", "Close")}">${icon("close")}</button></header>
       <div class="earn-drawer-body">
-        <section class="earn-detail-section"><div class="earn-detail-amount"><strong>${money(row.amount)}</strong>${badge(row.status)}</div><p>${h(reason(row))}</p><dl class="earn-detail-grid">${field(t("流水类型", "Record type"), t(...typeLabels[row.type]))}${field(t("产生日期", "Accrual date"), row.date)}${field(t("原预计佣金", "Original estimate"), money(c.expected))}${field(t("当前已入账", "Currently credited"), money(c.approved))}${field(t("暂扣金额", "Amount on hold"), money(c.held))}${field(t("冲正金额", "Reversed amount"), money(c.reversed))}</dl>
+        <section class="earn-detail-section"><div class="earn-detail-amount"><strong>${money(row.amount)}</strong>${badge(row.status)}</div><p>${h(reason(row))}</p><dl class="earn-detail-grid">${field(t("佣金编号", "Commission ID"), row.id)}${field(t("佣金分段", "Commission segment"), segmentLabel(row))}${field(t("更新日期", "Updated date"), row.date)}${field(t("本案件金额", "Case amount"), money(Math.abs(row.amount)))}${field(t("已支付分摊", "Paid allocation"), money(row.paidAmount))}${field(t("税费", "Tax"), money(row.settlement?.taxAmount / 100 || 0))}${field(t("保证金", "Guarantee"), money(row.settlement?.guaranteeAmount / 100 || 0))}${field(t("结算入账", "Settlement credit"), money(row.settlement?.availableAmount / 100 || 0))}</dl>
           ${canAppeal(row) ? `<p class="earn-muted">${h(c.commissionReasonCode)}</p>` : ""}
         </section>
         <section class="earn-detail-section"><h3>${t("关联客户", "Related client")}</h3><dl class="earn-detail-grid">
-          ${field(t("客户编号", "Client ID"), c.clientId)}${field(t("邮箱", "Email"), c.email)}${field(t("国家/地区", "Country / region"), c.country)}${field(t("平台", "Platform"), c.platform)}${field(t("注册日期", "Registered on"), c.registeredAt)}${field("FTD", c.ftdAt)}${field(t("有效FTD", "Valid FTD"), c.effectiveAt)}${field(t("CPA合格", "CPA qualified"), c.qualifiedAt)}${field(t("活动", "Campaign"), `${c.campaign} · ${c.campaignCode}`)}${field("Sub ID", c.subId)}
+          ${field(t("客户编号", "Client ID"), c.clientId)}${field(t("邮箱", "Email"), c.email)}${field(t("国家/地区", "Country / region"), c.country)}${field(t("注册平台", "Registration platform"), c.platform)}${field(t("注册日期", "Registered on"), c.registeredAt)}${field(t("客户资格状态", "Eligibility status"), clientStatusLabel("eligibility", c.eligibilityStatus))}${field(t("客户里程碑状态", "Milestone status"), clientStatusLabel("milestone", c.milestoneStatus))}${field(t("资金状态", "Fund status"), clientStatusLabel("fund", c.fundStatus))}${field("FTD", c.ftdAt)}${field(t("有效FTD", "Valid FTD"), c.effectiveAt)}${field(t("质量服务", "Quality service"), c.qualityAt)}${field(t("转化活动", "Conversion campaign"), `${c.campaign} · ${c.campaignCode}`)}${field("Sub ID", c.subId)}
         </dl></section>
         ${holdSection(row, s)}
         <section class="earn-detail-section"><h3>${t("佣金流向", "Commission flow")}</h3>${flow(row)}</section>
@@ -244,7 +308,7 @@
     s.pageSize = [10, 20, 50].includes(Number(s.pageSize)) ? Number(s.pageSize) : 10;
     s.page = Math.min(Math.max(1, Number(s.page) || 1), Math.max(1, Math.ceil(rows.length / s.pageSize)));
     return `<div class="earn-page">${stats(rows)}
-      <section class="card earn-panel"><div class="earn-panel-heading"><h2>${t("佣金流水", "Commission records")}</h2><button class="earn-text-button" type="button" data-earn-action="help" aria-expanded="${s.help}" aria-controls="earn-hold-help">${t("暂扣说明", "About holds")} <span aria-hidden="true">?</span></button></div>
+      <section class="card earn-panel"><div class="earn-panel-heading"><h2>${t("佣金流水", "Commission records")}</h2><div><button class="earn-text-button" type="button" data-earn-action="toggle-id" aria-pressed="${Boolean(s.showCommissionId)}">${s.showCommissionId ? t("隐藏佣金编号", "Hide IDs") : t("显示佣金编号", "Show IDs")}</button><button class="earn-text-button" type="button" data-earn-action="help" aria-expanded="${s.help}" aria-controls="earn-hold-help">${t("暂扣说明", "About holds")} <span aria-hidden="true">?</span></button></div></div>
         ${filters()}${s.help ? helpContent("earn-hold-help") : ""}${table(rows)}
       </section>
       <div class="earn-footnote"><span>${t("时区", "Timezone")} UTC+08:00 · ${t("币种", "Currency")} USD</span><span>${t("数据截至", "Data through")} ${AFF.reporting.now} 23:59</span></div>
@@ -337,7 +401,11 @@
     if (action === "close") return close();
     if (action === "reset") {
       s.filters = defaultFilters(); s.draft = { ...s.filters }; s.error = ""; s.page = 1;
-      return rerender('[data-earn-filter="from"]');
+      return rerender('[data-range-id="earnings-range"] [data-range-toggle]');
+    }
+    if (action === "toggle-id") {
+      s.showCommissionId = !s.showCommissionId;
+      return rerender('[data-earn-action="toggle-id"]');
     }
     if (action === "help") {
       s.help = !s.help;
@@ -382,6 +450,12 @@
     }
   };
   document.addEventListener("input", updateDraft);
+  document.addEventListener("date-range-change", event => {
+    if (AFF.state?.route !== "pay" || event.detail.id !== "earnings-range") return;
+    const s = state();
+    s.draft.from = event.detail.from;
+    s.draft.to = event.detail.to;
+  });
   document.addEventListener("change", event => {
     updateDraft(event);
     if (AFF.state?.route !== "pay" || !event.target.matches("[data-earn-page-size]")) return;
@@ -395,14 +469,14 @@
     const f = s.draft;
     s.error = !validDate(f.from) || !validDate(f.to) || f.from > f.to || f.to > AFF.reporting.now
       ? t("请选择有效日期，开始日期不得晚于结束日期，结束日期不得晚于数据截止日。", "Choose valid dates. Start must not follow end, and end must not exceed the data date.")
-      : f.status && !statusLabels[f.status] || f.type && !typeLabels[f.type]
+      : f.status && !statusLabels[f.status] || f.type && !typeLabels[f.type] || f.caseType && !caseTypeLabels[f.caseType]
         ? t("请选择有效的状态和类型。", "Choose a valid status and type.") : "";
     if (s.error) {
       document.querySelector("#earn-filter-error").textContent = s.error;
       return;
     }
     s.filters = { ...f }; s.page = 1;
-    rerender('[data-earn-filter="from"]');
+    rerender('[data-range-id="earnings-range"] [data-range-toggle]');
   });
   document.addEventListener("keydown", event => {
     if (AFF.state?.route !== "pay") return;

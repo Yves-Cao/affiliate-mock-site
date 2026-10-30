@@ -1,6 +1,6 @@
-# Affiliate User Mock
+# Affiliate CPA Mock
 
-Public static demo for `affiliate.evecha.cn`. The site implements the fourteen Affiliate user-side pages defined by the product page specifications. All account names, client IDs, campaigns, commissions, assets, and amounts are synthetic.
+Public P0 demo for the Affiliate program. The site implements seventeen Affiliate user-side pages defined by the product page specifications. All account names, client IDs, campaigns, commissions, taxes, guarantees, withdrawals, assets, and amounts are synthetic.
 
 ## Pages
 
@@ -16,6 +16,9 @@ Public static demo for `affiliate.evecha.cn`. The site implements the fourteen A
 - `#/pay` Earnings and withdrawals
 - `#/lookup` Attribution lookup
 - `#/wd` Withdrawal
+- `#/guarantee` Rolling guarantee balance, retention, release, and deduction ledger
+- `#/appeals` Appeal center
+- `#/messages` Message center with required acknowledgements
 - `#/apply` Partner program: a six-step guide covering searchable multi-country commission tiers with top-reward defaults and bulk selection, desktop/mobile conversion rates, device-system support, creative-asset filters, system navigation entries, share-intro/deep-link actions, and a persistent bottom action bar
 - `#/onboarding` Onboarding application: email verification, profile confirmation, simulated KYC, three agreement documents, and pending-review submission
 
@@ -23,18 +26,23 @@ Login follows the approved CRM visual language with the full-page exported backg
 
 The demo login is a presentation gate only, not authentication. A successful mock registration is stored in the current browser session and returns to the login form with the email prefilled.
 
-Hover the top-right account avatar to open account management and logout. Account management opens as a fullscreen mock dialog and saves editable profile fields to the current browser session; logout clears the demo session.
+Hover the top-right account avatar to open account management and logout. Account management opens as a fullscreen mock dialog for the display timezone; logout clears the demo session.
+
+Operations-admin build files remain in the repository for development review, but the public user navigation does not expose an admin-demo entry.
 
 The normal user view keeps internal scenario controls out of the visible top bar.
 
 ## Reporting
 
-Performance and general statistics share 20 selectable dimensions, with at most two selected at a time. Date/week/month/year are mutually exclusive. The source contains 1,440 deterministic synthetic visit records, including 960 unique clients over 90 days. All groupings, filters, totals, rates, sorting, pagination, milestone drilldowns, and CSV exports use this source. Email addresses stay masked in views and exports.
+Performance and general statistics share 20 selectable dimensions, with at most two selected at a time. Date/week/month/year are mutually exclusive. The source contains 1,440 deterministic synthetic visit records, including 960 unique clients over 90 days. The conversion chain is `registration -> FTD -> valid FTD -> quality service`. Commission records split into a first case for `FTD + valid FTD` and a second case for `quality service`. All groupings, filters, totals, rates, sorting, pagination, milestone drilldowns, and CSV exports use this source. Email addresses stay masked in views and exports.
 
 Date filters select click-attribution cohorts; subsequent conversion milestones are observed through October 27, 2026, in UTC+08:00. These are cohort results, not counts of conversion events occurring in the selected dates. Commission statuses and attributed device/source fields demonstrate interaction only; production field mappings and event ingestion remain subject to the approved backend contracts.
 
+The P0 finance model separates commission cases, settlement allocations, tax records, rolling-guarantee ledgers, available-balance lots, withdrawal orders, and FIFO withdrawal allocations. Tax and the 10% rolling guarantee are calculated from gross commission at settlement. A withdrawal debits the available balance; payment-channel fees are confirmed only after successful payment, and failures/timeout return the full amount without a fee. Dashboard cards and the wallet popover use this shared finance source rather than static values. Twelve deterministic scenarios cover normal L1/L2 flow, tier downgrade, FTD-only, valid-FTD pending review, quality-service void, extended hold, D+30 freeze, chargeback, non-new-customer, fraud hit, and appeal overturn.
+
 ```bash
 npm run test:reports-data
+npm run test:p0
 npm run test:reports
 ```
 
@@ -57,9 +65,11 @@ With Playwright available to Node:
 npm run test:ui
 npm run test:postbacks
 npm run test:dashboard-postbacks
+npm run test:withdrawals
+npm run test:dashboard-clients
 ```
 
-The check covers login and registration validation, mock registration success, login, the account dropdown, fullscreen account management, logout, all fourteen routes, performance filters and grouping, client details, campaign creation, subchannel state and details, tracker creation and state changes, appeals, attribution lookup, asset unlock, the five-step onboarding application, the six-step partner program, withdrawal records, empty/error mock states, English navigation, and desktop/mobile layout bounds. It also fails on console errors and failed requests.
+The check covers login and registration validation, mock registration success, login, the account dropdown, fullscreen account management, logout, all seventeen routes, performance filters and grouping, client details and progress, campaign creation, subchannel state and details, postback configuration, appeals, guarantee and message pages, attribution lookup, asset unlock, risk-check onboarding, the partner-program calculator, withdrawal records, empty/error mock states, English navigation, and desktop/mobile layout bounds. `npm run test:v1` additionally covers the retained admin routes, three-layer client states, two commission cases, the KYC/KYB withdrawal gate, and admin/user responsive bounds. Both fail on console errors and failed requests.
 
 The focused Postback check covers receiver URL validation, generated and manual templates, click parameter mapping, editing and cancellation, session persistence, simulated success/failure/timeout, retry identity, paused configurations, and desktop/mobile layouts. Screenshots are written under `.artifacts/`.
 

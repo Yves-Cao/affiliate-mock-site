@@ -73,7 +73,9 @@
   }
 
   function status(row) {
-    return `<span class="tag ${row.status === "启用" ? "tag-ok" : "tag-danger"}">${row.status === "启用" ? t("启用", "Enabled") : t("已封禁", "Blocked")}</span>`;
+    const blocked = row.status !== "启用";
+    const platform = row.statusSource === "platform";
+    return `<span class="tag ${blocked ? (platform ? "tag-danger" : "tag-warning") : "tag-ok"}">${row.status === "启用" ? t("启用", "Enabled") : platform ? t("平台限制", "Platform blocked") : t("自己停用", "Self disabled")}</span><small>${blocked ? h(row.statusReason || "-") : ""}</small>`;
   }
 
   function heading(key, zh, en) {
@@ -105,8 +107,7 @@
       <label><span>${t("状态", "Status")}</span><select data-sc-filter="status">
         <option value="">${t("全部", "All")}</option><option value="启用" ${f.status === "启用" ? "selected" : ""}>${t("启用", "Enabled")}</option><option value="已封禁" ${f.status === "已封禁" ? "selected" : ""}>${t("已封禁", "Blocked")}</option>
       </select></label>
-      <label><span>${t("更新开始日期", "Updated from")}</span><input type="date" data-sc-filter="from" value="${h(f.from)}"></label>
-      <label><span>${t("更新结束日期", "Updated to")}</span><input type="date" data-sc-filter="to" value="${h(f.to)}"></label>
+      <label><span>${t("更新日期范围", "Updated date range")}</span>${AFF.dateRange.component({ id: "subchannels-range", from: f.from, to: f.to, max: AFF.reporting.now, placeholder: t("选择更新日期范围", "Select updated dates") })}</label>
       <div class="sc-filter-actions"><button class="button primary small" type="submit">${t("查询", "Search")}</button><button class="button secondary small" type="button" data-sc-action="reset">${t("重置", "Reset")}</button></div>
       <p class="sc-validation" id="sc-filter-error" role="alert">${h(s.filterError || "")}</p>
     </form>`;
@@ -117,6 +118,7 @@
     const rows = filteredRows();
     const footer = pagination(rows.length);
     const visible = rows.slice((s.page - 1) * s.pageSize, s.page * s.pageSize);
+    const stats = id => AFF.reporting.totals(AFF.reporting.rows.filter(row => row.subId === id));
     return `<div class="sc-page">
       <div class="page-actions page-actions-top page-actions-start"><button class="button primary" type="button" data-sc-action="create">${icon("add")}${t("创建二级渠道", "Create subchannel")}</button></div>
       <div class="sc-stats">${[
@@ -127,14 +129,18 @@
       <section class="card sc-panel">
         ${filters()}
         <div class="table-wrap sc-table-scroll"><table class="sc-table"><thead><tr>
-          ${heading("id", "Sub ID", "Sub ID")}${heading("status", "状态", "Status")}${heading("updatedAt", "更新时间", "Updated at")}
+          ${heading("id", "Sub ID", "Sub ID")}${heading("status", "状态 / 来源", "Status / source")}${heading("updatedAt", "更新时间", "Updated at")}
+          <th scope="col" class="numeric">${t("注册数", "Registrations")}</th><th scope="col" class="numeric">${t("有效FTD达成率", "Valid FTD rate")}</th><th scope="col" class="numeric">${t("冲正率", "Reversal rate")}</th>
           <th scope="col">${t("二级链接", "Subchannel link")}</th><th scope="col">${t("操作", "Actions")}</th>
         </tr></thead><tbody>${visible.length ? visible.map(row => `<tr>
           <td><strong>${h(row.id)}</strong><small>${h(row.name || "")}</small></td><td>${status(row)}</td><td>${h(row.updatedAt)}</td>
+          <td class="numeric">${format(stats(row.id).registrations)}</td>
+          <td class="numeric">${format(stats(row.id).effectiveRate, "rate")}</td>
+          <td class="numeric">${format(stats(row.id).expected ? stats(row.id).reversed / stats(row.id).expected : null, "rate")}</td>
           <td><div class="sc-link"><a href="${h(link(row))}" target="_blank" rel="noopener noreferrer" title="${h(link(row))}">${h(link(row))}</a>
             <button class="sc-copy" type="button" data-copy="${h(link(row))}" title="${t("复制链接", "Copy link")}" aria-label="${t("复制链接", "Copy link")}">${icon("copy")}</button></div></td>
-          <td><div class="sc-row-actions"><button class="button secondary small" type="button" data-sc-detail="${h(row.id)}">${t("详情", "Details")}</button><button class="button secondary small" type="button" data-sc-toggle="${h(row.id)}">${row.status === "启用" ? t("封禁", "Block") : t("启用", "Enable")}</button></div></td>
-        </tr>`).join("") : `<tr><td colspan="5" class="sc-empty">${t("暂无二级渠道，请调整筛选或创建渠道。", "No subchannels. Adjust filters or create a channel.")}</td></tr>`}</tbody></table></div>
+          <td><div class="sc-row-actions"><button class="button secondary small" type="button" data-sc-detail="${h(row.id)}">${t("详情", "Details")}</button>${row.statusSource === "platform" ? `<button class="button secondary small" type="button" disabled title="${t("平台限制不可自行解除", "Platform blocks cannot be self-lifted")}">${t("不可解除", "Locked")}</button>` : `<button class="button secondary small" type="button" data-sc-toggle="${h(row.id)}">${row.status === "启用" ? t("封禁", "Block") : t("启用", "Enable")}</button>`}</div></td>
+        </tr>`).join("") : `<tr><td colspan="8" class="sc-empty">${t("暂无二级渠道，请调整筛选或创建渠道。", "No subchannels. Adjust filters or create a channel.")}</td></tr>`}</tbody></table></div>
         ${footer}
       </section>
       ${s.dialog === "create" ? createDialog() : s.dialog === "detail" ? renderDetail() : ""}
@@ -168,7 +174,7 @@
       ["clicks", t("点击量", "Clicks")], ["registrations", t("注册客户", "Registrations")],
       ["ftd", "FTD"], ["effective", t("有效 FTD", "Valid FTD")],
       ["expected", t("预计佣金", "Projected commission"), "money"],
-      ["approved", t("已入账佣金", "Credited commission"), "money"]
+      ["approved", t("结算净额", "Settlement net"), "money"]
     ];
     return `<div class="overlay sc-overlay" data-sc-action="close"></div>
       <aside class="sc-drawer" role="dialog" aria-modal="true" aria-labelledby="sc-detail-title">
@@ -224,6 +230,8 @@
       const row = s.rows.find(item => item.id === target.dataset.scToggle);
       if (!row) return false;
       row.status = row.status === "启用" ? "已封禁" : "启用";
+      row.statusSource = "self";
+      row.statusReason = row.status === "已封禁" ? "SELF-DISABLED" : "";
       row.updatedAt = new Date().toLocaleDateString("en-CA");
       showToast(t("渠道状态已更新", "Channel status updated"));
       rerender(); return true;
@@ -300,6 +308,12 @@
   document.addEventListener("click", handleClick);
   document.addEventListener("input", handleInput);
   document.addEventListener("change", handleChange);
+  document.addEventListener("date-range-change", event => {
+    if (AFF.state?.route !== "subchannels" || event.detail.id !== "subchannels-range") return;
+    const s = state();
+    s.filterDraft.from = event.detail.from;
+    s.filterDraft.to = event.detail.to;
+  });
   document.addEventListener("submit", handleSubmit);
   document.addEventListener("keydown", event => {
     if (AFF.state?.route !== "subchannels" || !state().dialog) return;

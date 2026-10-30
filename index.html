@@ -8,12 +8,14 @@
   <link rel="icon" type="image/svg+xml" href="./assets/affiliate-icon.svg">
   <link rel="alternate icon" type="image/png" sizes="32x32" href="./assets/affiliate-icon-32.png">
   <link rel="apple-touch-icon" href="./assets/affiliate-icon-180.png">
-  <link rel="stylesheet" href="./styles.css">
-  <link rel="stylesheet" href="./postbacks.css">
-  <link rel="stylesheet" href="./reports.css">
-  <link rel="stylesheet" href="./subchannels.css">
-  <link rel="stylesheet" href="./earnings.css">
-  <link rel="stylesheet" href="./withdrawals.css">
+  <link rel="stylesheet" href="./styles.css?v=p0-20261030-5">
+  <link rel="stylesheet" href="./postbacks.css?v=p0-20261030">
+  <link rel="stylesheet" href="./reports.css?v=p0-20261030-16">
+  <link rel="stylesheet" href="./subchannels.css?v=p0-20261030">
+  <link rel="stylesheet" href="./earnings.css?v=p0-20261030-2">
+  <link rel="stylesheet" href="./withdrawals.css?v=p0-20261030-2">
+  <link rel="stylesheet" href="./finance.css?v=p0-20261030-3">
+  <link rel="stylesheet" href="./date-range.css?v=p0-20261030">
 </head>
 <body>
   <a class="skip-link" href="#main">跳到主要内容</a>
@@ -104,9 +106,20 @@
         <div class="brand topbar-brand">
           <img class="brand-mark" src="./assets/affiliate-icon.svg" alt="A" width="28" height="28">
           <span class="brand-text"><strong>Affiliate CPA</strong></span>
+          <span class="topbar-demo-note"><span class="demo-note-full">演示环境 · 虚构数据 · 参数为参考值</span><span class="demo-note-compact">演示数据</span></span>
         </div>
         <div class="topbar-spacer" aria-hidden="true"></div>
         <div class="topbar-tools">
+          <div class="topbar-clock" aria-label="服务器时间与本地时间">
+            <div>
+              <span>服务器时间 <small id="server-time-zone">UTC+08:00</small></span>
+              <strong id="server-time">YYYY-MM-DD HH:mm:ss</strong>
+            </div>
+            <div>
+              <span>本地时间 <small id="local-time-zone">UTC+08:00</small></span>
+              <strong id="local-time">YYYY-MM-DD HH:mm:ss</strong>
+            </div>
+          </div>
           <div class="wallet-menu" id="wallet-menu">
             <button class="wallet" id="wallet-toggle" type="button" aria-expanded="false" aria-controls="wallet-popover">
               <span>可提现</span>
@@ -120,6 +133,12 @@
           </div>
           <button class="icon-button circular" type="button" aria-label="帮助中心">
             <span aria-hidden="true">?</span>
+          </button>
+          <button class="icon-button circular notice" type="button" data-route="messages" aria-label="消息中心">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 6h16v10H8l-4 4z"/><path d="M8 10h8M8 13h5"/>
+            </svg>
+            <span id="message-count">0</span>
           </button>
           <label class="scenario-control hidden" for="scenario-select">
             <span>Mock状态</span>
@@ -185,15 +204,20 @@
   <div id="modal-root" class="modal-layer hidden" role="dialog" aria-modal="true"></div>
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
-  <script src="./data.js"></script>
-  <script src="./campaign-links.js"></script>
-  <script src="./report-data.js"></script>
-  <script src="./pages.js"></script>
-  <script src="./postbacks.js"></script>
-  <script src="./reports.js"></script>
-  <script src="./subchannels.js"></script>
-  <script src="./earnings.js"></script>
-  <script src="./withdrawals.js"></script>
-  <script src="./app.js"></script>
+  <script src="./data.js?v=p0-20261030-3"></script>
+  <script src="./campaign-links.js?v=p0-20261030"></script>
+  <script src="./report-data.js?v=p0-20261030-6"></script>
+  <script src="./finance-data.js?v=p0-20261030-4"></script>
+  <script src="./pages.js?v=p0-20261030-5"></script>
+  <script src="./date-range.js?v=p0-20261030-2"></script>
+  <script src="./postbacks.js?v=p0-20261030-2"></script>
+  <script src="./reports.js?v=p0-20261030-23"></script>
+  <script src="./subchannels.js?v=p0-20261030-3"></script>
+  <script src="./earnings.js?v=p0-20261030-6"></script>
+  <script src="./withdrawals.js?v=p0-20261030-2"></script>
+  <script src="./guarantee-page.js?v=p0-20261030-5"></script>
+  <script src="./appeals-page.js?v=p0-20261030"></script>
+  <script src="./messages-page.js?v=p0-20261030"></script>
+  <script src="./app.js?v=p0-20261030-17"></script>
 </body>
 </html>

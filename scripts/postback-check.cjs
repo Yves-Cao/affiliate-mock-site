@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const origin = "http://127.0.0.1:4179";
+const origin = process.env.POSTBACK_BASE_URL || "http://127.0.0.1:4179";
 const artifacts = path.resolve(".artifacts");
 
 async function main() {
@@ -138,14 +138,14 @@ async function main() {
     check(await configRow().locator("[data-action='postback-test']").isDisabled(), "Session refresh preserves paused status");
     await configRow().locator("[data-action='postback-toggle']").click();
     await configRow().locator("[data-action='postback-edit']").click();
-    await page.locator("#postback-event").selectOption("deposit");
+    await page.locator("#postback-event").selectOption("quality_service");
     await save();
     check((await configRow().innerText()).includes("版本 2"), "Saving an edit increments configuration version");
     await logs();
     check(await logRow.locator("[data-action='postback-retry']").isDisabled(), "Old-version record cannot retry after configuration changes");
     await configs();
     await configRow().locator("[data-action='postback-test']").click();
-    check(new URL(await page.locator(".postback-preview code").innerText()).searchParams.get("amount") === "250.00", "Deposit event uses deposit sample amount");
+    check(new URL(await page.locator(".postback-preview code").innerText()).searchParams.get("amount") === "100.00", "Quality service event uses commission sample amount");
     await action("postback-run-test").click();
     check((await page.locator("#postback-test-output").innerText()).includes("200"), "Success produces HTTP 200");
     await close();

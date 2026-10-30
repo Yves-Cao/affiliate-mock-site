@@ -149,7 +149,7 @@ async function main() {
     await page.click("[data-rp-action='columns']");
     await page.click("[data-rp-action='all-columns']");
     await page.click("[data-rp-action='apply']");
-    assert.equal(await page.locator(".report-table thead th").count(), 20);
+    assert.equal(await page.locator(".report-table thead th").count(), 21);
     await page.click("[data-rp-action='columns']");
     await page.click("[data-rp-action='default-columns']");
     await page.click("[data-rp-action='apply']");
@@ -171,23 +171,23 @@ async function main() {
     for (const grain of ["week", "month", "year"]) {
       await route("perf");
       await patchState("perf", {
-        groups: [grain, "country"], columns: ["registrations", "ftd", "effective", "qualified"],
+        groups: [grain, "country"], columns: ["registrations", "ftd", "effective", "quality"],
         filters: { from: "2026-09-03", to: "2026-10-17" }, sort: grain, direction: "asc", page: 1
       });
-      const selected = await page.evaluate(() => AFF.reports.tableRows().find(row => row.metrics.qualified > 0));
+      const selected = await page.evaluate(() => AFF.reports.tableRows().find(row => row.metrics.quality > 0));
       assert.ok(selected);
       await page.evaluate(rowKey => {
-        const button = [...document.querySelectorAll("[data-rp-row]")].find(node => node.dataset.rpRow === rowKey && node.dataset.rpDrillMetric === "qualified");
+        const button = [...document.querySelectorAll("[data-rp-row]")].find(node => node.dataset.rpRow === rowKey && node.dataset.rpDrillMetric === "quality");
         if (button) button.click();
         else {
           const index = AFF.reports.tableRows().findIndex(row => row.key === rowKey);
           AFF.reports.state().page = Math.floor(index / AFF.reports.state().pageSize) + 1;
           render();
-          [...document.querySelectorAll("[data-rp-row]")].find(node => node.dataset.rpRow === rowKey && node.dataset.rpDrillMetric === "qualified").click();
+          [...document.querySelectorAll("[data-rp-row]")].find(node => node.dataset.rpRow === rowKey && node.dataset.rpDrillMetric === "quality").click();
         }
       }, selected.key);
       assert.equal(await page.evaluate(() => AFF.state.route), "clients");
-      assert.equal(await getTotal(), selected.metrics.qualified, `${grain} drilldown count differs from grouped count`);
+      assert.equal(await getTotal(), selected.metrics.quality, `${grain} drilldown count differs from grouped count`);
       const filters = await page.evaluate(() => AFF.reports.state().filters);
       assert.ok(filters.from >= "2026-09-03" && filters.to <= "2026-10-17", "Drilldown must intersect original date bounds");
     }
@@ -199,13 +199,13 @@ async function main() {
     assert.equal(await getTotal(), dataInfo.clients);
     await page.click("[data-rp-sort='stage']");
     await page.click("[data-rp-sort='stage']");
-    const stages = await page.evaluate(() => AFF.reports.tableRows().map(row => row.qualifiedAt ? 3 : row.effectiveAt ? 2 : row.ftdAt ? 1 : 0));
+    const stages = await page.evaluate(() => AFF.reports.tableRows().map(row => row.qualityAt ? 3 : row.effectiveAt ? 2 : row.ftdAt ? 1 : 0));
     assert.ok(stages.every((value, index) => !index || value >= stages[index - 1]), "Conversion stages must sort by progression");
     await page.click("[data-rp-action='filters']");
-    await page.selectOption("[data-rp-filter='commissionStatus']", "pending");
+    await page.selectOption("[data-rp-filter='commissionStatus']", "pending_review");
     await page.click("[data-rp-action='apply']");
     assert.ok(await getTotal() > 0, "Pending commission filter must return clients");
-    assert.ok(await page.evaluate(() => AFF.reports.filtered().every(row => row.expected > 0 && row.commissionStatus === "pending")));
+    assert.ok(await page.evaluate(() => AFF.reports.filtered().every(row => row.fundStatus === "pending_review")));
     await page.click("[data-rp-clear='commissionStatus']");
     await page.locator("[data-rp-client]").first().click();
     assert.equal(await page.locator(".report-drawer[role='dialog'][aria-modal='true']").count(), 1);
@@ -226,9 +226,9 @@ async function main() {
     assert.match(await page.locator("#rp-commission-help").innerText(), /观察期[\s\S]*核验[\s\S]*退款/);
     await page.keyboard.press("Escape");
     assert.ok(await page.locator("#rp-commission-help").isHidden());
-    for (const commissionStatus of ["rejected", "reversed"]) {
+    for (const [commissionStatus, fundStatus] of [["rejected", "rejected"], ["reversed", "clawed_back"]]) {
       await page.click("[data-rp-action='filters']");
-      await page.selectOption("[data-rp-filter='commissionStatus']", commissionStatus);
+      await page.selectOption("[data-rp-filter='commissionStatus']", fundStatus);
       await page.click("[data-rp-action='apply']");
       assert.ok(await getTotal() > 1);
       const record = await page.evaluate(() => AFF.reports.tableRows()[0]);
@@ -276,14 +276,14 @@ async function main() {
     await route("perf");
     await patchState("perf", {
       groups: ["country", "platform"], filters: { from: "2026-09-28", to: "2026-10-27", source: "Telegram" },
-      columns: ["clicks", "registrations", "qualified", "expected"], pageSize: 20, page: 1
+      columns: ["clicks", "registrations", "quality", "expected"], pageSize: 20, page: 1
     });
     await page.reload({ waitUntil: "domcontentloaded" });
     const restored = await page.evaluate(() => AFF.reports.state());
     assert.deepEqual(restored.groups, ["country", "platform"]);
     assert.equal(restored.filters.source, "Telegram");
     assert.equal(restored.pageSize, 20);
-    assert.deepEqual(restored.columns, ["clicks", "registrations", "qualified", "expected"]);
+    assert.deepEqual(restored.columns, ["clicks", "registrations", "quality", "expected"]);
     assert.ok(!restored.drawer && !restored.client && !restored.picker);
 
     for (const width of [1920, 1366, 1111, 390]) {

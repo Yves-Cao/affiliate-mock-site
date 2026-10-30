@@ -13,10 +13,13 @@ AFF.postbacks = (() => {
   ];
   const events = [
     ["registration", "注册", "Registration"],
-    ["qualified_ftd", "有效FTD", "Qualified FTD"],
-    ["deposit", "入金", "Deposit"],
-    ["approved_reward", "已审批佣金", "Approved reward"],
-    ["kyc_completed", "KYC完成", "KYC completed"]
+    ["kyc_completed", "KYC完成", "KYC completed"],
+    ["ftd_reached", "FTD达成", "FTD reached"],
+    ["qualified_ftd", "有效FTD确认", "Valid FTD confirmed"],
+    ["quality_service", "质量服务确认", "Quality service confirmed"],
+    ["commission_status", "佣金状态变更", "Commission status changed"],
+    ["commission_rejected", "佣金拒付", "Commission rejected"],
+    ["commission_clawback", "佣金冲正", "Commission clawback"]
   ];
   const systemTokens = ["aff_cid", "aff_client", "aff_value"];
   const sensitiveKey = /^(email|phone|mobile|telephone|password|secret|token|api_key|address)$/i;
@@ -35,16 +38,17 @@ AFF.postbacks = (() => {
     const item = events.find(event => event[0] === value);
     return item ? t(item[1], item[2]) : value;
   };
-  const standardParameters = () => [
+  const standardParameters = (event = "commission_status") => [
     { key: "clickid", value: "{clickid}" },
     { key: "event_id", value: "{aff_cid}" },
-    { key: "amount", value: "{aff_value}" }
+    ...["quality_service", "commission_status", "commission_rejected", "commission_clawback"].includes(event)
+      ? [{ key: "amount", value: "{aff_value}" }] : []
   ];
 
   function state() {
-    if (!AFF.state.postbacks || AFF.state.postbacks.schemaVersion !== 1) {
+    if (!AFF.state.postbacks || AFF.state.postbacks.schemaVersion !== 2) {
       AFF.state.postbacks = {
-        schemaVersion: 1,
+        schemaVersion: 2,
         tab: "configs",
         logPage: 1,
         filters: { config: "", event: "", result: "" },
@@ -53,11 +57,11 @@ AFF.postbacks = (() => {
             id: row.id,
             platform: "custom",
             name: index === 0 ? "注册事件回传" : "佣金获批回传",
-            event: index === 0 ? "registration" : "approved_reward",
+            event: index === 0 ? "registration" : "commission_status",
             mode: "generated",
             clickUrl: "https://track.example.com/click?clickid=demo_click_001&utm_source=telegram",
             endpoint: "https://tracker.example.com/postback",
-            parameters: standardParameters(),
+            parameters: standardParameters(index === 0 ? "registration" : "commission_status"),
             manualUrl: "",
             status: row.status,
             updatedAt: row.updatedAt,
@@ -181,7 +185,7 @@ AFF.postbacks = (() => {
     const values = {
       aff_cid: eventId,
       aff_client: "CLIENT-DEMO-1001",
-      aff_value: config.event === "deposit" ? "250.00" : config.event === "approved_reward" ? "100.00" : "1",
+      aff_value: ["quality_service", "commission_status", "commission_rejected", "commission_clawback"].includes(config.event) ? "100.00" : "1",
       clickid: "demo_click_001"
     };
     for (const key of clickParameters(config.clickUrl)) {
@@ -391,7 +395,7 @@ AFF.postbacks = (() => {
     draft = config ? structuredClone(config) : {
       name: platform.id === "custom" ? "" : t(`${platform.name} · 注册回传`, `${platform.name} · Registration postback`),
       platform: platform.id, event: "registration", mode: platform.id === "custom" ? "generated" : "manual", clickUrl: "", endpoint: "",
-      parameters: standardParameters(), manualUrl: "", status: "启用"
+      parameters: standardParameters("registration"), manualUrl: "", status: "启用"
     };
     errors = {};
     showEditor(!config && platform.id !== "custom" ? "postback-manualUrl" : "postback-name");

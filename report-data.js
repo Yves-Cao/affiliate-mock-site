@@ -40,18 +40,19 @@
     { key: "registrations", label: "注册客户", en: "Registrations", type: "count" },
     { key: "ftd", label: "FTD 客户", en: "FTD clients", type: "count" },
     { key: "effective", label: "有效 FTD", en: "Valid FTD", type: "count" },
-    { key: "qualified", label: "合格客户", en: "Qualified clients", type: "count" },
+    { key: "quality", label: "质量服务客户", en: "Quality service clients", type: "count" },
     { key: "traders", label: "开始交易客户", en: "Trading clients", type: "count" },
     { key: "ftdAmount", label: "首次入金金额", en: "FTD amount", type: "money" },
     { key: "expected", label: "预计佣金", en: "Projected commission", type: "money" },
     { key: "held", label: "暂扣佣金", en: "On hold commission", type: "money" },
-    { key: "approved", label: "已入账佣金", en: "Credited commission", type: "money" },
+    { key: "approved", label: "结算净额", en: "Settlement net", type: "money" },
+    { key: "paid", label: "已支付佣金", en: "Paid commission", type: "money" },
     { key: "rejected", label: "已拒绝佣金", en: "Rejected commission", type: "money" },
     { key: "reversed", label: "冲正金额", en: "Reversed commission", type: "money" },
     { key: "registerRate", label: "点击→注册", en: "Click → registration", type: "rate" },
     { key: "ftdRate", label: "注册→FTD", en: "Registration → FTD", type: "rate" },
     { key: "effectiveRate", label: "FTD→有效 FTD", en: "FTD → valid FTD", type: "rate" },
-    { key: "qualifiedRate", label: "有效 FTD→合格", en: "Valid FTD → qualified", type: "rate" },
+    { key: "qualityRate", label: "有效 FTD→质量服务", en: "Valid FTD → quality service", type: "rate" },
     { key: "epc", label: "EPC", en: "EPC", type: "money" }
   ];
   const countries = ["新加坡", "马来西亚", "泰国", "越南", "印度尼西亚", "南非", "巴西", "墨西哥", "菲律宾", "阿联酋"];
@@ -78,6 +79,7 @@
     pending: "待检查",
     held: "暂扣",
     approved: "已入账",
+    paid: "已支付",
     rejected: "已拒绝",
     reversed: "已冲正"
   };
@@ -123,8 +125,10 @@
     const tradedAt = ftdAt && random() < 0.82 && canReach(tradeCandidate) ? tradeCandidate : null;
     const qualifiedCandidate = effectiveAt && tradedAt ? plusDays(effectiveAt > tradedAt ? effectiveAt : tradedAt, integer(0, 2)) : null;
     const qualifiedAt = qualifiedCandidate && random() < 0.87 && canReach(qualifiedCandidate) ? qualifiedCandidate : null;
-    const commissionStatus = qualifiedAt ? pick(["pending", "held", "held", "approved", "approved", "approved", "rejected", "reversed"]) : "pending";
-    const expected = qualifiedAt ? pick([80, 120, 180, 240, 320, 400, 550, 700]) : 0;
+    const commissionStatus = effectiveAt ? pick(["pending", "held", "held", "approved", "approved", "approved", "rejected", "reversed"]) : "pending";
+    const country = kyc === "通过" ? pick(countries) : "待确认";
+    const tier = effectiveAt ? pick(["L1", "L2", "L3", "L4"]) : "-";
+    const expected = effectiveAt ? AFF.partnerProgram.commissionPrice(country, tier) : 0;
     rows.push({
       id: `EV-${String(index + 1).padStart(5, "0")}`,
       date,
@@ -139,9 +143,9 @@
       tradedAt,
       qualifiedAt,
       kyc,
-      country: kyc === "通过" ? pick(countries) : "待确认",
+      country,
       ...attribution(),
-      tier: qualifiedAt ? pick(["T1", "T2", "T3", "T4"]) : "-",
+      tier,
       commissionStatus,
       ftdAmount: ftdAt ? integer(1, 40) * 50 : 0,
       expected,
@@ -193,7 +197,70 @@
     ]
   };
   rows.forEach((row, index) => {
-    row.commissionId = row.expected ? `COM-${row.clientId}` : null;
+    row.qualityAt = row.qualifiedAt;
+    row.firstCommissionAt = row.effectiveAt;
+    row.qualityCommissionAt = row.qualityAt;
+    row.eligibilityStatus = !row.registeredAt
+      ? "pending_attribution"
+      : row.kyc === "失败" ? "kyc_failed"
+      : row.country === "待确认" ? "risk_investigation"
+      : "attributed";
+    const clientIdNumber = Number(String(row.clientId || "0").replace(/\D/g, ""));
+    row.milestoneStatus = !row.registeredAt ? "pending_attribution"
+      : row.kyc !== "通过" ? "pending"
+      : !row.ftdAt ? "ftd_in_progress"
+      : !row.effectiveAt ? "qftd_in_progress"
+      : !row.qualityAt ? (clientIdNumber % 17 === 0 ? "quality_pending" : "quality_in_progress")
+      : "quality";
+    row.fundStatus = !row.effectiveAt ? "not_generated"
+      : row.commissionStatus === "held" ? "held"
+      : row.commissionStatus === "approved" ? "payable"
+      : row.commissionStatus === "rejected" ? "rejected"
+      : row.commissionStatus === "reversed" ? "clawed_back"
+      : "pending_review";
+    if (row.effectiveAt && clientIdNumber % 23 === 0) row.fundStatus = "manual_review";
+    if (row.effectiveAt && clientIdNumber % 37 === 0) row.fundStatus = "frozen";
+    if (row.commissionStatus === "approved" && (clientIdNumber % 11 === 0 || row.effectiveAt >= plusDays(now, -30))) row.fundStatus = "paid";
+    row.voidedStage = "";
+    row.voidedReason = "";
+    if (row.registeredAt && !row.ftdAt && row.date < plusDays(now, -60)) {
+      row.milestoneStatus = "voided";
+      row.voidedStage = "FTD";
+      row.voidedReason = "window_expired";
+    }
+    if (row.effectiveAt && !row.qualityAt && row.effectiveAt < plusDays(now, -60)) {
+      row.milestoneStatus = "voided";
+      row.voidedStage = "QUALITY";
+      row.voidedReason = "window_expired";
+    }
+    const originalExpected = row.expected;
+    const firstAmount = row.effectiveAt ? Math.round(originalExpected * 0.75) : 0;
+    const qualityAmount = row.qualityAt ? originalExpected - firstAmount : 0;
+    row.commissionCases = [
+      {
+        id: `COM-${row.clientId}-QF`,
+        type: "qftd_batch",
+        segments: ["FTD", "QFTD"],
+        confirmedAt: row.effectiveAt,
+        amount: firstAmount,
+        status: firstAmount ? (row.fundStatus === "paid" ? "paid" : row.commissionStatus) : "not_generated"
+      },
+      {
+        id: `COM-${row.clientId}-QS`,
+        type: "quality_service",
+        segments: ["QUALITY"],
+        confirmedAt: row.qualityAt,
+        amount: qualityAmount,
+        status: qualityAmount ? (row.fundStatus === "paid" ? "paid" : row.commissionStatus) : "not_generated"
+      }
+    ].filter(item => item.amount > 0);
+    row.expected = row.commissionCases.reduce((sum, item) => sum + item.amount, 0);
+    row.held = row.commissionCases.filter(item => item.status === "held").reduce((sum, item) => sum + item.amount, 0);
+    row.approved = row.commissionCases.filter(item => item.status === "approved").reduce((sum, item) => sum + item.amount, 0);
+    row.paid = row.commissionCases.filter(item => item.status === "paid").reduce((sum, item) => sum + item.amount, 0);
+    row.rejected = row.commissionCases.filter(item => item.status === "rejected").reduce((sum, item) => sum + item.amount, 0);
+    row.reversed = row.commissionCases.filter(item => item.status === "reversed").reduce((sum, item) => sum + item.amount, 0);
+    row.commissionId = row.commissionCases[0]?.id || null;
     const reason = commissionReasons[row.commissionStatus]?.[index % 3];
     row.commissionReasonCode = reason?.[0] || "";
     row.commissionReason = reason?.[1] || "";
@@ -239,19 +306,27 @@
       registrations: registered.length,
       ftd: registered.filter(row => row.ftdAt).length,
       effective: registered.filter(row => row.effectiveAt).length,
-      qualified: registered.filter(row => row.qualifiedAt).length,
+      quality: registered.filter(row => row.qualityAt).length,
+      qualified: registered.filter(row => row.qualityAt).length,
       traders: registered.filter(row => row.tradedAt).length
     };
-    for (const key of ["ftdAmount", "expected", "held", "approved", "rejected", "reversed"]) {
-      counts[key] = registered.reduce((sum, row) => sum + row[key], 0);
-    }
+    counts.ftdAmount = registered.reduce((sum, row) => sum + row.ftdAmount, 0);
+    counts.expected = registered.reduce((sum, row) => sum + row.expected, 0);
+    counts.held = registered.filter(row => row.fundStatus === "held").reduce((sum, row) => sum + row.held, 0);
+    counts.approved = registered.filter(row => row.fundStatus === "payable").reduce((sum, row) => sum + row.approved, 0);
+    counts.paid = registered.filter(row => row.fundStatus === "paid").reduce((sum, row) => sum + row.paid, 0);
+    counts.inProgress = registered.filter(row => !["paid", "payable", "rejected", "clawed_back"].includes(row.fundStatus))
+      .reduce((sum, row) => sum + row.expected, 0);
+    counts.rejected = registered.filter(row => row.fundStatus === "rejected").reduce((sum, row) => sum + row.rejected, 0);
+    counts.reversed = registered.filter(row => row.fundStatus === "clawed_back").reduce((sum, row) => sum + row.reversed, 0);
     const ratio = (numerator, denominator) => denominator ? numerator / denominator : null;
     return {
       ...counts,
       registerRate: ratio(counts.registrations, counts.clicks),
       ftdRate: ratio(counts.ftd, counts.registrations),
       effectiveRate: ratio(counts.effective, counts.ftd),
-      qualifiedRate: ratio(counts.qualified, counts.effective),
+      qualityRate: ratio(counts.quality, counts.effective),
+      qualifiedRate: ratio(counts.quality, counts.effective),
       epc: ratio(counts.expected, counts.clicks)
     };
   }
@@ -293,6 +368,7 @@
       timezone: "UTC+08:00"
     },
     rows,
+    commissionPrice: AFF.partnerProgram.commissionPrice,
     value,
     options,
     filterRows,

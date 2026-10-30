@@ -5,7 +5,7 @@
   "description": "Public synthetic Affiliate user-side mock pages.",
   "scripts": {
     "serve": "node scripts/serve.cjs",
-    "check": "node --check data.js && node --check report-data.js && node --check pages.js && node --check reports.js && node --check postbacks.js && node --check subchannels.js && node --check earnings.js && node --check withdrawals.js && node --check campaign-links.js && node --check campaign-link.js && node --check app.js",
+    "check": "node --check data.js && node --check report-data.js && node --check finance-data.js && node --check pages.js && node --check date-range.js && node --check reports.js && node --check postbacks.js && node --check subchannels.js && node --check earnings.js && node --check withdrawals.js && node --check guarantee-page.js && node --check appeals-page.js && node --check messages-page.js && node --check campaign-links.js && node --check campaign-link.js && node --check admin-data.js && node --check admin.js && node --check app.js",
     "test:campaigns": "node scripts/campaign-check.cjs",
     "test:earnings": "node scripts/earnings-check.cjs",
     "test:dashboard-clients": "node scripts/dashboard-clients-check.cjs",
@@ -14,9 +14,11 @@
     "test:clients-layout": "node scripts/clients-layout-check.cjs",
     "test:client-hold-help": "node scripts/client-hold-help-check.cjs",
     "test:reports-data": "node scripts/report-data-check.cjs",
+    "test:p0": "node scripts/p0-check.cjs",
     "test:reports": "node scripts/reports-check.cjs",
     "test:ui": "node scripts/visual-check.cjs",
     "test:postbacks": "node scripts/postback-check.cjs",
-    "test:dashboard-postbacks": "node scripts/dashboard-postbacks-check.cjs"
+    "test:dashboard-postbacks": "node scripts/dashboard-postbacks-check.cjs",
+    "test:v1": "node scripts/v1-check.cjs"
   }
 }

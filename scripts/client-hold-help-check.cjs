@@ -51,7 +51,7 @@ async function main() {
       rows: AFF.reporting.rows, metrics: AFF.dashboard.metrics,
       revenue: AFF.dashboard.totalRevenue, appeals: AFF.state.clientCommissionAppeals
     }));
-    for (const status of ["pending", "approved", "rejected", "reversed"]) {
+    for (const status of ["pending_review", "settled_partial", "rejected", "clawed_back"]) {
       await openClient(page, status);
       assert.equal(await page.locator(triggerSelector).count(), 0);
       if (["rejected", "reversed"].includes(status)) {

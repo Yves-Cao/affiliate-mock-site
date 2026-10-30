@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const origin = "http://127.0.0.1:4179";
+const origin = process.env.DASHBOARD_POSTBACK_BASE_URL || "http://127.0.0.1:4179";
 const artifacts = path.resolve(".artifacts");
 const platforms = [
   ["binom", "Binom"], ["redtrack", "RedTrack"], ["voluum", "Voluum"],

@@ -8,9 +8,12 @@ const defaultState = {
     displayName: "Affiliate Partner",
     country: "新加坡",
     channel: "内容与社群",
-    language: "简体中文"
+    language: "简体中文",
+    timezone: "Asia/Shanghai"
   },
   scenario: "normal-flow",
+  kybCompleted: false,
+  withdrawalRequested: false,
   kycDismissed: false,
   dashboardMode: "day",
   dashboardPeriod: "past30",
@@ -70,13 +73,20 @@ const defaultState = {
     step: 1,
     maxStep: 1,
     emailVerified: false,
-    kycDone: false,
+    riskCheckDone: false,
     agreements: [false, false, false],
     submitted: false,
     agreementModal: 0,
     agreementDraft: false
   },
   programCommissionCountries: null,
+  programCalculator: {
+    country: "VN",
+    netDeposit: 800,
+    volume: 3,
+    days: 5,
+    payment: "wire"
+  },
   programCommissionSelectionVersion: 2,
   programCountryPickerOpen: false,
   programCountryQuery: "",
@@ -98,13 +108,16 @@ const englishLabels = {
   "活动": "Campaigns",
   "深度链接": "Deep links",
   "二级渠道": "Subchannels",
-  "链接追踪器": "Trackers",
+  "回传配置": "Postbacks",
   "素材库": "Assets",
   "收益与提现": "Earnings",
   "收益数据": "Earnings data",
   "客户归属查询": "Attribution",
   "归属查询": "Attribution lookup",
   "提现": "Withdrawal",
+  "保证金": "Guarantee",
+  "申诉中心": "Appeals",
+  "消息中心": "Messages",
   "合作者计划": "Partner Program",
   "入驻申请": "Onboarding Application"
 };
@@ -113,7 +126,8 @@ const englishGroupLabels = {
   "仪表盘": "Dashboard",
   "数据总览": "Overview",
   "推广管理": "Campaigns",
-  "收益中心": "Earnings"
+  "收益中心": "Earnings",
+  "服务中心": "Service"
 };
 
 const elements = {};
@@ -124,6 +138,84 @@ let authMode = "login";
 let sidebarHoverOpen = false;
 let onboardingPicker = "";
 let onboardingQuery = "";
+let accountTimezonePickerOpen = false;
+let accountTimezoneQuery = "";
+const firstPartnerProgramLoginKey = "affiliate-partner-program-first-login-completed";
+
+const fallbackTimezones = [
+  "UTC", "Asia/Shanghai", "Asia/Tokyo", "Asia/Singapore", "Asia/Hong_Kong",
+  "Asia/Bangkok", "Asia/Jakarta", "Asia/Ho_Chi_Minh", "Asia/Manila",
+  "Asia/Kolkata", "Asia/Karachi", "Asia/Dhaka", "Asia/Dubai",
+  "Asia/Kuwait", "Asia/Qatar", "Asia/Riyadh", "Asia/Almaty",
+  "Europe/London", "Europe/Paris", "Europe/Berlin", "Europe/Moscow",
+  "Africa/Lagos", "Africa/Johannesburg", "Africa/Cairo",
+  "America/New_York", "America/Chicago", "America/Los_Angeles", "America/Mexico_City",
+  "America/Sao_Paulo", "Australia/Sydney", "Pacific/Auckland"
+];
+const accountTimezoneCaches = new Map();
+
+function isValidTimezone(timezone) {
+  return fallbackTimezones.includes(timezone);
+}
+
+function accountTimezoneOptions() {
+  const locale = AFF.state?.language === "en" ? "en-US" : "zh-CN";
+  if (accountTimezoneCaches.has(locale)) return accountTimezoneCaches.get(locale);
+  const now = new Date();
+  const options = fallbackTimezones.map(value => {
+    const formatter = new Intl.DateTimeFormat(locale, { timeZone: value, timeZoneName: "long" });
+    const zoneName = formatter.formatToParts(now).find(part => part.type === "timeZoneName")?.value || value;
+    const offsetFormatter = new Intl.DateTimeFormat("en-US", { timeZone: value, timeZoneName: "longOffset" });
+    const offset = offsetFormatter.formatToParts(now).find(part => part.type === "timeZoneName")?.value || "GMT";
+    const label = `${zoneName} (${offset})`;
+    return { value, label, search: `${value} ${zoneName} ${offset}`.toLowerCase() };
+  });
+  accountTimezoneCaches.set(locale, options);
+  return options;
+}
+
+function accountTimezoneLabel(timezone) {
+  return accountTimezoneOptions().find(item => item.value === timezone)?.label || timezone;
+}
+
+function accountTimezoneOffset(timezone) {
+  const match = accountTimezoneLabel(timezone).match(/GMT([+-]\d{2}:\d{2})/);
+  return match ? `UTC${match[1]}` : "UTC";
+}
+
+function renderAccountTimezoneOptions(query = "") {
+  const keyword = query.trim().toLowerCase();
+  const options = accountTimezoneOptions().filter(item => item.search.includes(keyword));
+  if (!options.length) return `<div class="dashboard-link-empty">暂无匹配时区</div>`;
+  return options.map(item => {
+    const selected = accountDraft?.timezone === item.value;
+    return `<button class="dashboard-link-option timezone-option ${selected ? "selected" : ""}" type="button" role="option" aria-selected="${selected}" data-action="select-account-timezone" data-timezone="${AFF.helpers.h(item.value)}">
+      <span>${AFF.helpers.h(item.label)}<small>${AFF.helpers.h(item.value)}</small></span>
+      <strong>${selected ? "✓" : ""}</strong>
+    </button>`;
+  }).join("");
+}
+
+function formatAccountTime(now, timezone) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
+  }).formatToParts(now);
+  const value = type => parts.find(part => part.type === type)?.value || "00";
+  const hour = String(Number(value("hour")) % 24).padStart(2, "0");
+  return `${value("year")}-${value("month")}-${value("day")} ${hour}:${value("minute")}:${value("second")}`;
+}
+
+async function partnerProgramMarkerKey(email) {
+  try {
+    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(email.trim().toLowerCase()));
+    const fingerprint = [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, "0")).join("");
+    return `${firstPartnerProgramLoginKey}:${fingerprint}`;
+  } catch {
+    return `${firstPartnerProgramLoginKey}:shared`;
+  }
+ }
 
 function closeOnboardingPicker(restoreFocus = false) {
   const trigger = document.querySelector(".onboarding-picker.open .dashboard-link-picker-button");
@@ -141,8 +233,25 @@ function initializeElements() {
     "profile-entry", "sidebar-toggle", "language-toggle", "language-menu",
     "kyc-banner", "dismiss-kyc", "main", "modal-root", "toast", "scenario-select",
     "account-menu", "avatar-button", "account-dropdown", "wallet-menu", "wallet-toggle",
-    "wallet-popover", "wallet-balance", "wallet-popover-balance", "wallet-total-revenue"
+    "wallet-popover", "wallet-balance", "wallet-popover-balance", "wallet-total-revenue", "message-count",
+    "server-time", "server-time-zone", "local-time", "local-time-zone"
   ]) elements[id] = document.getElementById(id);
+}
+
+function updateTopbarClocks() {
+  const now = new Date();
+  const timezone = isValidTimezone(AFF.state?.account?.timezone)
+    ? AFF.state.account.timezone
+    : defaultState.account.timezone;
+  const time = formatAccountTime(now, timezone);
+  const zoneLabel = accountTimezoneLabel(timezone);
+  const offsetLabel = accountTimezoneOffset(timezone);
+  elements["server-time"].textContent = time;
+  elements["local-time"].textContent = time;
+  elements["server-time-zone"].textContent = offsetLabel;
+  elements["local-time-zone"].textContent = offsetLabel;
+  elements["server-time"].title = `服务器时间 · ${zoneLabel}`;
+  elements["local-time"].title = `本地时间 · ${zoneLabel}`;
 }
 
 function currentState() {
@@ -152,7 +261,11 @@ function currentState() {
     const savedState = JSON.parse(saved);
     const merged = { ...structuredClone(defaultState), ...savedState };
     merged.navGroups = [];
+    if (merged.reports?.clients?.filters?.commissionStatus && ["payable", "paid"].includes(merged.reports.clients.filters.commissionStatus)) {
+      merged.reports.clients.filters.commissionStatus = "settled_partial";
+    }
     merged.account = { ...structuredClone(defaultState.account), ...(savedState.account || {}) };
+    if (!isValidTimezone(merged.account.timezone)) merged.account.timezone = defaultState.account.timezone;
     merged.applyStep = Math.min(6, Math.max(1, Number(savedState.applyStep) || 1));
     merged.programMaxStep = Math.min(6, Math.max(merged.applyStep, savedState.programCompleted ? 6 : 1, Number(savedState.programMaxStep) || 1));
     merged.programAssetSlide = 0;
@@ -241,7 +354,8 @@ function renderNav() {
     "仪表盘": "dashboard",
     "数据总览": "overview",
     "推广管理": "megaphone",
-    "收益中心": "wallet"
+    "收益中心": "wallet",
+    "服务中心": "clients"
   };
   elements.nav.innerHTML = groups.map(group => {
     const routes = AFF.routes.filter(route => route.id !== "apply" && route.group === group);
@@ -300,6 +414,9 @@ function navIcon(name) {
     pay: '<path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6.5A2.5 2.5 0 0 1 4 16.5z"/><path d="M4 8h15"/><path d="M8 12h4"/>',
     lookup: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/><path d="M8 10.5h5M10.5 8v5"/>',
     wd: '<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>',
+    guarantee: '<path d="M12 3l7 3v6c0 4.2-2.8 7.6-7 9-4.2-1.4-7-4.8-7-9V6z"/><path d="M9.5 12l1.8 1.8L15 10"/>',
+    appeals: '<path d="M12 4v10"/><path d="M7.5 9.5 12 14l4.5-4.5"/><path d="M5 19h14"/>',
+    messages: '<path d="M4 6h16v10H8l-4 4z"/><path d="M8 10h8M8 13h5"/>',
     apply: '<path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="m19 16 .7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7z"/>'
   };
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${paths[name] || paths.dashboard}</svg>`;
@@ -319,9 +436,12 @@ function render() {
   const route = AFF.routes.some(item => item.id === AFF.state.route) ? AFF.state.route : "dash";
   AFF.state.route = route;
   renderNav();
-  elements["wallet-balance"].textContent = AFF.dashboard.metrics[0].value;
-  elements["wallet-popover-balance"].textContent = AFF.dashboard.metrics[0].value;
-  elements["wallet-total-revenue"].textContent = AFF.dashboard.totalRevenue;
+  const financeSummary = AFF.finance.summary();
+  const reportMoney = value => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
+  elements["wallet-balance"].textContent = reportMoney(AFF.finance.balance() / 100);
+  elements["wallet-popover-balance"].textContent = reportMoney(AFF.finance.balance() / 100);
+  elements["wallet-total-revenue"].textContent = reportMoney(financeSummary.available + financeSummary.paid + financeSummary.guarantee);
+  elements["message-count"].textContent = AFF.finance.messages.filter(message => message.status === "unread").length;
   elements["avatar-button"].textContent = accountInitial();
   elements["avatar-button"].setAttribute("aria-label", `${AFF.state.account.displayName} 账户菜单`);
   elements["scenario-select"].value = AFF.state.scenario;
@@ -330,7 +450,7 @@ function render() {
     : statePage(route);
   elements["kyc-banner"].classList.toggle(
     "hidden",
-    AFF.state.kycDismissed || route === "onboarding" || AFF.state.onboarding.kycDone || AFF.state.onboarding.submitted
+    AFF.state.kycDismissed || route === "onboarding" || route === "wd" || AFF.state.programCompleted
   );
   document.body.classList.toggle("collapsed", AFF.state.sidebarCollapsed);
   document.body.classList.toggle("mobile-nav-open", AFF.state.mobileNavOpen);
@@ -466,7 +586,11 @@ function showScreenModal(html, title) {
 }
 
 function closeModal() {
-  if (elements["modal-root"].getAttribute("aria-label") === "账户管理") accountDraft = null;
+  if (elements["modal-root"].getAttribute("aria-label") === "账户管理") {
+    accountDraft = null;
+    accountTimezonePickerOpen = false;
+    accountTimezoneQuery = "";
+  }
   elements["modal-root"].className = "modal-layer hidden";
   elements["modal-root"].innerHTML = "";
   elements["modal-root"].removeAttribute("aria-label");
@@ -483,17 +607,19 @@ function modalShell(title, body, actions = "") {
 
 function openAccountModal() {
   accountDraft = structuredClone(AFF.state.account);
-  const loginName = sessionStorage.getItem("affiliate-user-session") || "-";
-  const input = (field, label, value) => `
-    <label class="field"><span>${AFF.helpers.h(label)}</span>
-      <input data-account-field="${field}" value="${AFF.helpers.h(value)}" maxlength="40">
-    </label>`;
-  const select = (field, label, values) => `
-    <label class="field"><span>${AFF.helpers.h(label)}</span>
-      <select data-account-field="${field}">
-        ${values.map(value => `<option value="${AFF.helpers.h(value)}" ${accountDraft[field] === value ? "selected" : ""}>${AFF.helpers.h(value)}</option>`).join("")}
-      </select>
-    </label>`;
+  accountTimezonePickerOpen = false;
+  accountTimezoneQuery = "";
+  const timezonePicker = `
+    <div class="dashboard-link-picker account-timezone-picker">
+      <span class="field-label" id="account-timezone-label">所在时区</span>
+      <button class="dashboard-link-picker-button" type="button" data-action="toggle-account-timezone" aria-labelledby="account-timezone-label account-timezone-value" aria-haspopup="listbox" aria-controls="account-timezone-options" aria-expanded="false">
+        <span id="account-timezone-value">${AFF.helpers.h(accountTimezoneLabel(accountDraft.timezone))}</span><small aria-hidden="true">▾</small>
+      </button>
+      <div class="dashboard-link-options" id="account-timezone-options">
+        <input data-account-timezone-search type="search" placeholder="搜索时区、城市或UTC偏移" aria-label="搜索时区" value="">
+        <div class="dashboard-link-option-list" role="listbox" aria-label="所在时区" data-account-timezone-options>${renderAccountTimezoneOptions("")}</div>
+      </div>
+    </div>`;
   showScreenModal(`
     <div class="account-modal">
       <header class="account-modal-head">
@@ -506,21 +632,9 @@ function openAccountModal() {
       <div class="account-modal-body">
         <div class="account-modal-content">
           <section class="account-section">
-            <h3>基础信息</h3>
-            <div class="account-profile-grid">
-              <div class="info-item"><span>用户ID</span><strong>U-P-001</strong></div>
-              <div class="info-item"><span>登录账号</span><strong>${AFF.helpers.h(maskEmail(loginName))}</strong></div>
-              <div class="info-item"><span>邮箱</span><strong>${AFF.helpers.h(maskEmail(loginName))}</strong></div>
-              <div class="info-item"><span>角色</span><strong>Affiliate Partner</strong></div>
-            </div>
-          </section>
-          <section class="account-section">
-            <h3>可编辑资料</h3>
+            <h3>时区设置</h3>
             <div class="account-form">
-              ${input("displayName", "显示名称", accountDraft.displayName)}
-              ${select("country", "国家", ["新加坡", "马来西亚", "巴西", "其他"])}
-              ${select("channel", "推广渠道类型", ["内容与社群", "付费广告", "邮件营销", "线下活动"])}
-              ${select("language", "语言", ["简体中文", "English", "ไทย", "Tiếng Việt"])}
+              ${timezonePicker}
             </div>
             <p class="helper">资料仅保存在当前浏览器会话中。</p>
           </section>
@@ -539,24 +653,62 @@ function openAccountModal() {
 
 function closeAccountModal() {
   accountDraft = null;
+  accountTimezonePickerOpen = false;
+  accountTimezoneQuery = "";
   closeModal();
   elements["avatar-button"].focus();
+}
+
+function setAccountTimezonePicker(open) {
+  accountTimezonePickerOpen = open;
+  if (open) accountTimezoneQuery = "";
+  const picker = document.querySelector(".account-timezone-picker");
+  picker?.classList.toggle("open", open);
+  picker?.querySelector("[data-action='toggle-account-timezone']")?.setAttribute("aria-expanded", String(open));
+  const search = picker?.querySelector("[data-account-timezone-search]");
+  if (search) {
+    search.value = accountTimezoneQuery;
+    const list = picker.querySelector("[data-account-timezone-options]");
+    if (list) list.innerHTML = renderAccountTimezoneOptions(accountTimezoneQuery);
+  }
+  if (open) requestAnimationFrame(() => search?.focus());
+}
+
+function selectAccountTimezone(target) {
+  if (!accountDraft) return;
+  const timezone = target.dataset.timezone;
+  if (!isValidTimezone(timezone)) return;
+  accountDraft.timezone = timezone;
+  const picker = document.querySelector(".account-timezone-picker");
+  const timezoneValue = picker?.querySelector("#account-timezone-value");
+  if (timezoneValue) timezoneValue.textContent = accountTimezoneLabel(timezone);
+  setAccountTimezonePicker(false);
+  picker?.querySelector("[data-action='toggle-account-timezone']")?.focus();
 }
 
 function saveAccount() {
   if (!accountDraft) return;
   const displayName = accountDraft.displayName.trim();
   if (!displayName) return showToast("请输入显示名称");
-  AFF.state.account = { ...accountDraft, displayName };
+  AFF.state.account = {
+    ...accountDraft,
+    displayName,
+    timezone: isValidTimezone(accountDraft.timezone) ? accountDraft.timezone : defaultState.account.timezone
+  };
   accountDraft = null;
+  accountTimezonePickerOpen = false;
+  accountTimezoneQuery = "";
   closeModal();
   showToast("账户信息已保存");
+  updateTopbarClocks();
   render();
   elements["avatar-button"].focus();
 }
 
 function logout() {
   accountDraft = null;
+  accountTimezonePickerOpen = false;
+  accountTimezoneQuery = "";
   closeModal();
   closeAccountMenu(false);
   clearTimeout(showToast.timer);
@@ -607,13 +759,13 @@ function openCampaignData(code, period = "past30", focusPeriod = false) {
   const metrics = [
     ["clicks", t("点击量", "Clicks")], ["registrations", t("注册客户", "Registrations")],
     ["ftd", t("FTD 客户", "FTD clients")], ["effective", t("有效客户", "Valid FTD clients")],
-    ["qualified", t("合格客户", "Qualified clients")], ["expected", t("预计佣金", "Projected commission"), "money"]
+    ["quality", t("质量服务客户", "Quality service clients")], ["expected", t("预计佣金", "Projected commission"), "money"]
   ];
   const breakdown = (key, title) => {
     const grouped = AFF.reporting.aggregate(rows, [key]).sort((a, b) => b.metrics.clicks - a.metrics.clicks);
     return `<section class="campaign-breakdown"><h3>${title}</h3>${grouped.length ? AFF.helpers.table({
-      columns: [title, t("点击", "Clicks"), t("注册客户", "Registrations"), t("FTD客户", "FTD clients"), t("有效客户", "Valid FTD clients"), t("合格客户", "Qualified clients"), t("预计佣金", "Projected commission")],
-      rows: grouped.map(row => [AFF.helpers.h(row.values[0]), number(row.metrics.clicks), ...["registrations", "ftd", "effective", "qualified"].map(metric => AFF.campaignMetric(campaign, metric, row.metrics[metric], period, key, row.values[0])), number(row.metrics.expected, "money")])
+      columns: [title, t("点击", "Clicks"), t("注册客户", "Registrations"), t("FTD客户", "FTD clients"), t("有效客户", "Valid FTD clients"), t("质量服务客户", "Quality service clients"), t("预计佣金", "Projected commission")],
+      rows: grouped.map(row => [AFF.helpers.h(row.values[0]), number(row.metrics.clicks), ...["registrations", "ftd", "effective", "quality"].map(metric => AFF.campaignMetric(campaign, metric, row.metrics[metric], period, key, row.values[0])), number(row.metrics.expected, "money")])
     }) : `<div class="campaign-empty">${t("当前周期暂无数据", "No data for this period")}</div>`}</section>`;
   };
   const periods = [["today", "今日", "Today"], ["past7", "过去7天", "Last 7 days"], ["past30", "过去30天", "Last 30 days"], ["past90", "过去90天", "Last 90 days"]];
@@ -621,7 +773,7 @@ function openCampaignData(code, period = "past30", focusPeriod = false) {
     <header class="modal-head"><div><h2>${AFF.helpers.h(campaign.name)}</h2><p>${AFF.helpers.h(campaign.code)}</p></div><button class="close-button" type="button" data-action="campaign-close-data" data-code="${AFF.helpers.h(code)}" title="${t("关闭", "Close")}" aria-label="${t("关闭", "Close")}">×</button></header>
     <div class="campaign-data-body">
       <div class="campaign-data-period"><label for="campaign-period">${t("时间范围", "Date range")}</label><select id="campaign-period">${periods.map(([value, zh, en]) => `<option value="${value}" ${value === period ? "selected" : ""}>${t(zh, en)}</option>`).join("")}</select><span>${range.from} — ${range.to}</span></div>
-      <section class="campaign-data-metrics">${metrics.map(([key, label, type]) => `<div><span>${label}</span>${["registrations", "ftd", "effective", "qualified"].includes(key) ? AFF.campaignMetric(campaign, key, totals[key], period) : `<strong>${number(totals[key], type)}</strong>`}</div>`).join("")}</section>
+      <section class="campaign-data-metrics">${metrics.map(([key, label, type]) => `<div><span>${label}</span>${["registrations", "ftd", "effective", "quality"].includes(key) ? AFF.campaignMetric(campaign, key, totals[key], period) : `<strong>${number(totals[key], type)}</strong>`}</div>`).join("")}</section>
       <section class="campaign-data-rates">${[["registerRate", t("点击→注册", "Click → registration")], ["ftdRate", t("注册→FTD", "Registration → FTD")], ["effectiveRate", t("FTD→有效 FTD", "FTD → valid FTD")]].map(([key, label]) => `<div><span>${label}</span><strong>${number(totals[key], "rate")}</strong></div>`).join("")}</section>
       ${breakdown("country", t("国家/地区", "Country / region"))}
       ${breakdown("platform", t("平台", "Platform"))}
@@ -687,8 +839,8 @@ function openClientInfo(clientId) {
   if (!row) return;
   showModal(modalShell(`客户 ${row.clientId}`, `
     <div class="info-grid">
-      <div class="info-item"><span>资格链</span><strong>注册 → KYC → 有效FTD → 真实交易 → 合格判定</strong></div>
-      <div class="info-item"><span>佣金链</span><strong>待检查 → 已批准 → 已支付</strong></div>
+      <div class="info-item"><span>资格链</span><strong>注册 → KYC → FTD → 有效FTD → 质量服务</strong></div>
+      <div class="info-item"><span>佣金链</span><strong>未生成 → 前两段合并 → 质量服务单独 → 动态Hold → 可提现</strong></div>
       <div class="info-item"><span>动态Hold</span><strong>初始1天，按风险分递增</strong></div>
       <div class="info-item"><span>结算</span><strong>日度结算</strong></div>
       <div class="info-item"><span>归因</span><strong>${AFF.helpers.h(row.source)} / ${AFF.helpers.h(row.medium)} / ${AFF.helpers.h(row.campaign)}</strong></div>
@@ -713,8 +865,10 @@ function lookup() {
     return;
   }
   state.lookup.queries += 1;
-  state.lookup.result = AFF.lookupIndex.find(item => item.key.toLowerCase() === input.toLowerCase()) || {
-    id: "-", email: "-", owned: false, date: "-", reason: "未查询到可披露结果；请求已进入审计日志"
+  const matched = AFF.lookupIndex.find(item => item.key.toLowerCase() === input.toLowerCase());
+  state.lookup.result = matched?.owned ? matched : {
+    id: "-", email: "-", owned: false, date: "-", method: "-", firstTouch: "-",
+    reason: "无匹配结果；为防止客户探测，非本人客户与不存在客户返回相同结果。请求已进入审计日志。"
   };
   render();
 }
@@ -729,6 +883,8 @@ function handleAction(action, target) {
   }
   if (action === "close-account-modal") return closeAccountModal();
   if (action === "save-account") return saveAccount();
+  if (action === "toggle-account-timezone") return setAccountTimezonePicker(!accountTimezonePickerOpen);
+  if (action === "select-account-timezone") return selectAccountTimezone(target);
   if (action === "logout") return logout();
   if (action === "open-perf-filter") {
     state.perf.drawer = true;
@@ -775,18 +931,34 @@ function handleAction(action, target) {
   }
   if (action === "dashboard-clients") {
     const { metric, period } = target.dataset;
-    if (!["registrations", "effective", "qualified", "revenue"].includes(metric) ||
+    if (!["registrations", "ftd", "effective", "quality", "revenue"].includes(metric) ||
         !["all", "month", "today", "past7", "past30", "lastWeek", "lastMonth"].includes(period)) return;
     const filters = { ...AFF.dashboardData(period).range };
-    if (metric === "revenue") filters.commissionStatus = "approved";
+    if (metric === "revenue") filters.commissionStatus = "settled_partial";
     return AFF.reports.openClients(filters, metric === "revenue" ? "registrations" : metric);
+  }
+  if (action === "dashboard-earnings") {
+    const earnings = AFF.earnings.state();
+    earnings.filters = {
+      from: AFF.reporting.from,
+      to: AFF.reporting.now,
+      status: "in_progress",
+      type: "",
+      caseType: ""
+    };
+    earnings.draft = { ...earnings.filters };
+    earnings.page = 1;
+    earnings.detail = null;
+    earnings.appeal = false;
+    earnings.error = "";
+    return navigate("pay");
   }
   if (action === "open-campaign-modal") return openCampaignModal();
   if (action === "campaign-data") return openCampaignData(target.dataset.code);
   if (action === "campaign-close-data") return closeCampaignData(target.dataset.code);
   if (action === "campaign-clients") {
     const campaign = AFF.campaigns.find(item => item.code === target.dataset.code);
-    if (!campaign || !["registrations", "ftd", "effective", "qualified"].includes(target.dataset.metric)) return;
+    if (!campaign || !["registrations", "ftd", "effective", "quality"].includes(target.dataset.metric)) return;
     const filters = { ...AFF.reports.range(target.dataset.period || "past30"), campaignCode: campaign.code };
     if (["country", "platform"].includes(target.dataset.dimension)) filters[target.dataset.dimension] = target.dataset.value;
     closeModal();
@@ -873,7 +1045,7 @@ function handleAction(action, target) {
       state.account.displayName = state.onboarding.name;
       state.onboarding.step = 3;
       state.onboarding.maxStep = Math.max(state.onboarding.maxStep, 3);
-    } else if (state.onboarding.step === 3 && state.onboarding.kycDone) {
+    } else if (state.onboarding.step === 3 && state.onboarding.riskCheckDone) {
       state.onboarding.step = 4;
       state.onboarding.maxStep = Math.max(state.onboarding.maxStep, 4);
     } else if (state.onboarding.step === 4 && state.onboarding.agreements.every(Boolean)) {
@@ -909,14 +1081,14 @@ function handleAction(action, target) {
     return;
   }
   if (action === "open-client-kyc") {
-    showToast("演示：跳转客户端完成 KYC 实名认证");
+    showToast("演示：KYB将在首次提现时开启");
     return;
   }
   if (action === "complete-onboarding-kyc") {
-    state.onboarding.kycDone = true;
+    state.onboarding.riskCheckDone = true;
     state.onboarding.step = 4;
     state.onboarding.maxStep = Math.max(state.onboarding.maxStep, 4);
-    showToast("KYC 已完成并同步");
+    showToast("实时硬风控通过，可进入资质审核");
     return render();
   }
   if (action === "open-onboarding-agreement") {
@@ -942,7 +1114,7 @@ function handleAction(action, target) {
   }
   if (action === "submit-onboarding") {
     state.onboarding.submitted = true;
-    showToast("入驻申请已提交审核");
+    showToast("资质审核已提交；审核通过后启用推广链接");
     return render();
   }
   if (action === "lookup") return lookup();
@@ -1235,6 +1407,12 @@ function handleChange(event) {
 function handleInput(event) {
   if (AFF.postbacks?.handleInput(event)) return;
   const target = event.target;
+  if (target.dataset.accountTimezoneSearch !== undefined) {
+    accountTimezoneQuery = target.value;
+    const list = document.querySelector("[data-account-timezone-options]");
+    if (list) list.innerHTML = renderAccountTimezoneOptions(accountTimezoneQuery);
+    return;
+  }
   if (target.hasAttribute("data-onboarding-name")) {
     AFF.state.onboarding.name = target.value;
     target.setCustomValidity("");
@@ -1300,7 +1478,7 @@ function showRegisterError(message) {
   elements["register-error"].hidden = false;
 }
 
-function handleLogin(event) {
+async function handleLogin(event) {
   event.preventDefault();
   const email = event.currentTarget.email.value.trim();
   const password = event.currentTarget.password.value;
@@ -1312,8 +1490,11 @@ function handleLogin(event) {
     const registered = JSON.parse(sessionStorage.getItem("affiliate-registered-account") || "null");
     if (registered?.email === email) AFF.state.account.country = registered.country;
   } catch {}
-  AFF.state.route = "dash";
-  history.replaceState(null, "", `${location.pathname}${location.search}#/dash`);
+  const markerKey = await partnerProgramMarkerKey(email);
+  const isFirstLogin = localStorage.getItem(markerKey) !== "1";
+  if (isFirstLogin) localStorage.setItem(markerKey, "1");
+  AFF.state.route = isFirstLogin ? "apply" : "dash";
+  history.replaceState(null, "", `${location.pathname}${location.search}#/${AFF.state.route}`);
   elements["login-view"].classList.add("hidden");
   elements["app-view"].classList.remove("hidden");
   render();
@@ -1423,6 +1604,8 @@ function initializeAuthForms() {
 
 function initialize() {
   initializeElements();
+  updateTopbarClocks();
+  setInterval(updateTopbarClocks, 1000);
   initializeWalletMenu();
   initializeAccountMenu();
   initializeAuthForms();
@@ -1498,7 +1681,25 @@ function initialize() {
   });
   document.addEventListener("change", handleChange);
   document.addEventListener("input", handleInput);
+  document.addEventListener("input", event => {
+    if (!event.target.matches("[data-calculator-field]")) return;
+    const field = event.target.dataset.calculatorField;
+    if (["netDeposit", "volume", "days"].includes(field)) {
+      AFF.state.programCalculator[field] = Math.max(0, Number(event.target.value) || 0);
+    } else {
+      AFF.state.programCalculator[field] = event.target.value;
+    }
+  });
+  document.addEventListener("change", event => {
+    if (!event.target.matches("[data-calculator-field]")) return;
+    render();
+    document.querySelector(`[data-calculator-field="${event.target.dataset.calculatorField}"]`)?.focus();
+  });
   document.addEventListener("click", event => {
+    const timezonePicker = document.querySelector(".account-timezone-picker");
+    if (accountTimezonePickerOpen && timezonePicker && !timezonePicker.contains(event.target)) {
+      setAccountTimezonePicker(false);
+    }
     if (!event.target.closest(".onboarding-picker")) closeOnboardingPicker();
     if (event.target.closest(".country-picker, .dashboard-link-picker")) return;
     if (

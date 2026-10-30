@@ -82,15 +82,17 @@ AFF.pages.dash = () => {
   };
   const languageCodes = { "简体中文": "zh-cn", "English": "en", "ไทย": "th", "Tiếng Việt": "vi" };
   const promotionUrl = new URL(AFF.dashboard.link);
+  promotionUrl.searchParams.set("aff", "AFF1001");
+  promotionUrl.searchParams.set("sub", "default");
+  promotionUrl.searchParams.set("clickid", "demo_click_001");
   promotionUrl.searchParams.set("page", pageCodes[state.dashboardLinkPage] || "register");
   promotionUrl.searchParams.set("lang", languageCodes[state.dashboardLinkLanguage] || "zh-cn");
   const promotionLink = promotionUrl.href;
   const summaryPeriod = ["today", "past7", "past30", "lastWeek", "lastMonth"].includes(state.dashboardPeriod)
     ? state.dashboardPeriod : "past30";
   const summary = AFF.dashboardData(summaryPeriod).totals;
-  const allClients = AFF.dashboardData("all");
+  const finance = AFF.finance.summary();
   const monthClients = AFF.dashboardData("month").totals;
-  const qualifiedChange = monthClients.qualified - AFF.dashboardData("lastMonth").totals.qualified;
   const periodOptions = [
     ["today", t("今日", "Today")],
     ["past7", t("过去7天", "Last 7 days")],
@@ -109,27 +111,51 @@ AFF.pages.dash = () => {
         <div class="dashboard-link-option-list" data-dashboard-link-option-list="${field}">${AFF.renderDashboardLinkOptions(field)}</div>
       </div>
     </div>`;
-  const walletMetric = AFF.dashboard.metrics[0];
   return `
-    ${AFF.helpers.pageHeader("仪表盘", "我能提多少钱、客户激活情况、去哪拿链接。")}
+    ${AFF.helpers.pageHeader("仪表盘", "查看资金状态与本月里程碑；所有金额与资金流水同源。")}
     <div class="cards dashboard-metrics">
       <article class="card metric dashboard-wallet-card">
         <div class="metric-header">
-          <span>${AFF.helpers.h(walletMetric.label)}</span>
+          <span>${t("可提现余额", "Available balance")}</span>
           <button class="button secondary small" type="button" data-route="wd">提现</button>
         </div>
-        <strong>${AFF.helpers.h(walletMetric.value)}</strong>
-        <small>总收益：${AFF.helpers.h(AFF.dashboard.totalRevenue)}</small>
+        <strong>${money(finance.available)}</strong>
+        <small>${t("数据截至", "As of")} ${AFF.finance.asOf}</small>
       </article>
       <article class="card metric">
-        <span>${t("注册客户", "Registered clients")}</span>
-        ${clientButton("registrations", number(allClients.totals.registrations), "all", t("查看注册客户", "View registered clients"))}
-        <small>${t("未激活客户", "Inactive clients")}：${number(allClients.inactive)}</small>
+        <span>${t("进行中的余额", "Balance in progress")}</span>
+        <button class="dashboard-number-link" type="button" data-action="dashboard-earnings" title="${t("查看收益数据", "View earnings data")}">${money(finance.held)}</button>
+        <small>${t("含暂扣、人工确认余额", "Includes held and manual-review balances")}</small>
       </article>
       <article class="card metric">
-        <span>${t("合格客户（本月）", "Qualified clients (this month)")}</span>
-        ${clientButton("qualified", number(monthClients.qualified), "month", t("查看本月合格客户", "View this month's qualified clients"))}
-        <small>${qualifiedChange >= 0 ? "▲" : "▼"} ${number(Math.abs(qualifiedChange))} ${t("较上月", "vs. last month")}</small>
+        <span>${t("滚动保证金", "Rolling guarantee")}</span>
+        <button class="dashboard-number-link" type="button" data-route="guarantee">${money(finance.guarantee)}</button>
+        <small>${t("结算后90自然日释放", "Released 90 days after settlement")}</small>
+      </article>
+      <article class="card metric">
+        <span>${t("已提现余额", "Withdrawn balance")}</span>
+        <strong>${money(finance.paid)}</strong>
+        <small>${t("按支付成功分摊合计", "Successful withdrawal allocations")}</small>
+      </article>
+      <article class="card metric">
+        <span>${t("本月注册客户", "Registrations this month")}</span>
+        ${clientButton("registrations", number(monthClients.registrations), "month", t("查看本月注册客户", "View registrations"))}
+        <small>${AFF.reporting.now.slice(0, 7)}</small>
+      </article>
+      <article class="card metric">
+        <span>${t("本月FTD", "FTD this month")}</span>
+        ${clientButton("ftd", number(monthClients.ftd), "month", t("查看本月FTD", "View FTD"))}
+        <small>${AFF.reporting.now.slice(0, 7)}</small>
+      </article>
+      <article class="card metric">
+        <span>${t("本月有效FTD", "Valid FTD this month")}</span>
+        ${clientButton("effective", number(monthClients.effective), "month", t("查看本月有效FTD", "View this month's valid FTD"))}
+        <small>${AFF.reporting.now.slice(0, 7)}</small>
+      </article>
+      <article class="card metric">
+        <span>${t("本月质量服务", "Quality service this month")}</span>
+        ${clientButton("quality", number(monthClients.quality), "month", t("查看本月质量服务", "View quality service"))}
+        <small>${AFF.reporting.now.slice(0, 7)}</small>
       </article>
     </div>
     <div class="dashboard-promotion-grid">
@@ -264,7 +290,7 @@ AFF.pages.perfDrawer = () => {
   <aside class="filter-drawer" aria-label="筛选器">
     <div class="panel-header"><h2>筛选器</h2><button class="close-button" type="button" data-action="close-perf-filter">×</button></div>
     <div class="panel-body">
-      <div class="field"><span>时间</span><input type="date" value="2026-09-23" disabled><input type="date" value="2026-10-22" disabled></div>
+      <div class="field"><span>时间</span><input value="2026-09-23 — 2026-10-22" disabled></div>
       ${Object.entries(filterOptions).map(([key, values], index) => `
         <label class="field" style="margin-top:${index === 0 ? 14 : 12}px">
           <span>${labels[key]}</span>
@@ -361,7 +387,7 @@ AFF.pages.promo = () => {
       `<div class="campaign-link"><a href="${AFF.helpers.h(link)}" target="_blank" rel="noopener" title="${AFF.helpers.h(link)}">${AFF.helpers.h(link)}</a><button class="icon-button campaign-copy" type="button" data-copy="${AFF.helpers.h(link)}" title="${t("复制链接", "Copy link")}" aria-label="${t("复制链接", "Copy link")}">${copyIcon}</button></div>`,
       `<span class="tag tag-${archived ? "muted" : "ok"}">${archived ? t("归档", "Archived") : t("活跃", "Active")}</span>`,
       AFF.campaignNumber(totals.clicks),
-      ...["registrations", "ftd", "effective", "qualified"].map(key => AFF.campaignMetric(row, key, totals[key])),
+      ...["registrations", "ftd", "effective", "quality"].map(key => AFF.campaignMetric(row, key, totals[key])),
       AFF.campaignNumber(totals.expected, "money"),
       `<div class="table-actions"><button class="button secondary small" type="button" data-action="campaign-data" data-code="${AFF.helpers.h(row.code)}">${t("查看数据", "View data")}</button><button class="button secondary small" type="button" data-action="campaign-status" data-code="${AFF.helpers.h(row.code)}">${archived ? t("设为活跃", "Activate") : t("归档", "Archive")}</button></div>`
     ];
@@ -373,16 +399,18 @@ AFF.pages.promo = () => {
       <strong>${t("活动", "Campaigns")}</strong>
       <span class="helper">${t("过去30天", "Last 30 days")} · ${AFF.reports.range("past30").from} — ${AFF.reporting.now}</span>
     </div>
-    <section class="card campaign-list">${AFF.helpers.table({ columns: [t("活动", "Campaign"), t("链接", "Link"), t("状态", "Status"), t("点击", "Clicks"), t("注册客户", "Registrations"), t("FTD客户", "FTD clients"), t("有效客户", "Valid FTD clients"), t("合格客户", "Qualified clients"), t("预计佣金", "Projected commission"), t("操作", "Action")], rows: campaignRows, footer: AFF.helpers.pagination(AFF.campaigns.length, page, "campaign-page") })}</section>
+    <section class="card campaign-list">${AFF.helpers.table({ columns: [t("活动", "Campaign"), t("链接", "Link"), t("状态", "Status"), t("点击", "Clicks"), t("注册客户", "Registrations"), t("FTD客户", "FTD clients"), t("有效客户", "Valid FTD clients"), t("质量服务客户", "Quality service clients"), t("预计佣金", "Projected commission"), t("操作", "Action")], rows: campaignRows, footer: AFF.helpers.pagination(AFF.campaigns.length, page, "campaign-page") })}</section>
     </div>`;
 };
 
 AFF.pages.deep = () => {
   const state = AFF.state;
   const languageCode = language => language === "简体中文" ? "zh-cn" : language === "English" ? "en" : language === "ไทย" ? "th" : "vi";
-  const slug = page => page === "首页" ? "" : page.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-  const desktop = `https://example.com/${slug(state.deep.desktop.page)}?lang=${languageCode(state.deep.desktop.language)}`;
-  const mobile = `https://app.example.com/${state.deep.mobile.system.includes("iOS") ? "ios" : "android"}/${slug(state.deep.mobile.page)}?lang=${languageCode(state.deep.mobile.language)}`;
+  const pageCodes = { "注册页": "register", "首页": "home", "Standard·MT5开户页": "standard-mt5", "Pro·MT4开户页": "pro-mt4", "Zero·MT5开户页": "zero-mt5" };
+  const slug = page => pageCodes[page] || "register";
+  const linkParams = scope => `aff=AFF1001&sub=default&clickid=demo_click_001&lang=${languageCode(state.deep[scope].language)}`;
+  const desktop = `https://track.example.com/r/AFF1001/${slug(state.deep.desktop.page)}?${linkParams("desktop")}`;
+  const mobile = `https://track.example.com/r/AFF1001/mobile/${state.deep.mobile.system.includes("iOS") ? "ios" : "android"}/${slug(state.deep.mobile.page)}?${linkParams("mobile")}&mmp=appsflyer&deferred_deep_link=1`;
   const control = (label, scope, key, values) => `
     <label class="field"><span>${label}</span>
       <select data-deep="${scope}.${key}">${values.map(value => `<option ${state.deep[scope][key] === value ? "selected" : ""}>${AFF.helpers.h(value)}</option>`).join("")}</select>
@@ -442,8 +470,10 @@ AFF.pages.lookup = () => {
         <div class="result-card info-grid">
           <div class="info-item"><span>客户编号</span><strong>${AFF.helpers.h(result.id)}</strong></div>
           <div class="info-item"><span>客户邮箱</span><strong>${AFF.helpers.h(result.email)}</strong></div>
-          <div class="info-item"><span>归属状态</span>${AFF.helpers.tag(result.owned ? "通过" : "拒绝")}</div>
+          <div class="info-item"><span>归属状态</span>${AFF.helpers.tag(result.owned ? "通过" : "无匹配")}</div>
           <div class="info-item"><span>归属起始</span><strong>${AFF.helpers.h(result.date)}</strong></div>
+          <div class="info-item"><span>归因方式</span><strong>${AFF.helpers.h(result.method || "受控查询")}</strong></div>
+          <div class="info-item"><span>首触时间</span><strong>${AFF.helpers.h(result.firstTouch || "不披露")}</strong></div>
           <div class="info-item wide"><span>判定依据</span><strong>${AFF.helpers.h(result.reason)}</strong></div>
         </div>` : `<div class="empty-state"><strong>输入精准标识后查询</strong><span>为保障账户安全，连续查询次数有限制；请求会进入审计日志</span></div>`}
     </section>`;
@@ -597,6 +627,15 @@ AFF.pages.assetDetail = () => {
   const detail = AFF.state.assets.detail;
   const item = AFF.assets.find(asset => asset.id === detail.id);
   if (!item) return "";
+  const meta = AFF.assetMeta(item);
+  const metaHtml = `<div class="asset-meta-grid">
+    <div><span>素材编号</span><strong>${AFF.helpers.h(item.id)}</strong></div>
+    <div><span>版本</span><strong>${AFF.helpers.h(meta.version)}</strong></div>
+    <div><span>审批人</span><strong>${AFF.helpers.h(meta.approvedBy)}</strong></div>
+    <div><span>上线时间</span><strong>${AFF.helpers.h(meta.onlineAt)}</strong></div>
+    <div><span>下线时间</span><strong>${AFF.helpers.h(meta.offlineAt)}</strong></div>
+    <div><span>风险提示</span><strong>官方素材已注入，不可删除</strong></div>
+  </div>`;
   if (item.type === "GIF") {
     const anchorTag = AFF.assetAnchorTag(item, detail);
     const fields = [
@@ -611,6 +650,7 @@ AFF.pages.assetDetail = () => {
     <div class="asset-gif-layout">
       <div class="asset-gif-preview" aria-label="GIF大预览">${AFF.assetPreview(item)}</div>
       <div class="asset-gif-settings">
+        ${metaHtml}
         <div class="asset-gif-fields">
           ${fields.map(([key, label, values]) => `
             <label class="field"><span>${AFF.helpers.h(label)}</span>
@@ -642,6 +682,7 @@ AFF.pages.assetDetail = () => {
         ${Array.from({ length: 12 }, (_, index) => `<section>${AFF.assetPreview(item)}<strong>第 ${index + 1} 屏</strong></section>`).join("")}
       </div>
       <div class="asset-landing-settings">
+        ${metaHtml}
         <label class="field"><span>语言</span>
           <select data-asset-detail-option="language" aria-label="语言">
             ${item.languages.map(value => `<option value="${AFF.helpers.h(value)}" ${detail.language === value ? "selected" : ""}>${AFF.helpers.h(AFF.languageDisplayName(value))}</option>`).join("")}
@@ -671,6 +712,7 @@ AFF.pages.assetDetail = () => {
   <aside class="filter-drawer asset-detail-drawer" aria-label="视频素材详情">
     <div class="panel-header"><h2>${AFF.helpers.h(item.name)}</h2><button class="close-button" type="button" data-action="close-asset-detail" aria-label="关闭素材详情">×</button></div>
     <div class="asset-detail-body">
+      ${metaHtml}
       <div class="asset-detail-fields asset-video-fields">
         <label class="field"><span>尺寸</span>
           <select data-asset-detail-option="size" aria-label="尺寸">
@@ -714,6 +756,7 @@ AFF.pages.assetDetail = () => {
   <aside class="filter-drawer asset-detail-drawer" aria-label="横幅素材详情">
     <div class="panel-header"><h2>${AFF.helpers.h(item.name)}</h2><button class="close-button" type="button" data-action="close-asset-detail" aria-label="关闭素材详情">×</button></div>
     <div class="asset-detail-body">
+      ${metaHtml}
       <div class="asset-detail-fields">
         ${fields.map(([key, label, values]) => `
           <label class="field"><span>${AFF.helpers.h(label)}</span>
@@ -754,7 +797,7 @@ AFF.sortedCommissionCountries = () => {
 AFF.ensureCommissionCountries = () => {
   if (!Array.isArray(AFF.state.programCommissionCountries)) {
     AFF.state.programCommissionCountries = [...AFF.partnerProgram.commissionCountries]
-      .sort((a, b) => Math.max(...b.tiers.map(tier => tier.commission || 0)) - Math.max(...a.tiers.map(tier => tier.commission || 0)))
+      .sort((a, b) => Math.max(...b.tiers.map(tier => tier.price || 0)) - Math.max(...a.tiers.map(tier => tier.price || 0)))
       .slice(0, 3)
       .map(item => item.code);
   }
@@ -868,7 +911,7 @@ AFF.renderOnboardingOptions = (field, query = "") => {
 
 AFF.pages.onboarding = () => {
   const state = AFF.state;
-  const steps = ["注册账号", "填写基本资料", "KYC 实名认证", "接受协议与准则", "提交审核"];
+  const steps = ["注册账号", "基本资料与渠道", "实时硬风控", "接受协议与准则", "资质审核"];
   const current = state.onboarding.step;
   const max = state.onboarding.maxStep;
   const allAgreed = state.onboarding.agreements.every(Boolean);
@@ -915,16 +958,16 @@ AFF.pages.onboarding = () => {
 
     if (current === 3) return `
       <section class="onboarding-step">
-        <div class="commission-page-head"><div><h2>KYC 实名认证</h2><p>本平台不单独提交 KYC 材料 · KYC 门槛为硬门禁第一支柱。</p></div></div>
+        <div class="commission-page-head"><div><h2>实时硬风控</h2><p>注册后先完成确定性风险检查，通过后进入资质审核。</p></div></div>
         <div class="onboarding-kyc-panel">
           <div class="onboarding-kyc-head">
-            <strong>请前往客户端完成实名认证</strong>
+            <strong>检查制裁、黑名单、身份冲突、禁推国家与已知欺诈风险</strong>
             <button class="button primary small" type="button" data-action="open-client-kyc">去完成</button>
           </div>
-          <p>KYC 流程在客户端内完成：登录客户端 → 实名认证 → 上传证件并提交 → 审核通过后自动同步回本平台。完成后返回本页继续下一步。</p>
+          <p>本步骤只做实时硬风控，不代表合规背书。KYC/KYB与收款账户验证后置到首次提现；佣金可先生成，但未完成前不可提现。</p>
           <div class="onboarding-inline-status">
-            <span class="tag ${state.onboarding.kycDone ? "tag-ok" : "tag-info"}">${state.onboarding.kycDone ? "已完成" : "未完成"}</span>
-            ${state.onboarding.kycDone ? "" : `<button class="button secondary small" type="button" data-action="complete-onboarding-kyc">模拟完成 KYC</button>`}
+            <span class="tag ${state.onboarding.riskCheckDone ? "tag-ok" : "tag-info"}">${state.onboarding.riskCheckDone ? "已通过" : "待检查"}</span>
+            ${state.onboarding.riskCheckDone ? "" : `<button class="button secondary small" type="button" data-action="complete-onboarding-kyc">模拟实时检查</button>`}
           </div>
         </div>
       </section>`;
@@ -944,18 +987,25 @@ AFF.pages.onboarding = () => {
 
     return `
       <section class="onboarding-step">
-        <div class="commission-page-head"><div><h2>提交审核</h2><p>提交后状态变更为「待审核」，站内与邮件双通道通知，运营侧在「合作者审核」处理。</p></div></div>
+        <div class="commission-page-head"><div><h2>资质审核</h2><p>提交资料与协议记录后进入审核；审核通过后启用推广链接。</p></div></div>
+        <div class="onboarding-kyc-panel">
+          <div class="onboarding-kyc-head">
+            <strong>审核范围：合作者身份资料、推广渠道、实时硬风控结果、协议接受记录</strong>
+            <span class="tag ${state.onboarding.submitted ? "tag-info" : "tag-warning"}">${state.onboarding.submitted ? "审核中" : "待提交"}</span>
+          </div>
+          <p>资质审核通过前，推广链接保持不可用；审核结果将以站内消息通知，审核通过后可开始归因采集与客户进度追踪。</p>
+        </div>
         ${state.onboarding.submitted ? `
           <div class="onboarding-submitted">
-            <div><span class="tag tag-info">待审核</span><strong>已提交</strong></div>
-            <p>审核结果将通过站内消息与邮件通知。</p>
+            <div><span class="tag tag-info">已提交</span><strong>等待资质审核结果</strong></div>
+            <p>审核通过后推广链接自动启用；首次提现前仍需完成KYC/KYB、收款账户与税务信息。</p>
           </div>` : ""}
       </section>`;
   };
 
   return `
     <section class="card program-steps-card onboarding-card"><div class="panel-body">
-      <div class="commission-page-head onboarding-head"><div><h2>入驻申请</h2><p>客户端准入流程：注册 → 资料 → KYC → 协议 → 提交审核。</p></div></div>
+      <div class="commission-page-head onboarding-head"><div><h2>入驻申请</h2><p>注册 → 资料 → 实时硬风控 → 协议 → 资质审核。</p></div></div>
       <div class="steps">${steps.map((label, index) => {
         const number = index + 1;
         const status = number === current ? "current" : number <= max ? "done" : "disabled";
@@ -965,7 +1015,7 @@ AFF.pages.onboarding = () => {
       <div class="onboarding-actions">
         <button class="button secondary" type="button" data-action="onboarding-go" data-onboarding-step="${current - 1}" ${current <= 1 ? "disabled" : ""}>上一步</button>
         ${current < 5
-          ? `<button class="button primary" type="button" data-action="onboarding-next" ${(current === 1 && !state.onboarding.emailVerified) || (current === 3 && !state.onboarding.kycDone) || (current === 4 && !allAgreed) ? "disabled" : ""}>下一步</button>`
+          ? `<button class="button primary" type="button" data-action="onboarding-next" ${(current === 1 && !state.onboarding.emailVerified) || (current === 3 && !state.onboarding.riskCheckDone) || (current === 4 && !allAgreed) ? "disabled" : ""}>下一步</button>`
           : `<button class="button primary" type="button" data-action="submit-onboarding" ${state.onboarding.submitted ? "disabled" : ""}>${state.onboarding.submitted ? "已提交" : "提交审核"}</button>`}
       </div>
     </div></section>
@@ -1019,14 +1069,17 @@ AFF.pages.applyStep = () => {
     AFF.ensureCommissionCountries();
     const selectedCountries = AFF.sortedCommissionCountries().filter(item => state.programCommissionCountries.includes(item.code));
     const isEnglish = state.language === "en";
+    const calculator = AFF.programCalculatorResult();
+    const calculatorInput = (field, label, value, attributes = "") => `
+      <label><span>${AFF.helpers.h(label)}</span><input data-calculator-field="${field}" value="${AFF.helpers.h(value)}" ${attributes}></label>`;
     const countryLabel = isEnglish ? "Country / Region" : "国家/地区";
     const searchLabel = isEnglish ? "Search countries" : "搜索国家";
     return `
     <section class="card commission-selector-card program-step-card"><div class="panel-body">
       <div class="commission-page-head">
         <div>
-          <h2>不同国家佣金奖励</h2>
-          <p>不同地区根据入金门槛提供阶梯奖励</p>
+          <h2>L1-L4资格档与国家佣金</h2>
+          <p>参考CPA按国家直接配置；全部数值可后台配置</p>
         </div>
       </div>
       <div class="country-picker ${state.programCountryPickerOpen ? "open" : ""}">
@@ -1045,15 +1098,44 @@ AFF.pages.applyStep = () => {
       </div>
     </div></section>
     <div class="commission-module-grid">
-      ${selectedCountries.length ? selectedCountries.map(country => `
+          ${selectedCountries.length ? selectedCountries.map(country => `
         <section class="commission-module">
-          <header><h3>${AFF.helpers.h(AFF.countryDisplayName(country))}</h3><span>${country.code}</span></header>
+          <header><h3>${AFF.helpers.h(AFF.countryDisplayName(country))}</h3><span>${isEnglish ? "Country-specific CPA" : "国家专属CPA"}</span></header>
           <div class="commission-table-wrap"><table class="commission-table">
-            <thead><tr><th>入金金额</th><th>佣金</th></tr></thead>
-            <tbody>${country.tiers.map(tier => `<tr><td>${tier.label}</td><td>${tier.commission ? `$${tier.commission}` : "-"}</td></tr>`).join("")}</tbody>
+            <thead><tr><th>资格档</th><th>净入金 / 交易量 / 交易日</th><th>参考CPA</th></tr></thead>
+            <tbody>${country.tiers.map(tier => `<tr><td>${tier.tier}</td><td>$${tier.netDeposit} / ${tier.volume}手 / ${tier.days}天</td><td>$${tier.price}</td></tr>`).join("")}</tbody>
           </table></div>
         </section>`).join("") : `<div class="card state-panel"><strong>暂无数据</strong><span>请至少选择一个国家</span></div>`}
     </div>
+    <section class="card commission-calculator">
+      <div class="panel-header"><h2>${isEnglish ? "Commission calculator" : "佣金计算器"}</h2><span class="helper">${isEnglish ? "Reference values, configurable" : "演示参考值，可配置"}</span></div>
+      <div class="panel-body calculator-grid">
+        <div class="calculator-fields">
+          <label><span>${isEnglish ? "Country" : "国家"}</span>
+            <select data-calculator-field="country">${AFF.partnerProgram.commissionCountries.map(country => `<option value="${country.code}" ${state.programCalculator.country === country.code ? "selected" : ""}>${AFF.helpers.h(AFF.countryDisplayName(country))}</option>`).join("")}</select>
+          </label>
+          ${calculatorInput("netDeposit", isEnglish ? "Net deposit" : "净入金", state.programCalculator.netDeposit, 'type="number" min="0" step="50"')}
+          ${calculatorInput("volume", isEnglish ? "Trading volume (lots)" : "交易量（手）", state.programCalculator.volume, 'type="number" min="0" step="0.1"')}
+          ${calculatorInput("days", isEnglish ? "Trading days" : "交易日", state.programCalculator.days, 'type="number" min="0" step="1"')}
+          <label><span>${isEnglish ? "Payment method" : "入金方式"}</span>
+            <select data-calculator-field="payment">
+              <option value="wire" ${state.programCalculator.payment === "wire" ? "selected" : ""}>${isEnglish ? "Bank transfer" : "银行转账"}</option>
+              <option value="wallet" ${state.programCalculator.payment === "wallet" ? "selected" : ""}>${isEnglish ? "E-wallet" : "电子钱包"}</option>
+              <option value="card" ${state.programCalculator.payment === "card" ? "selected" : ""}>${isEnglish ? "Card" : "银行卡"}</option>
+            </select>
+          </label>
+        </div>
+        <div class="calculator-result">
+          <span>${isEnglish ? "Qualified tier" : "所达资格档"}</span><strong>${calculator.tier.tier}</strong>
+          <div><span>${isEnglish ? "Commission total" : "佣金总额"}</span><strong>$${calculator.gross.toFixed(2)}</strong></div>
+          <div><span>${isEnglish ? "Tax" : "税费"} ${calculator.taxTier} ${(calculator.taxRate * 100).toFixed(0)}%</span><strong>$${calculator.tax.toFixed(2)}</strong></div>
+          <div><span>${isEnglish ? "Guarantee 10%" : "保证金 10%"}</span><strong>$${calculator.guarantee.toFixed(2)}</strong></div>
+          <div><span>${isEnglish ? "Available credit" : "结算入账"}</span><strong>$${calculator.available.toFixed(2)}</strong></div>
+          <small>${isEnglish ? "Payment method affects only the dynamic hold date, not price." : "入金方式只影响动态Hold日期，不影响档位和佣金总额。"}</small>
+          <small>${isEnglish ? "Dynamic hold" : "动态Hold"} ${calculator.holdDays}${isEnglish ? "d" : "天"} · ${calculator.releaseDate}；${isEnglish ? "Guarantee release" : "保证金释放"} ${calculator.guaranteeDate}</small>
+        </div>
+      </div>
+    </section>
     <section class="commission-info-grid">
       <article class="commission-info-card">
         <h3>如何获得佣金</h3>
@@ -1218,16 +1300,19 @@ AFF.pages.applyStep = () => {
         <button class="button secondary" type="button" data-route="clients">进入客户列表</button>
       </article>
       <article>
-        <span>入口 02</span><strong>查看业绩</strong><p>按国家、活动、UTM和平台分析点击、注册、首次入金、交易与合格客户。</p>
+        <span>入口 02</span><strong>查看业绩</strong><p>按国家、活动、UTM和平台分析点击、注册、FTD、有效FTD与质量服务。</p>
         <button class="button secondary" type="button" data-route="perf">进入业绩数据</button>
       </article>
       <article>
-        <span>入口 03</span><strong>查看整体数据</strong><p>从仪表盘看钱包余额、注册客户、未激活数量、总收益、合格客户和时间范围汇总。</p>
+        <span>入口 03</span><strong>查看整体数据</strong><p>从仪表盘看可提现、暂扣中、进行中里程碑和本月有效FTD。</p>
         <button class="button secondary" type="button" data-route="dash">进入仪表盘</button>
       </article>
     </div>`;
 
   const webLink = new URL(AFF.dashboard.link);
+  webLink.searchParams.set("aff", "AFF1001");
+  webLink.searchParams.set("sub", "default");
+  webLink.searchParams.set("clickid", "demo_click_001");
   webLink.searchParams.set("platform", "web");
   webLink.searchParams.set("lang", state.language === "en" ? "en" : "zh-cn");
   const mobileLink = new URL(webLink);

@@ -66,7 +66,7 @@
 .report-client-table th:last-child, .report-client-table td:last-child { position: sticky; right: 0; z-index: 3; box-shadow: -6px 0 8px -8px var(--side-icon); }
 .report-client-table th:last-child { z-index: 5; }
 .report-table-scroll.report-client-scroll { max-height: none; overflow-x: auto; overflow-y: hidden; }
-.report-client-scroll .report-client-table { width: 100%; min-width: 1160px; table-layout: fixed; }
+.report-client-scroll .report-client-table { width: 100%; min-width: 1300px; table-layout: fixed; }
 .report-client-col-clientId { width: 164px; }
 .report-client-col-registeredAt { width: 102px; }
 .report-client-col-country { width: 100px; }
@@ -74,9 +74,17 @@
 .report-client-col-campaign { width: 120px; }
 .report-client-col-kyc { width: 74px; }
 .report-client-col-stage { width: 96px; }
+.report-client-col-quality { width: 92px; }
 .report-client-col-expected { width: 136px; }
 .report-client-col-commissionStatus { width: 178px; }
-.report-client-col-actions { width: 116px; }
+.report-client-col-actions { width: 150px; }
+.report-commission-status { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+.report-commission-status.held { cursor: help; }
+.report-commission-status small { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.report-client-table th:nth-child(9),
+.report-client-table td:nth-child(9) { text-align: center; }
+.report-client-table th:nth-child(9) button[data-rp-sort] { justify-content: center; text-align: center; }
+.report-client-table td.report-expected-cell { cursor: help; }
 .report-client-scroll .report-client-table th,
 .report-client-scroll .report-client-table td {
   min-width: 0;
@@ -100,6 +108,52 @@
   color: var(--muted);
   font-size: 12px;
 }
+.report-floating-help {
+  position: fixed;
+  z-index: 100;
+  display: none;
+  max-height: min(420px, calc(100vh - 24px));
+  padding: 14px;
+  overflow-y: auto;
+  border: 1px solid var(--control-border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--body-text);
+  box-shadow: 0 10px 34px rgba(15, 27, 42, .18);
+  font-size: 12px;
+  line-height: 1.65;
+}
+.report-floating-help[hidden] { display: none; }
+.report-floating-help:not([hidden]) { display: block; }
+.report-floating-help strong { color: var(--blue-black); }
+.report-floating-help p { margin: 7px 0 0; }
+.report-floating-help dl { margin: 8px 0 0; }
+.report-floating-help dl > div + div { margin-top: 7px; }
+.report-floating-help dt { color: var(--blue-black); font-weight: 600; }
+.report-floating-help dd { margin: 2px 0 0; }
+.report-inline-help { position: relative; display: inline-flex; align-items: center; }
+.report-inline-tooltip {
+  position: absolute;
+  top: calc(100% + 7px);
+  right: 0;
+  left: auto;
+  z-index: 50;
+  display: block;
+  width: min(380px, calc(100vw - 40px));
+  padding: 10px 12px;
+  border: 1px solid var(--control-border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--body-text);
+  box-shadow: 0 8px 28px rgba(15, 27, 42, .16);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.6;
+  text-align: left;
+  transform: none;
+  pointer-events: none;
+}
+.report-inline-tooltip[hidden] { display: none !important; }
 .report-commission-help {
   position: fixed;
   z-index: 46;
@@ -145,7 +199,8 @@
 .report-hold-help dl > div + div { margin-top: 12px; }
 .report-hold-help dt { color: var(--blue-black); font-weight: 600; }
 .report-hold-help dd { margin: 4px 0 0; }
-.report-client-actions { display: flex; align-items: center; gap: 8px; }
+.report-client-actions { flex-wrap: nowrap; align-items: center; gap: 8px; }
+.report-client-actions .button { flex: 0 0 auto; white-space: nowrap; }
 .report-table td.report-commission-cell { min-width: 240px; max-width: 280px; white-space: normal; }
 .report-commission-reason { margin: 6px 0 0; color: var(--body-text); font-size: 12px; line-height: 1.6; white-space: normal; overflow-wrap: anywhere; }
 .report-commission-reference { margin: 10px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
@@ -175,6 +230,91 @@
 .report-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 12px 0 0; }
 .report-detail-grid dt { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
 .report-detail-grid dd { margin: 0; font-size: 13px; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.report-commission-summary {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.report-commission-summary .report-inline-help { position: static; }
+.report-commission-summary .report-inline-tooltip {
+  top: calc(100% + 8px);
+  left: 0;
+  width: min(420px, 100%);
+  transform: none;
+}
+.report-commission-summary > div,
+.report-hold-progress > div {
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: #f8fbff;
+}
+.report-commission-summary span:not(.report-inline-tooltip),
+.report-hold-progress span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+.report-commission-summary strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--blue-black);
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+.report-hold-progress {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.report-unsettled-commissions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.report-unsettled-commissions > div {
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #d7e0ec;
+  border-radius: 4px;
+  background: #f8fbff;
+}
+.report-unsettled-commissions span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+}
+.report-unsettled-commissions strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--blue-black);
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+.report-unsettled-commissions small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.report-hold-progress strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--blue-black);
+  font-size: 13px;
+}
+.report-hold-progress small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11px;
+}
 .report-timeline { list-style: none; margin: 0; padding: 0 0 0 6px; }
 .report-timeline li { display: flex; justify-content: space-between; gap: 16px; position: relative; padding: 0 0 20px 22px; border-left: 1px solid var(--border); font-size: 13px; }
 .report-timeline li:last-child { padding-bottom: 0; border-left: 0; }
@@ -222,4 +362,8 @@
 @media (max-width: 479px) {
   .report-stats { grid-template-columns: 1fr; }
   .report-column-grid, .report-detail-grid { grid-template-columns: 1fr; }
+  .report-commission-summary { grid-template-columns: 1fr; }
 }
+.report-progress { min-width: 190px; white-space: normal; }
+.report-progress strong { display: block; color: var(--text); font-size: 12px; }
+.report-progress small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }

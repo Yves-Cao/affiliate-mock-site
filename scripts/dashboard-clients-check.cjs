@@ -39,17 +39,17 @@ async function main() {
         : period === "month" ? { from: `${data.now.slice(0, 7)}-01`, to: data.now }
         : AFF.reports.range(period);
       const source = data.filterRows(filters).filter(row => row.clientId);
-      const milestone = { effective: "effectiveAt", qualified: "qualifiedAt" }[metric];
+      const milestone = { effective: "effectiveAt", quality: "qualityAt" }[metric];
       const rows = source.filter(row => metric === "revenue"
-        ? row.commissionStatus === "approved" && row.expected > 0
+        ? row.fundStatus === "settled_partial" && row.expected > 0
         : !milestone || row[milestone]);
       return {
-        filters: metric === "revenue" ? { ...filters, commissionStatus: "approved" } : filters,
+        filters: metric === "revenue" ? { ...filters, commissionStatus: "settled_partial" } : filters,
         ids: rows.map(row => row.clientId).sort(),
-        value: metric === "revenue" ? rows.reduce((sum, row) => sum + row.approved, 0) : rows.length
+        value: metric === "revenue" ? rows.reduce((sum, row) => sum + row.available, 0) : rows.length
       };
     }, attrs);
-    check(Math.abs(displayed - expected.value) < 0.005, `${attrs.period}/${attrs.metric}: displayed source total`);
+    check(Math.abs(displayed - expected.value) < 0.005, `${attrs.period}/${attrs.metric}: displayed ${displayed} / source ${expected.value}`);
     await page.evaluate(() => {
       Object.assign(AFF.reports.state("clients"), {
         filters: {
@@ -57,7 +57,7 @@ async function main() {
           search: "replace-me", campaignCode: "not-found", stage: "Registered",
           commissionStatus: "reversed", registeredFrom: "2026-10-01"
         },
-        page: 9, metric: "qualified"
+        page: 9, metric: "quality"
       });
     });
     if (keyboard) {
@@ -86,19 +86,16 @@ async function main() {
     await page.locator("#login-form button[type=submit]").click();
     await page.locator("#app-view:not(.hidden)").waitFor();
     await dashboard();
-    const wallet = await page.evaluate(() => ({
-      balance: AFF.dashboard.metrics[0].value, total: AFF.dashboard.totalRevenue,
-      inactive: AFF.reporting.rows.filter(row => row.clientId && !row.effectiveAt).length
-    }));
-    check((await page.locator(".dashboard-wallet-card").innerText()).includes(wallet.balance) &&
-      (await page.locator(".dashboard-wallet-card").innerText()).includes(wallet.total),
-    "Wallet balance and lifetime revenue remain intact");
-    check((await page.locator(".dashboard-metrics .metric").nth(1).locator("small").innerText())
-      .includes(new Intl.NumberFormat("en-US").format(wallet.inactive)),
-    "Inactive subtitle counts clients without effective FTD");
-    await drill('.dashboard-metrics [data-metric="registrations"]', true);
-    await dashboard();
-    await drill('.dashboard-metrics [data-metric="qualified"]');
+    const totals = await page.evaluate(() => AFF.finance.summary());
+    const money = value => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
+    check((await page.locator(".dashboard-metrics .metric").count()) === 8,
+      "Dashboard shows eight core funding and milestone cards");
+    check((await page.locator(".dashboard-wallet-card").innerText()).includes(money(AFF.finance.balance() / 100)),
+    "Wallet uses the finance available balance");
+    check((await page.locator("#main").innerText()).includes(money(totals.inProgress)) &&
+      (await page.locator("#main").innerText()).includes(money(totals.paid)),
+    "Dashboard computes in-progress and paid amounts from reporting data");
+    await drill('.dashboard-metrics [data-metric="effective"]', true);
     for (const period of ["today", "past7", "past30", "lastWeek", "lastMonth"]) {
       for (const metric of ["registrations", "effective", "revenue"]) {
         await dashboard(period);

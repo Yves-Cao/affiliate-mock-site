@@ -54,6 +54,9 @@
     if (!validCode(campaign?.code)) throw new Error("Invalid campaign");
     const link = new URL("./campaign-link.html", location.href);
     link.searchParams.set("camp", campaign.code);
+    link.searchParams.set("aff", "AFF1001");
+    link.searchParams.set("sub", "default");
+    link.searchParams.set("clickid", "demo_click_001");
     Object.entries(extraParams).forEach(([key, value]) => {
       if (key !== "camp" && value !== undefined && value !== null) link.searchParams.set(key, String(value));
     });

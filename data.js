@@ -9,10 +9,13 @@ AFF.routes = [
   { id: "promo", group: "推广管理", label: "活动" },
   { id: "subchannels", group: "推广管理", label: "二级渠道" },
   { id: "deep", group: "推广管理", label: "深度链接" },
-  { id: "tracker", group: "推广管理", label: "链接追踪器" },
+  { id: "tracker", group: "推广管理", label: "回传配置" },
   { id: "lookup", group: "推广管理", label: "归属查询" },
   { id: "pay", group: "收益中心", label: "收益数据" },
   { id: "wd", group: "收益中心", label: "提现" },
+  { id: "guarantee", group: "收益中心", label: "保证金" },
+  { id: "appeals", group: "服务中心", label: "申诉中心" },
+  { id: "messages", group: "服务中心", label: "消息中心" },
   { id: "apply", group: "资料", label: "合作者计划" },
   { id: "onboarding", group: "前置流程", label: "入驻申请" }
 ];
@@ -34,150 +37,48 @@ AFF.users = {
 };
 
 AFF.dashboard = {
-  metrics: [
-    { label: "钱包余额（可提现）", value: "$12,480.50" },
-    { label: "注册客户", value: "960", hint: "未激活客户：247" },
-    { label: "合格客户（本月）", value: "182", hint: "▲ 23 较上月" }
-  ],
-  totalRevenue: "$34,215.00",
-  link: "https://track.example.com/r/AFF1001?utm_source=partner",
-  summaryPeriods: {
-    today: { registrations: "28", qualified: "9", revenue: "$1,280.00" },
-    past7: { registrations: "186", qualified: "54", revenue: "$6,840.00" },
-    past30: { registrations: "742", qualified: "182", revenue: "$34,215.00" },
-    lastWeek: { registrations: "214", qualified: "61", revenue: "$8,450.00" },
-    lastMonth: { registrations: "816", qualified: "203", revenue: "$37,980.00" }
-  },
-  trends: {
-    day: [38, 52, 44, 61, 58, 72, 66, 79, 84, 76, 91, 88, 96, 104],
-    week: [168, 204, 189, 226, 214, 248, 262, 289],
-    month: [720, 812, 776, 890, 942, 1028]
-  },
-  labels: {
-    day: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"],
-    week: ["W1", "W2", "W3", "W4", "W5", "W6", "W7", "W8"],
-    month: ["May", "Jun", "Jul", "Aug", "Sep", "Oct"]
-  },
-  titles: { day: "近14天", week: "近8周", month: "近6个月" }
+  link: "https://track.example.com/r/AFF1001?utm_source=partner"
 };
 
 AFF.partnerProgram = {
-  commissionCountryRows: [
-    ["Thailand (TH)", "TH", null, 350, 650, 1400],
-    ["South Africa (ZA)", "ZA", 30, 80, 230, 710],
-    ["Vietnam (VN)", "VN", 100, 230, 460, 1650],
-    ["Indonesia (ID)", "ID", 60, 190, 410, 1100],
-    ["Pakistan (PK)", "PK", 70, 155, 330, 890],
-    ["Bangladesh (BD)", "BD", 60, 170, 370, 900],
-    ["Maldives (MV)", "MV", 90, 240, 540, 1100],
-    ["Egypt (EG)", "EG", 80, 150, 390, 780],
-    ["Nigeria (NG)", "NG", 25, 70, 220, 590],
-    ["Ghana (GH)", "GH", 30, 80, 230, 710],
-    ["Kenya (KE)", "KE", 30, 60, 160, 710],
-    ["Uganda (UG)", "UG", 30, 80, 210, 660],
-    ["Cape Verde (CV)", "CV", 25, 70, 230, 800],
-    ["Zimbabwe (ZW)", "ZW", 25, 80, 230, 660],
-    ["Botswana (BW)", "BW", 20, 70, 230, 660],
-    ["Kuwait (KW)", "KW", 110, 320, 580, 1320],
-    ["Bahrain (BH)", "BH", 80, 250, 440, 1230],
-    ["Qatar (QA)", "QA", 80, 320, 490, 1170],
-    ["Jordan (JO)", "JO", 120, 220, 480, 1040],
-    ["Mexico (MX)", "MX", 50, 120, 310, 960],
-    ["Chile (CL)", "CL", 70, 180, 370, 950],
-    ["Argentina (AR)", "AR", 70, 150, 310, 830],
-    ["Colombia (CO)", "CO", 60, 130, 250, 760],
-    ["Peru (PE)", "PE", 60, 140, 250, 760],
-    ["Costa Rica (CR)", "CR", 50, 120, 280, 760],
-    ["Bolivia (BO)", "BO", 60, 140, 280, 950],
-    ["Paraguay (PY)", "PY", 60, 120, 280, 760],
-    ["Ecuador (EC)", "EC", 70, 120, 290, 760],
-    ["Guatemala (GT)", "GT", 50, 120, 280, 760],
-    ["Morocco (MA)", "MA", 60, 120, 230, 750],
-    ["Algeria (DZ)", "DZ", 60, 120, 360, 1040],
-    ["Kazakhstan (KZ)", "KZ", 150, 350, 650, 1270],
-    ["Sri-Lanka (LK)", "LK", 70, 150, 430, 930],
-    ["Brunei Darussalam (BN)", "BN", 70, 180, 420, 890],
-    ["Cambodia (KH)", "KH", 120, 250, 550, 890],
-    ["Nepal (NP)", "NP", 70, 190, 410, 890],
-    ["Azerbaijan (AZ)", "AZ", 80, 240, 500, 1200],
-    ["Georgia (GE)", "GE", 80, 240, 500, 1200],
-    ["The Republic of Moldova (MD)", "MD", 80, 240, 500, 1200],
-    ["Mongolia (MN)", "MN", 80, 240, 500, 1200],
-    ["Tajikistan (TJ)", "TJ", 100, 240, 500, 1200],
-    ["Turkmenistan (TM)", "TM", 80, 240, 500, 1200],
-    ["Uzbekistan (UZ)", "UZ", 150, 340, 640, 1330],
-    ["The Dominican Republic (DO)", "DO", 70, 160, 340, 950],
-    ["Guyana (GY)", "GY", 50, 120, 280, 950],
-    ["Trinidad and Tobago (TT)", "TT", 50, 160, 280, 950],
-    ["Tunisia (TN)", "TN", 70, 180, 400, 920],
-    ["Burkina Faso (BF)", "BF", 35, 90, 230, 680],
-    ["Benin (BJ)", "BJ", 25, 80, 230, 680],
-    ["Côte d'Ivoire (CI)", "CI", 25, 80, 230, 680],
-    ["Cameroon (CM)", "CM", 30, 80, 200, 680],
-    ["Djibouti (DJ)", "DJ", 25, 70, 230, 680],
-    ["Ethiopia (ET)", "ET", 40, 110, 300, 680],
-    ["Gabon (GA)", "GA", 25, 70, 230, 680],
-    ["Guinea (GN)", "GN", 25, 70, 230, 680],
-    ["Mozambique (MZ)", "MZ", 25, 70, 230, 680],
-    ["Senegal (SN)", "SN", 35, 70, 230, 680],
-    ["Eswatini (SZ)", "SZ", 25, 70, 230, 680],
-    ["Togo (TG)", "TG", 25, 70, 230, 680],
-    ["United Republic of Tanzania (TZ)", "TZ", 25, 70, 220, 680],
-    ["Zambia (ZM)", "ZM", 20, 70, 230, 680],
-    ["Chad (TD)", "TD", 25, 70, 230, 680],
-    ["Libya (LY)", "LY", 80, 190, 400, 920],
-    ["Antigua and Barbuda (AG)", "AG", 50, 120, 280, 760],
-    ["Armenia (AM)", "AM", 80, 240, 500, 1200],
-    ["Aruba (AW)", "AW", 50, 120, 280, 760],
-    ["Belize (BZ)", "BZ", 50, 120, 280, 800],
-    ["Bhutan (BT)", "BT", 70, 180, 420, 1040],
-    ["Burundi (BI)", "BI", 25, 70, 230, 660],
-    ["Dominica (DM)", "DM", 50, 120, 280, 800],
-    ["El Salvador (SV)", "SV", 60, 120, 280, 760],
-    ["Equatorial Guinea (GQ)", "GQ", 25, 70, 230, 660],
-    ["Eritrea (ER)", "ER", 25, 70, 230, 690],
-    ["Gambia (GM)", "GM", 25, 70, 230, 660],
-    ["Grenada (GD)", "GD", 50, 120, 280, 760],
-    ["Guinea-Bissau (GW)", "GW", 25, 70, 230, 690],
-    ["Honduras (HN)", "HN", 50, 120, 280, 760],
-    ["Isle of Man (IM)", "IM", 80, 240, 460, 1080],
-    ["Jamaica (JM)", "JM", 50, 100, 320, 760],
-    ["Kyrgyzstan (KG)", "KG", 80, 240, 500, 1200],
-    ["Lao People's Democratic Republic (LA)", "LA", 80, 180, 420, 890],
-    ["Lesotho (LS)", "LS", 25, 70, 230, 660],
-    ["Liberia (LR)", "LR", 25, 70, 230, 660],
-    ["Macao (MO)", "MO", 80, 250, 500, 1020],
-    ["Madagascar (MG)", "MG", 30, 80, 230, 660],
-    ["Malawi (MW)", "MW", 25, 70, 230, 660],
-    ["Mauritania (MR)", "MR", 80, 210, 400, 920],
-    ["Montenegro (ME)", "ME", 80, 250, 480, 960],
-    ["Montserrat (MS)", "MS", 50, 120, 290, 800],
-    ["Nauru (NR)", "NR", 80, 240, 460, 1080],
-    ["Niger (NE)", "NE", 25, 70, 230, 660],
-    ["Papua New Guinea (PG)", "PG", 80, 240, 460, 1080],
-    ["Saint Kitts and Nevis (KN)", "KN", 50, 120, 280, 760],
-    ["Sao Tome and Principe (ST)", "ST", 25, 70, 230, 690],
-    ["Serbia (RS)", "RS", 80, 250, 480, 960],
-    ["Sierra Leone (SL)", "SL", 25, 70, 230, 660],
-    ["Solomon Islands (SB)", "SB", 80, 240, 460, 1080],
-    ["Suriname (SR)", "SR", 50, 120, 280, 760],
-    ["Timor-Leste (TL)", "TL", 80, 240, 460, 1080],
-    ["Tonga (TO)", "TO", 80, 240, 460, 1080],
-    ["Oman (OM)", "OM", 150, 300, 510, 1170],
-    ["Saudi Arabia (SA)", "SA", 150, 330, 580, 1750],
-    ["Angola (AO)", "AO", 30, 70, 230, 660]
+  commissionMarkets: [
+    { code: "VN", name: "Vietnam" }, { code: "TH", name: "Thailand" },
+    { code: "ID", name: "Indonesia" }, { code: "ZA", name: "South Africa" },
+    { code: "NG", name: "Nigeria" }, { code: "PK", name: "Pakistan" },
+    { code: "EG", name: "Egypt" }, { code: "KW", name: "Kuwait" },
+    { code: "QA", name: "Qatar" }, { code: "KZ", name: "Kazakhstan" },
+    { code: "SA", name: "Saudi Arabia" }, { code: "BD", name: "Bangladesh" }
   ],
+  qualificationTiers: [
+    { tier: "L1", netDeposit: 300, volume: 1, days: 3, basePrice: 200 },
+    { tier: "L2", netDeposit: 800, volume: 3, days: 5, basePrice: 400 },
+    { tier: "L3", netDeposit: 1500, volume: 5, days: 5, basePrice: 700 },
+    { tier: "L4", netDeposit: 4000, volume: 10, days: 8, basePrice: 1200 }
+  ],
+  countryCoefficients: {
+    "新加坡": 1, "马来西亚": 1, "泰国": 1.1, "越南": 1.2, "印度尼西亚": 1,
+    "南非": 0.9, "巴西": 1, "墨西哥": 1.1, "菲律宾": 1, "阿联酋": 0.8
+  },
+  commissionPrice(countryName, tierName) {
+    const tier = AFF.partnerProgram.qualificationTiers.find(item => item.tier === tierName);
+    const coefficient = AFF.partnerProgram.countryCoefficients[countryName] || 1;
+    if (!tier) return 0;
+    return Math.round(tier.basePrice * coefficient / 5) * 5;
+  },
   get commissionCountries() {
-    return this.commissionCountryRows.map(([name, code, p10, p30, p150, p600]) => ({
-      name,
-      code,
-      tiers: [
-        { min: 10, label: '$10+', commission: p10, note: p10 ? '' : '该档不适用' },
-        { min: name.startsWith('Thailand') ? 100 : 30, label: name.startsWith('Thailand') ? '$100+' : '$30+', commission: p30, note: name.startsWith('Thailand') ? 'TH特殊门槛' : '' },
-        { min: 150, label: '$150+', commission: p150, note: '' },
-        { min: 600, label: '$600+', commission: p600, note: '' }
-      ]
-    }));
+    return this.commissionMarkets.map(({ code, name }) => {
+      const score = [...code].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+      const coefficient = Number((0.6 + (score % 10) * 0.1).toFixed(1));
+      return {
+        name,
+        code,
+        coefficient,
+        tiers: this.qualificationTiers.map(tier => ({
+          ...tier,
+          price: Math.round(tier.basePrice * coefficient / 5) * 5
+        }))
+      };
+    });
   },
   conversionCountries: [
     { name: "越南", desktop: [11.8, 36.4, 72.5], mobile: [17.6, 41.8, 78.4], volume: 4820 },
@@ -289,11 +190,13 @@ AFF.trackers = [
 AFF.subIds = [
   { id: "tg_group_01", name: "Telegram 社群", status: "启用", updatedAt: "2026-10-22", campaignId: "" },
   { id: "sg_search_02", name: "新加坡搜索推广", status: "启用", updatedAt: "2026-10-21", campaignId: "" },
-  { id: "br_social_03", name: "巴西社交推广", status: "已封禁", updatedAt: "2026-10-18", campaignId: "" },
+  { id: "br_social_03", name: "巴西社交推广", status: "已封禁", statusSource: "platform", statusReason: "GEO-POLICY", updatedAt: "2026-10-18", campaignId: "" },
   ...Array.from({ length: 18 }, (_, index) => ({
     id: `placement_${String(index + 1).padStart(2, "0")}`,
     name: `${["网站展示位", "社群内容位", "视频推广位"][index % 3]} ${String(index + 1).padStart(2, "0")}`,
     status: index % 7 === 6 ? "已封禁" : "启用",
+    statusSource: index % 7 === 6 ? (index % 2 ? "platform" : "self") : "self",
+    statusReason: index % 7 === 6 ? (index % 2 ? "RISK-RULE-02" : "SELF-DISABLED") : "",
     updatedAt: `2026-10-${String(27 - index).padStart(2, "0")}`,
     campaignId: ""
   }))
@@ -315,13 +218,6 @@ AFF.commissions = {
     { date: "2026-10-18", type: "佣金批准", note: "C-10241 合格客户", amount: "$400.00", status: "已批准", action: "" }
   ]
 };
-
-AFF.withdrawals = [
-  { date: "2026-10-19", method: "电汇", amount: "$2,000.00", status: "已支付", note: "尾号6621" },
-  { date: "2026-10-12", method: "电汇", amount: "$1,200.00", status: "已支付", note: "尾号6621" },
-  { date: "2026-10-05", method: "其他", amount: "$800.00", status: "处理中", note: "渠道确认中" },
-  { date: "2026-09-28", method: "电汇", amount: "$1,650.00", status: "已拒绝", note: "资料待完善" }
-];
 
 AFF.assetOptions = {
   bannerSizes: ["120x600", "160x600", "300x250", "320x50", "320x100", "336x280", "468x60", "728x90", "970x90", "970x250", "1080x1080", "1080x1920", "1280x720", "1500x500", "180x150"],
@@ -384,10 +280,31 @@ AFF.assets = [
   }
 ];
 
+AFF.assetMetadata = {
+  "banner-onboarding": { version: "v3", approvedBy: "合规专员A", onlineAt: "2026-10-20 10:00", offlineAt: "" },
+  "banner-market": { version: "v2", approvedBy: "合规专员B", onlineAt: "2026-10-19 09:00", offlineAt: "" },
+  "video-onboarding": { version: "v4", approvedBy: "合规专员A", onlineAt: "2026-10-18 15:30", offlineAt: "" },
+  "video-platform": { version: "v1", approvedBy: "合规专员C", onlineAt: "2026-10-17 11:00", offlineAt: "" },
+  "video-mobile": { version: "v2", approvedBy: "合规专员C", onlineAt: "2026-10-17 11:20", offlineAt: "" },
+  "lp-standard": { version: "v5", approvedBy: "合规专员B", onlineAt: "2026-10-16 08:30", offlineAt: "" },
+  "lp-mobile": { version: "v3", approvedBy: "合规专员B", onlineAt: "2026-10-16 08:40", offlineAt: "" },
+  "lp-fund": { version: "v2", approvedBy: "合规专员A", onlineAt: "2026-10-15 14:00", offlineAt: "" },
+  "gif-telegram": { version: "v3", approvedBy: "合规专员C", onlineAt: "2026-10-15 16:00", offlineAt: "" },
+  "gif-social": { version: "v1", approvedBy: "合规专员C", onlineAt: "2026-10-14 17:00", offlineAt: "" }
+};
+
+AFF.assetMeta = item => ({
+  version: "v1",
+  approvedBy: "合规专员",
+  onlineAt: `${item.date} 10:00`,
+  offlineAt: "当前有效",
+  ...(AFF.assetMetadata[item.id] || {})
+});
+
 AFF.lookupIndex = [
-  { key: "C-10241", id: "C-10241", email: "w***@gmail.com", owned: true, date: "2026-10-18", reason: "30天归因窗口内首次点击，此后锁定" },
-  { key: "w***@gmail.com", id: "C-10241", email: "w***@gmail.com", owned: true, date: "2026-10-18", reason: "30天归因窗口内首次点击，此后锁定" },
-  { key: "C-10239", id: "C-10239", email: "n***@example.com", owned: false, date: "-", reason: "该客户已归属其他推广方，仅返回有限原因" }
+  { key: "C-10241", id: "C-10241", email: "w***@gmail.com", owned: true, date: "2026-10-18", method: "Web有效点击", firstTouch: "2026-10-18 09:12", reason: "30天归因窗口内首次点击，此后锁定" },
+  { key: "w***@gmail.com", id: "C-10241", email: "w***@gmail.com", owned: true, date: "2026-10-18", method: "Web有效点击", firstTouch: "2026-10-18 09:12", reason: "30天归因窗口内首次点击，此后锁定" },
+  { key: "C-10239", id: "C-10239", email: "n***@example.com", owned: false, date: "-", method: "App归因", firstTouch: "-", reason: "该客户已归属其他推广方，仅返回有限原因" }
 ];
 
 AFF.deepLinks = {
