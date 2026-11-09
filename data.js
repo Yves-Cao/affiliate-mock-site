@@ -12,13 +12,175 @@ AFF.routes = [
   { id: "tracker", group: "推广管理", label: "回传配置" },
   { id: "lookup", group: "推广管理", label: "归属查询" },
   { id: "pay", group: "收益中心", label: "收益数据" },
+  { id: "statements", group: "收益中心", label: "结算单", hidden: true },
   { id: "wd", group: "收益中心", label: "提现" },
   { id: "guarantee", group: "收益中心", label: "保证金" },
+  { id: "support", group: "服务中心", label: "帮助与工单" },
+  { id: "account", group: "服务中心", label: "个人中心" },
   { id: "appeals", group: "服务中心", label: "申诉中心" },
   { id: "messages", group: "服务中心", label: "消息中心" },
+  { id: "export", group: "服务中心", label: "导出中心" },
   { id: "apply", group: "资料", label: "合作者计划" },
   { id: "onboarding", group: "前置流程", label: "入驻申请" }
 ];
+
+AFF.countryLabel = value => {
+  const program = AFF.partnerProgram;
+  if (!program) return value;
+  if (program.commissionMarkets) {
+    const market = program.commissionMarkets.find(item => item.code === value || item.zh === value || item.name === value);
+    if (market) return AFF.state?.language === "en" ? market.name : market.zh;
+  }
+  if (program.supportCountries) {
+    const support = program.supportCountries.find(item => item.code === value || item.name === value);
+    if (support) return AFF.state?.language === "en" ? (program.commissionMarkets.find(m => m.code === support.code)?.name || support.name) : support.name;
+  }
+  if (/^[A-Z]{2}$/.test(String(value))) {
+    try {
+      const locale = AFF.state?.language === "en" ? "en" : "zh-CN";
+      const displayName = new Intl.DisplayNames([locale], { type: "region" }).of(String(value));
+      if (displayName) return displayName;
+    } catch {}
+  }
+  return AFF.state?.language === "en" ? "Pending verification" : "待确认";
+};
+
+AFF.dataText = value => {
+  const countryCode = String(value ?? "");
+  if (/^[A-Z]{2}$/.test(countryCode) && AFF.partnerProgram?.commissionMarkets) {
+    const market = AFF.partnerProgram.commissionMarkets.find(item => item.code === countryCode);
+    if (market) return AFF.state?.language === "en" ? market.name : market.zh;
+    if (countryCode === "UN") return AFF.state?.language === "en" ? "Pending verification" : "待确认";
+    try {
+      const locale = AFF.state?.language === "en" ? "en" : "zh-CN";
+      const displayName = new Intl.DisplayNames([locale], { type: "region" }).of(countryCode);
+      if (displayName) return displayName;
+    } catch {}
+  }
+  if (AFF.state?.language !== "en") return value;
+  const dictionary = {
+    "待确认": "Pending verification",
+    "秋季交易指南": "Autumn trading guide", "市场观察周刊": "Market watch weekly",
+    "移动交易体验": "Mobile trading experience", "新客户入门": "New-client onboarding",
+    "社区直播专场": "Community live session", "全球市场专题": "Global markets spotlight",
+    "社交媒体": "Social media", "视频平台": "Video platform", "搜索推广": "Search promotion",
+    "内容推荐": "Content recommendation", "自主推广": "Direct promotion", "远景传媒": "Vision Media",
+    "星河互动": "Star Interactive", "海拓营销": "Ocean Marketing",
+    "通过": "Passed", "未提交": "Not submitted", "审核中": "Under review", "失败": "Failed", "不适用": "Not applicable",
+    "手机": "Mobile", "平板": "Tablet", "电脑": "Desktop", "未记录": "Not recorded",
+    "资料待核验": "Documentation pending verification", "行为待说明": "Behavior pending explanation",
+    "质量待复核": "Quality pending review", "支付风险": "Payment risk", "集群风险": "Cluster risk", "其他": "Other", "全部": "All",
+    "客户注册资料与流量来源记录": "Client registration profile and traffic-source records",
+    "关联行为特征与佣金流水": "Related behavior patterns and commission records",
+    "质量服务结果与结算前检查": "Quality-service result and pre-settlement checks",
+    "客户与关联佣金": "Client and related commissions",
+    "客户、关联佣金与相关链接": "Client, related commissions, and associated links",
+    "补充说明": "Provide explanation", "等待复核": "Await review", "等待结算复核": "Await settlement review",
+    "低风险调查": "Low-risk investigation", "统一隔离队列": "Unified quarantine queue", "已解除隔离": "Quarantine released",
+    "Telegram 社群": "Telegram community", "新加坡搜索推广": "Singapore search promotion",
+    "巴西社交推广": "Brazil social promotion", "网站展示位": "Website placement",
+    "社群内容位": "Community content placement", "视频推广位": "Video placement",
+    "注册事件回传": "Registration event postback", "佣金获批回传": "Commission approval postback",
+    "正常流程": "Normal flow", "层级下调": "Tier downgrade", "仅FTD": "FTD only",
+    "有效FTD待审": "Valid FTD pending review", "质量服务作废": "Quality service voided",
+    "结算延长": "Extended hold", "D+30冻结": "D+30 frozen", "拒付": "Chargeback",
+    "非新客户": "Not a new client", "欺诈命中": "Fraud hit", "申诉改判": "Appeal overturned"
+  };
+  Object.assign(dictionary, {
+    "注册账号": "Create account", "基本资料与渠道": "Profile and channel", "KYC 提交": "KYC submission",
+    "接受协议与准则": "Accept agreements", "资质审核": "Qualification review", "入驻申请": "Onboarding application",
+    "注册 → 资料 → KYC 提交 → 协议 → 资质审核。": "Registration → Profile → KYC submission → Agreements → Qualification review.",
+    "上一步": "Previous", "下一步": "Next", "提交审核": "Submit review", "已提交": "Submitted",
+    "查看协议": "View agreement", "关闭协议": "Close agreement", "阅读并接受": "Read and accept",
+    "邮箱": "Email", "邮箱验证": "Email verification", "未验证": "Not verified", "模拟验证": "Simulate verification",
+    "账号已创建": "Account created", "请先完成邮箱验证，再继续填写合作者资料。": "Verify your email before completing the partner profile.",
+    "账号": "Account", "姓名": "Name", "国家/地区": "Country / region", "推广渠道类型": "Channel type",
+    "主要推广国家": "Primary countries", "网站/App": "Website / app", "预计月流量": "Expected monthly traffic",
+    "历史合作平台": "Previous platforms", "投放方式": "Promotion methods", "自然流量": "Organic traffic",
+    "付费投放": "Paid media", "社群运营": "Community operations", "内容营销": "Content marketing",
+    "邮件": "Email marketing", "线下活动": "Offline events", "流量画像": "Traffic profile",
+    "画像审核": "Profile review", "端到端staging": "End-to-end staging", "待提交": "Not submitted",
+    "审核中": "Under review", "已通过": "Passed", "待检查": "Pending check", "可启用": "Can enable", "不可启用": "Cannot enable",
+    "查看佣金奖励": "Commission rewards", "高转化地区": "High-converting regions", "查看支持地区": "Supported regions",
+    "素材库总览": "Asset library overview", "系统使用指引": "System guide", "分享简介链接": "Share introduction link",
+    "L1-L4资格档与国家佣金": "L1-L4 qualification tiers and country commissions",
+    "参考CPA按国家直接配置；全部数值可后台配置": "Reference CPA is configured by country; all values are back-office configurable",
+    "资格档": "Tier", "净入金 / 交易量 / 交易日": "Net deposit / volume / trading days", "参考CPA": "Reference CPA",
+    "如何获得佣金": "How commissions work", "如何成为有效交易者": "How to become a valid trader",
+    "选择国家/地区查看哪些平台（网页、iOS、Android）可获得佣金。": "Choose countries or regions to see which platforms can earn commission.",
+    "端系统": "Platform", "支持状态": "Support status", "网页端": "Web", "安卓端": "Android", "iOS端": "iOS",
+    "支持": "Supported", "不支持": "Not supported", "端支持": "platform support",
+    "丰富的创意素材库": "A rich creative library", "适合不同渠道的推广创意": "Creative for different channels",
+    "用视频讲好您的推广内容": "Tell your promotion story with video", "让每次点击都有合适的落点": "Give every click the right landing point",
+    "快速入口": "Quick entries", "完成引导": "Finish guide", "已完成引导": "Guide completed",
+    "新建申诉": "New appeal", "申诉中": "Appealing", "已改判": "Overturned", "已驳回": "Rejected",
+    "不可申诉": "Not appealable", "调查任务": "Investigation tasks", "未读消息": "Unread messages",
+    "待强制确认": "Required acknowledgement", "规则公告": "Policy announcements", "业务通知": "Business notifications",
+    "消息列表": "Message list", "通知": "Notice", "普通已读": "Normal read", "仅提示": "Info only",
+    "强制确认": "Required acknowledgement"
+    ,"演示环境 · 虚构数据 · 参数为参考值": "Demo environment · synthetic data · reference values", "演示数据": "Demo data",
+    "服务器时间": "Server time", "本地时间": "Local time", "可提现": "Withdrawable", "帮助中心": "Help center",
+    "消息中心": "Messages", "个人中心": "Personal center", "退出登录": "Sign out",
+    "您的账户资料未完善，部分功能可能受限。": "Your partner profile is incomplete; some features may be limited.",
+    "知道了": "Dismiss", "去完成": "Complete now"
+    ,"1手": "1 lot", "3手": "3 lots", "5手": "5 lots", "10手": "10 lots",
+    "1天": "1 day", "3天": "3 days", "5天": "5 days", "8天": "8 days",
+    "将您的专属链接分享给交易客户。": "Share your exclusive link with trading clients.",
+    "点击您链接的客户必须注册并且在平台进行交易。": "Clients who click your link must register and trade on the platform.",
+    "每名有效的交易者可以为您带来佣金收益。": "Each valid trader can generate commission for you.",
+    "最低首次入金达到对应国家佣金奖励标准。": "The first deposit must meet the country reward threshold.",
+    "有充足的交易活跃度。": "Trading activity must be sufficient.",
+    "满足平台": "Meet the platform's", "《有效客户条款和条件》": "Valid Client Terms and Conditions", "中规定的资格要求。": "requirements.",
+    "佣金冲正": "Commission reversal", "佣金拒绝": "Commission rejection", "保证金抵扣": "Guarantee offset",
+    "客户资格无效": "Invalid client eligibility", "风险分级上调": "Risk level increased", "调查补充材料": "Investigation evidence",
+    "客户拒付原因待银行确认": "Client chargeback reason is pending bank confirmation",
+    "需补充CRM开户时间截图": "CRM account-opening screenshot is required",
+    "保证金释放并补发佣金": "Guarantee released and commission repaid",
+    "硬拦截": "Hard block", "欺诈库确权命中不可申诉": "Confirmed fraud-list hit is not appealable",
+    "CRM欺诈库命中误报": "CRM fraud-list false positive",
+    "投放说明": "Placement explanation", "流量来源截图": "Traffic-source screenshot", "客户沟通记录": "client communication record", "和客户沟通记录": "and client communication records",
+    "超时可能升级限制、维持结算阻断或转入人工处理；不会仅因超时自动认定违规。": "Missing the deadline may escalate limits, keep settlement blocked, or move to manual handling. A deadline alone does not establish a violation.",
+    "调查通知": "Investigation notice", "解除通知": "Release notice", "隔离通知": "Quarantine notice",
+    "规则变更": "Policy change", "申诉进度": "Appeal progress", "系统维护": "System maintenance",
+    "保证金规则更新": "Guarantee rule update", "1笔佣金延长观察期": "1 commission observation extended",
+    "报表延迟维护完成": "Report delay resolved",
+    "自下一结算版本起，佣金结算时按10%扣留滚动保证金，90个自然日后无风险自动释放。": "From the next settlement version, 10% rolling guarantee is withheld at settlement and automatically released after 90 risk-free calendar days.",
+    "因国家与支付方式风险档叠加，对应佣金动态结算延长。": "Country and payment risk tiers overlap, so the commission's dynamic hold is extended.",
+    "申诉已改判": "Appeal overturned", "复核确认误扣保证金，相关金额已释放至可提现余额。": "Review confirmed the guarantee was mistakenly withheld; the amount has been released to the available balance.",
+    "数据报表延迟10分钟，已恢复。": "Data reports were delayed by 10 minutes and have recovered.",
+    "需要补充调查材料": "Investigation evidence required",
+    "调查已解除，关联佣金等待结算前检查，不会直接入账。": "The investigation was released. Related commissions await pre-settlement checks and are not credited directly.",
+    "相关佣金已进入隔离": "Related commissions entered quarantine",
+    "调查期间佣金保留并留痕，但不自动结算、不可提现；解除后需等待结算前检查。": "During investigation, commissions are retained and audited but not settled or withdrawable. After release, they await pre-settlement checks."
+    ,"请在": "Please respond by ", "后7个自然日内补充": " within 7 calendar days, provide",
+    "超时可能升级限制或维持结算阻断。": "Missing the deadline may escalate limits or keep settlement blocked.",
+    "调查已解除": "Investigation released", "关联佣金等待结算前检查": "related commissions await pre-settlement checks",
+    "不会直接入账": "and are not credited directly", "调查期间佣金保留并留痕": "During investigation, commissions are retained and audited",
+    "但不自动结算": "but not settled automatically", "不可提现": "not withdrawable", "解除后需等待结算前检查": "After release, they await pre-settlement checks",
+    "调查已解除，等待结算复核": "Investigation released; awaiting settlement review"
+  });
+  const generated = String(value).match(/^(网站展示位|社群内容位|视频推广位)\s*(\d+)$/);
+  if (generated) return `${dictionary[generated[1]]} ${generated[2]}`;
+  if (dictionary[value]) return dictionary[value];
+  const partial = String(value);
+  return Object.entries(dictionary)
+    .sort(([left], [right]) => right.length - left.length)
+    .reduce((result, [zh, en]) => result.replaceAll(zh, en), partial);
+};
+
+AFF.localizeTextNodes = root => {
+  if (!root || AFF.state?.language !== "en") return;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const value = node.nodeValue;
+    if (!value.trim()) return;
+    const leading = value.match(/^\s*/)[0];
+    const trailing = value.match(/\s*$/)[0];
+    node.nodeValue = `${leading}${AFF.dataText(value.trim())}${trailing}`;
+  });
+};
 
 AFF.onboardingAgreements = [
   { title: "《主协议》", summary: "摘要：约定合作范围、佣金结算方式、双方权利义务与终止条款。" },
@@ -37,17 +199,17 @@ AFF.users = {
 };
 
 AFF.dashboard = {
-  link: "https://track.example.com/r/AFF1001?utm_source=partner"
+  link: "https://go.affiliate-cpa.example/register"
 };
 
 AFF.partnerProgram = {
   commissionMarkets: [
-    { code: "VN", name: "Vietnam" }, { code: "TH", name: "Thailand" },
-    { code: "ID", name: "Indonesia" }, { code: "ZA", name: "South Africa" },
-    { code: "NG", name: "Nigeria" }, { code: "PK", name: "Pakistan" },
-    { code: "EG", name: "Egypt" }, { code: "KW", name: "Kuwait" },
-    { code: "QA", name: "Qatar" }, { code: "KZ", name: "Kazakhstan" },
-    { code: "SA", name: "Saudi Arabia" }, { code: "BD", name: "Bangladesh" }
+    { code: "VN", name: "Vietnam", zh: "越南" }, { code: "TH", name: "Thailand", zh: "泰国" },
+    { code: "ID", name: "Indonesia", zh: "印度尼西亚" }, { code: "ZA", name: "South Africa", zh: "南非" },
+    { code: "NG", name: "Nigeria", zh: "尼日利亚" }, { code: "PK", name: "Pakistan", zh: "巴基斯坦" },
+    { code: "EG", name: "Egypt", zh: "埃及" }, { code: "KW", name: "Kuwait", zh: "科威特" },
+    { code: "QA", name: "Qatar", zh: "卡塔尔" }, { code: "KZ", name: "Kazakhstan", zh: "哈萨克斯坦" },
+    { code: "SA", name: "Saudi Arabia", zh: "沙特阿拉伯" }, { code: "BD", name: "Bangladesh", zh: "孟加拉国" }
   ],
   qualificationTiers: [
     { tier: "L1", netDeposit: 300, volume: 1, days: 3, basePrice: 200 },
@@ -55,20 +217,24 @@ AFF.partnerProgram = {
     { tier: "L3", netDeposit: 1500, volume: 5, days: 5, basePrice: 700 },
     { tier: "L4", netDeposit: 4000, volume: 10, days: 8, basePrice: 1200 }
   ],
-  countryCoefficients: {
-    "新加坡": 1, "马来西亚": 1, "泰国": 1.1, "越南": 1.2, "印度尼西亚": 1,
-    "南非": 0.9, "巴西": 1, "墨西哥": 1.1, "菲律宾": 1, "阿联酋": 0.8
+  countryCoefficient(code) {
+    const score = [...String(code)].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    return Number((0.6 + (score % 10) * 0.1).toFixed(1));
   },
-  commissionPrice(countryName, tierName) {
+  countryRef(code) {
+    const market = AFF.partnerProgram.commissionMarkets.find(item => item.code === code);
+    if (!market) return { code: "UN", name: "Unknown", zh: "待确认", coefficient: 1, unknown: true };
+    return { ...market, coefficient: AFF.partnerProgram.countryCoefficient(code), unknown: false };
+  },
+  commissionPrice(code, tierName) {
     const tier = AFF.partnerProgram.qualificationTiers.find(item => item.tier === tierName);
-    const coefficient = AFF.partnerProgram.countryCoefficients[countryName] || 1;
+    const ref = AFF.partnerProgram.countryRef(code);
     if (!tier) return 0;
-    return Math.round(tier.basePrice * coefficient / 5) * 5;
+    return Math.round(tier.basePrice * ref.coefficient / 5) * 5;
   },
   get commissionCountries() {
     return this.commissionMarkets.map(({ code, name }) => {
-      const score = [...code].reduce((sum, char) => sum + char.charCodeAt(0), 0);
-      const coefficient = Number((0.6 + (score % 10) * 0.1).toFixed(1));
+      const coefficient = AFF.partnerProgram.countryCoefficient(code);
       return {
         name,
         code,
@@ -81,28 +247,28 @@ AFF.partnerProgram = {
     });
   },
   conversionCountries: [
-    { name: "越南", desktop: [11.8, 36.4, 72.5], mobile: [17.6, 41.8, 78.4], volume: 4820 },
-    { name: "泰国", desktop: [10.4, 34.8, 70.2], mobile: [16.2, 39.6, 76.1], volume: 4310 },
-    { name: "印度尼西亚", desktop: [9.8, 33.9, 69.4], mobile: [15.4, 38.7, 74.8], volume: 5260 },
-    { name: "南非", desktop: [9.2, 31.8, 67.2], mobile: [12.8, 34.2, 70.6], volume: 3140 },
-    { name: "尼日利亚", desktop: [8.6, 30.4, 65.8], mobile: [12.1, 32.9, 69.2], volume: 2890 },
-    { name: "巴基斯坦", desktop: [8.1, 29.6, 64.4], mobile: [11.4, 31.2, 67.5], volume: 3520 },
-    { name: "埃及", desktop: [7.8, 28.9, 63.2], mobile: [10.8, 30.4, 66.8], volume: 2680 },
-    { name: "科威特", desktop: [7.2, 27.8, 61.4], mobile: [9.1, 27.2, 62.8], volume: 1240 }
+    { code: "VN", name: "越南", desktop: [11.8, 36.4, 72.5], mobile: [17.6, 41.8, 78.4], volume: 4820 },
+    { code: "TH", name: "泰国", desktop: [10.4, 34.8, 70.2], mobile: [16.2, 39.6, 76.1], volume: 4310 },
+    { code: "ID", name: "印度尼西亚", desktop: [9.8, 33.9, 69.4], mobile: [15.4, 38.7, 74.8], volume: 5260 },
+    { code: "ZA", name: "南非", desktop: [9.2, 31.8, 67.2], mobile: [12.8, 34.2, 70.6], volume: 3140 },
+    { code: "NG", name: "尼日利亚", desktop: [8.6, 30.4, 65.8], mobile: [12.1, 32.9, 69.2], volume: 2890 },
+    { code: "PK", name: "巴基斯坦", desktop: [8.1, 29.6, 64.4], mobile: [11.4, 31.2, 67.5], volume: 3520 },
+    { code: "EG", name: "埃及", desktop: [7.8, 28.9, 63.2], mobile: [10.8, 30.4, 66.8], volume: 2680 },
+    { code: "KW", name: "科威特", desktop: [7.2, 27.8, 61.4], mobile: [9.1, 27.2, 62.8], volume: 1240 }
   ],
   supportCountries: [
-    { name: "越南", web: true, android: true, ios: true, note: "三端均可注册与交易" },
-    { name: "泰国", web: true, android: true, ios: true, note: "iOS支付渠道受限" },
-    { name: "印度尼西亚", web: true, android: true, ios: true, note: "安卓安装包需归因回传" },
-    { name: "南非", web: true, android: true, ios: false, note: "iOS暂未开放注册" },
-    { name: "尼日利亚", web: true, android: true, ios: false, note: "iOS待监管评审" },
-    { name: "巴基斯坦", web: true, android: true, ios: true, note: "三端支持" },
-    { name: "埃及", web: true, android: false, ios: false, note: "仅Web端支持" },
-    { name: "科威特", web: true, android: true, ios: true, note: "三端支持" },
-    { name: "卡塔尔", web: true, android: true, ios: true, note: "三端支持" },
-    { name: "哈萨克斯坦", web: true, android: true, ios: true, note: "三端支持" },
-    { name: "沙特阿拉伯", web: true, android: true, ios: true, note: "iOS仅App Store分发" },
-    { name: "孟加拉国", web: true, android: true, ios: false, note: "iOS暂未开放" }
+    { code: "VN", name: "越南", web: true, android: true, ios: true, note: "三端均可注册与交易" },
+    { code: "TH", name: "泰国", web: true, android: true, ios: true, note: "iOS支付渠道受限" },
+    { code: "ID", name: "印度尼西亚", web: true, android: true, ios: true, note: "安卓安装包需归因回传" },
+    { code: "ZA", name: "南非", web: true, android: true, ios: false, note: "iOS暂未开放注册" },
+    { code: "NG", name: "尼日利亚", web: true, android: true, ios: false, note: "iOS待监管评审" },
+    { code: "PK", name: "巴基斯坦", web: true, android: true, ios: true, note: "三端支持" },
+    { code: "EG", name: "埃及", web: true, android: false, ios: false, note: "仅Web端支持" },
+    { code: "KW", name: "科威特", web: true, android: true, ios: true, note: "三端支持" },
+    { code: "QA", name: "卡塔尔", web: true, android: true, ios: true, note: "三端支持" },
+    { code: "KZ", name: "哈萨克斯坦", web: true, android: true, ios: true, note: "三端支持" },
+    { code: "SA", name: "沙特阿拉伯", web: true, android: true, ios: true, note: "iOS仅App Store分发" },
+    { code: "BD", name: "孟加拉国", web: true, android: true, ios: false, note: "iOS暂未开放" }
   ],
   assets: [
     { name: "抖音竖版落地页", device: "网站", platform: "抖音", type: "落地页", resolution: "1080×1920" },
@@ -127,45 +293,53 @@ AFF.performance = {
     "印象", "安装", "被拦截安装", "访客量UV", "点击量", "点击到达率", "注册量",
     "首次入金", "首次入金金额", "开始交易", "合格客户",
     "忠诚客户", "持有客户", "黑名单客户",
-    "预计收益", "已拒绝利润", "暂扣利润", "EPC"
+    "预计收益", "已拒绝利润", "结算中利润", "EPC"
   ],
   rows: [
-    ["2026-10-22", "新加坡", "Telegram", "社交媒体", "十月投放", "外汇", "横幅A", 18200, 620, 32, 4820, 5360, "29.5%", 402, 132, "$26,400", 121, 88, 92, 8, "$8,800", "$120", "$260", "$1.83"],
-    ["2026-10-21", "新加坡", "谷歌广告", "竞价广告", "十月投放", "外汇", "视频B", 15400, 480, 28, 4010, 4310, "27.8%", 351, 118, "$23,600", 108, 79, 83, 7, "$7,900", "$90", "$210", "$1.97"],
-    ["2026-10-20", "马来西亚", "Telegram", "社交媒体", "十月投放", "交易", "横幅A", 12100, 410, 21, 3380, 3720, "30.2%", 296, 96, "$19,200", 89, 68, 71, 5, "$6,800", "$80", "$180", "$1.83"],
-    ["2026-10-19", "马来西亚", "推荐链接", "推荐流量", "财经博客", "外汇", "横幅A", 8600, 280, 12, 2260, 2510, "26.4%", 187, 61, "$12,200", 55, 43, 45, 3, "$4,300", "$40", "$100", "$1.71"],
-    ["2026-10-18", "巴西", "Facebook", "竞价广告", "九月测试", "交易", "视频B", 7400, 210, 18, 1840, 2080, "24.1%", 142, 39, "$7,800", 33, 24, 28, 4, "$2,700", "$60", "$90", "$1.30"]
+    ["2026-10-22", "沙特阿拉伯", "Telegram", "社交媒体", "十月投放", "外汇", "横幅A", 18200, 620, 32, 4820, 5360, "29.5%", 402, 132, "$26,400", 121, 88, 92, 8, "$8,800", "$120", "$260", "$1.83"],
+    ["2026-10-21", "沙特阿拉伯", "谷歌广告", "竞价广告", "十月投放", "外汇", "视频B", 15400, 480, 28, 4010, 4310, "27.8%", 351, 118, "$23,600", 108, 79, 83, 7, "$7,900", "$90", "$210", "$1.97"],
+    ["2026-10-20", "孟加拉国", "Telegram", "社交媒体", "十月投放", "交易", "横幅A", 12100, 410, 21, 3380, 3720, "30.2%", 296, 96, "$19,200", 89, 68, 71, 5, "$6,800", "$80", "$180", "$1.83"],
+    ["2026-10-19", "孟加拉国", "推荐链接", "推荐流量", "财经博客", "外汇", "横幅A", 8600, 280, 12, 2260, 2510, "26.4%", 187, 61, "$12,200", 55, 43, 45, 3, "$4,300", "$40", "$100", "$1.71"],
+    ["2026-10-18", "尼日利亚", "Facebook", "竞价广告", "九月测试", "交易", "视频B", 7400, 210, 18, 1840, 2080, "24.1%", 142, 39, "$7,800", 33, 24, 28, 4, "$2,700", "$60", "$90", "$1.30"]
   ]
 };
 
 AFF.clients = [
   {
     clientId: "C-10241", email: "w***@gmail.com", status: "qualified", registeredAt: "2026-10-18",
-    country: "马来西亚", platform: "Web", kyc: "通过", source: "Telegram", medium: "社交媒体",
+    country: "MY", platform: "Web", kyc: "通过", source: "Telegram", medium: "社交媒体",
     campaign: "十月 Telegram 投放", term: "外汇", content: "横幅 A 版", loyal: true,
     qualifiedAt: "2026-10-20", tier: "T2", subId: "tg_group_01", expected: "$400", paid: "$400", rejected: "$0", held: "$0"
   },
   {
     clientId: "C-10240", email: "a***@example.com", status: "holding", registeredAt: "2026-10-18",
-    country: "新加坡", platform: "App", kyc: "通过", source: "谷歌广告", medium: "竞价广告",
+    country: "SG", platform: "App", kyc: "通过", source: "谷歌广告", medium: "竞价广告",
     campaign: "十月投放", term: "外汇", content: "视频 B 版", loyal: false,
     qualifiedAt: "2026-10-21", tier: "A", subId: "sg_search_02", expected: "$120", paid: "$0", rejected: "$0", held: "$120"
   },
   {
     clientId: "C-10239", email: "n***@example.com", status: "registered", registeredAt: "2026-10-19",
-    country: "巴西", platform: "Web", kyc: "未提交", source: "Facebook", medium: "社交媒体",
+    country: "BR", platform: "Web", kyc: "未提交", source: "Facebook", medium: "社交媒体",
     campaign: "九月测试", term: "交易", content: "横幅 A 版", loyal: false,
     qualifiedAt: "-", tier: "C", subId: "br_social_03", expected: "$0", paid: "$0", rejected: "$0", held: "$0"
   }
 ];
 
 AFF.campaigns = [
-  { code: "CMP-1001", name: "秋季交易指南", link: "https://track.example.com/r/AFF1001?camp=CMP-1001", status: "启用" },
-  { code: "CMP-1002", name: "市场观察周刊", link: "https://track.example.com/r/AFF1001?camp=CMP-1002", status: "启用" },
-  { code: "CMP-1003", name: "移动交易体验", link: "https://track.example.com/r/AFF1001?camp=CMP-1003", status: "启用" },
-  { code: "CMP-1004", name: "新客户入门", link: "https://track.example.com/r/AFF1001?camp=CMP-1004", status: "启用" },
-  { code: "CMP-1005", name: "社区直播专场", link: "https://track.example.com/r/AFF1001?camp=CMP-1005", status: "暂停" },
-  { code: "CMP-1006", name: "全球市场专题", link: "https://track.example.com/r/AFF1001?camp=CMP-1006", status: "启用" }
+  {
+    code: "DIRECT",
+    name: "直链推广",
+    link: "https://go.affiliate-cpa.example/register",
+    status: "启用",
+    fixed: true,
+    description: "不属于任何活动、直接通过推广链接进入的用户"
+  },
+  { code: "CMP-1001", name: "秋季交易指南", link: "https://go.affiliate-cpa.example/register", status: "启用" },
+  { code: "CMP-1002", name: "市场观察周刊", link: "https://go.affiliate-cpa.example/register", status: "启用" },
+  { code: "CMP-1003", name: "移动交易体验", link: "https://go.affiliate-cpa.example/register", status: "启用" },
+  { code: "CMP-1004", name: "新客户入门", link: "https://go.affiliate-cpa.example/register", status: "启用" },
+  { code: "CMP-1005", name: "社区直播专场", link: "https://go.affiliate-cpa.example/register", status: "暂停" },
+  { code: "CMP-1006", name: "全球市场专题", link: "https://go.affiliate-cpa.example/register", status: "启用" }
 ];
 
 AFF.trackers = [
@@ -204,14 +378,14 @@ AFF.subIds = [
 
 AFF.commissions = {
   metrics: [
-    { label: "可提现余额", value: "$12,480.50", hint: "已过Hold期且已批准" },
-    { label: "暂扣中（Hold）", value: "$1,260.00", hint: "初始1天，按风险分递增；超30天冻结转人工" },
+    { label: "可提现余额", value: "$12,480.50", hint: "已过结算期且已批准" },
+    { label: "结算中", value: "$1,260.00", hint: "初始1天，按风险分递增；超30天冻结转人工" },
     { label: "已拒绝（本期）", value: "$140.00", hint: "资格未达标拒付 · 申诉期内" },
     { label: "已付追回", value: "$300.00", hint: "已付佣金冲正 · 追回进行中" }
   ],
   rows: [
     { date: "2026-10-23", type: "日度结算", note: "日结批次", amount: "$820.00", status: "已批准", action: "" },
-    { date: "2026-10-22", type: "暂扣生效", note: "风险分R1，动态Hold 2天", amount: "$120.00", status: "暂扣", action: "" },
+    { date: "2026-10-22", type: "结算中生效", note: "风险分R1，动态结算 2天", amount: "$120.00", status: "结算中", action: "" },
     { date: "2026-10-21", type: "佣金拒绝", note: "QFTD-02 未达质量门槛", amount: "-$140.00", status: "已拒绝", action: "申诉", appealOpen: true },
     { date: "2026-10-20", type: "已付追回", note: "KYC复检失败 RC-1024", amount: "-$300.00", status: "追回中", action: "" },
     { date: "2026-10-19", type: "提现", note: "尾号6621", amount: "$2,000.00", status: "已到账", action: "" },
@@ -308,14 +482,26 @@ AFF.lookupIndex = [
 ];
 
 AFF.deepLinks = {
-  pages: ["注册页", "首页", "Standard·MT5开户页", "Pro·MT4开户页", "Zero·MT5开户页"],
+  domain: "https://go.affiliate-cpa.example",
+  promotionPath: "/register",
+  pathVersion: "PATH-20261104-1",
+  assets: [
+    { id: "OFF-REGISTER", code: "register", name: "官方注册页", type: "落地页", path: "/register", mobilePath: "/m/register" },
+    { id: "OFF-HOME", code: "home", name: "官方首页", type: "落地页", path: "/home", mobilePath: "/m/home" },
+    { id: "OFF-STANDARD-MT5", code: "standard-mt5", name: "Standard·MT5开户页", type: "开户页", path: "/open-account/standard-mt5", mobilePath: "/m/open-account/standard-mt5" },
+    { id: "OFF-PRO-MT4", code: "pro-mt4", name: "Pro·MT4开户页", type: "开户页", path: "/open-account/pro-mt4", mobilePath: "/m/open-account/pro-mt4" },
+    { id: "OFF-ZERO-MT5", code: "zero-mt5", name: "Zero·MT5开户页", type: "开户页", path: "/open-account/zero-mt5", mobilePath: "/m/open-account/zero-mt5" }
+  ],
   systems: ["iOS (App Store)", "Android (Google Play)"],
-  languages: ["简体中文", "English", "ไทย", "Tiếng Việt"]
+  languages: ["简体中文", "English", "ไทย", "Tiếng Việt"],
+  get pages() {
+    return this.assets.map(asset => asset.name);
+  }
 };
 
 AFF.parameters = {
   qualification: "入金 + 真实交易组合条件",
   settlement: "日结 · 不设最低提现",
-  hold: "动态Hold：初始1天，超过30天转人工",
+  hold: "动态结算：初始1天，超过30天转人工",
   demoTrade: "模拟盘不计入"
 };

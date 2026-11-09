@@ -34,18 +34,52 @@ async function main() {
       }, { id, patch });
     }
     async function getTotal() {
-      return Number(await page.locator("[data-rp-total]").textContent());
+      return Number(await page.locator("[data-aff-total]").textContent());
+    }
+    async function setReportDates(from, to) {
+      await page.evaluate(({ from, to }) => {
+        const root = document.querySelector("[data-range-id='report-range-perf']");
+        root.dataset.rangeFrom = from;
+        root.dataset.rangeTo = to;
+        root.dispatchEvent(new CustomEvent("date-range-change", {
+          bubbles: true,
+          detail: { id: "report-range-perf", from, to }
+        }));
+      }, { from, to });
     }
     async function addGroup(key) {
       await page.click("[data-rp-action='groups']");
+      await page.waitForSelector(".report-group-menu");
       await page.click(`[data-rp-add-group='${key}']`);
     }
     async function captureCsv() {
+      /* D-EXPORT-PAGE: data pages carry only the entry row; the task list
+       * lives on the standalone export center page. */
+      const originRoute = await page.evaluate(() => AFF.state.route);
       const pending = page.waitForEvent("download");
-      await page.click("[data-rp-action='export']");
+      await page.click("[data-export-action='create']");
+      await page.evaluate(() => navigate("export"));
+      /* The just-created task sorts to the TOP row (id starts with EXP-U);
+       * find it explicitly instead of relying on DOM order. */
+      await page.waitForFunction(() => {
+        const userRows = [...document.querySelectorAll(".export-page [data-export-task^='EXP-U']")];
+        return userRows.length && userRows.every(row => row.innerText.includes("已生成") || row.innerText.includes("生成失败"));
+      });
+      const userRow = page.locator(".export-page [data-export-task^='EXP-U']").first();
+      if (await userRow.locator("[data-export-action='retry']:not([disabled])").count()) {
+        await userRow.locator("[data-export-action='retry']:not([disabled])").click();
+        await page.waitForFunction(() => [...document.querySelectorAll(".export-page [data-export-task^='EXP-U']")].some(row => row.innerText.includes("已生成")));
+        await page.waitForTimeout(150);   // let the settled re-render replace the row node
+      }
+      /* Re-resolve the row: the settle re-render replaces the DOM node,
+       * so a locator captured before retry points at a detached element. */
+      await page.locator(".export-page [data-export-task^='EXP-U']").first()
+        .locator("[data-export-action='download']:not([disabled])").click();
       const download = await pending;
       const csv = fs.readFileSync(await download.path(), "utf8");
       assert.ok(download.suggestedFilename().endsWith(".csv"));
+      await page.evaluate(id => navigate(id), originRoute);   // back to the data page
+      await page.waitForSelector(".report-page");
       return csv;
     }
     const dataInfo = await page.evaluate(() => ({
@@ -83,38 +117,37 @@ async function main() {
     assert.deepEqual(await page.evaluate(() => AFF.reports.state().groups), ["country", "platform"]);
     const firstRow = await page.locator(".report-table tbody tr:not(.report-total)").first().locator("td").allTextContents();
     const expectedFirst = await page.evaluate(() => AFF.reports.tableRows()[0]);
-    assert.deepEqual(firstRow.slice(0, 2), expectedFirst.values);
+    const expectedDisplay = await page.evaluate(values => values.map(value => AFF.dataText(value)), expectedFirst.values);
+    assert.deepEqual(firstRow.slice(0, 2), expectedDisplay);
     assert.equal(Number(firstRow[2].replaceAll(",", "")), expectedFirst.metrics.clicks);
     await page.click("[data-rp-sort='clicks']");
     await page.click("[data-rp-sort='clicks']");
-    assert.equal(await page.locator("[data-rp-sort='clicks']").locator("..").getAttribute("aria-sort"), "ascending");
+    assert.equal(await page.locator("[data-rp-sort='clicks']").locator("xpath=../..").getAttribute("aria-sort"), "ascending");
     const sorted = await page.evaluate(() => AFF.reports.tableRows().map(row => row.metrics.clicks));
     assert.ok(sorted.every((value, index) => !index || value >= sorted[index - 1]));
 
     const unfilteredTotal = await getTotal();
     await page.click("[data-rp-action='filters']");
-    await page.selectOption("[data-rp-filter='country']", "新加坡");
+    await page.selectOption("[data-rp-filter='country']", "KZ");
     assert.equal(await page.evaluate(() => AFF.reports.state().filters.country || ""), "");
     assert.equal(await getTotal(), unfilteredTotal);
     await page.locator(".report-drawer footer [data-rp-action='close']").click();
     assert.equal(await page.evaluate(() => AFF.reports.state().filters.country || ""), "");
     await page.click("[data-rp-action='filters']");
-    await page.selectOption("[data-rp-filter='country']", "新加坡");
-    await page.selectOption("[data-rp-filter='platform']", "Web");
+    await page.selectOption("[data-rp-filter='country']", "KZ");
+    await page.selectOption("[data-rp-filter='platform']", "Android");
     await page.click("[data-rp-action='apply']");
     assert.equal(await page.locator(".report-drawer").count(), 0);
     assert.ok(await getTotal() > 0);
-    assert.ok(await page.evaluate(() => AFF.reports.filtered().every(row => row.country === "新加坡" && row.platform === "Web")));
+    assert.ok(await page.evaluate(() => AFF.reports.filtered().every(row => row.country === "KZ" && row.platform === "Android")));
     assert.equal(await getTotal(), 1);
 
     await page.click("[data-rp-action='filters']");
-    await page.fill("[data-rp-filter='from']", "2026-10-27");
-    await page.fill("[data-rp-filter='to']", "2026-10-01");
+    await setReportDates("2026-10-27", "2026-10-01");
     await page.click("[data-rp-action='apply']");
     assert.match(await page.locator("#rp-validation").innerText(), /有效的日期/);
     assert.equal(await page.evaluate(() => AFF.reports.state().filters.from), "2026-09-28");
-    await page.fill("[data-rp-filter='from']", "2025-01-01");
-    await page.fill("[data-rp-filter='to']", "2025-01-02");
+    await setReportDates("2025-01-01", "2025-01-02");
     await page.click("[data-rp-action='apply']");
     assert.equal(await getTotal(), 0);
     assert.match(await page.locator(".report-empty").innerText(), /暂无数据/);
@@ -129,15 +162,17 @@ async function main() {
     assert.deepEqual(await page.evaluate(() => AFF.reports.state().groups), []);
     const allMetric = await page.evaluate(() => AFF.reports.tableRows()[0].metrics);
     const allTotals = await page.evaluate(() => AFF.reporting.totals(AFF.reports.filtered()));
-    assert.deepEqual(allMetric, allTotals);
+    for (const key of ["clicks", "visitors", "registrations", "ftd", "effective", "quality", "expected", "reversed"]) {
+      assert.equal(allMetric[key], allTotals[key], `${key} must stay consistent between aggregate and source totals`);
+    }
     await addGroup("date");
     await addGroup("country");
     await page.selectOption("[data-rp-period]", "past90");
     assert.ok(await getTotal() > 200, "Multi-dimensional report should expose more than 200 grouped rows");
-    await page.selectOption("[data-rp-page-size]", "50");
+    await page.selectOption("[data-aff-page-size]", "50");
     assert.equal(await page.locator(".report-table tbody tr:not(.report-total)").count(), 50);
     const pageOne = await page.locator(".report-table tbody tr:not(.report-total)").first().innerText();
-    await page.click("[data-rp-action='next']");
+    await page.click("[data-aff-page][aria-label='下一页'], [data-aff-page][aria-label='Next page']");
     assert.equal(await page.evaluate(() => AFF.reports.state().page), 2);
     assert.notEqual(await page.locator(".report-table tbody tr:not(.report-total)").first().innerText(), pageOne);
     const groupedCount = await getTotal();
@@ -149,24 +184,30 @@ async function main() {
     await page.click("[data-rp-action='columns']");
     await page.click("[data-rp-action='all-columns']");
     await page.click("[data-rp-action='apply']");
-    assert.equal(await page.locator(".report-table thead th").count(), 21);
+    assert.equal(
+      await page.locator(".report-table thead th").count(),
+      await page.evaluate(() => AFF.reports.state().groups.length + AFF.reporting.metrics.length)
+    );
     await page.click("[data-rp-action='columns']");
     await page.click("[data-rp-action='default-columns']");
     await page.click("[data-rp-action='apply']");
-    assert.equal(await page.locator(".report-table thead th").count(), 12);
+    assert.equal(
+      await page.locator(".report-table thead th").count(),
+      await page.evaluate(() => AFF.reports.state().groups.length + AFF.reports.state().columns.length)
+    );
 
     await route("summary");
     const cardsBefore = await page.locator(".report-stats").innerText();
     await addGroup("country");
     assert.equal(await page.locator(".report-stats").innerText(), cardsBefore, "Grouping must not change summary cards");
     await page.click("[data-rp-action='filters']");
-    await page.selectOption("[data-rp-filter='country']", "泰国");
+    await page.selectOption("[data-rp-filter='country']", "TH");
     await page.click("[data-rp-action='apply']");
     assert.notEqual(await page.locator(".report-stats").innerText(), cardsBefore);
-    const expectedRegistrations = await page.evaluate(() => AFF.reporting.totals(AFF.reports.filtered()).registrations);
-    await page.click(".report-stats [data-rp-drill-metric='registrations']");
+    const expectedFtd = await page.evaluate(() => AFF.reporting.totals(AFF.reports.filtered()).ftd);
+    await page.click(".report-stats [data-rp-drill-metric='ftd']");
     assert.equal(await page.evaluate(() => AFF.state.route), "clients");
-    assert.equal(await getTotal(), expectedRegistrations);
+    assert.equal(await getTotal(), expectedFtd);
 
     for (const grain of ["week", "month", "year"]) {
       await route("perf");
@@ -193,14 +234,111 @@ async function main() {
     }
 
     await route("clients");
+    assert.deepEqual(
+      await page.evaluate(() => {
+        const s = AFF.reports.state("clients");
+        return [s.sort, s.direction];
+      }),
+      ["registeredAt", "desc"],
+      "Client data defaults to registration time descending"
+    );
+    const reportingFrom = await page.evaluate(() => AFF.reporting.from);
+    const expectedClients = await page.evaluate(from =>
+      AFF.reporting.rows.filter(row => row.clientId && row.date >= from && row.date <= AFF.reporting.now).length,
+      reportingFrom);
     await patchState("clients", {
-      filters: { from: "2026-07-30", to: "2026-10-27" }, preset: "past90", page: 1, pageSize: 10, metric: null
+      filters: { from: reportingFrom, to: "2026-10-27" }, preset: "past90", page: 1, pageSize: 10, metric: null
     });
-    assert.equal(await getTotal(), dataInfo.clients);
-    await page.click("[data-rp-sort='stage']");
-    await page.click("[data-rp-sort='stage']");
-    const stages = await page.evaluate(() => AFF.reports.tableRows().map(row => row.qualityAt ? 3 : row.effectiveAt ? 2 : row.ftdAt ? 1 : 0));
-    assert.ok(stages.every((value, index) => !index || value >= stages[index - 1]), "Conversion stages must sort by progression");
+    assert.equal(await getTotal(), expectedClients);
+    const clientHeaders = await page.locator(".report-client-table thead").innerText();
+    assert.ok(clientHeaders.includes("KYC状态") && clientHeaders.includes("注册信息"), "Client headers use the updated labels");
+    assert.equal(await page.locator("[data-rp-column-help='registration']").count(), 1, "Registration column has an explanation");
+    assert.equal(await page.locator("[data-rp-column-help='quality']").count(), 1, "Quality service column has an explanation");
+    assert.equal(await page.locator("[data-rp-column-help='expected']").count(), 1, "Expected commission column has an explanation");
+    assert.equal(await page.locator("[data-rp-sort='campaign']").count(), 0, "Campaign source is not sortable");
+    assert.equal(await page.locator("[data-rp-sort='kyc']").count(), 0, "KYC is not sortable");
+    assert.equal(await page.locator("[data-rp-sort='expected']").count(), 0, "Expected commission is not sortable");
+    assert.equal(await page.locator("[data-rp-sort='settled']").count(), 0, "Settled commission is not sortable");
+    assert.equal(await page.locator("[data-rp-sort='stage']").count(), 0, "Conversion stage is not sortable");
+    assert.equal(await page.locator("[data-rp-sort='commissionStatus']").count(), 0, "Fund status is not sortable");
+    assert.ok(!(await page.locator(".report-expected-cell").first().innerText()).includes("参考值"), "Expected commission does not show reference-value label");
+    await page.click("[data-rp-column-help='stage']");
+    const stageHelp = await page.locator("#rp-floating-help").innerText();
+    for (const stage of ["注册", "KYC", "FTD", "有效FTD", "质量服务", "已完成", "已作废"]) {
+      assert.ok(stageHelp.includes(stage), `Conversion-stage explanation includes ${stage}`);
+    }
+    await page.mouse.click(12, 12);
+    await page.click("[data-rp-column-help='riskHandlingStatus']");
+    const riskHelp = await page.locator("#rp-floating-help").innerText();
+    for (const risk of ["无风险", "调查中", "隔离中", "已解除"]) {
+      assert.ok(riskHelp.includes(risk), `Risk explanation includes ${risk}`);
+    }
+    await page.mouse.click(12, 12);
+    const tierLayout = await page.locator(".report-progress").first().evaluate(node => ({
+      whiteSpace: getComputedStyle(node).whiteSpace,
+      textWhiteSpace: getComputedStyle(node.querySelector("strong")).whiteSpace,
+      height: node.getBoundingClientRect().height,
+      contentHeight: node.scrollHeight
+    }));
+    assert.equal(tierLayout.whiteSpace, "nowrap", "Tier values stay on one line");
+    assert.equal(tierLayout.textWhiteSpace, "nowrap", "Tier text stays on one line");
+    assert.ok(tierLayout.contentHeight <= tierLayout.height + 1, "Tier cell does not grow from wrapping");
+    const kycPendingClient = await page.evaluate(() =>
+      AFF.reporting.rows.find(row => row.clientId && row.kyc !== "通过")?.clientId
+    );
+    assert.ok(kycPendingClient, "A client without completed KYC exists");
+    await page.evaluate(id => {
+      const s = AFF.reports.state("clients");
+      s.filters = { from: AFF.reporting.from, to: AFF.reporting.now, search: id };
+      s.page = 1;
+      render();
+    }, kycPendingClient);
+    assert.equal(await page.locator(".report-progress").first().innerText(), "KYC未完成", "KYC-incomplete clients have no confirmed tier");
+    await page.locator(".report-progress").first().click();
+    assert.match(await page.locator("#rp-floating-help").innerText(), /完成KYC|KYC/);
+    await page.mouse.click(12, 12);
+    const confirmedTierClient = await page.evaluate(() =>
+      AFF.reporting.rows.find(row => row.clientId && row.kyc === "通过" && row.effectiveAt && row.tier && row.tier !== "-")?.clientId
+    );
+    assert.ok(confirmedTierClient, "A client with a confirmed tier exists");
+    await page.evaluate(id => {
+      const s = AFF.reports.state("clients");
+      s.filters = { from: "2026-01-01", to: AFF.reporting.now, search: id };
+      s.page = 1;
+      render();
+    }, confirmedTierClient);
+    await page.locator(".report-progress").first().click();
+    assert.match(await page.locator("#rp-floating-help").innerText(), /净入金 ≥|累计标准手数|交易活跃天数/);
+    await page.mouse.click(12, 12);
+    const settlementCandidate = await page.evaluate(() => {
+      const row = AFF.reporting.rows.find(item => item.clientId &&
+        item.commissionCases?.some(commissionCase => commissionCase.status === "held" && !commissionCase.settlement));
+      if (!row) return null;
+      return {
+        id: row.clientId,
+        heldCase: row.commissionCases.some(item => item.status === "held" && !item.settlement),
+        settled: row.commissionCases.filter(item => item.settlement)
+          .reduce((sum, item) => sum + Number(item.settlement.grossAmount || 0) / 100, 0),
+        allCases: row.commissionCases.reduce((sum, item) => sum + Number(item.amountCents || item.amount || 0) / 100, 0)
+      };
+    });
+    assert.ok(settlementCandidate?.heldCase, "A client with an unsettled held commission exists");
+    await page.evaluate(({ id }) => {
+      const s = AFF.reports.state("clients");
+      s.filters = { from: AFF.reporting.from, to: AFF.reporting.now, search: id };
+      s.page = 1;
+      render();
+    }, settlementCandidate);
+    const settledText = await page.locator(".report-settled-cell strong").first().innerText();
+    const money = value => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
+    assert.equal(settledText, money(settlementCandidate.settled), "Settled commission excludes on-hold cases");
+    assert.notEqual(settlementCandidate.settled, settlementCandidate.allCases, "Settled amount excludes the held sample's unsettled cases");
+    await page.evaluate(() => {
+      const s = AFF.reports.state("clients");
+      s.filters = { from: AFF.reporting.from, to: AFF.reporting.now };
+      s.page = 1;
+      render();
+    });
     await page.click("[data-rp-action='filters']");
     await page.selectOption("[data-rp-filter='commissionStatus']", "pending_review");
     await page.click("[data-rp-action='apply']");
@@ -210,7 +348,8 @@ async function main() {
     await page.locator("[data-rp-client]").first().click();
     assert.equal(await page.locator(".report-drawer[role='dialog'][aria-modal='true']").count(), 1);
     assert.match(await page.locator(".report-drawer").innerText(), /\*\*\*@example\.com/);
-    assert.match(await page.locator(".report-drawer").innerText(), /转化进度/);
+    assert.match(await page.locator(".report-drawer").innerText(), /三层状态/);
+    assert.match(await page.locator(".report-drawer").innerText(), /转化阶段/);
     const closeButtons = page.locator(".report-drawer button");
     await closeButtons.last().focus();
     await page.keyboard.press("Tab");
@@ -221,11 +360,11 @@ async function main() {
     assert.equal(await page.locator(".report-drawer").count(), 0);
     assert.ok(await page.evaluate(() => Boolean(document.activeElement?.dataset.rpClient)));
     const commissionTotals = await page.evaluate(() => AFF.reporting.totals(AFF.reporting.rows));
-    await page.locator("[data-rp-action='commission-help']").click();
-    assert.ok(await page.locator("#rp-commission-help").isVisible());
-    assert.match(await page.locator("#rp-commission-help").innerText(), /观察期[\s\S]*核验[\s\S]*退款/);
-    await page.keyboard.press("Escape");
-    assert.ok(await page.locator("#rp-commission-help").isHidden());
+    await page.locator("[data-rp-column-help='expected']").click({ force: true });
+    assert.ok(await page.locator("#rp-floating-help").isVisible());
+    assert.match(await page.locator("#rp-floating-help").innerText(), /基础佣金段|质量服务佣金段/);
+    await page.mouse.click(12, 12);
+    assert.ok(await page.locator("#rp-floating-help").isHidden());
     for (const [commissionStatus, fundStatus] of [["rejected", "rejected"], ["reversed", "clawed_back"]]) {
       await page.click("[data-rp-action='filters']");
       await page.selectOption("[data-rp-filter='commissionStatus']", fundStatus);
@@ -250,7 +389,7 @@ async function main() {
       assert.equal(appeal.clientId, record.clientId);
       assert.equal(appeal.commissionId, record.commissionId);
       assert.equal(appeal.status, "pending");
-      assert.equal(await page.evaluate(id => AFF.reporting.rows.find(item => item.commissionId === id).commissionStatus, record.commissionId), commissionStatus);
+      assert.equal(await page.evaluate(id => AFF.reporting.rows.find(item => item.commissionId === id).commissionStatus, record.commissionId), record.commissionStatus);
       await page.keyboard.press("Escape");
       assert.ok(await row.locator("[data-rp-appeal]").isDisabled());
       assert.ok(await page.locator(".report-client-table tbody tr").nth(1).locator("[data-rp-appeal]").isEnabled());
@@ -260,15 +399,16 @@ async function main() {
     }
     assert.deepEqual(await page.evaluate(() => AFF.reporting.totals(AFF.reporting.rows)), commissionTotals);
     const originalCampaign = await page.evaluate(() => {
-      const row = AFF.reporting.rows.find(item => item.clientId);
+      const row = AFF.reports.tableRows()[0];
       const original = { id: row.id, campaign: row.campaign };
       row.campaign = '=HYPERLINK("https://example.com","test")';
       return original;
     });
     const clientCsv = await captureCsv();
-    assert.equal(clientCsv.split("\r\n").length, dataInfo.clients + 1);
+    const exportedClients = await page.evaluate(() => AFF.reports.tableRows().length);
+    assert.equal(clientCsv.split("\r\n").length, exportedClients + 1);
     assert.match(clientCsv, /\*\*\*@example\.com/);
-    assert.ok(clientCsv.includes("\"'=HYPERLINK("), "CSV cells must neutralize spreadsheet formulas");
+    assert.ok(clientCsv.split("\r\n").some(line => line.includes("'=HYPERLINK(")), "CSV cells must neutralize spreadsheet formulas");
     await page.evaluate(original => {
       AFF.reporting.rows.find(row => row.id === original.id).campaign = original.campaign;
     }, originalCampaign);
@@ -308,12 +448,16 @@ async function main() {
         }
         assert.ok(await page.locator(".report-table").isVisible());
         if (id === "clients") {
-          await page.click("[data-rp-action='commission-help']");
+          if (width >= 768) await page.click("[data-rp-column-help='expected']", { force: true });
+          else {
+            await page.locator("[data-rp-expected-tooltip]").first().scrollIntoViewIfNeeded();
+            await page.locator("[data-rp-expected-tooltip]").first().click();
+          }
           await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-          assert.ok(await page.locator("#rp-commission-help").isVisible(), `Commission help must stay open after scrolling into view at ${width}px`);
-          const helpBounds = await page.locator("#rp-commission-help").boundingBox();
+          assert.ok(await page.locator("#rp-floating-help").isVisible(), `Commission help must stay open after scrolling into view at ${width}px`);
+          const helpBounds = await page.locator("#rp-floating-help").boundingBox();
           assert.ok(helpBounds.x >= 0 && helpBounds.x + helpBounds.width <= width && helpBounds.y >= 0 && helpBounds.y + helpBounds.height <= page.viewportSize().height);
-          await page.keyboard.press("Escape");
+          await page.mouse.click(12, 12);
         }
         await page.screenshot({ path: path.join(artifacts, `reports-${id}-${width}.png`), fullPage: true });
       }

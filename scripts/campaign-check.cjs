@@ -95,7 +95,7 @@ async function main() {
     assert.deepEqual(result.ids, expected.ids, `${contextLabel}: exact matching clients`);
     check(result.metric === metric && result.page === 1 && !result.modalOpen,
       `${contextLabel}: milestone, first page and closed activity drawer`);
-    check(Number(await page.locator("[data-rp-total]").textContent()) === expected.count,
+    check(Number(await page.locator("[data-aff-total]").textContent()) === expected.count,
       `${contextLabel}: client total matches the clicked count`);
   }
   try {
@@ -108,6 +108,37 @@ async function main() {
     await checkLeftButton("promo", "[data-action='open-campaign-modal']");
     await checkLeftButton("subchannels", "[data-sc-action='create']");
     await checkLeftButton("tracker", "[data-action='open-tracker-modal']");
+    await route("promo");
+    const directCampaign = await page.evaluate(() => ({
+      firstCode: AFF.campaigns[0]?.code,
+      fixed: AFF.campaigns[0]?.fixed,
+      status: AFF.campaignLinks.status(AFF.campaigns[0]),
+      totals: AFF.campaignData(AFF.campaigns[0], "past90").totals,
+      directUrl: AFF.campaignLinks.url(AFF.campaigns[0])
+    }));
+    check(directCampaign.firstCode === "DIRECT" && directCampaign.fixed === true,
+      "Direct-link promotion is always the first fixed activity");
+    check(directCampaign.status === "active" && directCampaign.totals.registrations > 0,
+      "Direct-link promotion stays active and has attributable demo data");
+    check(new URL(directCampaign.directUrl).searchParams.get("utm_source") === "direct",
+      "Direct-link promotion uses the direct referral URL");
+    check(await page.locator('.campaign-list [data-action="campaign-data"][data-code="DIRECT"]').isVisible(),
+      "Direct-link promotion exposes its data action");
+    check(await page.locator('.campaign-list [data-action="campaign-status"][data-code="DIRECT"]').count() === 0,
+      "Direct-link promotion has no archive action");
+    check(await page.evaluate(() => {
+      const campaign = AFF.campaigns.find(item => item.code === "DIRECT");
+      try {
+        AFF.campaignLinks.setStatus(campaign, "archived");
+        return false;
+      } catch {
+        return AFF.campaignLinks.status(campaign) === "active";
+      }
+    }), "Direct-link promotion cannot be archived through the status API");
+    await openData("DIRECT", "past90");
+    check(await page.locator(".campaign-data-drawer").isVisible(),
+      "Direct-link promotion opens its data drawer");
+    await page.keyboard.press("Escape");
     await route("assets");
     check(await page.locator("#main > .page-actions").count() === 0,
       "Assets has no separate upper-right action");
@@ -140,17 +171,28 @@ async function main() {
     check(await action("campaign-data", "CMP-1001").evaluate(node => node === document.activeElement),
       "Closing the activity drawer restores focus");
 
-    const originalTotals = await page.evaluate(() => AFF.campaignData(AFF.campaigns[0], "past90").totals);
+    const originalTotals = await page.evaluate(() =>
+      AFF.campaignData(AFF.campaigns.find(item => item.code === "CMP-1001"), "past90").totals
+    );
     await page.evaluate(() => {
       AFF.campaignLinks.setStatus(AFF.campaigns.find(item => item.code === "CMP-1001"), "active");
       render();
     });
     const originalLink = await page.evaluate(() =>
+      AFF.campaignLinks.mockUrl(AFF.campaigns.find(item => item.code === "CMP-1001"))
+    );
+    const officialLink = await page.evaluate(() =>
       AFF.campaignLinks.url(AFF.campaigns.find(item => item.code === "CMP-1001"))
     );
+    const officialPathVersion = await page.evaluate(() => AFF.deepLinks.pathVersion);
+    check(new URL(officialLink).origin === "https://go.affiliate-cpa.example" &&
+      new URL(officialLink).pathname === "/register" &&
+      new URL(officialLink).searchParams.get("camp") === "CMP-1001" &&
+      new URL(officialLink).searchParams.get("path_version") === officialPathVersion,
+    "Activity display and copy value use the base official path and key-value campaign parameter");
     check(new URL(originalLink).origin === new URL(baseUrl).origin &&
       new URL(originalLink).searchParams.get("camp") === "CMP-1001",
-    "Activity link uses the local status-aware entry with the activity code");
+    "Activity open action uses the local status-aware mock entry");
     const gate = await context.newPage();
     await gate.goto(originalLink, { waitUntil: "domcontentloaded" });
     await gate.getByText("继续注册", { exact: true }).waitFor();
@@ -185,7 +227,7 @@ async function main() {
     await action("campaign-confirm-status", "CMP-1001").click();
     await gate.getByText("继续注册", { exact: true }).waitFor();
     check(await page.evaluate(() =>
-      AFF.campaignLinks.url(AFF.campaigns.find(item => item.code === "CMP-1001"))
+      AFF.campaignLinks.mockUrl(AFF.campaigns.find(item => item.code === "CMP-1001"))
     ) === originalLink, "Reactivating restores the same activity URL");
     await gate.goto(`${baseUrl}/campaign-link.html?camp=CMP-NOT-FOUND`);
     await gate.getByText("链接已失效", { exact: true }).waitFor();
@@ -201,7 +243,8 @@ async function main() {
       return {
         code: campaign.code, status: AFF.campaignLinks.status(campaign),
         totals: AFF.campaignData(campaign).totals,
-        url: AFF.campaignLinks.url(campaign)
+        url: AFF.campaignLinks.url(campaign),
+        mockUrl: AFF.campaignLinks.mockUrl(campaign)
       };
     });
     check(created.status === "active" &&
@@ -216,7 +259,7 @@ async function main() {
     check(await page.evaluate(code => AFF.campaigns.some(item => item.code === code), created.code),
       "New activity is retained after reload");
     const newGate = await context.newPage();
-    await newGate.goto(created.url);
+    await newGate.goto(created.mockUrl);
     await newGate.getByText("继续注册", { exact: true }).waitFor();
     await newGate.close();
 

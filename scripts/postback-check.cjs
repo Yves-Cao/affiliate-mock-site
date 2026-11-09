@@ -75,12 +75,12 @@ async function main() {
     await page.locator("#postback-endpoint").fill("https://tracker.example.com/postback?source=QA%20test");
     await page.locator("#postback-clickUrl").fill("https://track.example.com/click?clickid=123&campaign_code=abc");
     await action("postback-add-parameter").click();
-    check(await page.locator("#postback-value-3 option[value='{campaign_code}']").count() === 1, "Click URL exposes custom source token");
-    await page.locator("#postback-key-3").fill("campaign");
-    await page.locator("#postback-value-3").selectOption("{campaign_code}");
+    check(await page.locator("#postback-value-2 option[value='{campaign_code}']").count() === 1, "Click URL exposes custom source token");
+    await page.locator("#postback-key-2").fill("campaign");
+    await page.locator("#postback-value-2").selectOption("{campaign_code}");
     await action("postback-add-parameter").click();
-    await page.locator("[data-action='postback-remove-parameter'][data-index='4']").click();
-    check(await page.locator("#postback-parameters .postback-parameter").count() === 4, "Mappings can be added and removed");
+    await page.locator("[data-action='postback-remove-parameter'][data-index='3']").click();
+    check(await page.locator("#postback-parameters .postback-parameter").count() === 3, "Mappings can be added and removed");
     const template = await page.locator("#postback-url-preview").innerText();
     check(template.includes("campaign={campaign_code}") && template.includes("event_id={aff_cid}"), "Generated URL preview includes complete mappings");
     await screenshot("postbacks-editor-desktop.png");
@@ -91,6 +91,11 @@ async function main() {
     await page.setViewportSize({ width: 1440, height: 1000 });
     await save();
     check(await configRow().count() === 1, "Generated configuration is saved");
+    check((await page.locator(".postback-table thead th").allInnerTexts()).includes("归因状态"), "Attribution status column is visible");
+    check(await page.evaluate(() => [...document.querySelectorAll("#main tbody tr")]
+      .some(row => row.textContent.includes("链路完整") || row.textContent.includes("待核验"))),
+    "Attribution status shows a limited result state");
+    check(!(await page.locator("#main").innerText()).includes("补数任务"), "Attribution status does not expose internal repair tasks");
     await context.grantPermissions(["clipboard-read", "clipboard-write"], { origin });
     await configRow().locator("[data-action='postback-copy']").click();
     check(await page.evaluate(() => navigator.clipboard.readText()) === template, "Copy returns exact template");

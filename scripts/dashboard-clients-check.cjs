@@ -75,7 +75,7 @@ async function main() {
     assert.deepEqual(result.ids, expected.ids, "Drilldown contains the exact matching clients");
     check(result.metric === (attrs.metric === "revenue" ? "registrations" : attrs.metric) &&
       result.page === 1, "Drilldown sets the expected milestone and first page");
-    check(Number(await page.locator("[data-rp-total]").textContent()) === expected.ids.length,
+    check(Number(await page.locator("[data-aff-total]").textContent()) === expected.ids.length,
       "Visible client total matches the source");
     drills += 1;
   }
@@ -88,13 +88,19 @@ async function main() {
     await dashboard();
     const totals = await page.evaluate(() => AFF.finance.summary());
     const money = value => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
-    check((await page.locator(".dashboard-metrics .metric").count()) === 8,
-      "Dashboard shows eight core funding and milestone cards");
-    check((await page.locator(".dashboard-wallet-card").innerText()).includes(money(AFF.finance.balance() / 100)),
-    "Wallet uses the finance available balance");
-    check((await page.locator("#main").innerText()).includes(money(totals.inProgress)) &&
-      (await page.locator("#main").innerText()).includes(money(totals.paid)),
-    "Dashboard computes in-progress and paid amounts from reporting data");
+    check((await page.locator(".dashboard-metrics .metric").count()) === 4,
+      "Dashboard keeps only four client milestone cards");
+    check(!(await page.locator(".dashboard-metrics").innerText()).includes("可提现余额") &&
+      !(await page.locator(".dashboard-metrics").innerText()).includes("进行中的余额") &&
+      !(await page.locator(".dashboard-metrics").innerText()).includes("滚动保证金") &&
+      !(await page.locator(".dashboard-metrics").innerText()).includes("已提现余额"),
+    "Dashboard removes the four funding amount cards");
+    await page.locator("#wallet-toggle").click();
+    check((await page.locator("#wallet-popover").innerText()).includes(money(totals.available)) &&
+      (await page.locator("#wallet-popover").innerText()).includes(money(totals.held)) &&
+      (await page.locator("#wallet-popover").innerText()).includes(money(totals.guarantee)) &&
+      (await page.locator("#wallet-popover").innerText()).includes(money(totals.paid + totals.paidGuarantee)),
+    "Wallet popover contains all funding amounts");
     await drill('.dashboard-metrics [data-metric="effective"]', true);
     for (const period of ["today", "past7", "past30", "lastWeek", "lastMonth"]) {
       for (const metric of ["registrations", "effective", "revenue"]) {

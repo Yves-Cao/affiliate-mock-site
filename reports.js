@@ -4,6 +4,8 @@
   const t = (zh, en) => AFF.state.language === "en" ? en : zh;
   const timeKeys = ["date", "week", "month", "year"];
   const routeKeys = ["perf", "clients", "summary"];
+  const summaryMetrics = ["ftd", "effective", "quality", "settled", "guarantee", "available"];
+  const amountDrillMetrics = ["expected", "settled", "guarantee", "available"];
   const presetDays = { today: 1, past7: 7, past30: 30, past90: 90 };
   const previousMetricDefaults = {
     perf: ["clicks", "visitors", "registrations", "ftd", "effective", "quality", "ftdRate", "qualityRate", "expected", "held"],
@@ -11,7 +13,7 @@
   };
   const metricDefaults = {
     perf: ["clicks", "visitors", "registrations", "ftd", "effective", "quality", "ftdRate", "effectiveRate", "qualityRate", "expected", "held"],
-    summary: ["registrations", "ftd", "effective", "quality", "ftdRate", "effectiveRate", "qualityRate", "expected", "tax", "guarantee", "available", "paid"]
+    summary: ["registrations", "ftd", "effective", "quality", "ftdRate", "effectiveRate", "qualityRate", "expected", "settled", "tax", "guarantee", "available", "paid"]
   };
   let returnFocus = null;
   let holdHelpTimer = null;
@@ -50,8 +52,19 @@
     const value = AFF.state.reports[route];
     if (!initializedStates.has(value)) {
       value.drawer = null; value.client = null; value.picker = false; value.appeal = false; value.appealDraft = "";
+      if (route === "clients" && !value.sortUserSelected && value.sort !== "registeredAt") {
+        value.sort = "registeredAt";
+        value.direction = "desc";
+      }
       if (!value.columnsCustomized && previousMetricDefaults[route]?.join(",") === value.columns.join(",")) {
         value.columns = [...metricDefaults[route]];
+      }
+      if (route === "summary" && !value.settledColumnAdded) {
+        if (!value.columns.includes("settled")) {
+          const expectedIndex = value.columns.indexOf("expected");
+          value.columns.splice(expectedIndex < 0 ? value.columns.length : expectedIndex + 1, 0, "settled");
+        }
+        value.settledColumnAdded = true;
       }
       initializedStates.add(value);
     }
@@ -123,7 +136,7 @@
     const map = {
       not_generated: ["未生成", "Not generated", "muted"],
       pending_review: ["待检查", "Pending review", "muted"],
-      held: ["暂扣中", "On hold", "warning"],
+      held: ["结算中", "On hold", "warning"],
       manual_review: ["人工确认中", "Manual review", "warning"],
       payable: ["可提现", "Payable", "ok"],
       paid: ["已支付", "Paid", "ok"],
@@ -135,6 +148,16 @@
       disputed: ["争议处理中", "Disputed", "warning"]
     };
     return map[row.fundStatus] || map.pending_review;
+  }
+
+  function riskStatus(row) {
+    const map = {
+      none: [t("无风险", "No risk"), "No risk", "muted"],
+      investigating: [t("调查中", "Investigating"), "Investigating", "warning"],
+      quarantined: [t("隔离中", "Quarantined"), "Quarantined", "danger"],
+      released: [t("已解除", "Released"), "Released", "info"]
+    };
+    return map[row.riskHandlingStatus] || map.none;
   }
 
   function heldDaysText(row) {
@@ -152,8 +175,8 @@
       quality_service: t("质量服务佣金", "Quality service commission")
     };
     return [
-      t("暂扣中", "On hold"),
-      t("佣金已生成，但仍在动态Hold观察期内；完成观察与结算检查前，暂不可提现。", "The commission has been generated but remains in dynamic hold. It is not withdrawable until observation and settlement checks are complete."),
+      t("结算中", "On hold"),
+      t("佣金已生成，但仍在动态结算观察期内；完成观察与结算检查前，暂不可提现。", "The commission has been generated but remains in dynamic hold. It is not withdrawable until observation and settlement checks are complete."),
       ...heldCases.map(item => `${caseNames[item.type] || item.type}：${t("总天数", "Total days")} ${Number(item.holdDays)}${t("天", "d")}`)
     ].join("\n");
   }
@@ -161,7 +184,7 @@
   function commissionStatusCell(row) {
     const status = badge(commissionStatus(row));
     const days = row.fundStatus === "held" ? heldDaysText(row) : "";
-    return `<div class="report-commission-status ${row.fundStatus === "held" ? "held" : ""}" ${row.fundStatus === "held" ? `data-rp-fund-tooltip="${h(heldStatusTooltip(row))}" tabindex="0" aria-label="${t("暂扣原因与总天数说明", "Hold reason and total duration")}"` : ""}>${status}${days ? `<small>${t("暂扣", "Hold")} ${h(days)}</small>` : ""}</div>`;
+    return `<div class="report-commission-status ${row.fundStatus === "held" ? "held" : ""}" ${row.fundStatus === "held" ? `data-rp-fund-tooltip="${h(heldStatusTooltip(row))}" tabindex="0" aria-label="${t("结算中原因与总天数说明", "In-settlement reason and duration")}"` : ""}>${status}${days ? `<small>${t("结算中", "In settlement")} ${h(days)}</small>` : ""}</div>`;
   }
 
   function badge(values) {
@@ -190,32 +213,44 @@
 
   function commissionHelp() {
     return `<div id="rp-commission-help" class="report-commission-help" role="tooltip" hidden>
-      <strong>${t("预计佣金与暂扣说明", "Estimated commission and holds")}</strong>
+      <strong>${t("预计佣金与结算中说明", "Estimated commission and holds")}</strong>
       <p>${t("预计佣金是参考金额，不等于可提现余额，最终以审核和结算结果为准。", "Estimated commission is a reference amount, not an available balance. Final amounts depend on review and settlement.")}</p>
-      <p>${t("佣金处于暂扣状态，可能是因为：", "A commission may be on hold because:")}</p>
+      <p>${t("佣金处于结算中状态，可能是因为：", "A commission may be on hold because:")}</p>
       <ul><li>${t("仍在佣金观察期内；", "The commission observation period is ongoing;")}</li><li>${t("入金、交易或身份资料仍待核验；", "Deposit, trading or identity details need verification;")}</li><li>${t("退款、拒付或账户异常需要进一步复核。", "Refunds, chargebacks or account issues need further review.")}</li></ul>
       <p>${t("以上为常见原因说明，不代表某笔佣金的具体审核结论。", "These are common reasons, not a review decision about any specific commission.")}</p>
     </div>`;
   }
 
   function progress(row) {
+    if (row.kyc !== "通过") return t("KYC未完成", "KYC incomplete");
     if (["not_new_customer", "fraud_hit"].includes(row.eligibilityStatus)) return t("资格拦截", "Eligibility blocked");
-    if (!row.effectiveAt || !row.tier || row.tier === "-") return t("未达标", "Not qualified");
+    if (!row.effectiveAt || !row.tier || row.tier === "-") return t("待确认", "Pending confirmation");
     return `${h(row.tier)} · ${t("已达标", "Qualified")}`;
   }
 
   function tierTooltip(row) {
+    if (row.kyc !== "通过") {
+      return [
+        t("资格档暂无法确认", "Tier cannot be confirmed yet"),
+        t("客户尚未完成KYC，完成后才能根据净入金、累计标准手数和交易活跃天数确认资格档。", "KYC is not complete. The tier can be confirmed after reviewing net deposit, cumulative standard lots, and active trading days.")
+      ].join("\n");
+    }
     const tiers = AFF.partnerProgram.qualificationTiers.map(tier => {
       const price = AFF.partnerProgram.commissionPrice(row.country, tier.tier);
-      return `${tier.tier}：净入金$${tier.netDeposit} / ${tier.volume}手 / ${tier.days}天，佣金$${price}`;
+      return `${tier.tier}：净入金 ≥ $${tier.netDeposit} · 累计标准手数 ≥ ${tier.volume} · 交易活跃天数 ≥ ${tier.days}`;
     });
+    if (!row.effectiveAt || !row.tier || row.tier === "-") {
+      return [
+        t("资格档待确认", "Tier pending confirmation"),
+        t("当前客户尚未满足有效FTD确认条件，暂不能确认资格档。", "The client has not met the valid FTD confirmation conditions, so the tier cannot be confirmed yet."),
+        ...tiers
+      ].join("\n");
+    }
     const gross = AFF.partnerProgram.commissionPrice(row.country, row.tier);
-    const current = row.qualityAt ? gross : Math.round(gross * 0.75);
-    const qualityState = row.qualityAt ? "已达标" : "未达标";
     return [
-      `${row.country} · ${t("国家佣金阶梯（参考值）", "Country commission tiers (reference)")}`,
+      `${AFF.countryLabel(row.country)} · ${t("资格档条件", "Tier requirements")}`,
       ...tiers,
-      `当前客户：${row.tier}总价$${gross}；质量服务${qualityState}，当前预计$${current}`
+      `${t("当前客户", "Current client")}：${row.tier} · ${t("对应国家佣金", "Country commission")} $${gross}`
     ].join("\n");
   }
 
@@ -230,7 +265,7 @@
     const rateText = row.qualityAt ? "100%" : "75%";
     const qualityText = row.qualityAt ? t("质量服务已达标，按100%计入", "Quality service qualified; 100% included") : t("质量服务未达标，前两段合并佣金按75%计入", "Quality service not qualified; the first merged segment includes 75%");
     return [
-      `${t("国家/地区", "Country / region")}：${row.country}`,
+      `${t("国家/地区", "Country / region")}：${AFF.countryLabel(row.country)}`,
       `${t("资格档", "Tier")}：${row.tier}`,
       `${t("国家单价", "Country price")}：${format(gross, "money")}`,
       `${t("阶段比例", "Stage rate")}：${qualityText}`,
@@ -269,9 +304,9 @@
   function holdHelp(row) {
     if (row.commissionStatus !== "held" || !row.expected) return badge(commissionStatus(row));
     return `<div class="report-hold-anchor">${badge(commissionStatus(row))}
-      <button class="report-hold-button" type="button" data-rp-action="hold-help" aria-label="${t("暂扣规则说明", "Hold rules")}" aria-expanded="false" aria-controls="rp-hold-help" aria-describedby="rp-hold-help">?</button>
+      <button class="report-hold-button" type="button" data-rp-action="hold-help" aria-label="${t("结算中规则说明", "In-settlement rules")}" aria-expanded="false" aria-controls="rp-hold-help" aria-describedby="rp-hold-help">?</button>
       <section id="rp-hold-help" class="report-commission-help report-hold-help" role="tooltip" hidden>
-        <strong>${t("暂扣原因与天数说明", "Hold reasons and duration")}</strong>${AFF.earnings.holdRules()}
+        <strong>${t("结算中原因与天数说明", "In-settlement reasons and duration")}</strong>${AFF.earnings.holdRules()}
       </section></div>`;
   }
 
@@ -317,11 +352,15 @@
       }
       if (f.kyc) rows = rows.filter(row => row.kyc === f.kyc);
       if (f.stage) rows = rows.filter(row => status(row)[1] === f.stage);
+      if (f.qualityService) rows = rows.filter(row => f.qualityService === "qualified" ? !!row.qualityAt : !row.qualityAt);
       if (f.commissionStatus) rows = rows.filter(row => row.fundStatus === f.commissionStatus);
+      if (f.riskStatus) rows = rows.filter(row => row.riskHandlingStatus === f.riskStatus);
+      if (f.riskReason) rows = rows.filter(row => row.riskReasonCategory === f.riskReason);
       if (f.registeredFrom) rows = rows.filter(row => row.registeredAt?.slice(0, 10) >= f.registeredFrom);
       if (f.registeredTo) rows = rows.filter(row => row.registeredAt?.slice(0, 10) <= f.registeredTo);
       const milestone = { ftd: "ftdAt", effective: "effectiveAt", quality: "qualityAt" }[s.metric];
       if (milestone) rows = rows.filter(row => row[milestone]);
+      if (amountDrillMetrics.includes(s.metric)) rows = rows.filter(row => row[s.metric] > 0);
     }
     return rows;
   }
@@ -349,23 +388,31 @@
   function filterChips(s) {
     const extraLabels = {
       search: t("客户编号", "Client ID"), kyc: "KYC", stage: t("转化阶段", "Conversion stage"),
-      commissionStatus: t("佣金状态", "Commission status"),
+      commissionStatus: t("佣金状态", "Commission status"), qualityService: t("质量服务", "Quality service"),
+      riskStatus: t("风险处理状态", "Risk handling status"), riskReason: t("原因类别", "Reason category"),
       registeredFrom: t("注册开始", "Registered from"), registeredTo: t("注册结束", "Registered to")
     };
     const items = activeFilters(s);
     const valueLabel = (key, value) => {
       if (key === "commissionStatus") return {
         not_generated: t("未生成", "Not generated"), pending_review: t("待检查", "Pending review"),
-        held: t("暂扣中", "On hold"), manual_review: t("人工确认中", "Manual review"),
+        held: t("结算中", "On hold"), manual_review: t("人工确认中", "Manual review"),
         payable: t("可提现", "Payable"), paid: t("已支付", "Paid"),
         rejected: t("已拒绝", "Rejected"), clawed_back: t("已冲正", "Clawed back"),
         frozen: t("冻结", "Frozen"), disputed: t("争议处理中", "Disputed")
+      }[value] || value;
+      if (key === "riskStatus") return {
+        none: t("无风险", "No risk"), investigating: t("调查中", "Investigating"),
+        quarantined: t("隔离中", "Quarantined"), released: t("已解除", "Released")
       }[value] || value;
       if (key === "stage") return {
         Registration: t("注册", "Registration"), KYC: "KYC", FTD: "FTD",
         "Valid FTD": t("有效FTD", "Valid FTD"),
         "Quality service": t("质量服务", "Quality service"), Completed: t("已完成", "Completed"),
         Voided: t("已作废", "Voided")
+      }[value] || value;
+      if (key === "qualityService") return {
+        qualified: t("已达标", "Qualified"), unqualified: t("未达标", "Not qualified")
       }[value] || value;
       return value;
     };
@@ -380,7 +427,7 @@
     return `<div class="report-actions">
       <button class="button secondary" type="button" data-rp-action="filters">${icon("filter")}${t("筛选器", "Filters")}${activeFilters(s).length ? `<span class="report-count">${activeFilters(s).length}</span>` : ""}</button>
       ${AFF.state.route !== "clients" ? iconButton("columns", "columns", t("设置显示列", "Display columns")) : ""}
-      <button class="button secondary" type="button" data-rp-action="export">${icon("download")}${t("导出 CSV", "Export CSV")}</button>
+      <button class="button secondary" type="button" data-export-action="create">${icon("download")}${t("创建导出", "Create export")}</button>
     </div>`;
   }
 
@@ -393,7 +440,7 @@
         <span>${h(s.filters.from)} — ${h(s.filters.to)}</span>
       </div>
       ${AFF.state.route === "clients" ? tableActions(s) : ""}
-    </div>${filterChips(s)}`;
+    </div>${AFF.state.route === "clients" ? "" : filterChips(s)}`;
   }
 
   function groupPicker(s) {
@@ -422,30 +469,50 @@
 
   function summaryCards(rows) {
     const totals = data.totals(rows);
-    const keys = ["registrations", "ftd", "effective", "quality", "expected", "tax", "guarantee", "available", "paid"];
-    return `<div class="report-stats">${keys.map(key => {
+    return `<div class="report-stats">${summaryMetrics.map(key => {
       const item = data.metrics.find(metric => metric.key === key);
-      const clickable = ["registrations", "ftd", "effective", "quality"].includes(key);
       return `<article class="card report-stat"><span>${h(label(key))}</span>
-        ${clickable ? `<button type="button" data-rp-drill-metric="${key}" class="report-stat-number">${format(totals[key], item.type)}</button>` : `<strong>${format(totals[key], item.type)}</strong>`}
-        <small>${t("所选归属周期", "Selected cohort period")}</small></article>`;
+        <button type="button" data-rp-drill-metric="${key}" class="report-stat-number" aria-label="${h(t("查看", "View"))} ${h(label(key))} ${h(format(totals[key], item.type))}">${format(totals[key], item.type)}</button></article>`;
     }).join("")}</div>`;
   }
 
-  function heading(key, text, numeric = false, help = "") {
+  const NON_SORTABLE_COLUMNS = new Set(["stage", "quality", "progress", "commissionStatus", "riskHandlingStatus"]);
+  function heading(key, text, numeric = false, help = "", sortableOverride = null) {
     const s = state();
-    return `<th scope="col" class="${numeric ? "numeric" : ""}" aria-sort="${s.sort === key ? (s.direction === "asc" ? "ascending" : "descending") : "none"}"><button type="button" data-rp-sort="${key}">${h(text)}<span aria-hidden="true">${s.sort === key ? (s.direction === "asc" ? "↑" : "↓") : "↕"}</span></button>${help ? `<button class="report-help-button" type="button" data-rp-column-help="${h(help)}" aria-label="${t("查看说明", "View explanation")}">?</button>` : ""}</th>`;
+    const sortable = sortableOverride === null ? !NON_SORTABLE_COLUMNS.has(key) : sortableOverride;
+    const sortState = s.sort === key ? (s.direction === "asc" ? "ascending" : "descending") : "none";
+    const label = sortable
+      ? `<button class="report-sort-button" type="button" data-rp-sort="${key}">${h(text)}<span class="report-sort-icon ${s.sort === key ? `is-${s.direction}` : "is-none"}" aria-hidden="true"></span></button>`
+      : `<span class="report-column-label">${h(text)}</span>`;
+    return `<th scope="col" class="${numeric ? "numeric" : ""} ${sortable ? "is-sortable" : "is-not-sortable"}" aria-sort="${sortable ? sortState : "none"}"><span class="report-header-content">${label}${help ? `<button class="report-help-button" type="button" data-rp-column-help="${h(help)}" aria-label="${t("查看说明", "View explanation")}">?</button>` : ""}</span></th>`;
   }
 
   function columnHelpContent(key) {
     const contents = {
-      expected: `<strong>${t("预计佣金", "Expected commission")}</strong><p>${t("佣金总额按客户国家对应的资格档单价确定。有效FTD确认后先展示前两段合并佣金的75%；质量服务达标后追加25%至100%。金额为参考值，最终以审核与结算结果为准。", "The gross amount uses the country-specific tier price. After valid FTD, 75% of the first merged segment is shown; quality service adds the remaining 25%. Amounts are reference values subject to review and settlement.")}</p>`,
-      stage: `<strong>${t("转化阶段", "Conversion stage")}</strong><p>${t("完整路径：注册 → KYC → FTD → 有效FTD → 质量服务。表格显示客户下一个待完成阶段；已作废表示资格窗口超时或资格失效。", "Full path: registration → KYC → FTD → valid FTD → quality service. The table shows the next incomplete stage; voided means an expired or invalid qualification.")}</p>`,
-      progress: `<strong>${t("达标进度", "Tier progress")}</strong><p>${t("显示客户当前达到的L1-L4佣金阶梯；悬浮在具体进度上可查看该国家各阶梯的净入金、交易量和参考佣金。", "Shows the client's current L1-L4 commission tier. Hover a row to view that country's deposit, trading, and reference commission tiers.")}</p>`,
+      registration: `<strong>${t("注册信息", "Registration information")}</strong><p>${t("包含注册时间、注册地址（国家/地区）和注册平台类型，用于核对客户来源与归属。", "Includes the registration time, registration address (country/region), and registration platform type for checking client source and attribution.")}</p>`,
+      quality: `<strong>${t("质量服务", "Quality service")}</strong><p>${t("通常会综合观察客户后续的交易活跃度、持续性、账户行为和结算前复核结果，判断是否达到质量服务阶段。", "Quality service generally considers ongoing trading activity, continuity, account behavior, and pre-settlement review outcomes.")}</p>`,
+      expected: `<strong>${t("预计佣金", "Expected commission")}</strong><p>${t("由基础佣金段（注册与有效FTD）和质量服务佣金段构成。", "Composed of the base commission segments (registration and valid FTD) plus the quality-service segment.")}</p>`,
+      settled: `<strong>${t("已结算佣金", "Settled commission")}</strong><p>${t("统计已完成结算检查的佣金金额，仍处于结算中、被拒绝或已冲正的金额不计入此列。", "Shows commissions that have completed settlement checks. Amounts still on hold, rejected, or reversed are excluded.")}</p>`,
+      stage: `<strong>${t("转化阶段", "Conversion stage")}</strong><dl>
+        <div><dt>${t("注册", "Registration")}</dt><dd>${t("已创建客户账户，等待身份或入金进展。", "A client account exists and awaits identity or funding progress.")}</dd></div>
+        <div><dt>KYC</dt><dd>${t("身份资料已通过，进入入金阶段。", "Identity details are approved and the client can move to funding.")}</dd></div>
+        <div><dt>FTD</dt><dd>${t("已完成首次入金，等待有效性确认。", "The first deposit is complete and awaits validity confirmation.")}</dd></div>
+        <div><dt>${t("有效FTD", "Valid FTD")}</dt><dd>${t("首次入金已满足有效客户条件。", "The first deposit meets valid-client conditions.")}</dd></div>
+        <div><dt>${t("质量服务", "Quality service")}</dt><dd>${t("客户已达到质量服务阶段。", "The client has reached the quality-service stage.")}</dd></div>
+        <div><dt>${t("已完成", "Completed")}</dt><dd>${t("转化链路完成，等待后续结算处理。", "The conversion path is complete and awaits settlement processing.")}</dd></div>
+        <div><dt>${t("已作废", "Voided")}</dt><dd>${t("资格窗口超时或资格已失效。", "The qualification window expired or eligibility became invalid.")}</dd></div>
+      </dl>`,
+      progress: `<strong>${t("资格档", "Tier")}</strong><p>${t("资格档需在KYC完成后，根据净入金、累计标准手数和交易活跃天数确认。", "The tier is confirmed after KYC using net deposit, cumulative standard lots, and active trading days.")}</p>`,
+      riskHandlingStatus: `<strong>${t("风险处理", "Risk handling")}</strong><dl>
+        <div><dt>${t("无风险", "No risk")}</dt><dd>${t("暂无风险处理记录。", "No risk handling record.")}</dd></div>
+        <div><dt>${t("调查中", "Investigating")}</dt><dd>${t("正在核对资料或行为，佣金暂不自动结算。", "Details or behavior are being checked; commission is not auto-settled.")}</dd></div>
+        <div><dt>${t("隔离中", "Quarantined")}</dt><dd>${t("关联佣金暂时保留，等待复核。", "Related commission is held pending review.")}</dd></div>
+        <div><dt>${t("已解除", "Released")}</dt><dd>${t("风险处置结束，等待结算前检查。", "Risk handling ended and pre-settlement checks are pending.")}</dd></div>
+      </dl>`,
       commissionStatus: `<strong>${t("资金状态", "Fund status")}</strong><dl>
         <dt>${t("未生成", "Not generated")}</dt><dd>${t("有效FTD未达成，暂无佣金案件。", "Valid FTD is not reached, so no commission case exists.")}</dd>
         <dt>${t("待检查", "Pending review")}</dt><dd>${t("佣金已生成，等待系统检查。", "A commission exists and awaits system checks.")}</dd>
-        <dt>${t("暂扣中", "On hold")}</dt><dd>${t("处于动态Hold观察期，暂不可提现。", "In dynamic hold and not yet withdrawable.")}</dd>
+        <dt>${t("结算中", "On hold")}</dt><dd>${t("处于动态结算观察期，暂不可提现。", "In dynamic hold and not yet withdrawable.")}</dd>
         <dt>${t("人工确认中", "Manual review")}</dt><dd>${t("命中人工复核条件，需风控处理。", "Manual review is required by risk controls.")}</dd>
         <dt>${t("可提现 / 已支付", "Payable / paid")}</dt><dd>${t("结算检查通过后进入可提现余额，支付成功后转为已支付。", "After settlement checks, funds become withdrawable and then paid after a successful withdrawal.")}</dd>
         <dt>${t("已拒绝 / 已冲正 / 冻结", "Rejected / reversed / frozen")}</dt><dd>${t("对应资格不成立、入金退款拒付、风险冻结或争议处理。", "These indicate invalid eligibility, refund or chargeback, risk freezing, or a dispute.")}</dd>
@@ -465,26 +532,13 @@
     }
     panel.innerHTML = content;
     panel.hidden = false;
-    const width = Math.min(380, window.innerWidth - 24);
-    panel.style.width = `${width}px`;
-    const box = trigger.getBoundingClientRect();
-    const left = Math.max(12, Math.min(box.left + box.width / 2 - width / 2, window.innerWidth - width - 12));
-    const below = box.bottom + 8;
-    panel.style.left = `${left}px`;
-    panel.style.top = `${below + panel.offsetHeight <= window.innerHeight - 12 ? below : Math.max(12, box.top - panel.offsetHeight - 8)}px`;
+    AFF.tooltip.position(panel, trigger, { width: 380, align: "center" });
   }
 
   function pagination(total, s) {
-    const pages = Math.max(1, Math.ceil(total / s.pageSize));
-    s.page = Math.min(pages, Math.max(1, s.page));
-    const wanted = [...new Set([1, s.page - 1, s.page, s.page + 1, pages])].filter(value => value > 0 && value <= pages).sort((a, b) => a - b);
-    let last = 0;
-    return `<div class="table-footer report-footer"><span>${t("共", "Total")} <b data-rp-total>${total}</b> ${t("条记录", "rows")}</span>
-      <div class="report-pagination"><label>${t("每页", "Per page")} <select data-rp-page-size aria-label="${t("每页条数", "Rows per page")}">${[10, 20, 50].map(value => `<option ${value === s.pageSize ? "selected" : ""}>${value}</option>`).join("")}</select></label>
-        <div class="pagination">${iconButton("previous", "left", t("上一页", "Previous page"), s.page === 1 ? "disabled" : "")}
-          ${wanted.map(value => { const gap = value - last > 1 ? "<span>…</span>" : ""; last = value; return `${gap}<button type="button" class="${s.page === value ? "active" : ""}" data-rp-page="${value}" ${s.page === value ? 'aria-current="page"' : ""}>${value}</button>`; }).join("")}
-          ${iconButton("next", "right", t("下一页", "Next page"), s.page === pages ? "disabled" : "")}</div>
-      </div></div>`;
+    // Unified component (D-02). Legacy channels data-rp-page/data-rp-action are
+    // mirrored in the click handler below for existing test assertions.
+    return AFF.pagination.component({ page: s.page, pageSize: s.pageSize, total, channel: "reports" });
   }
 
   function reportTable(rows, sourceRows, s) {
@@ -495,7 +549,7 @@
     const totals = data.totals(sourceRows);
     const cells = (values, rowKey, total = false) => metrics.map(item => {
       const value = format(values[item.key], item.type);
-      return `<td class="numeric">${!total && ["registrations", "ftd", "effective", "quality"].includes(item.key) && values[item.key] > 0
+      return `<td class="numeric">${!total && ["registrations", "ftd", "effective", "quality", "settled"].includes(item.key) && values[item.key] > 0
         ? `<button class="report-number-link" type="button" data-rp-row="${h(rowKey)}" data-rp-drill-metric="${item.key}">${value}</button>` : value}</td>`;
     }).join("");
     return `<div class="report-table-scroll" tabindex="0" aria-label="${t("分组数据表", "Grouped data table")}"><table class="report-table">
@@ -503,7 +557,7 @@
       <thead><tr>${dimensionHeads}${metrics.map(item => heading(item.key, t(item.label, item.en), true)).join("")}</tr></thead>
       <tbody>
         ${rows.length && s.groups.length ? `<tr class="report-total"><th scope="row" colspan="${s.groups.length}">${t("总计", "Total")}</th>${cells(totals, "", true)}</tr>` : ""}
-        ${shown.map(row => `<tr>${row.values.map((value, index) => `<td class="report-dimension" title="${h(value)}">${h(value)}</td>`).join("")}${cells(row.metrics, row.key)}</tr>`).join("")}
+        ${shown.map(row => `<tr>${row.values.map((value, index) => `<td class="report-dimension" title="${h(AFF.dataText(value))}">${h(AFF.dataText(value))}</td>`).join("")}${cells(row.metrics, row.key)}</tr>`).join("")}
       </tbody></table>
       ${!rows.length ? emptyState() : ""}</div>${footer}`;
   }
@@ -515,29 +569,131 @@
   function customerTable(rows, s) {
     const footer = pagination(rows.length, s);
     const heads = [
-      ["clientId", t("客户编号 / 邮箱", "Client / Email")], ["registeredAt", t("注册时间", "Registered")],
-      ["country", t("国家/地区", "Country / Region")], ["platform", t("注册平台", "Registration platform")],
-      ["campaign", t("转化活动", "Conversion campaign")], ["kyc", t("KYC状态", "KYC status")], ["stage", t("转化阶段", "Conversion stage"), false, "stage"],
-      ["quality", t("质量服务", "Quality service")],
-      ["expected", t("预计佣金", "Expected commission"), true, "expected"], ["progress", t("达标进度", "Tier progress"), false, "progress"], ["commissionStatus", t("资金状态", "Fund status"), false, "commissionStatus"]
+      ["clientId", t("客户", "Client")], ["registeredAt", t("注册信息", "Registration information"), false, "registration"],
+      ["campaign", t("活动 / 来源", "Campaign / Source"), false, "", false], ["kyc", t("KYC状态", "KYC status"), false, "", false], ["stage", t("转化阶段", "Conversion stage"), false, "stage"],
+      ["quality", t("质量服务", "Quality service"), false, "quality"],
+      ["expected", t("预计佣金", "Expected commission"), true, "expected", false],
+      ["settled", t("已结算佣金", "Settled commission"), true, "settled", false],
+      ["progress", t("资格档", "Tier"), false, "progress"],
+      ["commissionStatus", t("资金状态", "Fund status"), false, "commissionStatus"],
+      ["riskHandlingStatus", t("风险处理", "Risk handling"), false, "riskHandlingStatus"]
     ];
-    return `<div class="report-table-scroll report-client-scroll" tabindex="0" aria-label="${t("客户数据表", "Client data table")}"><table class="report-table report-client-table">
+    const latestMilestone = row => row.qualityAt || row.effectiveAt || row.ftdAt || row.kycAt || row.registeredAt;
+    const clientInitial = row => row.clientId?.replace(/^C-/i, "").slice(0, 2) || "--";
+    return `<div class="client-table-shell">
+      <div class="client-table-header">
+        <div class="client-table-title">
+          <strong>${t("客户数据", "Client data")}</strong>
+          ${filterChips(s)}
+        </div>
+        <div class="client-table-tools">
+          <button class="button secondary" type="button" data-rp-action="filters">${icon("filter")}${t("筛选器", "Filters")}${activeFilters(s).length ? `<span class="report-count">${activeFilters(s).length}</span>` : ""}</button>
+          <button class="button secondary" type="button" data-rp-action="quick-reset">${icon("close")}${t("重置", "Reset")}</button>
+        </div>
+      </div>
+      ${quickFilters(s)}
+      <div class="report-table-scroll report-client-scroll" tabindex="0" aria-label="${t("客户数据表", "Client data table")}"><table class="report-table report-client-table">
       <colgroup>${heads.map(([key]) => `<col class="report-client-col-${key}">`).join("")}<col class="report-client-col-actions"></colgroup>
       <thead><tr>${heads.map(item => heading(...item)).join("")}<th>${t("操作", "Action")}</th></tr></thead>
       <tbody>${rows.slice((s.page - 1) * s.pageSize, s.page * s.pageSize).map(row => `<tr>
-        <td><button class="report-text-button" data-rp-client="${h(row.clientId)}" type="button">${h(row.clientId)}</button><small>${h(row.email)}</small></td>
-        <td>${h(row.registeredAt)}</td><td>${h(row.country)}</td><td>${h(row.platform)}</td><td class="report-campaign-cell" title="${h(row.campaign)}">${h(row.campaign)}</td>
-        <td>${AFF.helpers.tag(row.kyc)}</td><td>${badge(status(row))}</td><td>${badge(qualityService(row))}</td><td class="numeric report-expected-cell" data-rp-expected-tooltip="${h(expectedTooltip(row))}" tabindex="0" aria-label="${t("预计佣金计算说明", "Expected commission calculation")}">${format(row.expected, "money")}</td>
-        <td class="report-progress" data-rp-tier-tooltip="${h(tierTooltip(row))}" tabindex="0" aria-label="${t("国家佣金阶梯", "Country commission tiers")}"><strong>${h(progress(row))}</strong></td>
-        <td class="report-commission-cell">${commissionStatusCell(row)}</td><td><div class="report-client-actions"><button class="button secondary small" data-rp-client="${h(row.clientId)}" type="button">${t("详情", "Details")}</button>${appealButton(row)}</div></td>
+        <td class="client-identity-cell" data-client-cell="${t("客户", "Client")}">
+          <div class="client-identity-inner">
+          <span class="client-avatar" aria-hidden="true">${h(clientInitial(row))}</span>
+          <span class="client-id-box"><button class="report-text-button" data-rp-client="${h(row.clientId)}" type="button">${h(row.clientId)}</button><small>${h(row.email)}</small></span>
+          </div>
+        </td>
+        <td class="client-registration-cell" data-client-cell="${t("注册信息", "Registration information")}"><div class="client-registration-inner"><strong class="num">${h(row.registeredAt)}</strong><small>${h(AFF.dataText(row.country))} · ${h(AFF.dataText(row.platform))}</small></div></td>
+        <td class="report-campaign-cell" data-client-cell="${t("活动 / 来源", "Campaign / Source")}"><div class="report-campaign-inner"><strong>${h(AFF.dataText(row.campaign))}</strong><small>${h(AFF.dataText(row.mediaSource))} · ${h(AFF.dataText(row.source))}</small></div></td>
+        <td data-client-cell="${t("KYC状态", "KYC status")}"><span class="tag tag-${row.kyc === "通过" ? "ok" : row.kyc === "失败" ? "danger" : row.kyc === "审核中" ? "warning" : "muted"}">${h(AFF.dataText(row.kyc))}</span></td>
+        <td class="client-stage-cell" data-client-cell="${t("转化阶段", "Conversion stage")}"><div class="client-stage-inner">${badge(status(row))}<small>${t("最近", "Latest")} ${h(latestMilestone(row))}</small></div></td>
+        <td data-client-cell="${t("质量服务", "Quality service")}">${badge(qualityService(row))}</td>
+        <td class="numeric report-expected-cell" data-client-cell="${t("预计佣金", "Expected commission")}" data-rp-expected-tooltip="${h(expectedTooltip(row))}" tabindex="0" aria-label="${t("预计佣金计算说明", "Expected commission calculation")}"><div class="report-expected-inner"><strong>${format(row.expected, "money")}</strong></div></td>
+        <td class="numeric report-settled-cell" data-client-cell="${t("已结算佣金", "Settled commission")}"><div class="report-settled-inner"><strong>${format(row.settled, "money")}</strong></div></td>
+        <td class="report-progress" data-client-cell="${t("资格档", "Tier")}" data-rp-tier-tooltip="${h(tierTooltip(row))}" tabindex="0" aria-label="${h(row.kyc !== "通过" ? t("资格档暂无法确认", "Tier cannot be confirmed yet") : t("资格档条件", "Tier requirements"))}"><strong>${h(progress(row))}</strong></td>
+        <td class="report-commission-cell" data-client-cell="${t("资金状态", "Fund status")}">${commissionStatusCell(row)}</td>
+        <td class="client-risk-cell" data-client-cell="${t("风险处理", "Risk handling")}">
+          <div class="client-risk-inner">${badge(riskStatus(row))}<small>${h(row.riskHandlingStatus === "none" ? "—" : AFF.dataText(row.riskNextStep))}</small></div>
+        </td>
+        <td class="client-action-cell"><div class="report-client-actions"><button class="button secondary small" data-rp-client="${h(row.clientId)}" type="button">${t("详情", "Details")}</button>${appealButton(row)}</div></td>
       </tr>`).join("")}</tbody></table>${rows.length ? "" : emptyState()}</div>${footer}`;
   }
 
   function selectField(key, value, title, values) {
     return `<label class="field"><span>${h(title)}</span><select data-rp-filter="${key}"><option value="">${t("全部", "All")}</option>${values.map(item => {
       const option = Array.isArray(item) ? item : [item, item];
-      return `<option value="${h(option[0])}" ${value === option[0] ? "selected" : ""}>${h(option[1])}</option>`;
+      return `<option value="${h(option[0])}" ${value === option[0] ? "selected" : ""}>${h(AFF.dataText(option[1]))}</option>`;
     }).join("")}</select></label>`;
+  }
+
+  function quickFilters(s) {
+    const campaigns = data.dimensions.find(item => item.key === "campaign");
+    const campaignOptions = data.options("campaign").map(value => {
+      const code = data.rows.find(row => row.campaign === value)?.campaignCode || value;
+      return [value, `${AFF.dataText(value)} · ${code}`];
+    });
+    const quickSelect = (key, title, values) => `<label class="client-quick-field"><select data-rp-quick="${key}" data-aff-dd-title="${h(title)}" aria-label="${h(title)}"><option value="">${t("全部", "All")}</option>${values.map(item => {
+      const option = Array.isArray(item) ? item : [item, item];
+      return `<option value="${h(option[0])}" ${s.filters[key] === option[0] ? "selected" : ""}>${h(option[1])}</option>`;
+    }).join("")}</select></label>`;
+    const stages = [["Registration", t("注册", "Registration")], ["KYC", "KYC"], ["FTD", "FTD"], ["Valid FTD", t("有效FTD", "Valid FTD")], ["Quality service", t("质量服务", "Quality service")], ["Completed", t("已完成", "Completed")], ["Voided", t("已作废", "Voided")]];
+    const funds = [["not_generated", t("未生成", "Not generated")], ["pending_review", t("待检查", "Pending review")], ["held", t("结算中", "On hold")], ["manual_review", t("人工确认中", "Manual review")], ["settled_partial", t("已结算 / 部分支付", "Settled / partially paid")], ["settled_closed", t("已支付 / 已结案", "Paid / closed")], ["rejected", t("已拒绝", "Rejected")], ["clawed_back", t("已冲正", "Clawed back")], ["frozen", t("冻结", "Frozen")], ["disputed", t("争议处理中", "Disputed")]];
+    const risks = [["none", t("无风险", "No risk")], ["investigating", t("调查中", "Investigating")], ["quarantined", t("隔离中", "Quarantined")], ["released", t("已解除", "Released")]];
+    return `<div class="client-quick-filters">
+      <div class="client-quick-combobox" data-rp-combobox="campaign">
+        <input type="search" data-rp-quick-combo-input="campaign" value="${s.filters.campaign ? h(campaignLabel(s.filters.campaign)) : ""}" placeholder="${h(t("活动来源：全部", "Campaign: all"))}" aria-label="${h(t("活动来源", "Campaign"))}" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="rp-quick-campaign-list">
+        <button type="button" class="client-quick-combobox-toggle" data-rp-combo-toggle="campaign" aria-label="${h(t("展开活动选项", "Expand campaign options"))}"></button>
+        <ul class="client-quick-combobox-list" id="rp-quick-campaign-list" role="listbox" hidden></ul>
+        <input type="hidden" data-rp-quick="campaign" value="${h(s.filters.campaign || "")}">
+      </div>
+      ${quickSelect("stage", t("转化阶段", "Conversion stage"), stages)}
+      ${quickSelect("quality", t("质量服务", "Quality service"), [["qualified", t("已达标", "Qualified")], ["unqualified", t("未达标", "Not qualified")]])}
+      ${quickSelect("commissionStatus", t("资金状态", "Fund status"), funds)}
+      ${quickSelect("riskStatus", t("风险处理", "Risk handling"), risks)}
+    </div>`;
+  }
+
+  function campaignLabel(value) {
+    const row = data.rows.find(item => item.campaign === value);
+    return row ? `${value} · ${row.campaignCode}` : value;
+  }
+
+  function renderQuickComboList(key, query = "") {
+    const list = document.querySelector(`[data-rp-combobox="${key}"] .client-quick-combobox-list`);
+    if (!list) return;
+    const current = state().filters[key];
+    const q0 = query.trim().toLowerCase();
+    // The input shows the picked option's label ("名称 · 代码"); while it is untouched, treat as no query
+    // so reopening lists every option plus the 全部 row instead of "无匹配选项".
+    const row = current ? data.rows.find(item => item[key] === current) : null;
+    const code = row?.campaignCode || "";
+    const currentLabel = current ? `${AFF.dataText(current)}${code ? ` · ${code}` : ""}`.trim().toLowerCase() : "";
+    const q = q0 && currentLabel && q0 === currentLabel ? "" : q0;
+    const options = data.options(key).filter(value =>
+      !q || `${AFF.dataText(value)} ${value}`.toLowerCase().includes(q));
+    // "All" sits on top when not searching — same clear affordance as the four sibling selects.
+    const allRow = !q ? `<li role="option" aria-selected="${!current}" data-rp-quick-combo-option="">${t("全部", "All")}</li>` : "";
+    list.innerHTML = options.length
+      ? allRow + options.map(value => {
+          const r = data.rows.find(item => item[key] === value);
+          const c = r?.campaignCode || "";
+          return `<li role="option" aria-selected="${value === current}" data-rp-quick-combo-option="${h(value)}">${h(AFF.dataText(value))}${c ? ` <small>${h(c)}</small>` : ""}</li>`;
+        }).join("")
+      : `<li class="client-quick-combobox-empty">${t("无匹配选项", "No matching options")}</li>`;
+  }
+
+  function closeQuickCombos(except) {
+    document.querySelectorAll("[data-rp-combobox]").forEach(box => {
+      if (box === except) return;
+      box.querySelector(".client-quick-combobox-list").hidden = true;
+      box.querySelector("[data-rp-quick-combo-input]")?.setAttribute("aria-expanded", "false");
+    });
+  }
+
+  function setQuickCampaignFilter(value) {
+    const s = state();
+    if (value) s.filters.campaign = value; else delete s.filters.campaign;
+    s.page = 1; s.metric = null;
+    renderPage("[data-rp-quick-combo-input='campaign']");
   }
 
   function drawer(s) {
@@ -545,8 +701,8 @@
     const isColumns = s.drawer === "columns";
     const title = isColumns ? t("设置显示列", "Display columns") : t("筛选条件", "Filter conditions");
     const draft = s.draft || {};
-    return `<div class="overlay report-overlay" data-rp-action="close"></div><aside class="report-drawer" role="dialog" aria-modal="true" aria-labelledby="rp-drawer-title">
-      <header><h2 id="rp-drawer-title">${title}</h2>${iconButton("close", "close", t("关闭", "Close"))}</header>
+    return `<div class="aff-drawer-overlay" data-rp-action="close"></div><aside class="aff-drawer report-drawer" role="dialog" aria-modal="true" aria-labelledby="rp-drawer-title">
+      <header><h2 id="rp-drawer-title">${title}</h2><button class="aff-drawer-close" type="button" data-rp-action="close" aria-label="${h(t("关闭", "Close"))}">${icon("close")}</button></header>
       <div class="report-drawer-body">
         ${isColumns ? `<div class="report-column-actions"><button class="report-text-button" type="button" data-rp-action="all-columns">${t("全选", "Select all")}</button><button class="report-text-button" type="button" data-rp-action="default-columns">${t("恢复默认", "Restore defaults")}</button></div>
           <div class="report-column-grid">${data.metrics.map(item => `<label><input type="checkbox" data-rp-column="${item.key}" ${(s.draftColumns || []).includes(item.key) ? "checked" : ""}>${h(t(item.label, item.en))}</label>`).join("")}</div>` :
@@ -557,7 +713,9 @@
             <label class="field"><span>${t("客户编号", "Client ID")}</span><input data-rp-filter="search" value="${h(draft.search || "")}" placeholder="C-100001"></label>
             ${selectField("kyc", draft.kyc, "KYC", ["通过", "未提交", "审核中", "失败"])}
             ${selectField("stage", draft.stage, t("转化阶段", "Conversion stage"), [["Registration", t("注册", "Registration")], ["KYC", "KYC"], ["FTD", "FTD"], ["Valid FTD", t("有效FTD", "Valid FTD")], ["Quality service", t("质量服务", "Quality service")], ["Completed", t("已完成", "Completed")], ["Voided", t("已作废", "Voided")]])}
-            ${selectField("commissionStatus", draft.commissionStatus, t("资金状态", "Fund status"), [["not_generated", t("未生成", "Not generated")], ["pending_review", t("待检查", "Pending review")], ["held", t("暂扣中", "On hold")], ["manual_review", t("人工确认中", "Manual review")], ["settled_partial", t("已结算 / 部分支付", "Settled / partially paid")], ["settled_closed", t("已支付 / 已结案", "Paid / closed")], ["rejected", t("已拒绝", "Rejected")], ["clawed_back", t("已冲正", "Clawed back")], ["frozen", t("冻结", "Frozen")], ["disputed", t("争议处理中", "Disputed")]])}
+            ${selectField("commissionStatus", draft.commissionStatus, t("资金状态", "Fund status"), [["not_generated", t("未生成", "Not generated")], ["pending_review", t("待检查", "Pending review")], ["held", t("结算中", "On hold")], ["manual_review", t("人工确认中", "Manual review")], ["settled_partial", t("已结算 / 部分支付", "Settled / partially paid")], ["settled_closed", t("已支付 / 已结案", "Paid / closed")], ["rejected", t("已拒绝", "Rejected")], ["clawed_back", t("已冲正", "Clawed back")], ["frozen", t("冻结", "Frozen")], ["disputed", t("争议处理中", "Disputed")]])}
+            ${selectField("riskStatus", draft.riskStatus, t("风险处理状态", "Risk handling status"), [["none", t("无风险", "No risk")], ["investigating", t("调查中", "Investigating")], ["quarantined", t("隔离中", "Quarantined")], ["released", t("已解除", "Released")]])}
+            ${selectField("riskReason", draft.riskReason, t("原因类别", "Reason category"), ["资料待核验", "行为待说明", "质量待复核", "支付风险", "集群风险", "其他"])}
             <label class="field"><span>${t("注册时间范围", "Registration range")}</span>${AFF.dateRange.component({ id: "report-registered-range", from: draft.registeredFrom || "", to: draft.registeredTo || "", max: data.now, placeholder: t("选择注册日期范围", "Select registration dates") })}</label>
           </div></fieldset>` : ""}
           <fieldset class="report-fieldset"><legend>${t("地区、平台与推广来源", "Region, platform and sources")}</legend><div class="report-filter-grid">
@@ -611,11 +769,16 @@
       : t("质量服务佣金", "Quality service commission");
     const caseStatusLabels = {
       pending: t("待检查", "Pending review"),
-      held: t("暂扣中", "On hold"),
+      held: t("结算中", "On hold"),
       manual_review: t("人工确认中", "Manual review"),
       frozen: t("冻结", "Frozen"),
       rejected: t("已拒绝", "Rejected"),
       reversed: t("已冲正", "Reversed")
+    };
+    const eligibilityLabels = {
+      attributed: t("已归属", "Attributed"),
+      not_new_customer: t("非新客户", "Not a new customer"),
+      fraud_hit: t("欺诈库命中", "Fraud-list hit")
     };
     const creditedHelp = settledCases.length
       ? [
@@ -642,17 +805,34 @@
       releasedGuarantee > 0 ? `${t("本行已释放", "Released in this row")} ${format(releasedGuarantee, "money")}${t("，已进入可提现余额，不再计入当前滚动保证金。", "; it has entered the available balance and is excluded here.")}` : "",
       t("结算时扣留的完整金额会在结算净额的对账说明中展示。", "The full amount withheld at settlement is shown in the settlement-net reconciliation.")
     ].filter(Boolean).join("\n");
-    return `<div class="overlay report-overlay" data-rp-action="close"></div><aside class="report-drawer" role="dialog" aria-modal="true" aria-labelledby="rp-drawer-title">
-      <header><div><h2 id="rp-drawer-title">${h(row.clientId)}</h2><p>${h(row.email)}</p></div>${iconButton("close", "close", t("关闭", "Close"))}</header>
+    return `<div class="aff-drawer-overlay" data-rp-action="close"></div><aside class="aff-drawer report-drawer" role="dialog" aria-modal="true" aria-labelledby="rp-drawer-title">
+      <header><div class="aff-drawer-title-wrap"><h2 id="rp-drawer-title">${h(row.clientId)}</h2><p>${h(row.email)}</p></div><button class="aff-drawer-close" type="button" data-rp-action="close" aria-label="${h(t("关闭", "Close"))}">${icon("close")}</button></header>
       <div class="report-drawer-body">
-        <section class="report-detail-section"><h3>${t("客户信息", "Client information")}</h3><dl class="report-detail-grid">${field(t("国家/地区", "Country / Region"), row.country)}${field(t("注册平台", "Registration platform"), row.platform)}${field(t("操作系统", "Operating system"), row.os)}${field(t("点击归属日期", "Attribution date"), row.date)}${row.scenarioCode ? field(t("演示场景", "Demo scenario"), `${row.scenarioCode} · ${row.scenarioLabel}`) : ""}</dl></section>
+        <section class="report-detail-section"><h3>${t("客户信息", "Client information")}</h3><dl class="report-detail-grid">${field(t("国家/地区", "Country / Region"), AFF.dataText(row.country))}${field(t("注册平台", "Registration platform"), AFF.dataText(row.platform))}${field(t("操作系统", "Operating system"), AFF.dataText(row.os))}${field(t("点击归属日期", "Attribution date"), row.date)}${row.scenarioCode ? field(t("演示场景", "Demo scenario"), `${row.scenarioCode} · ${AFF.dataText(row.scenarioLabel)}`) : ""}</dl></section>
+        <section class="report-detail-section"><h3>${t("三层状态", "Three-layer status")}</h3><dl class="report-detail-grid">
+          ${field(t("客户资格状态", "Client eligibility status"), eligibilityLabels[row.eligibilityStatus] || row.eligibilityStatus)}
+          ${field(t("客户里程碑状态", "Client milestone status"), status(row)[0])}
+          ${field(t("资金状态", "Fund status"), commissionStatus(row)[0])}
+        </dl></section>
+        ${row.riskHandlingStatus !== "none" ? `<section class="report-detail-section"><h3>${t("风险处理", "Risk handling")}</h3><dl class="report-detail-grid">
+          ${field(t("处理状态", "Status"), riskStatus(row)[0])}
+          ${field(t("原因类别", "Reason category"), AFF.dataText(row.riskReasonCategory))}
+          ${field(t("开始时间", "Started at"), row.riskStartedAt)}
+          ${field(t("当前状态时间", "Current status time"), row.riskStatusTime)}
+          ${field(t("影响范围", "Impact scope"), AFF.dataText(row.riskImpactScope))}
+          ${field(t("证据范围", "Evidence scope"), AFF.dataText(row.riskEvidenceScope))}
+          ${field(t("是否需补充材料", "Materials required"), row.riskRequiresMaterials ? t("需要", "Required") : t("不需要", "Not required"))}
+          ${field(t("下一步", "Next step"), AFF.dataText(row.riskNextStep))}
+          ${field(t("预计处理路径", "Handling path"), AFF.dataText(row.riskHandlingPath))}
+          ${field(t("申诉路径", "Appeal path"), row.riskHandlingStatus === "released" ? t("暂无", "None") : t("申诉中心", "Appeal center"))}
+        </dl><p>${t("调查或隔离期间佣金保留并留痕，但不自动结算、不可提现；解除后需等待结算前检查，不直接入账。", "During investigation or quarantine, commission is retained and audited but not automatically settled or withdrawable. After release it must pass pre-settlement checks before crediting.")}</p></section>` : ""}
         <section class="report-detail-section"><h3>${t("转化阶段", "Conversion stage")}</h3><ol class="report-timeline">${steps.map(([name, value]) => `<li class="${value ? "complete" : ""}"><span>${h(name)}</span><time>${h(value || t("尚未完成", "Not completed"))}</time></li>`).join("")}</ol></section>
         <section class="report-detail-section"><h3>${t("质量服务", "Quality service")}</h3><dl class="report-detail-grid">
           ${field(t("达标状态", "Qualification"), qualityService(row)[0])}
           ${row.qualityAt ? field(t("达标时间", "Qualified at"), row.qualityAt) : ""}
         </dl></section>
         <section class="report-detail-section"><h3>${t("推广来源", "Promotion attribution")}</h3><dl class="report-detail-grid">
-          ${data.dimensions.filter(item => !timeKeys.includes(item.key) && !["country", "platform", "os"].includes(item.key)).map(item => field(t(item.label, item.en), row[item.key])).join("")}
+          ${data.dimensions.filter(item => !timeKeys.includes(item.key) && !["country", "platform", "os"].includes(item.key)).map(item => field(t(item.label, item.en), AFF.dataText(row[item.key]))).join("")}
         </dl></section>
         <section class="report-detail-section"><h3>${t("佣金信息", "Commission information")}</h3>
           ${hasCommissionBreakdown ? `<div class="report-commission-summary">
@@ -664,11 +844,11 @@
             ${unsettledCases.map(item => `<div>
               <span>${t("未结算佣金", "Unsettled commission")}</span>
               <strong>${format(item.amountCents / 100, "money")}</strong>
-              <small>${h(caseName(item))} · ${h(caseStatusLabels[item.status] || item.status)}${item.holdDays ? ` · ${t("暂扣", "Hold")} ${item.holdDays}${t("天", "d")}` : ""}</small>
+              <small>${h(caseName(item))} · ${h(caseStatusLabels[item.status] || item.status)}${item.holdDays ? ` · ${t("结算中", "In settlement")} ${item.holdDays}${t("天", "d")}` : ""}</small>
             </div>`).join("")}
           </div>` : ""}
           ${heldProgress.length ? `<div class="report-hold-progress">${heldProgress.map(item => `
-            <div><span>${h(item.name)}</span><strong>${t("暂扣天数", "Hold days")} ${item.totalDays}${t("天", "d")}</strong><small>${t("已完成", "Elapsed")} ${item.elapsed}${t("天", "d")}</small></div>`).join("")}
+            <div><span>${h(item.name)}</span><strong>${t("结算中天数", "In-settlement days")} ${item.totalDays}${t("天", "d")}</strong><small>${t("已完成", "Elapsed")} ${item.elapsed}${t("天", "d")}</small></div>`).join("")}
           </div>` : ""}
           ${holdHelp(row)}<dl class="report-detail-grid">
           ${moneyField(label("expected"), row.expected)}
@@ -698,10 +878,11 @@
     const rows = tableRows();
     return `<div class="report-page">${controls(s)}
       ${AFF.state.route === "summary" ? summaryCards(source) : ""}
-      <section class="card report-panel">
-        ${AFF.state.route !== "clients" ? `<div class="report-table-toolbar">${groupPicker(s)}${tableActions(s)}</div>` : `<div class="report-client-toolbar"><strong>${t("客户数据", "Client data")}</strong><span>${t("按点击归属日期筛选", "Filtered by click attribution date")}</span></div>`}
+      <section class="card report-panel ${AFF.state.route === "clients" ? "client-panel" : ""}">
+        ${AFF.state.route !== "clients" ? `<div class="report-table-toolbar">${groupPicker(s)}${tableActions(s)}</div>` : ""}
         ${AFF.state.route === "clients" ? customerTable(rows, s) : reportTable(rows, source, s)}
       </section>
+      ${AFF.exportCenter.panel()}
       <div class="report-footnote">${t("时区", "Timezone")} ${h(data.fields.timezone)} · ${t("金额", "Currency")} USD<span>${t("数据截至", "Data through")} ${data.now} 23:59</span></div>
       ${AFF.state.route === "clients" ? commissionHelp() : ""}
       ${s.drawer ? drawer(s) : s.client ? clientDrawer(s) : ""}
@@ -714,13 +895,13 @@
     renderPage(returnFocus);
   }
 
-  function download() {
+  function exportCsv() {
     const s = state();
     const clients = AFF.state.route === "clients";
     const keys = clients
-      ? ["clientId", "email", "registeredAt", "country", "platform", "campaign", "kyc", "ftdAt", "effectiveAt", "qualityAt", "milestoneStatus", "fundStatus", "commissionStatus", "scenarioCode", "scenarioLabel", "expected", "tax", "guarantee", "approved", "paid", "rejected", "reversed", "commissionId", "commissionReasonCode", "commissionReason"]
+      ? ["clientId", "email", "registeredAt", "country", "platform", "campaign", "kyc", "ftdAt", "effectiveAt", "qualityAt", "milestoneStatus", "fundStatus", "commissionStatus", "riskHandlingStatus", "riskReasonCategory", "riskStartedAt", "riskStatusTime", "riskImpactScope", "riskEvidenceScope", "riskNextStep", "riskHandlingPath", "scenarioCode", "scenarioLabel", "expected", "settled", "tax", "guarantee", "approved", "paid", "rejected", "reversed", "commissionId", "commissionReasonCode", "commissionReason"]
       : [...s.groups, ...s.columns];
-    const titles = clients ? ["客户编号", "脱敏邮箱", "注册时间", "国家/地区", "注册平台", "转化活动", "KYC状态", "FTD时间", "有效FTD时间", "质量服务时间", "客户里程碑状态", "资金状态", "佣金状态", "演示场景代码", "演示场景", "预计佣金", "税费", "滚动保证金", "可提现净额", "已支付佣金", "已拒绝佣金", "冲正金额", "佣金编号", "处理原因码", "处理原因"] : keys.map(label);
+    const titles = clients ? ["客户编号", "脱敏邮箱", "注册时间", "国家/地区", "注册平台", "转化活动", "KYC状态", "FTD时间", "有效FTD时间", "质量服务时间", "客户里程碑状态", "资金状态", "佣金状态", "风险处理状态", "原因类别", "风险开始时间", "当前状态时间", "影响范围", "证据范围", "下一步", "处理路径", "演示场景代码", "演示场景", "预计佣金", "已结算佣金", "税费", "滚动保证金", "可提现净额", "已支付佣金", "已拒绝佣金", "冲正金额", "佣金编号", "处理原因码", "处理原因"] : keys.map(label);
     const csvCell = value => {
       let text = String(value ?? "");
       if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`;
@@ -730,11 +911,16 @@
     const matrix = clients ? rows.map(row => keys.map(key => row[key])) :
       rows.map(row => [...row.values.filter(() => s.groups.length), ...s.columns.map(key => row.metrics[key])]);
     const csv = [titles, ...matrix].map(row => row.map(csvCell).join(",")).join("\r\n");
-    const url = URL.createObjectURL(new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" }));
+    return { csv, filename: `${AFF.state.route}-${s.filters.from}-${s.filters.to}.csv`, rows: rows.length };
+  }
+
+  function download() {
+    const payload = exportCsv();
+    const url = URL.createObjectURL(new Blob(["\uFEFF", payload.csv], { type: "text/csv;charset=utf-8" }));
     const anchor = document.createElement("a");
-    anchor.href = url; anchor.download = `${AFF.state.route}-${s.filters.from}-${s.filters.to}.csv`; anchor.click();
+    anchor.href = url; anchor.download = payload.filename; anchor.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    showToast(t(`已导出 ${rows.length} 条记录`, `Exported ${rows.length} rows`));
+    showToast(t(`已导出 ${payload.rows} 条记录`, `Exported ${payload.rows} rows`));
   }
 
   function drill(metric, rowKey) {
@@ -757,7 +943,7 @@
   }
 
   function openClients(filters, metric = "registrations") {
-    if (!["registrations", "ftd", "effective", "quality"].includes(metric)) return;
+    if (!["registrations", ...summaryMetrics, ...amountDrillMetrics].includes(metric)) return;
     const clients = state("clients");
     Object.assign(clients, {
       filters: { ...filters }, metric, preset: "custom", page: 1,
@@ -770,7 +956,44 @@
     if (!routeKeys.includes(AFF.state.route)) return;
     if (!event.target.closest(".report-hold-anchor")) setHoldHelp(false);
     if (!event.target.closest("#rp-commission-help, [data-rp-action='commission-help']")) closeCommissionHelp();
-    const target = event.target.closest("[data-rp-action], [data-rp-add-group], [data-rp-remove-group], [data-rp-sort], [data-rp-page], [data-rp-clear], [data-rp-client], [data-rp-appeal], [data-rp-drill-metric], [data-rp-column-help], [data-rp-tier-tooltip], [data-rp-expected-tooltip], [data-rp-fund-tooltip], [data-rp-detail-help]");
+    const comboOption = event.target.closest("[data-rp-quick-combo-option]");
+    if (comboOption) {
+      setQuickCampaignFilter(comboOption.dataset.rpQuickComboOption);
+      closeQuickCombos();
+      return;
+    }
+    const comboToggle = event.target.closest("[data-rp-combo-toggle]");
+    if (comboToggle) {
+      const box = comboToggle.closest("[data-rp-combobox]");
+      const list = box.querySelector(".client-quick-combobox-list");
+      const willOpen = list.hidden;
+      closeQuickCombos();
+      if (willOpen) {
+        renderQuickComboList(box.dataset.rpCombobox, box.querySelector("[data-rp-quick-combo-input]").value);
+        list.hidden = false;
+        box.querySelector("[data-rp-quick-combo-input]").setAttribute("aria-expanded", "true");
+        box.querySelector("[data-rp-quick-combo-input]").focus();
+      }
+      return;
+    }
+    // Clicking the search input itself also opens the option list (like the toggle).
+    const comboInput = event.target.closest("[data-rp-quick-combo-input]");
+    if (comboInput) {
+      const box = comboInput.closest("[data-rp-combobox]");
+      const list = box.querySelector(".client-quick-combobox-list");
+      if (list.hidden) {
+        closeQuickCombos();
+        renderQuickComboList(box.dataset.rpCombobox, comboInput.value);
+        list.hidden = false;
+        comboInput.setAttribute("aria-expanded", "true");
+      }
+      // Select-all must run after the browser places the click caret.
+      setTimeout(() => comboInput.select(), 0);
+      return;
+    }
+    const comboBox = event.target.closest("[data-rp-combobox]");
+    if (!comboBox) closeQuickCombos();
+    const target = event.target.closest("[data-rp-action], [data-rp-add-group], [data-rp-remove-group], [data-rp-sort], [data-rp-page], [data-aff-page], [data-rp-clear], [data-rp-client], [data-rp-appeal], [data-rp-drill-metric], [data-rp-column-help], [data-rp-tier-tooltip], [data-rp-expected-tooltip], [data-rp-fund-tooltip], [data-rp-detail-help]");
     const s = state();
     if (!target) {
       if (s.picker && !event.target.closest(".report-picker")) {
@@ -829,7 +1052,9 @@
       if (s.sort === d.rpRemoveGroup) s.sort = s.groups[0] || s.columns[0];
     } else if (d.rpSort) {
       s.direction = s.sort === d.rpSort && s.direction === "desc" ? "asc" : "desc"; s.sort = d.rpSort; s.page = 1;
+      if (AFF.state.route === "clients") s.sortUserSelected = true;
     } else if (d.rpPage) s.page = Number(d.rpPage);
+    else if (d.affPage) { s.page = Number(d.affPage); renderPage(); AFF.pagination.focusNav("reports"); return; }
     else if (d.rpClear) { delete s.filters[d.rpClear]; s.page = 1; s.metric = null; }
     else if (d.rpClient) {
       returnFocus = `[data-rp-client="${d.rpClient}"]`; s.client = d.rpClient; s.picker = false; s.appeal = false; s.error = "";
@@ -848,8 +1073,9 @@
         s.draft = { ...s.filters }; s.draftColumns = [...s.columns]; s.error = "";
         return renderPage(".report-drawer .report-icon");
       }
-      if (action === "reset" || action === "clear-filters") {
+      if (action === "reset" || action === "clear-filters" || action === "quick-reset") {
         s.filters = range("past30"); s.preset = "past30"; s.draft = { ...s.filters }; s.page = 1; s.metric = null; s.error = "";
+        if (action === "quick-reset") { renderPage("[data-rp-action='quick-reset']"); return; }
       }
       if (action === "clear-milestone") { s.metric = null; s.page = 1; }
       if (action === "all-columns") s.draftColumns = data.metrics.map(item => item.key);
@@ -921,6 +1147,10 @@
       setFloatingHelp(content, floatingTrigger);
     }
     if (event.target.matches(".report-inline-help .report-help-button:focus-visible")) setInlineHelp(event, true);
+    // Quick-filter combobox: select-all on focus so typed input replaces the label instantly.
+    if (event.target.matches("[data-rp-quick-combo-input]")) {
+      window.requestAnimationFrame(() => event.target.select());
+    }
   });
   document.addEventListener("focusout", event => {
     leaveHoldHelp(event);
@@ -940,6 +1170,16 @@
     if (!routeKeys.includes(AFF.state.route)) return;
     const node = event.target;
     const s = state();
+    if (node.matches("[data-rp-quick]")) {
+      const key = node.dataset.rpQuick;
+      if (node.type === "hidden") return;
+      if (key === "quality") {
+        if (node.value) s.filters.qualityService = node.value; else delete s.filters.qualityService;
+      } else if (node.value) s.filters[key] = node.value;
+      else delete s.filters[key];
+      s.page = 1; s.metric = null;
+      return renderPage(node.matches("select") ? `[data-rp-quick="${key}"]` : undefined);
+    }
     if (node.matches("[data-rp-filter]")) { s.draft[node.dataset.rpFilter] = node.value; return; }
     if (node.matches("[data-rp-column]")) {
       s.draftColumns = node.checked ? [...new Set([...s.draftColumns, node.dataset.rpColumn])] : s.draftColumns.filter(key => key !== node.dataset.rpColumn);
@@ -953,7 +1193,7 @@
       Object.assign(s.filters, range(node.value)); s.preset = node.value; s.page = 1; s.metric = null;
       return renderPage("[data-rp-period]");
     }
-    if (node.matches("[data-rp-page-size]")) { s.pageSize = Number(node.value); s.page = 1; renderPage("[data-rp-page-size]"); }
+    if (node.matches("[data-rp-page-size], [data-aff-page-size]")) { s.pageSize = Number(node.value); s.page = 1; renderPage("[data-aff-page-size]"); }
   });
   document.addEventListener("input", event => {
     if (!routeKeys.includes(AFF.state.route)) return;
@@ -964,6 +1204,14 @@
       return;
     }
     if (event.target.matches("[data-rp-filter]")) state().draft[event.target.dataset.rpFilter] = event.target.value;
+    if (event.target.matches("[data-rp-quick-combo-input]")) {
+      const key = event.target.dataset.rpQuickComboInput;
+      renderQuickComboList(key, event.target.value);
+      const box = event.target.closest("[data-rp-combobox]");
+      box.querySelector(".client-quick-combobox-list").hidden = false;
+      event.target.setAttribute("aria-expanded", "true");
+      return;
+    }
     if (!event.target.matches("[data-rp-group-search]")) return;
     const s = state(); s.groupQuery = event.target.value;
     const options = data.dimensions.filter(item => !s.groups.includes(item.key) && `${item.label} ${item.en} ${item.key}`.toLowerCase().includes(s.groupQuery.toLowerCase()));
@@ -985,7 +1233,6 @@
   document.addEventListener("keydown", event => {
     if (!routeKeys.includes(AFF.state.route)) return;
     const s = state();
-    const dialog = document.querySelector(".report-drawer");
     if (event.key === "Escape" && document.querySelector("#rp-hold-help:not([hidden])")) {
       event.preventDefault();
       setHoldHelp(false);
@@ -996,13 +1243,24 @@
       document.querySelector("[data-rp-action='commission-help']")?.focus();
       return;
     }
-    if (event.key === "Escape" && (dialog || s.picker)) { event.preventDefault(); close(); }
-    if (event.key === "Tab" && dialog) {
-      const nodes = [...dialog.querySelectorAll("button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled)")];
-      const first = nodes[0]; const last = nodes[nodes.length - 1];
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    // Escape closes an open quick-combobox list before anything else (chevron resets via input's aria-expanded).
+    if (event.key === "Escape" && document.querySelector(".client-quick-combobox-list:not([hidden])")) {
+      event.preventDefault();
+      closeQuickCombos();
+      return;
     }
+    // Group-dimension picker (not a drawer — page-owned Escape path, kept here).
+    if (event.key === "Escape" && s.picker) {
+      event.preventDefault();
+      s.picker = false;
+      document.querySelector(".report-group-menu")?.remove();
+      document.querySelector("[data-rp-action='groups']")?.setAttribute("aria-expanded", "false");
+      persist();
+      renderPage("[data-rp-action='groups']");
+      return;
+    }
+    // Drawer Escape + Tab trap are handled by AFF.drawer runtime (drawer.js);
+    // the blocks above only clear inner layers first (hasInnerLayers contract).
   });
   window.addEventListener("hashchange", () => {
     if (!AFF.state.reports) return;
@@ -1014,7 +1272,7 @@
   document.addEventListener("scroll", positionCommissionHelp, true);
   document.addEventListener("scroll", () => document.getElementById("rp-floating-help")?.setAttribute("hidden", ""), true);
 
-  AFF.reports = { state, filtered: () => filtered(), tableRows, range, openClients };
+  AFF.reports = { state, filtered: () => filtered(), tableRows, range, openClients, exportCsv };
   AFF.pages.perf = page;
   AFF.pages.summary = page;
   AFF.pages.clients = page;

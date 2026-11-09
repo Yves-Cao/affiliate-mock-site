@@ -59,7 +59,10 @@ AFF.postbacks = (() => {
             name: index === 0 ? "注册事件回传" : "佣金获批回传",
             event: index === 0 ? "registration" : "commission_status",
             mode: "generated",
-            clickUrl: "https://track.example.com/click?clickid=demo_click_001&utm_source=telegram",
+            clickUrl: AFF.linkBuilder.href("https://track.example.com/click", {
+              clickid: "demo_click_001",
+              utm_source: "telegram"
+            }),
             endpoint: "https://tracker.example.com/postback",
             parameters: standardParameters(index === 0 ? "registration" : "commission_status"),
             manualUrl: "",
@@ -230,12 +233,20 @@ AFF.postbacks = (() => {
     return `<span class="tag tag-${result === "success" ? "ok" : "danger"}">${result === "success" ? t("成功", "Success") : result === "timeout" ? t("超时", "Timeout") : t("失败", "Failed")}</span>`;
   }
 
+  function attributionStatus(config) {
+    const pending = Number(String(config.id).replace(/\D/g, "")) % 7 === 0;
+    return pending
+      ? `<span class="tag tag-warning">${t("待核验", "Pending verification")}</span>`
+      : `<span class="tag tag-ok">${t("链路完整", "Chain complete")}</span>`;
+  }
+
   function renderConfigs(store) {
     const rows = store.configs.map(config => [
-      `<strong>${h(config.name)}</strong><small>${h(platformLabel(config.platform))}</small><small>${h(config.id)}</small>`,
+      `<strong>${h(AFF.dataText(config.name))}</strong><small>${h(platformLabel(config.platform))}</small><small>${h(config.id)}</small>`,
       h(eventLabel(config.event)),
       `<code class="postback-url">${h(config.callbackUrl)}</code>`,
       badge(config.status),
+      attributionStatus(config),
       `${h(config.updatedAt)}<small>${t("版本", "Version")} ${config.version}</small>`,
       `<div class="table-actions">
         ${iconButton("postback-edit", t("编辑", "Edit"), "edit", `data-config-id="${h(config.id)}"`)}
@@ -247,7 +258,7 @@ AFF.postbacks = (() => {
     ]);
     if (!rows.length) return `<div class="empty-state"><strong>${t("暂无回传配置", "No postback configurations")}</strong><button class="button primary" type="button" data-action="open-tracker-modal">${t("新建回传", "Create postback")}</button></div>`;
     return AFF.helpers.table({
-      columns: [t("名称", "Name"), t("回传事件", "Event"), t("接收地址", "Receiver URL"), t("状态", "Status"), t("最近更新 · UTC+8", "Updated · UTC+8"), t("操作", "Actions")],
+      columns: [t("名称", "Name"), t("回传事件", "Event"), t("接收地址", "Receiver URL"), t("状态", "Status"), t("归因状态", "Attribution status"), t("最近更新 · UTC+8", "Updated · UTC+8"), t("操作", "Actions")],
       rows
     });
   }
@@ -287,9 +298,10 @@ AFF.postbacks = (() => {
       (!store.filters.config || log.configId === store.filters.config) &&
       (!store.filters.event || log.event === store.filters.event) &&
       (!store.filters.result || log.result === store.filters.result));
-    const totalPages = Math.max(1, Math.ceil(filtered.length / 10));
+    const pageSize = [10, 20, 50].includes(Number(store.logPageSize)) ? Number(store.logPageSize) : 10;
+    const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
     store.logPage = Math.min(Math.max(1, store.logPage), totalPages);
-    const rows = filtered.slice((store.logPage - 1) * 10, store.logPage * 10).map(log => {
+    const rows = filtered.slice((store.logPage - 1) * pageSize, store.logPage * pageSize).map(log => {
       const config = store.configs.find(item => item.id === log.configId);
       const canRetry = log.result !== "success" && config?.status === "启用" && config.version === log.configVersion;
       const retryHint = log.result === "success" ? t("成功记录无需重试", "Successful records do not need retrying")
@@ -317,11 +329,7 @@ AFF.postbacks = (() => {
         <button class="button secondary" type="button" data-action="postback-reset-filters">${t("重置", "Reset")}</button>
       </div>
       ${rows.length ? AFF.helpers.table({ columns: [t("时间 · UTC+8", "Time · UTC+8"), t("配置", "Configuration"), t("事件", "Event"), t("事件ID", "Event ID"), t("结果", "Result"), t("次数", "Attempts"), t("操作", "Actions")], rows }) : `<div class="empty-state"><strong>${t("暂无投递记录", "No delivery records")}</strong><span>${t("本地测试后可在此查看结果", "Local test results will appear here")}</span></div>`}
-      <div class="table-footer"><span>${t(`共 ${filtered.length} 条记录`, `${filtered.length} records`)}</span><div class="pagination">
-        <button type="button" data-action="postback-log-page" data-page="${store.logPage - 1}" aria-label="${t("上一页", "Previous page")}" ${store.logPage <= 1 ? "disabled" : ""}>‹</button>
-        <span>${store.logPage} / ${totalPages}</span>
-        <button type="button" data-action="postback-log-page" data-page="${store.logPage + 1}" aria-label="${t("下一页", "Next page")}" ${store.logPage >= totalPages ? "disabled" : ""}>›</button>
-      </div></div>`;
+      ${AFF.pagination.component({ page: store.logPage, pageSize, total: filtered.length, channel: "postbacks" })}`;
   }
 
   function renderPage() {
@@ -331,7 +339,8 @@ AFF.postbacks = (() => {
       ${AFF.helpers.cards([
         { label: t("追踪器总数", "Total trackers"), value: store.configs.length },
         { label: t("启用中", "Enabled"), value: store.configs.filter(config => config.status === "启用").length },
-        { label: t("已暂停", "Paused"), value: store.configs.filter(config => config.status !== "启用").length }
+        { label: t("已暂停", "Paused"), value: store.configs.filter(config => config.status !== "启用").length },
+        { label: t("归因状态待核验", "Attribution pending"), value: store.configs.filter(config => Number(String(config.id).replace(/\D/g, "")) % 7 === 0).length, hint: t("仅显示结果状态", "Result status only") }
       ])}
       <div class="postback-tabs" role="tablist" aria-label="${t("回传视图", "Postback views")}">
         <button type="button" role="tab" aria-selected="${store.tab === "configs"}" data-action="postback-tab" data-tab="configs">${t("回传配置", "Configurations")}</button>
@@ -439,7 +448,7 @@ AFF.postbacks = (() => {
       <div class="modal-head"><h2>${log ? t("重试本地测试", "Retry local test") : t("本地测试", "Local test")}</h2><button class="close-button" type="button" data-action="close-modal" aria-label="${t("关闭", "Close")}">×</button></div>
       <div class="postback-body">
         <p class="postback-local-notice">${t("仅生成本地测试结果，不会向接收地址发送请求。", "Generates a local test result without sending a request to the receiver.")}</p>
-        <dl class="postback-details"><div><dt>${t("配置", "Configuration")}</dt><dd>${h(config.name)}</dd></div><div><dt>${t("事件", "Event")}</dt><dd>${h(eventLabel(config.event))}</dd></div><div><dt>${t("事件ID", "Event ID")}</dt><dd>${h(testContext.sample.eventId)}</dd></div><div><dt>${t("请求方法", "Request method")}</dt><dd>GET</dd></div></dl>
+        <dl class="postback-details"><div><dt>${t("配置", "Configuration")}</dt><dd>${h(AFF.dataText(config.name))}</dd></div><div><dt>${t("事件", "Event")}</dt><dd>${h(eventLabel(config.event))}</dd></div><div><dt>${t("事件ID", "Event ID")}</dt><dd>${h(testContext.sample.eventId)}</dd></div><div><dt>${t("请求方法", "Request method")}</dt><dd>GET</dd></div></dl>
         <div class="postback-preview"><h3>${t("请求预览", "Request preview")}</h3><code>${h(testContext.sample.requestUrl)}</code></div>
         <div class="field postback-field"><label for="postback-test-result">${t("测试结果", "Test result")}</label><select id="postback-test-result"><option value="success">${t("成功 · HTTP 200", "Success · HTTP 200")}</option><option value="failed">${t("失败 · HTTP 500", "Failed · HTTP 500")}</option><option value="timeout">${t("请求超时", "Request timeout")}</option></select></div>
         <div id="postback-test-output" aria-live="polite"></div>
@@ -468,7 +477,7 @@ AFF.postbacks = (() => {
     const reason = result === "success" ? t("本地测试通过", "Local test passed") : result === "failed" ? t("接收服务异常（本地测试）", "Receiver service error (local test)") : t("连接超时（本地测试）", "Connection timeout (local test)");
     if (!log) {
       log = {
-        id: id("LOG"), configId: config.id, configName: config.name, configVersion: config.version,
+        id: id("LOG"), configId: config.id, configName: AFF.dataText(config.name), configVersion: config.version,
         event: config.event, ...testContext.sample, attempts: []
       };
       store.logs.unshift(log);
@@ -515,6 +524,15 @@ AFF.postbacks = (() => {
     else if (target.dataset.postbackKey !== undefined) draft.parameters[Number(target.dataset.postbackKey)].key = target.value;
     else if (target.dataset.postbackValue !== undefined) draft.parameters[Number(target.dataset.postbackValue)].value = target.value;
     else return false;
+    if (target.dataset.postbackField === "event") {
+      const amountEvents = ["quality_service", "commission_status", "commission_rejected", "commission_clawback"];
+      const hasAmount = draft.parameters.some(parameter => parameter.key === "amount");
+      if (amountEvents.includes(draft.event) && !hasAmount) {
+        draft.parameters.push({ key: "amount", value: "{aff_value}" });
+      } else if (!amountEvents.includes(draft.event) && hasAmount) {
+        draft.parameters = draft.parameters.filter(parameter => parameter.key !== "amount");
+      }
+    }
     const preview = document.getElementById("postback-url-preview");
     if (preview) preview.textContent = template(draft) || t("填写接收地址后显示", "Enter a receiver URL");
     return true;
@@ -530,6 +548,10 @@ AFF.postbacks = (() => {
       return true;
     }
     if (updateDraft(event)) {
+      if (target.dataset.postbackField === "event" && draft.mode === "generated") {
+        showEditor("#postback-event");
+        return true;
+      }
       if (target.dataset.postbackField === "clickUrl" && draft.mode === "generated") {
         const available = tokens(draft).map(value => `{${value}}`);
         document.querySelectorAll("[data-postback-value]").forEach(select => {
@@ -598,12 +620,13 @@ AFF.postbacks = (() => {
     } else if (action === "postback-log-page") {
       store.logPage = Number(target.dataset.page);
       render();
+      AFF.pagination.focusNav("postbacks");
     } else if (action === "postback-reset-filters") {
       store.filters = { config: "", event: "", result: "" };
       store.logPage = 1;
       render();
     } else if (action === "postback-delete" && config) {
-      showModal(`<div class="modal-card postback-confirm"><div class="modal-head"><h2>${t("删除回传配置", "Delete configuration")}</h2><button class="close-button" type="button" data-action="close-modal" aria-label="${t("关闭", "Close")}">×</button></div><p>${t("删除后停止此配置的后续回传，已有投递记录保留。", "Deletion stops future postbacks for this configuration. Existing delivery records are retained.")}</p><strong>${h(config.name)}</strong><div class="drawer-actions"><button class="button secondary" type="button" data-action="close-modal">${t("取消", "Cancel")}</button><button class="button danger" type="button" data-action="postback-confirm-delete" data-config-id="${h(config.id)}">${t("删除", "Delete")}</button></div></div>`, false, t("删除回传配置", "Delete configuration"));
+      showModal(`<div class="modal-card postback-confirm"><div class="modal-head"><h2>${t("删除回传配置", "Delete configuration")}</h2><button class="close-button" type="button" data-action="close-modal" aria-label="${t("关闭", "Close")}">×</button></div><p>${t("删除后停止此配置的后续回传，已有投递记录保留。", "Deletion stops future postbacks for this configuration. Existing delivery records are retained.")}</p><strong>${h(AFF.dataText(config.name))}</strong><div class="drawer-actions"><button class="button secondary" type="button" data-action="close-modal">${t("取消", "Cancel")}</button><button class="button danger" type="button" data-action="postback-confirm-delete" data-config-id="${h(config.id)}">${t("删除", "Delete")}</button></div></div>`, false, t("删除回传配置", "Delete configuration"));
     } else if (action === "postback-confirm-delete" && config) {
       store.configs = store.configs.filter(item => item.id !== configId);
       persist();
@@ -615,4 +638,22 @@ AFF.postbacks = (() => {
   }
 
   return { render: renderPage, renderDashboard, openEditor, handleAction, handleInput: updateDraft, handleChange, validate, template, sample };
+
+  /* Unified pagination channel (D-02): data-aff-page buttons + page-size select. */
+  document.addEventListener("click", event => {
+    const btn = event.target.closest('[data-aff-pagination="postbacks"] [data-aff-page]');
+    if (!btn || btn.disabled) return;
+    state().logPage = Number(btn.dataset.affPage);
+    renderPage();
+    AFF.pagination.focusNav("postbacks");
+  });
+  document.addEventListener("change", event => {
+    if (!event.target.matches('[data-aff-pagination="postbacks"] [data-aff-page-size]')) return;
+    const value = Number(event.target.value);
+    if (![10, 20, 50].includes(value)) return;
+    state().logPageSize = value;
+    state().logPage = 1;
+    renderPage();
+    document.querySelector('[data-aff-pagination="postbacks"] [data-aff-page-size]')?.focus();
+  });
 })();

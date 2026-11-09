@@ -8,14 +8,14 @@
   const tabs = {
     "admin-config": [
       ["overview", "配置总览"], ["price", "价格表"], ["tiers", "资格档与里程碑"],
-      ["hold", "动态Hold"], ["finance", "保证金 / 税费"], ["country", "国家与主体"],
+      ["hold", "动态结算"], ["finance", "保证金 / 税费"], ["country", "国家与主体"],
       ["approval", "审批流"], ["trial", "试算结果"]
     ],
     "admin-risk": [["hard", "硬规则"], ["scored", "评分规则"], ["violation", "违规事件"], ["fraud", "CRM欺诈库"]],
     "admin-review": [["risk", "风险复核"], ["d30", "D+30冻结"], ["appeal", "申诉处理"], ["guarantee", "保证金抵扣"], ["cap", "上限与熔断"]],
     "admin-performance": [["roi", "合作方ROI"], ["quality", "质量看板"], ["guarantee", "保证金覆盖"]]
   };
-  const state = {route: "admin-config", tab: "overview", query: "", detail: null};
+  const state = {route: "admin-config", tab: "overview", query: "", detail: null, filters: {}, draft: {}, filterOpen: false};
   const h = value => String(value ?? "-").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const money = value => new Intl.NumberFormat("en-US", {style: "currency", currency: "USD"}).format(value);
   const currentRoute = () => routes.find(item => item[0] === location.hash.slice(1)) || routes[0];
@@ -36,7 +36,7 @@
 
   function filtered(rows, keys) {
     const query = state.query.trim().toLowerCase();
-    return query ? rows.filter(row => keys.some(key => String(row[key]).toLowerCase().includes(query))) : rows;
+    return rows.filter(row => (!query || keys.some(key => String(row[key] ?? "").toLowerCase().includes(query))) && Object.entries(state.filters).every(([key, value]) => !value || String(row[key] ?? "") === value));
   }
 
   function stats(items) {
@@ -44,10 +44,30 @@
   }
 
   function table(columns, rows, detailKey) {
-    return `<div class="tm-table-wrap"><table><thead><tr>${columns.map(column => `<th>${h(column.label)}</th>`).join("")}</tr></thead><tbody>${
-      rows.length ? rows.map(row => `<tr ${detailKey ? `data-detail="${h(row[detailKey])}"` : ""}>${columns.map(column => `<td class="${column.numeric ? "numeric" : ""}">${column.render ? column.render(row) : h(row[column.key])}</td>`).join("")}</tr>`).join("")
+    const controls = tableFilters(columns, rows);
+    const visible = filtered(rows, columns.map(column => column.key));
+    return `${controls}<div class="tm-table-wrap"><table><thead><tr>${columns.map(column => `<th>${h(column.label)}</th>`).join("")}</tr></thead><tbody>${
+      visible.length ? visible.map(row => `<tr ${detailKey ? `data-detail="${h(row[detailKey])}"` : ""}>${columns.map(column => `<td class="${column.numeric ? "numeric" : ""}">${column.render ? column.render(row) : h(row[column.key])}</td>`).join("")}</tr>`).join("")
         : `<tr><td colspan="${columns.length}" class="tm-empty">暂无数据</td></tr>`
     }</tbody></table></div>`;
+  }
+
+  function resetFilters() {
+    state.query = ""; state.filters = {}; state.draft = {}; state.filterOpen = false;
+  }
+
+  function tableFilters(columns, rows) {
+    const priority = ["status", "band", "country", "tier", "typeName", "fundStatus", "group", "partner", "name", "metric"];
+    const quick = priority.map(key => columns.find(column => column.key === key)).filter(Boolean).slice(0, 4);
+    if (!quick.length && columns.length) quick.push(columns[0]);
+    const select = (column, draft) => {
+      const options = [...new Set(rows.map(row => String(row[column.key] ?? "")))].filter(Boolean);
+      const value = (draft ? state.draft : state.filters)[column.key] || "";
+      return `<label><span>${h(column.label)}</span><select ${draft ? "data-filter-draft" : "data-filter-quick"}="${h(column.key)}" aria-label="${h(column.label)}"><option value="">全部${h(column.label)}</option>${options.map(option => `<option value="${h(option)}" ${option === value ? "selected" : ""}>${h(option)}</option>`).join("")}</select></label>`;
+    };
+    const tags = Object.entries(state.filters).filter(([, value]) => value).map(([key, value]) => `<button type="button" class="dev-chip" data-filter-remove="${h(key)}" aria-label="移除${h(columns.find(column => column.key === key)?.label || key)}">${h(columns.find(column => column.key === key)?.label || key)}：${h(value)}<span aria-hidden="true">×</span></button>`);
+    if (state.query) tags.unshift(`<button type="button" class="dev-chip" data-filter-remove="query" aria-label="移除关键词">关键词：${h(state.query)}<span aria-hidden="true">×</span></button>`);
+    return `<section class="admin-filter-shell" aria-label="列表筛选"><div class="admin-filter-quick">${quick.map(column => select(column, false)).join("")}<button type="button" class="tm-button secondary" data-filter-toggle aria-expanded="${state.filterOpen}" aria-controls="legacy-filter-panel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4h16l-6 7v7l-4 2v-9z"/></svg>筛选器</button></div>${state.filterOpen ? `<form class="admin-filter-panel" id="legacy-filter-panel"><div class="admin-filter-fields"><label><span>关键词</span><input data-filter-keyword value="${h(state.draft.query || "")}" placeholder="搜索当前列表" aria-label="关键词"></label>${columns.map(column => select(column, true)).join("")}</div><div class="admin-filter-actions"><button type="button" class="tm-button secondary" data-filter-reset>重置条件</button><button type="button" class="tm-button secondary" data-filter-cancel>取消</button><button type="submit" class="tm-button primary">应用筛选</button></div></form>` : ""}${tags.length ? `<div class="admin-filter-tags">${tags.join("")}<button type="button" class="tm-button secondary" data-filter-clear>清空筛选</button></div>` : ""}</section>`;
   }
 
   function configPage() {
@@ -55,7 +75,7 @@
       {key: "code", label: "国家代码"}, {key: "country", label: "国家"}, {key: "coefficient", label: "系数"},
       {key: "tier", label: "资格档"}, {key: "price", label: "参考CPA", numeric: true, render: row => money(row.price)},
       {key: "status", label: "状态", render: row => tag(row.status, statusTone(row.status))}
-    ], filtered(AFF_ADMIN.prices, ["code", "country", "status", "tier"]), "code");
+    ], AFF_ADMIN.prices, "code");
     if (state.tab === "tiers") return table([
       {key: "tier", label: "资格档"}, {key: "netDeposit", label: "净入金", numeric: true},
       {key: "volume", label: "交易量", numeric: true}, {key: "days", label: "交易日", numeric: true},
@@ -91,7 +111,7 @@
       {key: "id", label: "配置ID"}, {key: "group", label: "配置组"}, {key: "current", label: "当前值"},
       {key: "draft", label: "草稿值"}, {key: "status", label: "状态", render: row => tag(row.status, statusTone(row.status))},
       {key: "scope", label: "影响范围"}, {key: "effective", label: "生效时间"}, {key: "owners", label: "修改/审批"}
-    ], filtered(AFF_ADMIN.configurations, ["id", "group", "current", "draft", "status", "scope", "owners"]), "id")}`;
+    ], AFF_ADMIN.configurations, "id")}`;
   }
 
   function riskPage() {
@@ -104,7 +124,7 @@
       {key: "band", label: "风险带", render: row => tag(row.band, riskTone(row.band))},
       {key: "action", label: "建议动作"}, {key: "evidence", label: "证据"},
       {key: "status", label: "状态", render: row => tag(row.status, statusTone(row.status))}
-    ], filtered(rows, ["id", "rule", "object", "action", "evidence"]), "id")}`;
+    ], rows, "id")}`;
   }
 
   function reviewPage() {
@@ -116,7 +136,7 @@
       {key: "band", label: "风险带", render: row => tag(row.band, riskTone(row.band))},
       {key: "fundStatus", label: "资金动作", render: row => tag(row.fundStatus, ["冲正", "拒付"].includes(row.fundStatus) ? "danger" : "warning")},
       {key: "reason", label: "原因"}, {key: "status", label: "状态", render: row => tag(row.status, statusTone(row.status))}
-    ], filtered(rows, ["id", "typeName", "object", "reason", "status"]), "id")}`;
+    ], rows, "id")}`;
   }
 
   function performancePage() {
@@ -131,7 +151,7 @@
       {key: "cac", label: "获客成本", numeric: true, render: row => money(row.cac)},
       {key: "reversal", label: "冲正率"}, {key: "guaranteeCoverage", label: "保证金覆盖"},
       {key: "band", label: "风险带", render: row => tag(row.band, riskTone(row.band))}
-    ], filtered(AFF_ADMIN.performance, ["partner", "country", "subId", "band"]), "partner")}`;
+    ], AFF_ADMIN.performance, "partner")}`;
   }
 
   function detail() {
@@ -157,7 +177,7 @@
     const pages = {"admin-config": configPage, "admin-risk": riskPage, "admin-review": reviewPage, "admin-performance": performancePage};
     document.querySelector("#admin-app").innerHTML = `
       <aside class="tm-sidebar"><strong>Affiliate Ops</strong><nav>${routes.map(([id, name]) => `<button class="${id === route ? "active" : ""}" data-route="${id}">${h(name)}</button>`).join("")}</nav><small>Mock Console</small></aside>
-      <main class="tm-main"><header class="tm-topbar"><div><button class="tm-nav-button" data-nav aria-label="打开导航">≡</button><span>${h(group)}</span><strong>${h(label)}</strong></div><div class="tm-top-actions"><input data-search value="${h(state.query)}" placeholder="搜索ID / 对象 / 范围" aria-label="搜索"><span class="tm-delay">延迟 42ms</span><span class="tm-user">OP</span></div></header>
+      <main class="tm-main"><header class="tm-topbar"><div><button class="tm-nav-button" data-nav aria-label="打开导航">≡</button><span>${h(group)}</span><strong>${h(label)}</strong></div><div class="tm-top-actions"><span class="tm-delay">延迟 42ms</span><span class="tm-user">OP</span></div></header>
       <div class="tm-tabs">${tabs[route].map(([key, name]) => `<button class="${key === state.tab ? "active" : ""}" data-tab="${key}">${h(name)}</button>`).join("")}</div>
       <section class="tm-content"><div class="tm-page-head"><div><h1>${h(label)}</h1><p>P0配置、保证金、税费、审批与风控闭环演示；参数均为参考值。</p></div><div class="tm-head-actions"><button class="tm-button secondary" data-action="draft">保存草稿</button><button class="tm-button primary" data-action="approve">提交审批</button></div></div>${pages[route]()}</section></main>
       ${detail()}`;
@@ -169,7 +189,13 @@
     const routeButton = event.target.closest("[data-route]");
     if (routeButton) return navigate(routeButton.dataset.route);
     const tabButton = event.target.closest("[data-tab]");
-    if (tabButton) {state.tab = tabButton.dataset.tab; state.detail = null; return render();}
+    if (tabButton) {state.tab = tabButton.dataset.tab; state.detail = null; resetFilters(); return render();}
+    if (event.target.closest("[data-filter-toggle]")) {state.filterOpen = !state.filterOpen; state.draft = {...state.filters, query: state.query}; return render();}
+    if (event.target.closest("[data-filter-cancel]")) {state.filterOpen = false; state.draft = {}; return render();}
+    if (event.target.closest("[data-filter-reset]")) {state.draft = {}; return render();}
+    if (event.target.closest("[data-filter-clear]")) {resetFilters(); return render();}
+    const remove = event.target.closest("[data-filter-remove]");
+    if (remove) {if (remove.dataset.filterRemove === "query") state.query = ""; else delete state.filters[remove.dataset.filterRemove]; state.filterOpen = false; return render();}
     const row = event.target.closest("[data-detail]");
     if (row) {state.detail = row.dataset.detail; return render();}
     if (event.target.closest("[data-close]")) {state.detail = null; return render();}
@@ -178,10 +204,18 @@
     if (event.target.closest("[data-action='approve']")) return toast("已提交审批，生成版本号后定时生效");
   });
   document.addEventListener("input", event => {
-    if (!event.target.matches("[data-search]")) return;
-    state.query = event.target.value; state.detail = null;
-    const focus = document.querySelector("[data-search]"); render(); focus?.focus();
+    if (event.target.matches("[data-filter-keyword]")) state.draft.query = event.target.value;
   });
-  window.addEventListener("hashchange", () => {state.detail = null; state.tab = tabs[(currentRoute()[0])][0][0]; render();});
+  document.addEventListener("change", event => {
+    if (event.target.matches("[data-filter-draft]")) state.draft[event.target.dataset.filterDraft] = event.target.value;
+    if (event.target.matches("[data-filter-quick]")) {state.filters[event.target.dataset.filterQuick] = event.target.value; state.filterOpen = false; state.detail = null; render();}
+  });
+  document.addEventListener("submit", event => {
+    if (!event.target.matches("#legacy-filter-panel")) return;
+    event.preventDefault();
+    const {query = "", ...filters} = state.draft;
+    state.query = query; state.filters = filters; state.filterOpen = false; state.detail = null; render();
+  });
+  window.addEventListener("hashchange", () => {state.detail = null; state.tab = tabs[(currentRoute()[0])][0][0]; resetFilters(); render();});
   render();
 })();

@@ -44,9 +44,17 @@
   function link(row) {
     const campaign = AFF.campaigns.find(item => [item.code, item.id, item.name].filter(Boolean).includes(row.campaignId));
     if (campaign) return AFF.campaignLinks.url(campaign, { subid: row.id });
-    const url = new URL(AFF.dashboard.link);
-    url.searchParams.set("subid", row.id);
-    return url.href;
+    return AFF.linkBuilder.href(new URL(AFF.deepLinks.promotionPath || "/register", AFF.deepLinks.domain), {
+      ...AFF.linkBuilder.trackingParams(),
+      subid: row.id
+    });
+  }
+
+  function mockLink(row) {
+    const campaign = AFF.campaigns.find(item => [item.code, item.id, item.name].filter(Boolean).includes(row.campaignId));
+    return campaign
+      ? AFF.campaignLinks.mockUrl(campaign, { subid: row.id })
+      : AFF.campaignLinks.mockUrl(AFF.campaigns[0], { subid: row.id, fallback: 1 });
   }
 
   function filteredRows() {
@@ -85,18 +93,8 @@
   }
 
   function pagination(total) {
-    const s = state();
-    const pages = Math.max(1, Math.ceil(total / s.pageSize));
-    s.page = Math.min(pages, Math.max(1, s.page));
-    return `<footer class="table-footer sc-footer">
-      <span>${t("共", "Total")} <b data-sc-total>${total}</b> ${t("条记录", "channels")}</span>
-      <div class="sc-pagination"><label>${t("每页", "Per page")}<select data-sc-page-size aria-label="${t("每页条数", "Rows per page")}">${[10, 20, 50].map(value => `<option ${s.pageSize === value ? "selected" : ""}>${value}</option>`).join("")}</select></label>
-        <div class="pagination"><button type="button" data-sc-page="${s.page - 1}" aria-label="${t("上一页", "Previous page")}" ${s.page === 1 ? "disabled" : ""}>${icon("left")}</button>
-          <span>${s.page} / ${pages}</span>
-          <button type="button" data-sc-page="${s.page + 1}" aria-label="${t("下一页", "Next page")}" ${s.page === pages ? "disabled" : ""}>${icon("right")}</button>
-        </div>
-      </div>
-    </footer>`;
+    // Unified component (D-02): ellipsis pages + data-aff-* channel.
+    return AFF.pagination.component({ page: state().page, pageSize: state().pageSize, total, channel: "subchannels" });
   }
 
   function filters() {
@@ -120,7 +118,8 @@
     const visible = rows.slice((s.page - 1) * s.pageSize, s.page * s.pageSize);
     const stats = id => AFF.reporting.totals(AFF.reporting.rows.filter(row => row.subId === id));
     return `<div class="sc-page">
-      <div class="page-actions page-actions-top page-actions-start"><button class="button primary" type="button" data-sc-action="create">${icon("add")}${t("创建二级渠道", "Create subchannel")}</button></div>
+      ${AFF.partnerClosure.promotionNotice()}
+      <div class="page-actions page-actions-top page-actions-start"><button class="button primary" type="button" data-sc-action="create" ${AFF.partnerClosure.active() ? "disabled" : ""}>${icon("add")}${t("创建二级渠道", "Create subchannel")}</button></div>
       <div class="sc-stats">${[
         [t("二级渠道总数", "Total subchannels"), s.rows.length],
         [t("启用中", "Enabled"), s.rows.filter(row => row.status === "启用").length],
@@ -133,13 +132,13 @@
           <th scope="col" class="numeric">${t("注册数", "Registrations")}</th><th scope="col" class="numeric">${t("有效FTD达成率", "Valid FTD rate")}</th><th scope="col" class="numeric">${t("冲正率", "Reversal rate")}</th>
           <th scope="col">${t("二级链接", "Subchannel link")}</th><th scope="col">${t("操作", "Actions")}</th>
         </tr></thead><tbody>${visible.length ? visible.map(row => `<tr>
-          <td><strong>${h(row.id)}</strong><small>${h(row.name || "")}</small></td><td>${status(row)}</td><td>${h(row.updatedAt)}</td>
+          <td><strong>${h(row.id)}</strong><small>${h(AFF.dataText(row.name || ""))}</small></td><td>${status(row)}</td><td>${h(row.updatedAt)}</td>
           <td class="numeric">${format(stats(row.id).registrations)}</td>
           <td class="numeric">${format(stats(row.id).effectiveRate, "rate")}</td>
           <td class="numeric">${format(stats(row.id).expected ? stats(row.id).reversed / stats(row.id).expected : null, "rate")}</td>
-          <td><div class="sc-link"><a href="${h(link(row))}" target="_blank" rel="noopener noreferrer" title="${h(link(row))}">${h(link(row))}</a>
-            <button class="sc-copy" type="button" data-copy="${h(link(row))}" title="${t("复制链接", "Copy link")}" aria-label="${t("复制链接", "Copy link")}">${icon("copy")}</button></div></td>
-          <td><div class="sc-row-actions"><button class="button secondary small" type="button" data-sc-detail="${h(row.id)}">${t("详情", "Details")}</button>${row.statusSource === "platform" ? `<button class="button secondary small" type="button" disabled title="${t("平台限制不可自行解除", "Platform blocks cannot be self-lifted")}">${t("不可解除", "Locked")}</button>` : `<button class="button secondary small" type="button" data-sc-toggle="${h(row.id)}">${row.status === "启用" ? t("封禁", "Block") : t("启用", "Enable")}</button>`}</div></td>
+          <td>${AFF.partnerClosure.active() ? AFF.partnerClosure.campaignLinkCell(link(row), mockLink(row), icon("copy")) : `<div class="sc-link"><a href="${h(mockLink(row))}" target="_blank" rel="noopener noreferrer" title="${h(link(row))}">${h(link(row))}</a>
+            <button class="sc-copy" type="button" data-copy="${h(link(row))}" title="${t("复制链接", "Copy link")}" aria-label="${t("复制链接", "Copy link")}">${icon("copy")}</button></div>`}</td>
+          <td><div class="sc-row-actions"><button class="button secondary small" type="button" data-sc-detail="${h(row.id)}">${t("详情", "Details")}</button>${row.statusSource === "platform" ? `<button class="button secondary small" type="button" disabled title="${t("平台限制不可自行解除", "Platform blocks cannot be self-lifted")}">${t("不可解除", "Locked")}</button>` : `<button class="button secondary small" type="button" data-sc-toggle="${h(row.id)}" ${AFF.partnerClosure.active() ? "disabled" : ""}>${row.status === "启用" ? t("封禁", "Block") : t("启用", "Enable")}</button>`}</div></td>
         </tr>`).join("") : `<tr><td colspan="8" class="sc-empty">${t("暂无二级渠道，请调整筛选或创建渠道。", "No subchannels. Adjust filters or create a channel.")}</td></tr>`}</tbody></table></div>
         ${footer}
       </section>
@@ -156,7 +155,7 @@
         <form data-sc-create-form novalidate><div class="sc-modal-body">
           <label><span>${t("渠道名称", "Channel name")} <b>*</b></span><input data-sc-create="name" maxlength="80" required value="${h(draft.name)}" placeholder="${t("输入渠道名称", "Enter a channel name")}"></label>
           <label><span>Sub ID <b>*</b></span><input data-sc-create="id" maxlength="64" required value="${h(draft.id)}" placeholder="${t("如 newsletter_01", "e.g. newsletter_01")}" aria-describedby="sc-id-hint sc-create-error"><small id="sc-id-hint">${t("1–64位字母、数字、下划线或连字符，以字母或数字开头。", "1–64 letters, digits, underscores or hyphens; start with a letter or digit.")}</small></label>
-          <label><span>${t("所属活动（可选）", "Campaign (optional)")}</span><select data-sc-create="campaignId"><option value="">${t("不关联活动", "No campaign")}</option>${AFF.campaigns.map(item => `<option value="${h(item.id || item.name)}" ${draft.campaignId === (item.id || item.name) ? "selected" : ""}>${h(item.name)}</option>`).join("")}</select></label>
+          <label><span>${t("所属活动（可选）", "Campaign (optional)")}</span><select data-sc-create="campaignId"><option value="">${t("不关联活动", "No campaign")}</option>${AFF.campaigns.map(item => `<option value="${h(item.id || item.name)}" ${draft.campaignId === (item.id || item.name) ? "selected" : ""}>${h(AFF.dataText(item.name))}</option>`).join("")}</select></label>
           <p class="sc-validation" id="sc-create-error" role="alert">${h(s.error || "")}</p>
         </div><footer><button class="button secondary" type="button" data-sc-action="close">${t("取消", "Cancel")}</button><button class="button primary" type="submit">${t("创建", "Create")}</button></footer></form>
       </section>
@@ -176,12 +175,12 @@
       ["expected", t("预计佣金", "Projected commission"), "money"],
       ["approved", t("结算净额", "Settlement net"), "money"]
     ];
-    return `<div class="overlay sc-overlay" data-sc-action="close"></div>
-      <aside class="sc-drawer" role="dialog" aria-modal="true" aria-labelledby="sc-detail-title">
-        <header><div><h2 id="sc-detail-title">${h(row.name || row.id)}</h2><p>Sub ID: ${h(row.id)}</p></div><button class="sc-icon-button" type="button" data-sc-action="close" aria-label="${t("关闭", "Close")}">${icon("close")}</button></header>
+    return `<div class="aff-drawer-overlay" data-sc-action="close"></div>
+      <aside class="aff-drawer sc-drawer" role="dialog" aria-modal="true" aria-labelledby="sc-detail-title">
+        <header><div><h2 id="sc-detail-title">${h(AFF.dataText(row.name || row.id))}</h2><p>Sub ID: ${h(row.id)}</p></div><button class="sc-icon-button" type="button" data-sc-action="close" aria-label="${t("关闭", "Close")}">${icon("close")}</button></header>
         <div class="sc-drawer-body">
           <dl class="sc-detail-meta">${field(t("链接状态", "Link status"), status(row))}${field(t("更新时间", "Updated at"), h(row.updatedAt))}</dl>
-          <div class="sc-detail-link"><a href="${h(link(row))}" target="_blank" rel="noopener noreferrer">${h(link(row))}</a><button class="sc-copy" type="button" data-copy="${h(link(row))}" title="${t("复制链接", "Copy link")}" aria-label="${t("复制链接", "Copy link")}">${icon("copy")}</button></div>
+          <div class="sc-detail-link"><a href="${h(mockLink(row))}" target="_blank" rel="noopener noreferrer" title="${h(link(row))}">${h(link(row))}</a><button class="sc-copy" type="button" data-copy="${h(link(row))}" title="${t("复制链接", "Copy link")}" aria-label="${t("复制链接", "Copy link")}">${icon("copy")}</button></div>
           <div class="sc-detail-section-head"><h3>${t("渠道表现", "Channel performance")}</h3><span>${h(AFF.reporting.from)} — ${h(AFF.reporting.now)}</span></div>
           <dl class="sc-detail-metrics">${metrics.map(([key, label, type]) => field(label, format(totals[key], type))).join("")}</dl>
           <h3>${t("转化率", "Conversion rates")}</h3>
@@ -193,7 +192,7 @@
             <option value="platform" ${s.breakdown === "platform" ? "selected" : ""}>${t("按平台", "By platform")}</option><option value="country" ${s.breakdown === "country" ? "selected" : ""}>${t("按国家/地区", "By country / region")}</option>
           </select></div>
           <div class="table-wrap"><table class="sc-breakdown-table"><thead><tr><th>${s.breakdown === "platform" ? t("平台", "Platform") : t("国家/地区", "Country / region")}</th><th class="numeric">${t("点击", "Clicks")}</th><th class="numeric">${t("注册", "Registrations")}</th><th class="numeric">FTD</th><th class="numeric">${t("有效 FTD", "Valid FTD")}</th><th class="numeric">${t("预计佣金", "Projected commission")}</th></tr></thead>
-            <tbody>${groups.length ? groups.map(group => `<tr><td>${h(group.values[0])}</td>${["clicks", "registrations", "ftd", "effective", "expected"].map(key => `<td class="numeric">${format(group.metrics[key], key === "expected" ? "money" : "count")}</td>`).join("")}</tr>`).join("") : `<tr><td colspan="6" class="sc-empty">${t("暂无推广数据", "No promotion data yet")}</td></tr>`}</tbody>
+            <tbody>${groups.length ? groups.map(group => `<tr><td>${h(AFF.dataText(group.values[0]))}</td>${["clicks", "registrations", "ftd", "effective", "expected"].map(key => `<td class="numeric">${format(group.metrics[key], key === "expected" ? "money" : "count")}</td>`).join("")}</tr>`).join("") : `<tr><td colspan="6" class="sc-empty">${t("暂无推广数据", "No promotion data yet")}</td></tr>`}</tbody>
           </table></div>
         </div><footer><button class="button secondary" type="button" data-sc-action="close">${t("关闭", "Close")}</button></footer>
       </aside>`;
@@ -206,7 +205,7 @@
 
   function handleClick(event) {
     if (AFF.state?.route !== "subchannels") return false;
-    const target = event.target.closest("[data-sc-action], [data-sc-detail], [data-sc-toggle], [data-sc-page], [data-sc-sort]");
+    const target = event.target.closest("[data-sc-action], [data-sc-detail], [data-sc-toggle], [data-sc-page], [data-sc-sort], [data-aff-page]");
     if (!target || target.disabled) return false;
     const s = state();
     if (target.dataset.scAction === "close") { close(); return true; }
@@ -242,9 +241,9 @@
       s.direction = s.sort === key && s.direction === "asc" ? "desc" : "asc";
       s.sort = key; s.page = 1; rerender(); return true;
     }
-    if (target.dataset.scPage) {
-      s.page = Math.max(1, Number(target.dataset.scPage) || 1);
-      rerender(); return true;
+    if (target.dataset.scPage || target.dataset.affPage) {
+      s.page = Math.max(1, Number(target.dataset.scPage || target.dataset.affPage) || 1);
+      rerender(); AFF.pagination.focusNav("subchannels"); return true;
     }
     return false;
   }
@@ -261,10 +260,10 @@
     if (handleInput(event)) return true;
     if (AFF.state?.route !== "subchannels") return false;
     const target = event.target;
-    if (target.matches("[data-sc-page-size]")) {
+    if (target.matches("[data-sc-page-size], [data-aff-page-size]")) {
       const value = Number(target.value);
       if (![10, 20, 50].includes(value)) return false;
-      state().pageSize = value; state().page = 1; rerender("[data-sc-page-size]"); return true;
+      state().pageSize = value; state().page = 1; rerender("[data-aff-page-size]"); return true;
     }
     if (target.matches("[data-sc-breakdown]") && ["platform", "country"].includes(target.value)) {
       state().breakdown = target.value; rerender("[data-sc-breakdown]"); return true;

@@ -72,6 +72,14 @@ async function main() {
         await openClient(page);
         const trigger = page.locator(triggerSelector);
         await trigger.scrollIntoViewIfNeeded();
+        await page.evaluate(() => {
+          const trigger = document.querySelector('[data-rp-action="hold-help"]');
+          const body = document.querySelector(".report-drawer-body");
+          if (trigger && body) {
+            const top = trigger.getBoundingClientRect().top - body.getBoundingClientRect().top + body.scrollTop - 80;
+            body.scrollTo({ top, behavior: "instant" });
+          }
+        });
         await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
         await trigger.hover();
         const popup = page.locator(popupSelector);

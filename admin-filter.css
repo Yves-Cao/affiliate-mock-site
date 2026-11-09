@@ -1,0 +1,180 @@
+/* Shared list filters: immediate selects, applied tags, staged full conditions. */
+body.admin-tables .admin-filter-shell {
+  display: block;
+  min-width: 0;
+  margin: 16px 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.admin-filter-quick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  min-width: 0;
+}
+
+.admin-filter-quick > label {
+  display: grid;
+  flex: 1 1 150px;
+  gap: 6px;
+  min-width: 0;
+  max-width: 240px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.admin-filter-quick select,
+.admin-filter-fields :is(select, input) {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+}
+
+.admin-filter-quick > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  gap: 6px;
+  min-height: 34px;
+  margin-left: auto;
+}
+
+.admin-filter-quick button svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+
+.admin-filter-count {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+body.admin-tables .admin-filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.admin-filter-tag,
+.admin-filter-tags > .dev-chip,
+.admin-filter-tags > .cs-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  min-height: 28px;
+  min-width: 0;
+  max-width: 100%;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-soft);
+  color: var(--accent-text);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.admin-filter-tag > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-filter-tag > button,
+.admin-filter-clear {
+  flex-shrink: 0;
+  min-height: 24px;
+  border: 0;
+  background: transparent;
+  color: var(--accent-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.admin-filter-tag > button {
+  min-width: 24px;
+  padding: 0 4px;
+}
+
+body.admin-tables .admin-filter-panel {
+  display: block;
+  min-width: 0;
+  margin-top: 14px;
+  padding: 16px 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+}
+
+.admin-filter-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-filter-fields > label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.admin-filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.admin-filter-error {
+  color: var(--error-text);
+  font-size: 12px;
+}
+
+@media (max-width: 900px) {
+  .admin-filter-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-filter-quick > label {
+    flex-basis: calc(50% - 6px);
+    max-width: none;
+  }
+
+  .admin-filter-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-filter-quick > button,
+  .admin-filter-quick select {
+    min-height: 44px;
+  }
+}

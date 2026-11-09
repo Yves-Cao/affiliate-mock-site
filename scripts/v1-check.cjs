@@ -58,7 +58,8 @@ async function shot(page, name) {
 
     const routes = [
       "dash", "perf", "clients", "summary", "assets", "promo", "subchannels", "deep",
-      "tracker", "lookup", "pay", "wd", "guarantee", "appeals", "messages", "apply", "onboarding"
+      "tracker", "lookup", "pay", "statements", "wd", "guarantee", "account", "support",
+      "appeals", "messages", "apply", "onboarding"
     ];
     for (const route of routes) {
       await desktop.page.goto(`${baseUrl}/#${route}`, { waitUntil: "domcontentloaded" });
@@ -88,12 +89,13 @@ async function shot(page, name) {
     await desktop.page.goto(`${baseUrl}/#/pay`, { waitUntil: "domcontentloaded" });
     await desktop.page.waitForSelector(".earn-table");
     const payText = await desktop.page.locator("#main").innerText();
-    for (const text of ["FTD + 有效FTD", "质量服务", "佣金案件"]) {
+    for (const text of ["有效FTD", "质量服务", "佣金案件"]) {
       if (!payText.includes(text)) throw new Error(`pay missing ${text}`);
     }
 
     await desktop.page.goto(`${baseUrl}/#/wd`, { waitUntil: "domcontentloaded" });
-    await desktop.page.waitForSelector(".wd-kyb-checklist");
+    await desktop.page.click("[data-withdraw-method-choice='wire']");
+    await desktop.page.waitForSelector(".wd-kyc-inline");
     if (!(await desktop.page.locator("[data-withdraw-action='complete-kyc']").isEnabled())) throw new Error("KYC/KYB simulation unavailable");
     await desktop.page.click("[data-withdraw-action='complete-kyc']");
     await desktop.page.click("[data-withdraw-tab='records']");
@@ -112,7 +114,7 @@ async function shot(page, name) {
       AFF.state.wdTab = "withdraw";
       render();
     });
-    await desktop.page.waitForSelector(".wd-kyb-checklist");
+    await desktop.page.waitForSelector(".wd-kyc-inline");
     await shot(desktop.page, "user-wd-kyb-1440");
 
     for (const route of ["admin-config", "admin-risk", "admin-review", "admin-performance"]) {
@@ -142,7 +144,7 @@ async function shot(page, name) {
 
     const issues = [...desktop.issues, ...mobile.issues];
     if (issues.length) throw new Error(`browser issues:\n${issues.join("\n")}`);
-    console.log("V1 browser checks passed: 17 user routes, 4 admin routes, three-layer states, two commission cases, KYC/KYB gate, desktop/mobile overflow.");
+    console.log("V1 browser checks passed: 20 user routes, 4 admin routes, three-layer states, two commission cases, KYC/KYB gate, desktop/mobile overflow.");
   } finally {
     await browser.close();
   }

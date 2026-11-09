@@ -14,8 +14,9 @@ const types = {
 const server = http.createServer(async (request, response) => {
   try {
     const pathname = decodeURIComponent(new URL(request.url, `http://127.0.0.1:${port}`).pathname);
-    const file = path.join(root, pathname === "/" ? "index.html" : pathname);
+    let file = path.join(root, pathname === "/" ? "index.html" : pathname);
     if (!file.startsWith(root)) throw Object.assign(new Error("Forbidden"), { statusCode: 403 });
+    if ((await fs.stat(file).catch(() => null))?.isDirectory()) file = path.join(file, "index.html");
     const body = await fs.readFile(file);
     response.writeHead(200, {
       "Content-Type": types[path.extname(file)] || "application/octet-stream",

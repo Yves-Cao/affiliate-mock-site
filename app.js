@@ -17,7 +17,7 @@ const defaultState = {
   kycDismissed: false,
   dashboardMode: "day",
   dashboardPeriod: "past30",
-  dashboardLinkPage: "注册页",
+  dashboardLinkPage: "官方注册页",
   dashboardLinkLanguage: "简体中文",
   dashboardLinkPagePickerOpen: false,
   dashboardLinkLanguagePickerOpen: false,
@@ -55,10 +55,13 @@ const defaultState = {
   },
   promoTab: "campaign",
   deep: {
-    desktop: { page: "注册页", language: "简体中文" },
-    mobile: { system: "iOS (App Store)", page: "注册页", language: "简体中文" }
+    desktop: { assetId: "OFF-REGISTER", language: "简体中文" },
+    mobile: { system: "iOS (App Store)", assetId: "OFF-REGISTER", language: "简体中文" }
   },
-  lookup: { input: "", result: null, queries: 0 },
+  lookup: {
+    input: "", result: null, queries: 0, windowStartedAt: 0,
+    cooldownUntil: 0, blocked: false, lastTraceId: ""
+  },
   assetsAccepted: false,
   assets: {
     type: "全部",
@@ -70,10 +73,22 @@ const defaultState = {
   programAssetSlide: 0,
   onboarding: {
     name: "",
+    detailsOpen: false,
     step: 1,
     maxStep: 1,
     emailVerified: false,
-    riskCheckDone: false,
+    kycCompleted: false,
+    kycRedirected: false,
+    trafficProfile: {
+      primaryCountries: "",
+      websites: "",
+      promotionMethods: [],
+      expectedTraffic: "",
+      historicalPlatforms: "",
+      otherExplanation: "",
+      status: "not_submitted",
+      version: ""
+    },
     agreements: [false, false, false],
     submitted: false,
     agreementModal: 0,
@@ -112,12 +127,16 @@ const englishLabels = {
   "素材库": "Assets",
   "收益与提现": "Earnings",
   "收益数据": "Earnings data",
+  "结算单": "Statements",
   "客户归属查询": "Attribution",
   "归属查询": "Attribution lookup",
   "提现": "Withdrawal",
   "保证金": "Guarantee",
+  "个人中心": "Personal center",
+  "帮助与工单": "Help & tickets",
   "申诉中心": "Appeals",
   "消息中心": "Messages",
+  "导出中心": "Export center",
   "合作者计划": "Partner Program",
   "入驻申请": "Onboarding Application"
 };
@@ -180,7 +199,13 @@ function accountTimezoneLabel(timezone) {
 
 function accountTimezoneOffset(timezone) {
   const match = accountTimezoneLabel(timezone).match(/GMT([+-]\d{2}:\d{2})/);
-  return match ? `UTC${match[1]}` : "UTC";
+  if (!match) return "UTC";
+  const [, rawOffset] = match;
+  const [hours, minutes] = rawOffset.slice(1).split(":");
+  const sign = rawOffset[0];
+  return minutes === "00"
+    ? `UTC${sign}${Number(hours)}`
+    : `UTC${sign}${Number(hours)}:${minutes}`;
 }
 
 function renderAccountTimezoneOptions(query = "") {
@@ -234,6 +259,7 @@ function initializeElements() {
     "kyc-banner", "dismiss-kyc", "main", "modal-root", "toast", "scenario-select",
     "account-menu", "avatar-button", "account-dropdown", "wallet-menu", "wallet-toggle",
     "wallet-popover", "wallet-balance", "wallet-popover-balance", "wallet-total-revenue", "message-count",
+  "wallet-processing", "wallet-held", "wallet-guarantee", "wallet-paid", "wallet-frozen", "wallet-main-reason",
     "server-time", "server-time-zone", "local-time", "local-time-zone"
   ]) elements[id] = document.getElementById(id);
 }
@@ -285,6 +311,8 @@ function currentState() {
     merged.programSupportQuery = "";
     merged.dashboardLinkPage = savedState.dashboardLinkPage || defaultState.dashboardLinkPage;
     merged.dashboardLinkLanguage = savedState.dashboardLinkLanguage || defaultState.dashboardLinkLanguage;
+    if (!AFF.deepLinks.pages.includes(merged.dashboardLinkPage)) merged.dashboardLinkPage = defaultState.dashboardLinkPage;
+    if (!AFF.deepLinks.languages.includes(merged.dashboardLinkLanguage)) merged.dashboardLinkLanguage = defaultState.dashboardLinkLanguage;
     merged.dashboardLinkPagePickerOpen = false;
     merged.dashboardLinkLanguagePickerOpen = false;
     merged.dashboardLinkPageQuery = "";
@@ -299,6 +327,16 @@ function currentState() {
     merged.clientFilters = { ...structuredClone(defaultState.clientFilters), ...(savedState.clientFilters || {}) };
     merged.lookup = { ...structuredClone(defaultState.lookup), ...(savedState.lookup || {}) };
     merged.onboarding = { ...structuredClone(defaultState.onboarding), ...(savedState.onboarding || {}) };
+    merged.onboarding.detailsOpen = Boolean(savedState.onboarding?.detailsOpen);
+    merged.onboarding.kycCompleted = Boolean(savedState.onboarding?.kycCompleted);
+    merged.onboarding.kycRedirected = Boolean(savedState.onboarding?.kycRedirected);
+    merged.onboarding.trafficProfile = {
+      ...structuredClone(defaultState.onboarding.trafficProfile),
+      ...(savedState.onboarding?.trafficProfile || {})
+    };
+    merged.onboarding.trafficProfile.promotionMethods = Array.isArray(savedState.onboarding?.trafficProfile?.promotionMethods)
+      ? savedState.onboarding.trafficProfile.promotionMethods.map(String)
+      : [];
     merged.onboarding.step = Math.min(5, Math.max(1, Number(merged.onboarding.step) || 1));
     merged.onboarding.maxStep = Math.min(5, Math.max(1, Number(merged.onboarding.maxStep) || 1));
     merged.onboarding.agreements = Array.isArray(savedState.onboarding?.agreements) && savedState.onboarding.agreements.length === 3
@@ -317,6 +355,11 @@ function currentState() {
       desktop: { ...structuredClone(defaultState.deep.desktop), ...(savedState.deep?.desktop || {}) },
       mobile: { ...structuredClone(defaultState.deep.mobile), ...(savedState.deep?.mobile || {}) }
     };
+    for (const scope of ["desktop", "mobile"]) {
+      if (!AFF.deepLinks.assets.some(item => item.id === merged.deep[scope].assetId)) {
+        merged.deep[scope].assetId = defaultState.deep[scope].assetId;
+      }
+    }
     return merged;
   } catch {
     return structuredClone(defaultState);
@@ -335,6 +378,15 @@ if (Array.isArray(AFF.state.createdCampaigns)) {
   });
 }
 
+function keepFixedCampaignFirst() {
+  const fixed = AFF.campaigns.find(item => item.fixed || item.code === "DIRECT");
+  if (!fixed) return;
+  const rest = AFF.campaigns.filter(item => item !== fixed);
+  AFF.campaigns.splice(0, AFF.campaigns.length, fixed, ...rest);
+}
+
+keepFixedCampaignFirst();
+
 function persist() {
   sessionStorage.setItem("affiliate-user-mock", JSON.stringify(AFF.state));
 }
@@ -349,7 +401,7 @@ function routeLabel(route) {
 }
 
 function renderNav() {
-  const groups = [...new Set(AFF.routes.filter(route => !["apply", "onboarding"].includes(route.id)).map(route => route.group))];
+  const groups = [...new Set(AFF.routes.filter(route => !route.hidden && !["apply", "onboarding"].includes(route.id)).map(route => route.group))];
   const groupIcons = {
     "仪表盘": "dashboard",
     "数据总览": "overview",
@@ -358,9 +410,9 @@ function renderNav() {
     "服务中心": "clients"
   };
   elements.nav.innerHTML = groups.map(group => {
-    const routes = AFF.routes.filter(route => route.id !== "apply" && route.group === group);
+    const routes = AFF.routes.filter(route => !route.hidden && !["apply", "onboarding"].includes(route.id) && route.group === group);
     const groupLabel = AFF.state.language === "en" ? (englishGroupLabels[group] || group) : group;
-    const open = AFF.state.navGroups.includes(group);
+    const open = AFF.state.navGroups.includes(group) || (AFF.state.route === "account" && group === "服务中心");
     if (group === "仪表盘") {
       return `
         <section class="nav-section nav-direct">
@@ -412,9 +464,12 @@ function navIcon(name) {
     tracker: '<path d="M4 7h16v13H4z"/><path d="M8 7V5h8v2"/><path d="M8 11h8M8 15h5"/>',
     assets: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m4 17 5-5 3 3 2-2 6 6"/>',
     pay: '<path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6.5A2.5 2.5 0 0 1 4 16.5z"/><path d="M4 8h15"/><path d="M8 12h4"/>',
+    statements: '<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 12h7M9 16h5"/>',
     lookup: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/><path d="M8 10.5h5M10.5 8v5"/>',
     wd: '<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>',
     guarantee: '<path d="M12 3l7 3v6c0 4.2-2.8 7.6-7 9-4.2-1.4-7-4.8-7-9V6z"/><path d="M9.5 12l1.8 1.8L15 10"/>',
+    account: '<circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/><path d="M12 15v6"/><path d="M9 18h6"/>',
+    support: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.1 1-1.1 1.8"/><path d="M12 17h.01"/>',
     appeals: '<path d="M12 4v10"/><path d="M7.5 9.5 12 14l4.5-4.5"/><path d="M5 19h14"/>',
     messages: '<path d="M4 6h16v10H8l-4 4z"/><path d="M8 10h8M8 13h5"/>',
     apply: '<path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="m19 16 .7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7z"/>'
@@ -436,18 +491,28 @@ function render() {
   const route = AFF.routes.some(item => item.id === AFF.state.route) ? AFF.state.route : "dash";
   AFF.state.route = route;
   renderNav();
-  const financeSummary = AFF.finance.summary();
   const reportMoney = value => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
   elements["wallet-balance"].textContent = reportMoney(AFF.finance.balance() / 100);
   elements["wallet-popover-balance"].textContent = reportMoney(AFF.finance.balance() / 100);
-  elements["wallet-total-revenue"].textContent = reportMoney(financeSummary.available + financeSummary.paid + financeSummary.guarantee);
-  elements["message-count"].textContent = AFF.finance.messages.filter(message => message.status === "unread").length;
+  const walletAvailability = AFF.fundsAvailability.walletSummary();
+  const financeSummary = AFF.finance.summary();
+  elements["wallet-total-revenue"].textContent = reportMoney(financeSummary.totalRevenue);
+  elements["wallet-processing"].textContent = reportMoney(financeSummary.held);
+  if (elements["wallet-main-reason"]) elements["wallet-main-reason"].textContent = walletAvailability.mainReason;
+  if (elements["wallet-held"]) elements["wallet-held"].textContent = reportMoney(financeSummary.held);
+  if (elements["wallet-guarantee"]) elements["wallet-guarantee"].textContent = reportMoney(financeSummary.guarantee);
+  if (elements["wallet-paid"]) elements["wallet-paid"].textContent = reportMoney(financeSummary.paid + financeSummary.paidGuarantee);
+  if (elements["wallet-frozen"]) elements["wallet-frozen"].textContent = reportMoney(financeSummary.frozen);
+  elements["message-count"].textContent = (AFF.messages?.allMessages() || AFF.finance.messages)
+    .filter(message => message.status === "unread").length;
   elements["avatar-button"].textContent = accountInitial();
-  elements["avatar-button"].setAttribute("aria-label", `${AFF.state.account.displayName} 账户菜单`);
+  elements["avatar-button"].setAttribute("aria-label", `${AFF.state.account.displayName} 个人中心菜单`);
   elements["scenario-select"].value = AFF.state.scenario;
-  elements.main.innerHTML = AFF.state.scenario === "normal-flow"
+  elements.main.innerHTML = ["normal-flow", "closure-flow"].includes(AFF.state.scenario)
     ? AFF.pages[route]()
     : statePage(route);
+  AFF.localizeTextNodes(elements.main);
+  syncTopbarLanguage();
   elements["kyc-banner"].classList.toggle(
     "hidden",
     AFF.state.kycDismissed || route === "onboarding" || route === "wd" || AFF.state.programCompleted
@@ -473,7 +538,43 @@ function syncSidebarToggle() {
   elements["sidebar-toggle"].setAttribute("aria-label", sidebarExpanded ? "收起侧栏" : "展开侧栏");
 }
 
+function syncTopbarLanguage() {
+  const english = AFF.state.language === "en";
+  document.querySelector(".demo-note-full").textContent = english
+    ? "Demo environment · synthetic data · reference values"
+    : "演示环境 · 虚构数据 · 参数为参考值";
+  document.querySelector(".demo-note-compact").textContent = english ? "Demo data" : "演示数据";
+  const clockLabels = document.querySelectorAll(".topbar-clock > div > span");
+  if (clockLabels[0]) clockLabels[0].textContent = english ? "Server time" : "服务器时间";
+  if (clockLabels[1]) clockLabels[1].textContent = english ? "Local time" : "本地时间";
+  document.querySelector("#wallet-toggle > span").textContent = english ? "Available balance" : "可提现余额";
+  const accountLabels = document.querySelectorAll("#account-dropdown .account-menu-item span:last-child");
+  if (accountLabels[0]) accountLabels[0].textContent = english ? "Personal center" : "个人中心";
+  if (accountLabels[1]) accountLabels[1].textContent = english ? "Sign out" : "退出登录";
+  elements["kyc-banner"].querySelector("span").textContent = english
+    ? "Your partner profile is incomplete; some features may be limited."
+    : "您的账户资料未完善，部分功能可能受限。";
+  elements["dismiss-kyc"].textContent = english ? "Dismiss" : "知道了";
+  elements["kyc-banner"].querySelector("button.button.primary").textContent = english ? "Complete now" : "去完成";
+}
+
 function statePage(route) {
+  if (AFF.state.scenario === "loading-flow") {
+    return `
+      <div class="loading-page" role="status" aria-busy="true">
+        <p>正在加载数据，请稍候。</p>
+        <div class="skeleton-cards">
+          ${Array.from({ length: 4 }, () => '<article class="card skeleton-card"><i></i><b></b><small></small></article>').join("")}
+        </div>
+        <section class="card skeleton-table-card">
+          <header><i></i><b></b></header>
+          <div class="skeleton-table">
+            <div>${Array.from({ length: 6 }, () => "<span></span>").join("")}</div>
+            ${Array.from({ length: 6 }, () => `<div>${Array.from({ length: 6 }, () => "<span></span>").join("")}</div>`).join("")}
+          </div>
+        </section>
+      </div>`;
+  }
   if (AFF.state.scenario === "api-error") {
     return `
       <section class="card state-panel">
@@ -493,6 +594,10 @@ function statePage(route) {
 
 function navigate(route) {
   closeOnboardingPicker();
+  if (route === "statements") {
+    AFF.state.wdTab = "records";
+    route = "wd";
+  }
   if (!AFF.routes.some(item => item.id === route)) route = "dash";
   setWalletOpen(false);
   AFF.state.route = route;
@@ -514,6 +619,9 @@ function setAccountMenu(open) {
   clearTimeout(accountMenuCloseTimer);
   elements["account-menu"].classList.toggle("open", open);
   elements["avatar-button"].setAttribute("aria-expanded", String(open));
+  // D-03: sync the unified runtime's bookkeeping (see setWalletOpen note).
+  if (open) AFF.popover?.state && (AFF.popover.state.open = "account");
+  else if (AFF.popover?.state?.open === "account") AFF.popover.state.open = null;
 }
 
 function openAccountMenu(focusFirstItem = false) {
@@ -574,6 +682,7 @@ async function copyText(text, target) {
 function showModal(html, full = false, title = "详情") {
   elements["modal-root"].className = `modal-layer ${full ? "full" : ""}`;
   elements["modal-root"].innerHTML = html;
+  AFF.localizeTextNodes(elements["modal-root"]);
   elements["modal-root"].setAttribute("aria-label", title);
   document.addEventListener("keydown", escapeModal);
 }
@@ -581,12 +690,13 @@ function showModal(html, full = false, title = "详情") {
 function showScreenModal(html, title) {
   elements["modal-root"].className = "modal-layer screen";
   elements["modal-root"].innerHTML = html;
+  AFF.localizeTextNodes(elements["modal-root"]);
   elements["modal-root"].setAttribute("aria-label", title);
   document.addEventListener("keydown", escapeModal);
 }
 
 function closeModal() {
-  if (elements["modal-root"].getAttribute("aria-label") === "账户管理") {
+  if (elements["modal-root"].getAttribute("aria-label") === "个人中心") {
     accountDraft = null;
     accountTimezonePickerOpen = false;
     accountTimezoneQuery = "";
@@ -598,7 +708,14 @@ function closeModal() {
 }
 
 function escapeModal(event) {
-  if (event.key === "Escape") closeModal();
+  if (event.key !== "Escape") return;
+  // D-03: the in-modal timezone picker closes first; the modal survives.
+  if (accountTimezonePickerOpen) {
+    setAccountTimezonePicker(false);
+    document.querySelector("[data-action='toggle-account-timezone']")?.focus();
+    return;
+  }
+  closeModal();
 }
 
 function modalShell(title, body, actions = "") {
@@ -625,9 +742,9 @@ function openAccountModal() {
       <header class="account-modal-head">
         <div>
           <p>Affiliate CPA</p>
-          <h2>账户管理</h2>
+          <h2>个人中心</h2>
         </div>
-        <button class="close-button" type="button" data-action="close-account-modal" aria-label="关闭账户管理">×</button>
+        <button class="close-button" type="button" data-action="close-account-modal" aria-label="关闭个人中心">×</button>
       </header>
       <div class="account-modal-body">
         <div class="account-modal-content">
@@ -647,7 +764,7 @@ function openAccountModal() {
           <button class="button primary" type="button" data-action="save-account">保存修改</button>
         </div>
       </footer>
-    </div>`, "账户管理");
+    </div>`, "个人中心");
   elements["modal-root"].querySelector(".close-button").focus();
 }
 
@@ -738,11 +855,12 @@ function openCampaignModal() {
 function openCampaignStatus(code) {
   const campaign = AFF.campaigns.find(item => item.code === code);
   if (!campaign) return;
+  if (campaign.fixed || campaign.code === "DIRECT") return showToast("直链推广为固定活动，不能归档");
   const t = (zh, en) => AFF.state.language === "en" ? en : zh;
   const archived = AFF.campaignLinks.status(campaign) === "archived";
   const next = archived ? "active" : "archived";
   showModal(modalShell(t(archived ? "设为活跃" : "归档活动", archived ? "Activate campaign" : "Archive campaign"), `
-    <p>${AFF.helpers.h(campaign.name)} · ${AFF.helpers.h(campaign.code)}</p>
+    <p>${AFF.helpers.h(AFF.dataText(campaign.name))} · ${AFF.helpers.h(campaign.code)}</p>
     <p>${archived
       ? t("恢复后，此活动的推广链接将重新生效，历史数据保持不变。", "This campaign's promotional links will work again. Historical data will be retained.")
       : t("归档后，此活动的推广链接及关联二级渠道链接将失效。历史数据仍可查看，也可以稍后恢复活跃状态。", "This campaign's promotional links and associated subchannel links will stop working. Historical data will remain available, and you can reactivate the campaign later.")}</p>`,
@@ -770,7 +888,7 @@ function openCampaignData(code, period = "past30", focusPeriod = false) {
   };
   const periods = [["today", "今日", "Today"], ["past7", "过去7天", "Last 7 days"], ["past30", "过去30天", "Last 30 days"], ["past90", "过去90天", "Last 90 days"]];
   showModal(`<div class="campaign-data-backdrop" data-action="campaign-close-data" data-code="${AFF.helpers.h(code)}" aria-hidden="true"></div><div class="modal-card campaign-data-drawer" role="document">
-    <header class="modal-head"><div><h2>${AFF.helpers.h(campaign.name)}</h2><p>${AFF.helpers.h(campaign.code)}</p></div><button class="close-button" type="button" data-action="campaign-close-data" data-code="${AFF.helpers.h(code)}" title="${t("关闭", "Close")}" aria-label="${t("关闭", "Close")}">×</button></header>
+    <header class="modal-head"><div><h2>${AFF.helpers.h(AFF.dataText(campaign.name))}</h2><p>${AFF.helpers.h(campaign.code)}</p></div><button class="close-button" type="button" data-action="campaign-close-data" data-code="${AFF.helpers.h(code)}" title="${t("关闭", "Close")}" aria-label="${t("关闭", "Close")}">×</button></header>
     <div class="campaign-data-body">
       <div class="campaign-data-period"><label for="campaign-period">${t("时间范围", "Date range")}</label><select id="campaign-period">${periods.map(([value, zh, en]) => `<option value="${value}" ${value === period ? "selected" : ""}>${t(zh, en)}</option>`).join("")}</select><span>${range.from} — ${range.to}</span></div>
       <section class="campaign-data-metrics">${metrics.map(([key, label, type]) => `<div><span>${label}</span>${["registrations", "ftd", "effective", "quality"].includes(key) ? AFF.campaignMetric(campaign, key, totals[key], period) : `<strong>${number(totals[key], type)}</strong>`}</div>`).join("")}</section>
@@ -779,7 +897,7 @@ function openCampaignData(code, period = "past30", focusPeriod = false) {
       ${breakdown("platform", t("平台", "Platform"))}
     </div>
     <footer class="campaign-data-footer"><button class="button secondary" type="button" data-action="campaign-close-data" data-code="${AFF.helpers.h(code)}">${t("关闭", "Close")}</button></footer>
-  </div>`, true, `${t("活动数据", "Campaign data")} · ${campaign.name}`);
+  </div>`, true, `${t("活动数据", "Campaign data")} · ${AFF.dataText(campaign.name)}`);
   elements["modal-root"].classList.add("campaign-data-modal");
   const drawer = elements["modal-root"].querySelector(".campaign-data-drawer");
   drawer.querySelector("#campaign-period").addEventListener("change", event => openCampaignData(code, event.target.value, true));
@@ -816,9 +934,10 @@ function openAppealModal() {
 }
 
 function openCodeModal() {
-  showModal(modalShell("推广行为准则", `
-    <p>请确认推广要求：不得自荐、不得违规使用品牌素材、不得诱导虚假交易。确认后可下载素材。</p>`,
-    `<button class="button secondary" type="button" data-action="close-modal">关闭</button><button class="button primary" type="button" data-action="accept-code">阅读并接受</button>`));
+  const t = (zh, en) => AFF.state.language === "en" ? en : zh;
+  showModal(modalShell(t("推广行为准则", "Promotion guidelines"), `
+    <p>${t("请确认推广要求：不得自荐、不得违规使用品牌素材、不得诱导虚假交易。确认后可下载素材。", "Confirm the promotion requirements: no unsolicited self-referral, misuse of brand assets, or inducement of false trading. After confirmation, assets can be downloaded.")}</p>`,
+    `<button class="button secondary" type="button" data-action="close-modal">${t("关闭", "Close")}</button><button class="button primary" type="button" data-action="accept-code">${t("阅读并接受", "Read and accept")}</button>`));
   elements["modal-root"].classList.add("asset-code-modal");
   elements["modal-root"].querySelector(".modal-card").setAttribute("role", "dialog");
   elements["modal-root"].querySelector(".modal-card").setAttribute("aria-modal", "true");
@@ -840,11 +959,11 @@ function openClientInfo(clientId) {
   showModal(modalShell(`客户 ${row.clientId}`, `
     <div class="info-grid">
       <div class="info-item"><span>资格链</span><strong>注册 → KYC → FTD → 有效FTD → 质量服务</strong></div>
-      <div class="info-item"><span>佣金链</span><strong>未生成 → 前两段合并 → 质量服务单独 → 动态Hold → 可提现</strong></div>
-      <div class="info-item"><span>动态Hold</span><strong>初始1天，按风险分递增</strong></div>
+      <div class="info-item"><span>佣金链</span><strong>未生成 → 前两段合并 → 质量服务单独 → 动态结算 → 可提现</strong></div>
+      <div class="info-item"><span>动态结算</span><strong>初始1天，按风险分递增</strong></div>
       <div class="info-item"><span>结算</span><strong>日度结算</strong></div>
       <div class="info-item"><span>归因</span><strong>${AFF.helpers.h(row.source)} / ${AFF.helpers.h(row.medium)} / ${AFF.helpers.h(row.campaign)}</strong></div>
-      <div class="info-item"><span>资金</span><strong>预计 ${row.expected} · 已付 ${row.paid} · 暂扣 ${row.held}</strong></div>
+      <div class="info-item"><span>资金</span><strong>预计 ${row.expected} · 已付 ${row.paid} · 结算中 ${row.held}</strong></div>
     </div>`), true);
 }
 
@@ -852,19 +971,32 @@ function lookup() {
   const state = AFF.state;
   const input = document.getElementById("lookup-input")?.value.trim() || "";
   state.lookup.input = input;
+  const now = Date.now();
+  if (!state.lookup.windowStartedAt || now - state.lookup.windowStartedAt >= 60000) {
+    state.lookup.windowStartedAt = now;
+    state.lookup.queries = 0;
+    state.lookup.cooldownUntil = 0;
+    state.lookup.blocked = false;
+  }
   if (!input) {
     state.lookup.result = null;
+    state.lookup.blocked = false;
     showToast("请输入精准客户标识");
     render();
     return;
   }
-  if (state.lookup.queries >= 5) {
+  if (now < state.lookup.cooldownUntil || state.lookup.queries >= 5) {
     state.lookup.result = null;
-  showToast("查询频次已达上限，请稍后再试");
+    state.lookup.blocked = true;
+    if (state.lookup.queries >= 5) state.lookup.cooldownUntil = now + 30000;
+    state.lookup.lastTraceId = `LOOKUP-TR-${String(now).slice(-8)}`;
+    showToast("查询频次已达上限，请稍后再试");
     render();
     return;
   }
   state.lookup.queries += 1;
+  state.lookup.blocked = false;
+  state.lookup.lastTraceId = `LOOKUP-TR-${String(now).slice(-8)}`;
   const matched = AFF.lookupIndex.find(item => item.key.toLowerCase() === input.toLowerCase());
   state.lookup.result = matched?.owned ? matched : {
     id: "-", email: "-", owned: false, date: "-", method: "-", firstTouch: "-",
@@ -968,6 +1100,10 @@ function handleAction(action, target) {
   if (action === "campaign-confirm-status") {
     const campaign = AFF.campaigns.find(item => item.code === target.dataset.code);
     if (!campaign || !["active", "archived"].includes(target.dataset.status)) return;
+    if (campaign.fixed || campaign.code === "DIRECT") {
+      closeModal();
+      return showToast("直链推广为固定活动，不能归档");
+    }
     const t = (zh, en) => state.language === "en" ? en : zh;
     try {
       AFF.campaignLinks.setStatus(campaign, target.dataset.status);
@@ -990,13 +1126,19 @@ function handleAction(action, target) {
     let nextCode = Math.max(1000, ...AFF.campaigns.map(item => Number(item.code.slice(4)) || 0)) + 1;
     while (AFF.campaignLinks.find(`CMP-${nextCode}`)) nextCode += 1;
     const code = `CMP-${nextCode}`;
-    const campaign = { code, name, link: `https://track.example.com/r/AFF1001?camp=${encodeURIComponent(code)}`, status: "启用" };
+    const campaign = {
+      code,
+      name,
+      link: AFF.linkBuilder.href("https://go.affiliate-cpa.example/register", { camp: code }),
+      status: "启用"
+    };
     try {
       AFF.campaignLinks.register(campaign);
     } catch {
       return showToast("活动保存失败，请重试。");
     }
     AFF.campaigns.unshift(campaign);
+    keepFixedCampaignFirst();
     state.createdCampaigns ||= [];
     state.createdCampaigns.unshift(campaign);
     state.campaignPage = 1;
@@ -1041,11 +1183,24 @@ function handleAction(action, target) {
         name?.reportValidity();
         return;
       }
+      if (!state.account.country?.trim()) {
+        showToast("请选择国家");
+        return;
+      }
+      const profileError = trafficProfileValidity();
+      if (profileError) {
+        showToast(profileError);
+        return;
+      }
       state.onboarding.name = state.onboarding.name.trim();
       state.account.displayName = state.onboarding.name;
+      if (state.onboarding.trafficProfile.status === "not_submitted") {
+        state.onboarding.trafficProfile.status = "reviewing";
+        state.onboarding.trafficProfile.version = `TP-${String(Date.now()).slice(-8)}`;
+      }
       state.onboarding.step = 3;
       state.onboarding.maxStep = Math.max(state.onboarding.maxStep, 3);
-    } else if (state.onboarding.step === 3 && state.onboarding.riskCheckDone) {
+    } else if (state.onboarding.step === 3 && state.onboarding.kycCompleted) {
       state.onboarding.step = 4;
       state.onboarding.maxStep = Math.max(state.onboarding.maxStep, 4);
     } else if (state.onboarding.step === 4 && state.onboarding.agreements.every(Boolean)) {
@@ -1053,6 +1208,12 @@ function handleAction(action, target) {
       state.onboarding.maxStep = Math.max(state.onboarding.maxStep, 5);
     }
     closeOnboardingPicker();
+    return render();
+  }
+  if (action === "toggle-onboarding-details") {
+    state.onboarding.detailsOpen = !state.onboarding.detailsOpen;
+    closeOnboardingPicker();
+    persist();
     return render();
   }
   if (action === "onboarding-go") {
@@ -1080,15 +1241,18 @@ function handleAction(action, target) {
     document.querySelector(`[data-action="toggle-onboarding-picker"][data-onboarding-field="${field}"]`)?.focus();
     return;
   }
-  if (action === "open-client-kyc") {
-    showToast("演示：KYB将在首次提现时开启");
-    return;
+  if (action === "open-onboarding-kyc") {
+    state.onboarding.kycRedirected = true;
+    persist();
+    showToast("已打开认证页面，请完成后返回此页面");
+    return render();
   }
   if (action === "complete-onboarding-kyc") {
-    state.onboarding.riskCheckDone = true;
+    state.onboarding.kycCompleted = true;
     state.onboarding.step = 4;
     state.onboarding.maxStep = Math.max(state.onboarding.maxStep, 4);
-    showToast("实时硬风控通过，可进入资质审核");
+    persist();
+    showToast("已模拟完成认证");
     return render();
   }
   if (action === "open-onboarding-agreement") {
@@ -1113,8 +1277,14 @@ function handleAction(action, target) {
     return render();
   }
   if (action === "submit-onboarding") {
+    const profileError = trafficProfileValidity();
+    if (profileError || !state.onboarding.kycCompleted || !state.onboarding.agreements.every(Boolean)) {
+      showToast(profileError || "请先完成KYC资料和协议确认");
+      return;
+    }
     state.onboarding.submitted = true;
-    showToast("资质审核已提交；审核通过后启用推广链接");
+    if (state.onboarding.trafficProfile.status === "not_submitted") state.onboarding.trafficProfile.status = "reviewing";
+    showToast("资质审核已提交");
     return render();
   }
   if (action === "lookup") return lookup();
@@ -1356,6 +1526,12 @@ function handleClick(event) {
 }
 
 function handleChange(event) {
+  if (event.target.matches("[data-onboarding-country-selection]")) {
+    AFF.state.onboarding.trafficProfile.primaryCountries = [...event.target.selectedOptions]
+      .map(option => option.value).join("、");
+    persist();
+    return;
+  }
   if (AFF.postbacks?.handleChange(event)) return;
   const target = event.target;
   if (target.dataset.accountField && accountDraft) {
@@ -1419,6 +1595,11 @@ function handleInput(event) {
     persist();
     return;
   }
+  if (target.dataset.onboardingProfile !== undefined) {
+    AFF.state.onboarding.trafficProfile[target.dataset.onboardingProfile] = target.value;
+    persist();
+    return;
+  }
   if (target.dataset.onboardingSearch) {
     const field = target.dataset.onboardingSearch;
     onboardingQuery = target.value;
@@ -1447,6 +1628,13 @@ function handleInput(event) {
 
 function isValidEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function trafficProfileValidity() {
+  const profile = AFF.state.onboarding.trafficProfile;
+  const urls = profile.websites.split(/[\n,，]/).map(value => value.trim()).filter(Boolean);
+  if (urls.length && urls.some(value => !/^https?:\/\/.+\..+/.test(value))) return "请填写有效的网站或App URL";
+  return "";
 }
 
 function setAuthMode(mode, updateHash = true) {
@@ -1532,6 +1720,10 @@ function setWalletOpen(open) {
   clearTimeout(walletCloseTimer);
   elements["wallet-popover"].hidden = !open;
   elements["wallet-toggle"].setAttribute("aria-expanded", String(open));
+  // D-03: keep the unified runtime's bookkeeping in sync (hover menus keep their
+  // own enhancers — routing open/close through the runtime loops with them).
+  if (open) AFF.popover?.state && (AFF.popover.state.open = "wallet");
+  else if (AFF.popover?.state?.open === "wallet") AFF.popover.state.open = null;
 }
 
 function initializeWalletMenu() {
@@ -1552,7 +1744,7 @@ function initializeWalletMenu() {
     if (event.key !== "ArrowDown") return;
     event.preventDefault();
     setWalletOpen(true);
-    elements["wallet-popover"].querySelector("button").focus();
+    elements["wallet-popover"].querySelector("[data-route='wd']").focus();
   });
   menu.addEventListener("keydown", event => {
     if (event.key !== "Escape") return;
@@ -1578,7 +1770,14 @@ function initializeAccountMenu() {
   });
   elements["account-dropdown"].addEventListener("keydown", handleAccountMenuKeydown);
   document.addEventListener("focusin", event => {
-    if (!menu.contains(event.target)) setAccountMenu(false);
+    // D-03: only react while the menu is open; browsers bounce focus between
+    // trigger and body during clicks, so confirm via activeElement after a tick.
+    if (!menu.classList.contains("open")) return;
+    if (menu.contains(event.target) || event.target === elements["avatar-button"]) return;
+    clearTimeout(window.__acctFocusTimer);
+    window.__acctFocusTimer = setTimeout(() => {
+      if (!menu.contains(document.activeElement) && document.activeElement !== elements["avatar-button"]) setAccountMenu(false);
+    }, 40);
   });
   document.addEventListener("click", event => {
     if (!menu.contains(event.target)) setAccountMenu(false);
@@ -1641,6 +1840,9 @@ function initialize() {
       AFF.state.programSupportPickerOpen = false;
       render();
     }
+    // D-03: unified popover runtime drives open/close (Esc/outside-click/keyboard),
+    // the .open class mirrors it for the legacy CSS.
+    AFF.popover?.toggle("language", open);
     languageMenu.classList.toggle("open", open);
     elements["language-toggle"].setAttribute("aria-expanded", String(open));
   };
@@ -1669,9 +1871,23 @@ function initialize() {
   });
   document.addEventListener("click", handleClick);
   document.addEventListener("keydown", event => {
-    if (event.key === "Escape" && onboardingPicker) {
-      closeOnboardingPicker(true);
-      return;
+    if (event.key === "Escape") {
+      // D-03: pickers close before their host layer (modal / page) — unified contract.
+      const pickerStates = [
+        { open: AFF.state.programCountryPickerOpen, close: () => { AFF.state.programCountryPickerOpen = false; render(); } },
+        { open: AFF.state.programSupportPickerOpen, close: () => { AFF.state.programSupportPickerOpen = false; render(); } },
+        { open: AFF.state.dashboardLinkPagePickerOpen, close: () => { AFF.state.dashboardLinkPagePickerOpen = false; render(); } },
+        { open: AFF.state.dashboardLinkLanguagePickerOpen, close: () => { AFF.state.dashboardLinkLanguagePickerOpen = false; render(); } }
+      ].find(picker => picker.open);
+      if (pickerStates) {
+        event.preventDefault();
+        pickerStates.close();
+        return;
+      }
+      if (onboardingPicker) {
+        closeOnboardingPicker(true);
+        return;
+      }
     }
     if (!["Enter", " "].includes(event.key)) return;
     const tutorial = event.target.closest(".tutorial-card");
@@ -1716,6 +1932,7 @@ function initialize() {
   });
   window.addEventListener("hashchange", () => {
     const route = location.hash.replace(/^#\//, "");
+    if (route === "statements") return navigate("statements");
     if (["login", "register"].includes(route) && elements["app-view"].classList.contains("hidden")) {
       setAuthMode(route, false);
       return;
@@ -1727,7 +1944,12 @@ function initialize() {
   if (["login", "register"].includes(route)) {
     setAuthMode(route, false);
   } else if (route) {
-    AFF.state.route = route;
+    if (route === "statements") {
+      AFF.state.wdTab = "records";
+      AFF.state.route = "wd";
+    } else {
+      AFF.state.route = route;
+    }
   }
   if (restoreSession()) render();
 }

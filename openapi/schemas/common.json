@@ -1,0 +1,549 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Affiliate common API schemas",
+  "type": "object",
+  "definitions": {
+    "Money": {
+      "type": "object",
+      "required": [
+        "currency",
+        "amount"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "currency": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 3,
+          "example": "USD"
+        },
+        "amount": {
+          "type": "string",
+          "pattern": "^-?[0-9]+\\.[0-9]{2}$",
+          "example": "150.00"
+        }
+      }
+    },
+    "PageMeta": {
+      "type": "object",
+      "required": [
+        "page",
+        "page_size",
+        "total"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "page_size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pages": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "required": [
+        "code",
+        "message",
+        "trace_id",
+        "retryable"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "trace_id": {
+          "type": "string"
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    "SuccessEnvelope": {
+      "type": "object",
+      "required": [
+        "data",
+        "meta"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "meta": {
+          "$ref": "#/definitions/ResponseMeta"
+        }
+      }
+    },
+    "ErrorEnvelope": {
+      "type": "object",
+      "required": [
+        "error"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/Error"
+        }
+      }
+    },
+    "ResponseMeta": {
+      "type": "object",
+      "required": [
+        "request_id",
+        "scenario",
+        "data_as_of",
+        "rule_version"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "request_id": {
+          "type": "string"
+        },
+        "scenario": {
+          "type": "string"
+        },
+        "data_as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "rule_version": {
+          "type": "string"
+        },
+        "page": {
+          "type": "integer"
+        },
+        "page_size": {
+          "type": "integer"
+        },
+        "total": {
+          "type": "integer"
+        }
+      }
+    },
+    "ReferenceRange": {
+      "type": "object",
+      "required": [
+        "param_id",
+        "min",
+        "max",
+        "suggested",
+        "value_status"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "param_id": {
+          "type": "string",
+          "pattern": "^PARAM-[A-Z]+[0-9]+$"
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "suggested": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "value_status": {
+          "type": "string",
+          "enum": [
+            "pending_review",
+            "reference",
+            "external_reference"
+          ]
+        },
+        "owner_roles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "MaskedCustomer": {
+      "type": "object",
+      "required": [
+        "customer_id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "customer_id": {
+          "type": "string"
+        },
+        "display_id": {
+          "type": "string"
+        },
+        "country_code": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 2
+        }
+      }
+    },
+    "ApprovalRecord": {
+      "type": "object",
+      "required": [
+        "applicant_id",
+        "approver_id",
+        "self_review",
+        "submitted_at",
+        "approved_at",
+        "trace_id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "applicant_id": {
+          "type": "string"
+        },
+        "approver_id": {
+          "type": "string"
+        },
+        "self_review": {
+          "type": "boolean"
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "SUBMIT",
+            "APPROVE"
+          ]
+        },
+        "result": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "impact_confirmation": {
+          "type": "string"
+        },
+        "submitted_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "approved_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      }
+    },
+    "AuditRecord": {
+      "type": "object",
+      "required": [
+        "actor_id",
+        "action",
+        "object_id",
+        "occurred_at",
+        "trace_id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "actor_id": {
+          "type": "string"
+        },
+        "action": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "object_id": {
+          "type": "string"
+        },
+        "before_state": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "after_state": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "reason": {
+          "type": "string"
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      }
+    },
+    "ExportTask": {
+      "type": "object",
+      "required": [
+        "export_id",
+        "status",
+        "expires_at"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "export_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "created",
+            "queued",
+            "running",
+            "success",
+            "failed",
+            "cancelled"
+          ]
+        },
+        "file_name": {
+          "type": "string"
+        },
+        "row_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "download_url": {
+          "type": "string"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      }
+    },
+    "ImpactPreview": {
+      "type": "object",
+      "required": [
+        "preview_id",
+        "object_id",
+        "impact_type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "preview_id": {
+          "type": "string"
+        },
+        "object_id": {
+          "type": "string"
+        },
+        "impact_type": {
+          "type": "string"
+        },
+        "attribution_change": {
+          "type": "boolean"
+        },
+        "commission_change": {
+          "type": "boolean"
+        },
+        "credit_change": {
+          "type": "boolean"
+        },
+        "fund_change": {
+          "type": "boolean"
+        },
+        "amount": {
+          "$ref": "#/definitions/Money"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "ConfigDraft": {
+      "type": "object",
+      "required": [
+        "draft_id",
+        "domain",
+        "status",
+        "version"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "draft_id": {
+          "type": "string"
+        },
+        "domain": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "validating",
+            "simulation_pending",
+            "pending_approval",
+            "approved",
+            "scheduled",
+            "active",
+            "returned",
+            "rejected",
+            "cancelled",
+            "activation_failed"
+          ]
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "reason": {
+          "type": "string"
+        },
+        "reference_ranges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ReferenceRange"
+          }
+        }
+      }
+    },
+    "ConfigVersion": {
+      "type": "object",
+      "required": [
+        "version_id",
+        "domain",
+        "version",
+        "status"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "version_id": {
+          "type": "string"
+        },
+        "domain": {
+          "type": "string"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "status": {
+          "type": "string"
+        },
+        "effective_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "activated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "SimulationTask": {
+      "type": "object",
+      "required": [
+        "simulation_id",
+        "type",
+        "status"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "simulation_id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "single",
+            "combined"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "created",
+            "queued",
+            "running",
+            "success",
+            "failed",
+            "cancelled"
+          ]
+        },
+        "guardrail_result": {
+          "type": "string",
+          "enum": [
+            "passed",
+            "warning",
+            "blocked"
+          ]
+        }
+      }
+    },
+    "ActionRequest": {
+      "type": "object",
+      "required": [
+        "reason"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "self_review": {
+          "type": "boolean"
+        },
+        "approval_result": {
+          "type": "string",
+          "enum": [
+            "approved",
+            "rejected",
+            "returned"
+          ]
+        },
+        "approval_reason": {
+          "type": "string"
+        },
+        "impact_confirmation": {
+          "type": "string"
+        },
+        "preview_id": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

@@ -7,14 +7,16 @@ const root = path.resolve(__dirname, "..");
 const context = vm.createContext({ window: {}, Intl, Date, Map, Set, Math, JSON });
 context.window = context;
 context.AFF = { helpers: { h: value => String(value ?? "-") } };
-for (const filename of ["data.js", "report-data.js", "finance-data.js"]) {
+for (const filename of ["data.js", "simulation-core.js", "report-data.js", "finance-data.js"]) {
   vm.runInContext(fs.readFileSync(path.join(root, filename), "utf8"), context, { filename });
 }
 const aff = context.AFF;
 const finance = aff.finance;
 
-assert.equal(aff.routes.length, 17);
-for (const route of ["guarantee", "appeals", "messages"]) assert.ok(aff.routes.some(item => item.id === route));
+assert.equal(aff.routes.length, 21);
+for (const route of ["account", "statements", "support", "guarantee", "appeals", "messages", "export"]) {
+  assert.ok(aff.routes.some(item => item.id === route), `Route ${route} must exist`);
+}
 assert.deepEqual([...new Set(finance.scenarioRows.map(row => row.scenarioCode))], [
   "normal_l1", "normal_l2", "tier_downgrade", "ftd_only", "qftd_pending", "quality_void",
   "hold_extended", "frozen_d30", "chargeback", "not_new_customer", "fraud_hit", "appeal_overturned"

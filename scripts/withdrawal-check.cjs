@@ -20,7 +20,9 @@ async function main() {
     await page.click("#login-form button[type=submit]");
     await page.waitForSelector("#app-view:not(.hidden)");
     await page.evaluate(() => navigate("wd"));
-    await page.waitForSelector(".wd-kyb-checklist");
+    await page.waitForSelector("[data-withdraw-method-choice='wire']");
+    await page.click("[data-withdraw-method-choice='wire']");
+    await page.waitForSelector(".wd-kyc-inline");
     await page.click("[data-withdraw-action='complete-kyc']");
     await page.waitForSelector("[data-withdraw-amount]");
     const feeTip = await page.locator(".wd-fee-tip").innerText();

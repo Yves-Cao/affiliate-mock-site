@@ -21,13 +21,18 @@
   let focusBack = null;
 
   function records() { return AFF.finance.allWithdrawals(); }
+  function settlementIds(row) {
+    return [...new Set((row.allocations || [])
+      .map(item => item.settlementId || AFF.finance.settlements.find(settlement => settlement.commissionCaseId === item.commissionCaseId)?.statementId)
+      .filter(Boolean))];
+  }
   function defaults() { return { from: "", to: "", status: "", method: "", search: "" }; }
   function state() {
-    AFF.state.withdrawalRecords ||= { filters: defaults(), page: 1, pageSize: 10 };
+    AFF.state.withdrawalRecords ||= { filters: defaults(), page: 1, pageSize: 10, filterDrawer: false };
     const s = AFF.state.withdrawalRecords;
     if (!initial.has(s)) {
       s.filters = { ...defaults(), ...s.filters }; s.draft = { ...s.filters };
-      s.detail = null; s.error = ""; initial.add(s);
+      s.detail = null; s.error = ""; s.filterDrawer = false; initial.add(s);
     }
     return s;
   }
@@ -38,7 +43,7 @@
     return records().filter(row =>
       (!f.from || row.date >= f.from) && (!f.to || row.date <= f.to) &&
       (!f.status || row.status === f.status) && (!f.method || row.method === f.method) &&
-      (!query || [row.id, ...row.allocations.flatMap(item => [item.clientId, item.commissionCaseId, item.sourceId])]
+      (!query || [row.id, ...settlementIds(row), ...row.allocations.flatMap(item => [item.clientId, item.commissionCaseId, item.sourceId])]
         .some(value => String(value).toLowerCase().includes(query)))
     );
   }
@@ -61,20 +66,42 @@
     </form>`;
   }
 
+  function quickFilters() {
+    const s = state();
+    return `<div class="client-quick-filters wd-quick-filters">
+      <label class="client-quick-field"><span class="sr-only">${t("提现方式", "Withdrawal method")}</span><select data-aff-dd="off" data-withdraw-quick="method" data-withdraw-filter="method" aria-label="${t("提现方式", "Withdrawal method")}">
+        <option value="">${t("提现方式：全部", "Withdrawal method: All")}</option>${Object.entries(methods).map(([value, text]) => `<option value="${value}" ${s.filters.method === value ? "selected" : ""}>${t(...text)}</option>`).join("")}
+      </select></label>
+      <label class="client-quick-field"><span class="sr-only">${t("结算状态", "Settlement status")}</span><select data-aff-dd="off" data-withdraw-quick="status" data-withdraw-filter="status" aria-label="${t("结算状态", "Settlement status")}">
+        <option value="">${t("结算状态：全部", "Settlement status: All")}</option>${Object.entries(labels).map(([value, text]) => `<option value="${value}" ${s.filters.status === value ? "selected" : ""}>${t(...text)}</option>`).join("")}
+      </select></label>
+    </div>`;
+  }
+
+  function filterDrawer() {
+    const s = state();
+    if (!s.filterDrawer) return "";
+    return `<div class="aff-drawer-overlay" data-withdraw-action="filter-close"></div><aside class="aff-drawer finance-drawer wd-filter-drawer" role="dialog" aria-modal="true" aria-labelledby="wd-filter-title">
+      <header><div><h2 id="wd-filter-title">${t("筛选器", "Filters")}</h2><span>${t("按申请日期、提现状态和关联编号筛选", "Filter by request date, withdrawal status and linked IDs")}</span></div><button class="finance-drawer-close" type="button" data-withdraw-action="filter-close" aria-label="${t("关闭筛选器", "Close filters")}">×</button></header>
+      <div class="finance-drawer-body">${filters()}</div>
+    </aside>`;
+  }
+
   function table(rows) {
     const s = state();
     const pages = Math.max(1, Math.ceil(rows.length / s.pageSize));
     s.page = Math.max(1, Math.min(s.page, pages));
     const visible = rows.slice((s.page - 1) * s.pageSize, s.page * s.pageSize);
-    return `<div class="wd-table-scroll" role="region" aria-label="${t("提现记录", "Withdrawal records")}" tabindex="0"><table class="wd-table"><thead><tr>
-      ${[t("申请编号", "Request ID"), t("申请日期", "Request date"), t("提现方式", "Method"), t("收款账户", "Receiving account"), t("申请金额", "Requested amount"), t("手续费", "Fee"), t("实际到账", "Received"), t("关联来源", "Sources"), t("状态", "Status"), t("操作", "Action")].map(item => `<th scope="col">${item}</th>`).join("")}
+    return `<p class="wd-note">${t("失败不收费", "No fee for failures")}</p><div class="wd-table-scroll" role="region" aria-label="${t("提现记录", "Withdrawal records")}" tabindex="0"><table class="wd-table"><thead><tr>
+      ${[t("申请编号", "Request ID"), t("申请日期", "Request date"), t("提现方式", "Method"), t("收款账户", "Receiving account"), t("申请金额", "Requested amount"), t("手续费", "Fee"), t("实际到账", "Received"), t("结算单编号", "Settlement ID"), t("关联来源", "Sources"), t("提现状态", "Withdrawal status"), t("操作", "Action")].map(item => `<th scope="col">${item}</th>`).join("")}
       </tr></thead><tbody>${visible.length ? visible.map(row => `<tr>
         <td>${h(row.id)}</td><td>${h(row.date)}</td><td>${method(row)}</td><td>${h(row.account)}</td>
         <td class="wd-money">${money(row.amount)}</td><td class="wd-money">${row.status === "paid" ? money(row.fee) : `${money(row.estimatedFee)}*`}</td><td class="wd-money">${row.status === "paid" ? money(row.received) : "-"}</td>
+        <td>${settlementIds(row).length ? settlementIds(row).map(id => `<button class="wd-settlement-link" type="button" data-withdraw-settlement="${h(id)}">${h(id)}</button>`).join("<br>") : "-"}</td>
         <td>${row.allocations.length} ${t("笔", "lots")}</td><td>${badge(row)}</td>
-        <td><div class="wd-row-actions"><button class="button secondary small" type="button" data-withdraw-detail="${row.id}">${t("详情", "Details")}</button>${row.id.startsWith("WOD-U") && row.status === "processing" ? `<button class="button primary small" type="button" data-withdraw-simulate="${row.id}" data-result="paid">${t("模拟成功", "Simulate success")}</button><button class="button secondary small" type="button" data-withdraw-simulate="${row.id}" data-result="failed">${t("模拟失败", "Simulate failure")}</button>` : ""}</div></td>
-      </tr>`).join("") : `<tr><td colspan="10" class="wd-empty"><strong>${t("暂无提现记录", "No withdrawal records")}</strong><p>${t("请调整筛选条件后查询。", "Adjust filters and search again.")}</p></td></tr>`}</tbody></table></div>
-      <footer class="table-footer wd-footer"><span>${t("共", "Total")} <b data-withdraw-total>${rows.length}</b> ${t("条记录", "records")} · ${t("失败不收费", "No fee for failures")}</span><div class="wd-pagination"><label>${t("每页", "Per page")} <select data-withdraw-page-size aria-label="${t("每页条数", "Rows per page")}">${[10, 20, 50].map(size => `<option ${size === s.pageSize ? "selected" : ""}>${size}</option>`).join("")}</select></label><div class="pagination"><button type="button" data-withdraw-page="${s.page - 1}" aria-label="${t("上一页", "Previous page")}" ${s.page <= 1 ? "disabled" : ""}>‹</button><span>${s.page} / ${pages}</span><button type="button" data-withdraw-page="${s.page + 1}" aria-label="${t("下一页", "Next page")}" ${s.page >= pages ? "disabled" : ""}>›</button></div></div></footer>`;
+        <td><div class="wd-row-actions"><button class="button secondary small" type="button" data-withdraw-detail="${row.id}" data-statement-detail="${row.id}">${t("详情", "Details")}</button>${row.id.startsWith("WOD-U") && row.status === "processing" ? `<button class="button primary small" type="button" data-withdraw-simulate="${row.id}" data-result="paid">${t("模拟成功", "Simulate success")}</button><button class="button secondary small" type="button" data-withdraw-simulate="${row.id}" data-result="failed">${t("模拟失败", "Simulate failure")}</button>` : ""}</div></td>
+      </tr>`).join("") : `<tr><td colspan="11" class="wd-empty"><strong>${t("暂无提现记录", "No withdrawal records")}</strong><p>${t("请调整筛选条件后查询。", "Adjust filters and search again.")}</p></td></tr>`}</tbody></table></div>
+      ${AFF.pagination.component({ page: s.page, pageSize: s.pageSize, total: rows.length, channel: "withdrawals" })}`;
   }
 
   function field(label, value) { return `<div><dt>${h(label)}</dt><dd>${h(value)}</dd></div>`; }
@@ -82,7 +109,7 @@
   function drawer() {
     const row = records().find(item => item.id === state().detail);
     if (!row) return "";
-    return `<div class="wd-overlay" data-withdraw-action="close"></div><aside class="wd-drawer" role="dialog" aria-modal="true" aria-labelledby="wd-detail-title">
+    return `<div class="aff-drawer-overlay" data-withdraw-action="close"></div><aside class="aff-drawer wd-drawer finance-drawer" role="dialog" aria-modal="true" aria-labelledby="wd-detail-title">
       <header><div><h2 id="wd-detail-title">${t("提现详情", "Withdrawal details")}</h2><span>${row.id}</span></div><button class="wd-close" data-withdraw-action="close" type="button" aria-label="${t("关闭详情", "Close details")}">×</button></header>
       <div class="wd-detail-body">
         <section class="wd-detail-amount"><span>${t("申请金额", "Requested amount")}</span><strong>${money(row.amount)}</strong>${badge(row)}</section>
@@ -92,8 +119,11 @@
           ${field(t("实际到账", "Received"), row.status === "paid" ? money(row.received) : "-")}${field(t("收款账户", "Receiving account"), `${row.receiver} · ${row.account}`)}
           ${field(t("规则版本", "Rule version"), row.ruleVersion)}
         </dl></section>
-        <section><h3>${t("先进先出分摊", "FIFO allocations")}</h3><div class="wd-table-scroll"><table class="wd-table"><thead><tr><th>${t("来源", "Source")}</th><th>${t("来源编号", "Source ID")}</th><th>${t("客户", "Client")}</th><th>${t("佣金案件", "Case")}</th><th>${t("金额", "Amount")}</th></tr></thead><tbody>
-          ${row.allocations.map(item => `<tr><td>${item.source === "guarantee_release" ? t("保证金释放", "Guarantee release") : t("佣金结算", "Commission settlement")}</td><td>${h(item.sourceId)}</td><td>${h(item.clientId)}</td><td>${h(item.commissionCaseId)}</td><td class="wd-money">${money(item.amount)}</td></tr>`).join("")}
+        <section><h3>${t("先进先出分摊", "FIFO allocations")}</h3><div class="wd-table-scroll"><table class="wd-table"><thead><tr><th>${t("来源", "Source")}</th><th>${t("来源编号", "Source ID")}</th><th>${t("结算单编号", "Settlement ID")}</th><th>${t("客户", "Client")}</th><th>${t("佣金案件", "Case")}</th><th>${t("金额", "Amount")}</th></tr></thead><tbody>
+          ${row.allocations.map(item => {
+            const settlementId = item.settlementId || AFF.finance.settlements.find(settlement => settlement.commissionCaseId === item.commissionCaseId)?.statementId;
+            return `<tr><td>${item.source === "guarantee_release" ? t("保证金释放", "Guarantee release") : t("佣金结算", "Commission settlement")}</td><td>${h(item.sourceId)}</td><td>${settlementId ? `<button class="wd-settlement-link" type="button" data-withdraw-settlement="${h(settlementId)}">${h(settlementId)}</button>` : "-"}</td><td>${h(item.clientId)}</td><td>${h(item.commissionCaseId)}</td><td class="wd-money">${money(item.amount)}</td></tr>`;
+          }).join("")}
         </tbody></table></div></section>
       </div>
       <footer><button class="button secondary" data-withdraw-action="close" type="button">${t("关闭", "Close")}</button></footer>
@@ -124,6 +154,7 @@
 
   function withdrawForm() {
     const s = AFF.state.wdForm;
+    if (AFF.partnerClosure.active()) return "";
     const selected = s.methodChosen && methods[s.method] ? s.method : "";
     let preview = null;
     if (selected) {
@@ -133,7 +164,7 @@
       <p>${t("请先选择收款方式；选择后再填写金额、查看手续费并校验提现资格。", "Choose a receiving method first. Then enter an amount, review the fee, and complete eligibility checks.")}</p>
       <dl class="wd-details">
         <div><dt>${t("可提现余额", "Available balance")}</dt><dd>${money(AFF.finance.balance())}</dd></div>
-        <div><dt>${t("滚动保证金", "Rolling guarantee")}</dt><dd>${money(AFF.finance.guaranteeRecords.filter(item => item.status === "retained").reduce((sum, item) => sum + item.amount, 0))}</dd></div>
+        <div><dt>${t("滚动保证金", "Rolling guarantee")}</dt><dd>${money(AFF.finance.guaranteeRecords.filter(item => ["retained", "frozen"].includes(item.status)).reduce((sum, item) => sum + item.amount, 0))}</dd></div>
       </dl>
       ${methodList(selected)}
       ${!selected ? `<p class="wd-method-hint">${t("选择方式后，将显示金额输入和手续费试算。", "After choosing a method, amount input and fee preview will appear.")}</p>` : `
@@ -157,30 +188,50 @@
     const s = state();
     AFF.state.wdForm ||= { amount: "100", method: "" };
     return `<div class="wd-page">
-      <div class="tabs wd-tabs">
+      <div class="tabs wd-tabs" role="tablist" aria-label="提现页签">
         <button type="button" class="${AFF.state.wdTab !== "records" ? "active" : ""}" data-withdraw-tab="withdraw">${t("出金", "Withdraw")}</button>
         <button type="button" class="${AFF.state.wdTab === "records" ? "active" : ""}" data-withdraw-tab="records">${t("提现记录", "Withdrawal records")}</button>
       </div>
-      ${AFF.state.wdTab !== "records" ? withdrawForm() : `<section class="card wd-records"><div class="wd-heading"><h2>${t("提现记录", "Withdrawal records")}</h2><span>${t("按申请日期由近到远排列", "Most recent requests first")}</span></div>${filters()}${table(filteredRows())}</section>`}
-      ${s.detail && AFF.state.wdTab === "records" ? drawer() : ""}
+      ${AFF.partnerClosure.withdrawalNotice()}
+      ${AFF.state.wdTab !== "records" ? withdrawForm() : `<section class="card wd-records"><div class="wd-heading"><div><h2>${t("提现记录", "Withdrawal records")}</h2><span>${t("按申请日期由近到远排列", "Most recent requests first")}</span></div><div class="wd-heading-actions"><button class="button secondary" type="button" data-withdraw-action="filters">${t("筛选器", "Filters")}</button><button class="button secondary" type="button" data-withdraw-action="reset">${t("重置", "Reset")}</button></div></div>${quickFilters()}${table(filteredRows())}</section>`}
+      ${s.detail && AFF.state.wdTab === "records" ? drawer() : ""}${filterDrawer()}
     </div>`;
   }
 
-  function rerender(selector) { render(); document.querySelector(selector)?.focus(); }
+  function rerender(selector) { render(); if (selector) document.querySelector(selector)?.focus(); }
 
   document.addEventListener("click", event => {
     if (AFF.state?.route !== "wd") return;
-    const target = event.target.closest("[data-withdraw-tab],[data-withdraw-detail],[data-withdraw-action],[data-withdraw-page],[data-withdraw-simulate],[data-withdraw-method-choice]");
+    const target = event.target.closest("[data-withdraw-tab],[data-withdraw-detail],[data-withdraw-settlement],[data-withdraw-action],[data-withdraw-page],[data-withdraw-simulate],[data-withdraw-method-choice],[data-aff-page]");
     if (!target) return;
     const s = state(), d = target.dataset;
     if (d.withdrawTab) { AFF.state.wdTab = d.withdrawTab; s.detail = null; return rerender(`[data-withdraw-tab="${d.withdrawTab}"]`); }
+    if (d.withdrawAction === "filters") {
+      s.draft = { ...s.filters };
+      s.filterDrawer = true;
+      render();
+      return document.querySelector(".wd-filter-drawer .finance-drawer-close")?.focus();
+    }
+    if (d.withdrawAction === "filter-close") {
+      s.filterDrawer = false;
+      return rerender();
+    }
     if (d.withdrawMethodChoice) {
       AFF.state.wdForm.method = d.withdrawMethodChoice;
       AFF.state.wdForm.methodChosen = true;
       return rerender(`[data-withdraw-method-choice="${d.withdrawMethodChoice}"]`);
     }
     if (d.withdrawDetail) { focusBack = `[data-withdraw-detail="${d.withdrawDetail}"]`; s.detail = d.withdrawDetail; return rerender(".wd-close"); }
-    if (d.withdrawPage) { s.page = Number(d.withdrawPage); return rerender(".wd-table-scroll"); }
+    if (d.withdrawSettlement) {
+      const earnings = AFF.earnings?.state?.();
+      if (earnings) {
+        earnings.filters = { ...earnings.filters, settlementId: d.withdrawSettlement };
+        earnings.draft = { ...earnings.filters };
+        earnings.page = 1;
+      }
+      return navigate("pay");
+    }
+    if (d.withdrawPage || d.affPage) { s.page = Number(d.withdrawPage || d.affPage); rerender(); AFF.pagination.focusNav("withdrawals"); return; }
     if (d.withdrawSimulate) {
       AFF.finance.setWithdrawalStatus(d.withdrawSimulate, d.result);
       showToast(d.result === "paid" ? t("支付成功，手续费已确认。", "Payment succeeded; fee confirmed.") : t("支付失败，金额已退回且不收费。", "Payment failed; amount returned with no fee."));
@@ -216,12 +267,21 @@
 
   document.addEventListener("change", event => {
     if (AFF.state?.route !== "wd") return;
+    if (event.target.matches("[data-withdraw-quick]")) {
+      const s = state();
+      const key = event.target.dataset.withdrawQuick;
+      s.filters[key] = event.target.value;
+      s.draft[key] = event.target.value;
+      s.page = 1;
+      s.detail = null;
+      return rerender(`[data-withdraw-quick="${key}"]`);
+    }
     if (event.target.matches("[data-withdraw-filter]")) state().draft[event.target.dataset.withdrawFilter] = event.target.value;
     if (event.target.matches("[data-withdraw-method]")) AFF.state.wdForm.method = event.target.value;
     if (event.target.matches("[data-withdraw-amount]") || event.target.matches("[data-withdraw-method]")) return rerender(event.target.matches("[data-withdraw-method]") ? "[data-withdraw-method]" : "[data-withdraw-amount]");
-    if (event.target.matches("[data-withdraw-page-size]")) {
+    if (event.target.matches("[data-withdraw-page-size], [data-aff-page-size]")) {
       state().pageSize = Number(event.target.value); state().page = 1;
-      return rerender("[data-withdraw-page-size]");
+      return rerender("[data-aff-page-size]");
     }
   });
   document.addEventListener("date-range-change", event => {
@@ -238,13 +298,20 @@
     s.error = (!f.from || !f.to || f.from > f.to) && (f.from || f.to)
       ? t("请选择有效日期，开始日期不得晚于结束日期。", "Choose valid dates. Start must not follow end.") : "";
     if (s.error) return void (document.querySelector("#wd-filter-error").textContent = s.error);
-    s.filters = { ...f }; s.page = 1;
-    rerender('[data-range-id="withdrawals-range"] [data-range-toggle]');
+    s.filters = { ...f }; s.draft = { ...f }; s.page = 1; s.filterDrawer = false;
+    rerender('[data-withdraw-quick="method"]');
   });
 
   document.addEventListener("keydown", event => {
-    if (AFF.state?.route !== "wd" || !state().detail || event.key !== "Escape") return;
-    event.preventDefault(); state().detail = null; rerender(focusBack);
+    if (AFF.state?.route !== "wd" || event.key !== "Escape") return;
+    const s = state();
+    if (s.filterDrawer) {
+      event.preventDefault();
+      s.filterDrawer = false;
+      return rerender();
+    }
+    if (!s.detail) return;
+    event.preventDefault(); s.detail = null; rerender(focusBack);
   });
 
   AFF.withdrawalsUI = { state, records, filteredRows, renderPage };

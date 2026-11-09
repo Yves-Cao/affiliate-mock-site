@@ -13,15 +13,16 @@
     T3: { rate: 0.15, label: "高税档" }
   };
   const countryTax = {
-    新加坡: "T3", 马来西亚: "T2", 泰国: "T1", 越南: "T1", 印度尼西亚: "T2",
-    南非: "T2", 巴西: "T3", 墨西哥: "T2", 菲律宾: "T1", 阿联酋: "T0"
+    VN: "T1", TH: "T1", ID: "T2", ZA: "T2", NG: "T1",
+    PK: "T1", EG: "T0", KW: "T0", QA: "T0", KZ: "T2",
+    SA: "T0", BD: "T1"
   };
-  const countryHold = { 新加坡: 2, 马来西亚: 3, 泰国: 4, 越南: 5, 印度尼西亚: 5, 南非: 7, 巴西: 7, 墨西哥: 7, 菲律宾: 4, 阿联酋: 2 };
+  const countryHold = { VN: 5, TH: 4, ID: 5, ZA: 7, NG: 7, PK: 6, EG: 6, KW: 2, QA: 2, KZ: 3, SA: 2, BD: 5 };
   const paymentMethods = ["wire", "wallet"];
   const scenarioLabels = {
     normal_l1: "正常L1全链路", normal_l2: "正常L2全链路", tier_downgrade: "档位取低",
     ftd_only: "仅FTD", qftd_pending: "有效FTD待确认", quality_void: "质量服务未达标",
-    hold_extended: "动态Hold延长", frozen_d30: "D+30冻结", chargeback: "拒付冲正",
+    hold_extended: "动态结算延长", frozen_d30: "D+30冻结", chargeback: "拒付冲正",
     not_new_customer: "非新客户", fraud_hit: "欺诈库命中", appeal_overturned: "申诉改判"
   };
 
@@ -45,18 +46,18 @@
   };
 
   const scenarioConfigs = [
-    { code: "normal_l1", country: "越南", kyc: "通过", date: "2026-07-01", registeredAt: "2026-07-02", ftdAt: "2026-07-05", effectiveAt: "2026-07-12", tradedAt: "2026-07-12", qualityAt: "2026-08-20", expected: 320, tier: "L1", commissionStatus: "approved", holdOverride: 5, netDepositBalance: 350, tradingVolume: 1.2, tradingDays: 4 },
-    { code: "normal_l2", country: "泰国", kyc: "通过", date: "2026-06-20", registeredAt: "2026-06-21", ftdAt: "2026-06-24", effectiveAt: "2026-07-01", tradedAt: "2026-07-01", qualityAt: "2026-08-10", expected: 550, tier: "L2", commissionStatus: "approved", holdOverride: 4, netDepositBalance: 950, tradingVolume: 3.4, tradingDays: 6 },
-    { code: "tier_downgrade", country: "南非", kyc: "通过", date: "2026-07-10", registeredAt: "2026-07-11", ftdAt: "2026-07-15", effectiveAt: "2026-07-22", tradedAt: "2026-07-23", qualityAt: "2026-09-02", expected: 320, tier: "L1", commissionStatus: "approved", netDepositBalance: 4200, tradingVolume: 1.1, tradingDays: 4 },
-    { code: "ftd_only", country: "马来西亚", kyc: "通过", date: "2026-09-10", registeredAt: "2026-09-11", ftdAt: "2026-09-15", effectiveAt: null, tradedAt: null, qualityAt: null, expected: 0, tier: "-", commissionStatus: "pending", netDepositBalance: 500, tradingVolume: 0, tradingDays: 0 },
-    { code: "qftd_pending", country: "印度尼西亚", kyc: "通过", date: "2026-10-01", registeredAt: "2026-10-02", ftdAt: "2026-10-06", effectiveAt: null, tradedAt: "2026-10-12", qualityAt: null, expected: 0, tier: "-", commissionStatus: "pending", netDepositBalance: 900, tradingVolume: 3, tradingDays: 5 },
-    { code: "quality_void", country: "巴西", kyc: "通过", date: "2026-07-20", registeredAt: "2026-07-21", ftdAt: "2026-07-24", effectiveAt: "2026-08-01", tradedAt: "2026-08-02", qualityAt: null, expected: 360, tier: "L2", commissionStatus: "approved", netDepositBalance: 1000, tradingVolume: 3.2, tradingDays: 5 },
-    { code: "hold_extended", country: "巴西", kyc: "通过", date: "2026-10-14", registeredAt: "2026-10-15", ftdAt: "2026-10-18", effectiveAt: "2026-10-22", tradedAt: "2026-10-22", qualityAt: "2026-10-24", expected: 420, tier: "L2", commissionStatus: "held", paymentRisk: "card", netDepositBalance: 1100, tradingVolume: 3.5, tradingDays: 6 },
-    { code: "frozen_d30", country: "墨西哥", kyc: "通过", date: "2026-08-10", registeredAt: "2026-08-11", ftdAt: "2026-08-14", effectiveAt: "2026-08-20", tradedAt: "2026-08-21", qualityAt: "2026-09-20", expected: 480, tier: "L2", commissionStatus: "pending", forceFund: "frozen", netDepositBalance: 1200, tradingVolume: 4, tradingDays: 6 },
-    { code: "chargeback", country: "新加坡", kyc: "通过", date: "2026-07-05", registeredAt: "2026-07-06", ftdAt: "2026-07-08", effectiveAt: "2026-07-15", tradedAt: "2026-07-16", qualityAt: "2026-08-18", expected: 600, tier: "L3", commissionStatus: "reversed", netDepositBalance: 1600, tradingVolume: 5.2, tradingDays: 6 },
-    { code: "not_new_customer", country: "泰国", kyc: "不适用", date: "2026-10-20", registeredAt: null, ftdAt: null, effectiveAt: null, tradedAt: null, qualityAt: null, expected: 0, tier: "-", commissionStatus: "pending" },
-    { code: "fraud_hit", country: "新加坡", kyc: "不适用", date: "2026-10-22", registeredAt: null, ftdAt: null, effectiveAt: null, tradedAt: null, qualityAt: null, expected: 0, tier: "-", commissionStatus: "pending" },
-    { code: "appeal_overturned", country: "菲律宾", kyc: "通过", date: "2026-06-10", registeredAt: "2026-06-11", ftdAt: "2026-06-14", effectiveAt: "2026-06-20", tradedAt: "2026-06-21", qualityAt: "2026-07-25", expected: 380, tier: "L2", commissionStatus: "approved", netDepositBalance: 900, tradingVolume: 3.1, tradingDays: 5 }
+    { code: "normal_l1", country: "VN", kyc: "通过", date: "2026-07-01", registeredAt: "2026-07-02", ftdAt: "2026-07-05", effectiveAt: "2026-07-12", tradedAt: "2026-07-12", qualityAt: "2026-08-20", expected: 200, tier: "L1", commissionStatus: "approved", holdOverride: 5, netDepositBalance: 350, tradingVolume: 1.2, tradingDays: 4 },
+    { code: "normal_l2", country: "TH", kyc: "通过", date: "2026-06-20", registeredAt: "2026-06-21", ftdAt: "2026-06-24", effectiveAt: "2026-07-01", tradedAt: "2026-07-01", qualityAt: "2026-08-10", expected: 480, tier: "L2", commissionStatus: "approved", holdOverride: 4, netDepositBalance: 950, tradingVolume: 3.4, tradingDays: 6 },
+    { code: "tier_downgrade", country: "ZA", kyc: "通过", date: "2026-07-10", registeredAt: "2026-07-11", ftdAt: "2026-07-15", effectiveAt: "2026-07-22", tradedAt: "2026-07-23", qualityAt: "2026-09-02", expected: 220, tier: "L1", commissionStatus: "approved", netDepositBalance: 4200, tradingVolume: 1.1, tradingDays: 4 },
+    { code: "ftd_only", country: "PK", kyc: "通过", date: "2026-09-10", registeredAt: "2026-09-11", ftdAt: "2026-09-15", effectiveAt: null, tradedAt: null, qualityAt: null, expected: 0, tier: "-", commissionStatus: "pending", netDepositBalance: 500, tradingVolume: 0, tradingDays: 0 },
+    { code: "qftd_pending", country: "ID", kyc: "通过", date: "2026-10-01", registeredAt: "2026-10-02", ftdAt: "2026-10-06", effectiveAt: null, tradedAt: "2026-10-12", qualityAt: null, expected: 0, tier: "-", commissionStatus: "pending", netDepositBalance: 900, tradingVolume: 3, tradingDays: 5 },
+    { code: "quality_void", country: "BD", kyc: "通过", date: "2026-07-20", registeredAt: "2026-07-21", ftdAt: "2026-07-24", effectiveAt: "2026-08-01", tradedAt: "2026-08-02", qualityAt: null, expected: 300, tier: "L2", commissionStatus: "approved", netDepositBalance: 1000, tradingVolume: 3.2, tradingDays: 5 },
+    { code: "hold_extended", country: "BD", kyc: "通过", date: "2026-10-14", registeredAt: "2026-10-15", ftdAt: "2026-10-18", effectiveAt: "2026-10-22", tradedAt: "2026-10-22", qualityAt: "2026-10-24", expected: 400, tier: "L2", commissionStatus: "held", paymentRisk: "card", netDepositBalance: 1100, tradingVolume: 3.5, tradingDays: 6 },
+    { code: "frozen_d30", country: "KZ", kyc: "通过", date: "2026-08-10", registeredAt: "2026-08-11", ftdAt: "2026-08-14", effectiveAt: "2026-08-20", tradedAt: "2026-08-21", qualityAt: "2026-09-20", expected: 440, tier: "L2", commissionStatus: "pending", forceFund: "frozen", netDepositBalance: 1200, tradingVolume: 4, tradingDays: 6 },
+    { code: "chargeback", country: "SA", kyc: "通过", date: "2026-07-05", registeredAt: "2026-07-06", ftdAt: "2026-07-08", effectiveAt: "2026-07-15", tradedAt: "2026-07-16", qualityAt: "2026-08-18", expected: 980, tier: "L3", commissionStatus: "reversed", netDepositBalance: 1600, tradingVolume: 5.2, tradingDays: 6 },
+    { code: "not_new_customer", country: "TH", kyc: "不适用", date: "2026-10-20", registeredAt: null, ftdAt: null, effectiveAt: null, tradedAt: null, qualityAt: null, expected: 0, tier: "-", commissionStatus: "pending" },
+    { code: "fraud_hit", country: "EG", kyc: "不适用", date: "2026-10-22", registeredAt: null, ftdAt: null, effectiveAt: null, tradedAt: null, qualityAt: null, expected: 0, tier: "-", commissionStatus: "pending" },
+    { code: "appeal_overturned", country: "EG", kyc: "通过", date: "2026-06-10", registeredAt: "2026-06-11", ftdAt: "2026-06-14", effectiveAt: "2026-06-20", tradedAt: "2026-06-21", qualityAt: "2026-07-25", expected: 240, tier: "L2", commissionStatus: "approved", netDepositBalance: 900, tradingVolume: 3.1, tradingDays: 5 }
   ];
 
   const scenarioRows = AFF.reporting.rows.slice(0, scenarioConfigs.length);
@@ -159,8 +160,10 @@
       const guaranteeAmount = Math.round(item.amountCents * configuration.guaranteeRate);
       const availableAmount = item.amountCents - taxAmount - guaranteeAmount;
       item.status = "settled";
+      const statementId = `STL-${item.theoreticalReleaseAt.slice(0, 7)}`;
       item.settlement = {
         id: `STL-${item.id}`,
+        statementId,
         commissionCaseId: item.id,
         settledAt: item.theoreticalReleaseAt,
         grossAmount: item.amountCents,
@@ -174,12 +177,13 @@
       settlements.push(item.settlement);
       taxRecords.push({
         id: `TAX-${item.id}`, type: "withheld", clientId: row.clientId, commissionCaseId: item.id,
-        date: item.theoreticalReleaseAt, taxTier, rate: taxRate, amount: taxAmount,
+        statementId, date: item.theoreticalReleaseAt, taxTier, rate: taxRate, amount: taxAmount,
         status: "withheld", ruleVersion: configuration.version
       });
       const releaseDate = shiftDate(item.theoreticalReleaseAt, configuration.guaranteeReleaseDays);
       const guarantee = {
         id: `GL-${item.id}`, type: "retained", clientId: row.clientId, commissionCaseId: item.id,
+        statementId,
         date: item.theoreticalReleaseAt, rate: configuration.guaranteeRate, amount: guaranteeAmount,
         status: releaseDate <= now ? "released" : "retained",
         retainedAt: item.theoreticalReleaseAt, normalReleaseAt: releaseDate,
@@ -189,12 +193,12 @@
       item.guarantee = guarantee;
       availableLots.push({
         id: `LOT-${item.id}-NET`, source: "commission", sourceId: item.id, clientId: row.clientId,
-        date: item.theoreticalReleaseAt, amount: availableAmount, remaining: availableAmount, staticRemaining: availableAmount
+        statementId, date: item.theoreticalReleaseAt, amount: availableAmount, remaining: availableAmount, staticRemaining: availableAmount
       });
       if (guarantee.status === "released") {
         availableLots.push({
           id: `LOT-${item.id}-GR`, source: "guarantee_release", sourceId: guarantee.id,
-          commissionCaseId: item.id, clientId: row.clientId, date: releaseDate,
+          statementId, commissionCaseId: item.id, clientId: row.clientId, date: releaseDate,
           amount: guaranteeAmount, remaining: guaranteeAmount, staticRemaining: guaranteeAmount
         });
       }
@@ -251,6 +255,32 @@
     }
   });
 
+  const frozenGuarantee = guaranteeRecords.find(item =>
+    item.status === "retained" && item.normalReleaseAt > now && Number(String(item.clientId).replace(/\D/g, "")) % 31 === 0
+  );
+  if (frozenGuarantee) {
+    frozenGuarantee.status = "frozen";
+    frozenGuarantee.freezeReasonCode = "GUARANTEE-RISK-REVIEW";
+    frozenGuarantee.freezeReason = "关联客户风险复核中，释放自动暂停。";
+  }
+
+  const statementBatches = [...new Set(settlements.map(item => item.statementId).filter(Boolean))].map(statementId => {
+    const batchSettlements = settlements.filter(item => item.statementId === statementId);
+    const batchGuarantees = guaranteeRecords.filter(item => item.statementId === statementId);
+    return {
+      id: statementId,
+      period: statementId.replace(/^STL-/, ""),
+      settledAt: batchSettlements.map(item => item.settledAt).sort().at(-1),
+      commissionCaseIds: batchSettlements.map(item => item.commissionCaseId),
+      guaranteeIds: batchGuarantees.map(item => item.id),
+      grossAmount: batchSettlements.reduce((sum, item) => sum + item.grossAmount, 0),
+      taxAmount: batchSettlements.reduce((sum, item) => sum + item.taxAmount, 0),
+      guaranteeAmount: batchSettlements.reduce((sum, item) => sum + item.guaranteeAmount, 0),
+      availableAmount: batchSettlements.reduce((sum, item) => sum + item.availableAmount, 0),
+      ruleVersion: batchSettlements[0]?.ruleVersion
+    };
+  });
+
   function feeFor(amountCents, method) {
     const rule = configuration.feeRules[method] || configuration.feeRules.wire;
     const raw = rule.fixed + Math.round(amountCents * rule.rate);
@@ -281,7 +311,7 @@
       ruleVersion: configuration.version,
       allocations: lots.map(lot => ({
         lotId: lot.id, source: lot.source, sourceId: lot.sourceId,
-        commissionCaseId: lot.commissionCaseId || lot.sourceId, clientId: lot.clientId, amount: lot.amount
+        commissionCaseId: lot.commissionCaseId || lot.sourceId, settlementId: lot.statementId || "", clientId: lot.clientId, amount: lot.amount
       }))
     };
     if (!failed) lots.forEach(lot => { lot.remaining = 0; lot.staticRemaining = 0; });
@@ -313,7 +343,7 @@
       if (!take) continue;
       allocations.push({
         lotId: lot.id, source: lot.source, sourceId: lot.sourceId,
-        commissionCaseId: lot.commissionCaseId || lot.sourceId, clientId: lot.clientId, amount: take
+        commissionCaseId: lot.commissionCaseId || lot.sourceId, settlementId: lot.statementId || "", clientId: lot.clientId, amount: take
       });
       remaining -= take;
     }
@@ -338,6 +368,7 @@
       fee: 0, received: 0, status: "processing", receiver: "A*** P***", account: "**** 6621",
       ruleVersion: configuration.version, allocations: allocate(preview.amount)
     };
+    if (!Array.isArray(AFF.state?.withdrawalOrders)) AFF.state.withdrawalOrders = orders;
     orders.push(order);
     return order;
   }
@@ -357,27 +388,45 @@
     const sum = key => rows.reduce((total, row) => total + (row[key] || 0), 0);
     const runtimePaid = runtimeWithdrawals().filter(order => order.status === "paid")
       .reduce((sum, order) => sum + order.allocations.reduce((total, allocation) => total + allocation.amount, 0), 0);
+    const frozen = rows.reduce((total, row) => total + (row.commissionCases || [])
+      .filter(item => item.status === "frozen")
+      .reduce((amount, item) => amount + item.amountCents / 100, 0), 0);
+    const guaranteeAll = guaranteeRecords.reduce((total, item) => total + (item.amount || 0), 0) / 100;
+    const guaranteeLotIds = new Set(availableLots.filter(lot => lot.source === "guarantee_release").map(lot => lot.id));
+    const allWithdrawals = [...staticWithdrawals, ...runtimeWithdrawals().filter(order => order.status === "paid")];
+    const paidGuarantee = allWithdrawals.reduce((total, order) => total + order.allocations
+      .filter(allocation => guaranteeLotIds.has(allocation.lotId))
+      .reduce((amount, allocation) => amount + allocation.amount, 0), 0) / 100;
+    const paidCommission = Number((sum("paid") + runtimePaid / 100 - paidGuarantee).toFixed(2));
+    const available = sourceRows === clientRows ? Number((balance() / 100).toFixed(2)) : Number(sum("available").toFixed(2));
     return {
       registrations: rows.length,
       ftd: rows.filter(row => row.ftdAt).length,
       effective: rows.filter(row => row.effectiveAt).length,
       quality: rows.filter(row => row.qualityAt).length,
       expected: sum("expected"),
+      settled: sum("settled"),
       held: sum("held"),
       approved: sum("approved"),
       paid: sum("paid"),
       rejected: sum("rejected"),
       reversed: sum("reversed"),
       guarantee: sum("guarantee"),
+      guaranteeAll: Number(guaranteeAll.toFixed(2)),
+      paidGuarantee: Number(paidGuarantee.toFixed(2)),
       tax: sum("tax"),
-      available: sourceRows === clientRows ? Number((balance() / 100).toFixed(2)) : Number(sum("available").toFixed(2)),
-      paid: Number((sum("paid") + runtimePaid / 100).toFixed(2))
+      frozen: Number(frozen.toFixed(2)),
+      available,
+      paid: paidCommission,
+      totalRevenue: Number((paidCommission + available + guaranteeAll).toFixed(2))
     };
   }
 
   clientRows.forEach(row => {
     const cases = row.commissionCases || [];
     row.expected = cases.reduce((sum, item) => sum + money(item.amountCents), 0);
+    row.settled = cases.filter(item => item.settlement)
+      .reduce((sum, item) => sum + Number(item.settlement.grossAmount || 0) / 100, 0);
     row.held = cases.filter(item => ["held", "pending", "manual_review", "frozen"].includes(item.status))
       .reduce((sum, item) => sum + item.amountCents / 100, 0);
     row.approved = cases.filter(item => item.status === "settled")
@@ -425,10 +474,12 @@
 
   const originalTotals = AFF.reporting.totals;
   AFF.reporting.metrics.push(
+    { key: "settled", label: "已结算佣金", en: "Settled commission", type: "money" },
     { key: "tax", label: "税费", en: "Tax", type: "money" },
     { key: "guarantee", label: "滚动保证金", en: "Rolling guarantee", type: "money" },
     { key: "available", label: "可提现净额", en: "Available net", type: "money" }
   );
+  AFF.reporting.fields.metrics.settled = AFF.reporting.metrics.find(item => item.key === "settled");
   AFF.reporting.fields.metrics.tax = AFF.reporting.metrics.find(item => item.key === "tax");
   AFF.reporting.fields.metrics.guarantee = AFF.reporting.metrics.find(item => item.key === "guarantee");
   AFF.reporting.fields.metrics.available = AFF.reporting.metrics.find(item => item.key === "available");
@@ -452,6 +503,7 @@
       qualified: finance.quality,
       ftdAmount: rows.reduce((sum, row) => sum + row.ftdAmount, 0),
       expected: finance.expected,
+      settled: finance.settled,
       held: finance.held,
       approved: finance.available,
       paid: finance.paid,
@@ -472,7 +524,7 @@
 
   const messages = [
     { id: "MSG-001", level: "required", type: "规则变更", title: "保证金规则更新", date: "2026-10-20", status: "unread", body: "自下一结算版本起，佣金结算时按10%扣留滚动保证金，90个自然日后无风险自动释放。", version: configuration.version },
-    { id: "MSG-002", level: "normal", type: "Hold延长", title: "1笔佣金延长观察期", date: "2026-10-23", status: "unread", body: "因国家与支付方式风险档叠加，对应佣金动态Hold延长。", commissionCaseId: "COM-C-12006-QS" },
+    { id: "MSG-002", level: "normal", type: "结算延长", title: "1笔佣金延长观察期", date: "2026-10-23", status: "unread", body: "因国家与支付方式风险档叠加，对应佣金动态结算延长。", commissionCaseId: "COM-C-12006-QS" },
     { id: "MSG-003", level: "normal", type: "申诉进度", title: "申诉已改判", date: "2026-10-18", status: "read", body: "复核确认误扣保证金，相关金额已释放至可提现余额。", appealId: "APL-0012" },
     { id: "MSG-004", level: "info", type: "系统维护", title: "报表延迟维护完成", date: "2026-10-16", status: "read", body: "数据报表延迟10分钟，已恢复。" }
   ];
@@ -482,6 +534,47 @@
     { id: "APL-0010", object: "客户资格无效", objectId: "C-12009", clientId: "C-12009", submittedAt: "2026-10-19", dueAt: "2026-10-26", status: "materials", reason: "需补充CRM开户时间截图", canAppeal: true },
     { id: "APL-0009", object: "硬拦截", objectId: "C-12010", clientId: "C-12010", submittedAt: "-", dueAt: "-", status: "blocked", reason: "欺诈库确权命中不可申诉", canAppeal: false }
   ];
+  AFF.simulation.state().violations.forEach(violation => {
+    const client = AFF.reporting.rows.find(row => row.clientId === violation.targetId);
+    if (!client) return;
+    const caseId = client.commissionCases?.[0]?.id || "-";
+    messages.push({
+      id: `MSG-${violation.id}`,
+      level: "required",
+      type: "风控通知",
+      title: "仿真违规事件已触发",
+      date: violation.occurredAt,
+      status: "unread",
+      body: `客户${violation.targetId}触发${violation.category || violation.type}模拟事件。关联佣金保留处理记录，处理结果以复核结论为准。`,
+      simulationViolationId: violation.id,
+      commissionCaseId: caseId
+    });
+    if (violation.allowAppeal) {
+      appeals.unshift({
+        id: `APL-${violation.id}`,
+        object: "仿真违规事件",
+        objectId: violation.id,
+        clientId: violation.targetId,
+        submittedAt: violation.occurredAt,
+        dueAt: shiftDate(violation.occurredAt, 7),
+        status: "reviewing",
+        reason: violation.reason || "仿真违规事件等待复核",
+        canAppeal: true
+      });
+    } else {
+      appeals.push({
+        id: `APL-${violation.id}`,
+        object: "仿真违规事件",
+        objectId: violation.id,
+        clientId: violation.targetId,
+        submittedAt: "-",
+        dueAt: "-",
+        status: "blocked",
+        reason: "该仿真事件设置为不可申诉",
+        canAppeal: false
+      });
+    }
+  });
 
   AFF.finance = {
     asOf: now,
@@ -491,6 +584,7 @@
     clients,
     commissionCases,
     settlements,
+    statementBatches,
     taxRecords,
     guaranteeRecords,
     availableLots,

@@ -1,5 +1,5 @@
 (() => {
-  const now = "2026-10-27";
+  const now = AFF.simulation.date();
   const day = 86400000;
   const dateValue = value => Date.parse(`${value}T00:00:00Z`);
   const dateText = value => new Date(value).toISOString().slice(0, 10);
@@ -55,8 +55,9 @@
     { key: "qualityRate", label: "有效 FTD→质量服务", en: "Valid FTD → quality service", type: "rate" },
     { key: "epc", label: "EPC", en: "EPC", type: "money" }
   ];
-  const countries = ["新加坡", "马来西亚", "泰国", "越南", "印度尼西亚", "南非", "巴西", "墨西哥", "菲律宾", "阿联酋"];
+  const countries = AFF.partnerProgram.commissionMarkets.map(item => item.code);
   const campaigns = [
+    ["DIRECT", "直链推广", "direct-link"],
     ["CMP-1001", "秋季交易指南", "autumn-guide"],
     ["CMP-1002", "市场观察周刊", "market-weekly"],
     ["CMP-1003", "移动交易体验", "mobile-trading"],
@@ -126,7 +127,7 @@
     const qualifiedCandidate = effectiveAt && tradedAt ? plusDays(effectiveAt > tradedAt ? effectiveAt : tradedAt, integer(0, 2)) : null;
     const qualifiedAt = qualifiedCandidate && random() < 0.87 && canReach(qualifiedCandidate) ? qualifiedCandidate : null;
     const commissionStatus = effectiveAt ? pick(["pending", "held", "held", "approved", "approved", "approved", "rejected", "reversed"]) : "pending";
-    const country = kyc === "通过" ? pick(countries) : "待确认";
+    const country = kyc === "通过" ? pick(countries) : "UN";
     const tier = effectiveAt ? pick(["L1", "L2", "L3", "L4"]) : "-";
     const expected = effectiveAt ? AFF.partnerProgram.commissionPrice(country, tier) : 0;
     rows.push({
@@ -171,7 +172,7 @@
       tradedAt: null,
       qualifiedAt: null,
       kyc: "不适用",
-      country: "待确认",
+      country: "UN",
       ...attribution(),
       tier: "-",
       commissionStatus: "pending",
@@ -183,6 +184,53 @@
       reversed: 0
     });
   }
+  AFF.simulation.state().records.forEach((record, recordIndex) => {
+    const tier = record.netDeposit >= 4000 && record.volume >= 10 && record.tradingDays >= 8 ? "L4"
+      : record.netDeposit >= 1500 && record.volume >= 5 && record.tradingDays >= 5 ? "L3"
+      : record.netDeposit >= 800 && record.volume >= 3 && record.tradingDays >= 5 ? "L2"
+      : record.netDeposit >= 300 && record.volume >= 1 && record.tradingDays >= 3 ? "L1" : "-";
+    const expected = record.effective ? AFF.partnerProgram.commissionPrice(record.country, tier) : 0;
+    rows.push({
+      id: `EV-SIM-${String(recordIndex + 1).padStart(4, "0")}`,
+      date: record.date,
+      visitorId: `V-SIM-${String(recordIndex + 1).padStart(4, "0")}`,
+      clicks: 1,
+      clientId: record.clientId,
+      email: record.email,
+      registeredAt: record.date,
+      kycAt: record.kyc === "通过" ? record.date : null,
+      ftdAt: record.effective || record.ftd ? record.date : null,
+      effectiveAt: record.effective ? record.date : null,
+      tradedAt: record.effective ? record.date : null,
+      qualifiedAt: record.quality ? record.date : null,
+      kyc: record.kyc,
+      country: record.country,
+      platform: record.platform,
+      os: record.platform === "Web" ? "Windows" : record.platform,
+      device: record.platform === "Web" ? "电脑" : "手机",
+      browser: record.platform === "Web" ? "Chrome" : "不适用",
+      mediaSource: "仿真录入",
+      agency: "自主推广",
+      campaignCode: record.campaignCode,
+      campaign: record.campaign,
+      source: record.source,
+      medium: "simulation",
+      utmCampaign: "simulation",
+      content: "simulation-entry",
+      term: "simulation",
+      subId: record.subId || "simulation_entry",
+      sourceDomain: "simulation.local",
+      tier,
+      commissionStatus: record.effective ? "held" : "pending",
+      ftdAmount: record.ftdAmount || 0,
+      expected,
+      held: record.effective ? expected : 0,
+      approved: 0,
+      rejected: 0,
+      reversed: 0,
+      simulationRecordId: record.id
+    });
+  });
   rows.sort((left, right) => right.date.localeCompare(left.date) || left.id.localeCompare(right.id));
   const commissionReasons = {
     rejected: [
@@ -196,6 +244,7 @@
       ["ELIGIBILITY-REVIEW", "客户资格复核结果变更，原佣金已冲正。", "A client eligibility review changed the original decision and the commission was reversed."]
     ]
   };
+  let recentRiskSequence = 0;
   rows.forEach((row, index) => {
     row.qualityAt = row.qualifiedAt;
     row.firstCommissionAt = row.effectiveAt;
@@ -203,9 +252,51 @@
     row.eligibilityStatus = !row.registeredAt
       ? "pending_attribution"
       : row.kyc === "失败" ? "kyc_failed"
-      : row.country === "待确认" ? "risk_investigation"
+      : row.country === "UN" ? "risk_investigation"
       : "attributed";
     const clientIdNumber = Number(String(row.clientId || "0").replace(/\D/g, ""));
+    row.riskHandlingStatus = "none";
+    row.riskReasonCategory = "";
+    row.riskStartedAt = "";
+    row.riskEvidenceScope = "";
+    row.riskImpactScope = "";
+    row.riskStatusTime = "";
+    row.riskNextStep = "";
+    row.riskHandlingPath = "";
+    row.riskRequiresMaterials = false;
+    const recentClient = row.clientId && row.effectiveAt && index >= 12 && row.date >= plusDays(now, -29);
+    const riskSlot = recentClient ? ++recentRiskSequence % 120 : -1;
+    if (riskSlot === 1) {
+      row.riskHandlingStatus = "investigating";
+      row.riskReasonCategory = index % 2 ? "资料待核验" : "行为待说明";
+      row.riskStartedAt = plusDays(row.effectiveAt, 1);
+      row.riskEvidenceScope = "客户注册资料与流量来源记录";
+      row.riskImpactScope = "客户与关联佣金";
+      row.riskStatusTime = now;
+      row.riskNextStep = "补充说明";
+      row.riskHandlingPath = "低风险调查";
+      row.riskRequiresMaterials = true;
+    } else if (riskSlot === 2) {
+      row.riskHandlingStatus = "quarantined";
+      row.riskReasonCategory = "集群风险";
+      row.riskStartedAt = plusDays(row.effectiveAt, 2);
+      row.riskEvidenceScope = "关联行为特征与佣金流水";
+      row.riskImpactScope = "客户、关联佣金与相关链接";
+      row.riskStatusTime = now;
+      row.riskNextStep = "等待复核";
+      row.riskHandlingPath = "统一隔离队列";
+      row.riskRequiresMaterials = false;
+    } else if (riskSlot === 3) {
+      row.riskHandlingStatus = "released";
+      row.riskReasonCategory = "质量待复核";
+      row.riskStartedAt = plusDays(row.effectiveAt, 3);
+      row.riskEvidenceScope = "质量服务结果与结算前检查";
+      row.riskImpactScope = "客户与关联佣金";
+      row.riskStatusTime = now;
+      row.riskNextStep = "等待结算复核";
+      row.riskHandlingPath = "已解除隔离";
+      row.riskRequiresMaterials = false;
+    }
     row.milestoneStatus = !row.registeredAt ? "pending_attribution"
       : row.kyc !== "通过" ? "pending"
       : !row.ftdAt ? "ftd_in_progress"
@@ -258,6 +349,7 @@
     row.held = row.commissionCases.filter(item => item.status === "held").reduce((sum, item) => sum + item.amount, 0);
     row.approved = row.commissionCases.filter(item => item.status === "approved").reduce((sum, item) => sum + item.amount, 0);
     row.paid = row.commissionCases.filter(item => item.status === "paid").reduce((sum, item) => sum + item.amount, 0);
+    row.settled = row.commissionCases.filter(item => ["approved", "paid", "settled"].includes(item.status)).reduce((sum, item) => sum + item.amount, 0);
     row.rejected = row.commissionCases.filter(item => item.status === "rejected").reduce((sum, item) => sum + item.amount, 0);
     row.reversed = row.commissionCases.filter(item => item.status === "reversed").reduce((sum, item) => sum + item.amount, 0);
     row.commissionId = row.commissionCases[0]?.id || null;
@@ -265,6 +357,54 @@
     row.commissionReasonCode = reason?.[0] || "";
     row.commissionReason = reason?.[1] || "";
     row.commissionReasonEn = reason?.[2] || "";
+  });
+
+  const violationRules = {
+    fraud_hit: { risk: "quarantined", commission: "rejected", category: "欺诈库命中" },
+    identity_duplicate: { risk: "quarantined", commission: "rejected", category: "重复身份" },
+    non_new_customer: { risk: "investigating", commission: "rejected", category: "非新客户" },
+    prohibited_region: { risk: "quarantined", commission: "rejected", category: "禁推地区" },
+    chargeback: { risk: "investigating", commission: "reversed", category: "支付拒付" },
+    payment_abnormal: { risk: "investigating", commission: "held", category: "支付风险" },
+    false_traffic: { risk: "investigating", commission: "held", category: "虚假流量" },
+    brand_bidding: { risk: "investigating", commission: "held", category: "品牌词违规竞价" },
+    self_referral: { risk: "investigating", commission: "held", category: "自荐或亲属注册" },
+    material_violation: { risk: "investigating", commission: "held", category: "素材违规" },
+    cluster_risk: { risk: "quarantined", commission: "manual_review", category: "集群风险" }
+  };
+  AFF.simulation.state().violations.forEach(violation => {
+    const row = rows.find(item => item.clientId === violation.targetId);
+    const rule = violationRules[violation.type] || violationRules.false_traffic;
+    if (!row) return;
+    row.simulationViolationId = violation.id;
+    row.riskHandlingStatus = rule.risk;
+    row.riskReasonCategory = violation.category || rule.category;
+    row.riskStartedAt = violation.occurredAt;
+    row.riskEvidenceScope = violation.evidenceScope || "仿真违规事件关联记录";
+    row.riskImpactScope = "客户、关联佣金与结算检查";
+    row.riskStatusTime = violation.occurredAt;
+    row.riskNextStep = rule.risk === "quarantined" ? "等待复核" : "补充说明";
+    row.riskHandlingPath = rule.risk === "quarantined" ? "统一隔离队列" : "低风险调查";
+    row.riskRequiresMaterials = rule.risk === "investigating";
+    row.commissionStatus = rule.commission;
+    row.commissionReasonCode = `SIM-${String(violation.type).toUpperCase()}`;
+    row.commissionReason = violation.reason || `${rule.category}触发模拟风控处理`;
+    row.commissionReasonEn = `${rule.category} triggered simulated risk handling`;
+    (row.commissionCases || []).forEach(item => {
+      item.status = rule.commission;
+      item.reasonCode = row.commissionReasonCode;
+      item.reason = row.commissionReason;
+    });
+    row.fundStatus = ["rejected", "reversed"].includes(rule.commission)
+      ? ({ rejected: "rejected", reversed: "clawed_back" })[rule.commission]
+      : rule.commission === "manual_review" ? "manual_review" : "held";
+    row.expected = row.commissionCases.reduce((sum, item) => sum + item.amount, 0);
+    row.held = row.commissionCases.filter(item => ["held", "manual_review"].includes(item.status)).reduce((sum, item) => sum + item.amount, 0);
+    row.approved = row.commissionCases.filter(item => ["approved", "settled"].includes(item.status)).reduce((sum, item) => sum + item.amount, 0);
+    row.paid = row.commissionCases.filter(item => ["paid", "settled"].includes(item.status)).reduce((sum, item) => sum + item.amount, 0);
+    row.settled = row.commissionCases.filter(item => ["approved", "paid", "settled"].includes(item.status)).reduce((sum, item) => sum + item.amount, 0);
+    row.rejected = row.commissionCases.filter(item => item.status === "rejected").reduce((sum, item) => sum + item.amount, 0);
+    row.reversed = row.commissionCases.filter(item => item.status === "reversed").reduce((sum, item) => sum + item.amount, 0);
   });
 
   function value(row, key) {
@@ -312,6 +452,7 @@
     };
     counts.ftdAmount = registered.reduce((sum, row) => sum + row.ftdAmount, 0);
     counts.expected = registered.reduce((sum, row) => sum + row.expected, 0);
+    counts.settled = registered.reduce((sum, row) => sum + row.settled, 0);
     counts.held = registered.filter(row => row.fundStatus === "held").reduce((sum, row) => sum + row.held, 0);
     counts.approved = registered.filter(row => row.fundStatus === "payable").reduce((sum, row) => sum + row.approved, 0);
     counts.paid = registered.filter(row => row.fundStatus === "paid").reduce((sum, row) => sum + row.paid, 0);

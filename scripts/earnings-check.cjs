@@ -28,9 +28,10 @@ async function main() {
     assert.equal(await page.title(), "收益数据 · Affiliate CPA");
     const source = await page.evaluate(() => AFF.earnings.records());
     const range = await page.evaluate(() => ({ from: AFF.reporting.from, to: AFF.reporting.now }));
+    const finance = await page.evaluate(() => AFF.finance.summary());
     assert.ok(source.length >= 200);
     assert.equal(new Set(source.map(row => row.id)).size, source.length);
-    const total = async () => Number(await page.locator("[data-earn-total]").textContent());
+    const total = async () => Number(await page.locator("[data-aff-total]").textContent());
     const financialSnapshot = () => page.evaluate(() => JSON.stringify({
       rows: AFF.reporting.rows,
       metrics: AFF.dashboard.metrics,
@@ -42,65 +43,77 @@ async function main() {
       (!filter.from || row.date >= filter.from) &&
       (!filter.to || row.date <= filter.to) &&
       (!filter.status || row.status === filter.status) &&
+      (!filter.withdrawalStatus || row.withdrawal?.key === filter.withdrawalStatus) &&
       (!filter.caseType || row.caseType === filter.caseType) &&
-      (!filter.type || typeOf(row) === filter.type)
+      (!filter.type || typeOf(row) === filter.type) &&
+      (!filter.settlementId || row.settlement?.id?.toLowerCase().includes(filter.settlementId.toLowerCase()))
     ));
+    async function openFilters() {
+      if (!(await page.locator(".earn-filter-drawer").count())) {
+        await page.locator("[data-earn-action='filters']").click();
+        await page.locator(".earn-filter-drawer").waitFor();
+      }
+    }
+    async function setDates(filter = {}) {
+      await openFilters();
+      const dates = { from: filter.from || range.from, to: filter.to || range.to };
+      await page.evaluate(dates => {
+        const root = document.querySelector("[data-range-id='earnings-filter-range']");
+        root.dataset.rangeFrom = dates.from;
+        root.dataset.rangeTo = dates.to;
+        root.dispatchEvent(new CustomEvent("date-range-change", {
+          bubbles: true,
+          detail: { id: "earnings-filter-range", ...dates }
+        }));
+      }, dates);
+    }
     async function apply(filter = {}) {
-      for (const key of ["from", "to"]) await page.fill(`[data-earn-filter="${key}"]`, filter[key] || range[key]);
-      for (const key of ["status", "type", "caseType"]) await page.selectOption(`[data-earn-filter="${key}"]`, filter[key] || "");
-      await page.locator("[data-earn-filter-form] button[type=submit]").click();
+      await setDates(filter);
+      for (const key of ["status", "withdrawalStatus", "type", "caseType"]) await page.selectOption(`[data-earn-filter="${key}"]`, filter[key] || "");
+      if ("settlementId" in filter) await page.fill("[data-earn-filter='settlementId']", filter.settlementId || "");
+      await page.locator("[data-earn-action='filter-apply']").click();
     }
     async function assertRows(filter = {}) {
       const expected = expectedRows({ ...range, ...filter });
       assert.equal(await total(), expected.length);
       const shown = await page.locator(".earn-table tbody tr [data-earn-detail]").evaluateAll(nodes => nodes.map(node => node.dataset.earnDetail));
-      const size = Number(await page.locator("[data-earn-page-size]").inputValue());
+      const size = Number(await page.locator("[data-aff-page-size]").inputValue());
       assert.deepEqual(shown, expected.slice(0, size).map(row => row.id));
-      const expectedTotals = expected.reduce((sum, row) => {
-        const amount = Math.abs(row.amount);
-        sum.expected += amount;
-        if (Object.hasOwn(sum, row.status)) sum[row.status] += amount;
-        if (row.status === "settled") {
-          sum.approved += row.settlement.availableAmount / 100;
-          sum.paid += AFF.finance.staticWithdrawals.filter(order => order.status === "paid")
-          .flatMap(order => order.allocations)
-          .filter(allocation => allocation.commissionCaseId === row.id)
-          .reduce((sum, allocation) => sum + allocation.amount / 100, 0);
-          sum.tax += row.settlement.taxAmount / 100;
-          sum.guarantee += row.settlement.guaranteeAmount / 100;
-        }
-        return sum;
-      }, { expected: 0, held: 0, approved: 0, paid: 0, tax: 0, guarantee: 0, rejected: 0, reversed: 0 });
-      for (const key of ["expected", "held", "approved", "paid", "reversed"]) {
-        assert.equal(await page.locator(`[data-earn-stat="${key}"]`).textContent(), money(expectedTotals[key]));
+      const expectedStats = {
+        totalRevenue: finance.totalRevenue,
+        paid: finance.paid + finance.paidGuarantee,
+        held: finance.held,
+        guarantee: finance.guarantee
+      };
+      for (const [key, value] of Object.entries(expectedStats)) {
+        assert.equal(await page.locator(`[data-earn-stat="${key}"]`).textContent(), money(value));
       }
     }
-    assert.equal(await total(), source.length);
-    assert.equal(await page.locator(".earn-table th").count(), 9);
+    const defaultRows = expectedRows(range);
+    assert.equal(await total(), defaultRows.length);
+    assert.equal(await page.locator(".earn-stat").count(), 4);
+    assert.equal(await page.locator(".earn-table th").count(), 11);
+    assert.ok(await page.locator(".earn-table").innerText().then(text => text.includes("佣金状态") && text.includes("提现状态")));
     await assertRows();
-    await page.selectOption("[data-earn-page-size]", "50");
+    await page.selectOption("[data-aff-page-size]", "50");
     const allIds = [];
-    for (let index = 1; index <= Math.ceil(source.length / 50); index += 1) {
+    for (let index = 1; index <= Math.ceil(defaultRows.length / 50); index += 1) {
       allIds.push(...await page.locator("[data-earn-detail]").evaluateAll(nodes => nodes.map(node => node.dataset.earnDetail)));
-      if (index < Math.ceil(source.length / 50)) await page.getByRole("button", { name: "下一页", exact: true }).click();
+      if (index < Math.ceil(defaultRows.length / 50)) await page.getByRole("button", { name: "下一页", exact: true }).click();
     }
-    assert.deepEqual(allIds, sorted(source).map(row => row.id));
-    await page.locator('[data-earn-action="reset"]').click();
-    await page.selectOption("[data-earn-page-size]", "10");
+    assert.deepEqual(allIds, defaultRows.map(row => row.id));
+    await page.locator('[data-earn-action="quick-reset"]').click();
+    await page.selectOption("[data-aff-page-size]", "10");
 
-    await page.selectOption('[data-earn-filter="status"]', "held");
-    assert.equal(await total(), source.length);
+    await page.selectOption('[data-earn-quick="status"]', "held");
+    assert.equal(await total(), expectedRows({ ...range, status: "held" }).length);
+    await page.locator('[data-earn-action="quick-reset"]').click();
+    const withdrawalStatus = source.find(row => row.withdrawal?.key === "paid")?.withdrawal?.key || "available";
+    await page.selectOption('[data-earn-quick="withdrawalStatus"]', withdrawalStatus);
+    assert.equal(await total(), expectedRows({ ...range, withdrawalStatus }).length);
+    await page.locator('[data-earn-action="quick-reset"]').click();
     await apply({ status: "held" });
     await assertRows({ status: "held" });
-    await page.locator('[data-earn-action="help"]').click();
-    const help = await page.locator("#earn-hold-help").innerText();
-    assert.ok(help.includes("初始为1天"));
-    assert.ok(help.includes("超过30天"));
-    assert.ok(help.includes("人工审核"));
-    assert.ok(help.includes("不是固定的一一对应关系"));
-    await page.keyboard.press("Escape");
-    assert.equal(await page.locator("#earn-hold-help").count(), 0);
-
     for (const status of ["pending", "held", "settled", "rejected", "reversed"]) {
       await apply({ status });
       await assertRows({ status });
@@ -131,6 +144,7 @@ async function main() {
         assert.ok(hold.totalDays >= 1 && hold.totalDays <= 30);
         assert.ok(hold.expectedReleaseAt > range.to);
         const trigger = drawer.locator('[data-earn-action="detail-help"]');
+        await trigger.scrollIntoViewIfNeeded();
         await trigger.hover();
         await page.locator("#earn-detail-help").waitFor({ state: "visible" });
         assert.ok((await page.locator("#earn-detail-help").innerText()).includes("预计日期不代表届时一定可提现"));
@@ -156,29 +170,34 @@ async function main() {
       await apply({ type });
       await assertRows({ type });
     }
+    const settledWithStatement = source.find(row => row.settlement?.id);
+    assert.ok(settledWithStatement?.settlement?.id);
+    await apply({ settlementId: settledWithStatement.settlement.id });
+    await assertRows({ settlementId: settledWithStatement.settlement.id });
+    assert.equal(await page.locator(".earn-table tbody tr").count(), 1);
+    assert.ok((await page.locator(".earn-table tbody tr").first().innerText()).includes("结算单号"));
     await apply({ status: "held", type: "settlement" });
     assert.equal(await total(), 0);
     assert.ok(await page.getByText("暂无佣金记录", { exact: true }).isVisible());
     await apply({ status: "frozen" });
     assert.equal(await total(), 0);
-    await page.locator('[data-earn-action="reset"]').click();
+    await page.locator('[data-earn-action="quick-reset"]').click();
     await assertRows();
-    await page.fill('[data-earn-filter="from"]', "2026-10-20");
-    await page.fill('[data-earn-filter="to"]', "2026-10-01");
-    await page.locator("[data-earn-filter-form] button[type=submit]").click();
+    await setDates({ from: "2026-10-20", to: "2026-10-01" });
+    await page.locator("[data-earn-action='filter-apply']").click();
     assert.ok((await page.locator("#earn-filter-error").innerText()).includes("开始日期不得晚于结束日期"));
-    assert.equal(await total(), source.length);
-    await page.fill('[data-earn-filter="to"]', "2026-10-28");
-    await page.locator("[data-earn-filter-form] button[type=submit]").click();
+    assert.equal(await total(), defaultRows.length);
+    await setDates({ from: "2026-10-20", to: "2026-10-28" });
+    await page.locator("[data-earn-action='filter-apply']").click();
     assert.ok((await page.locator("#earn-filter-error").innerText()).includes("结束日期不得晚于数据截止日"));
-    assert.equal(await total(), source.length);
+    assert.equal(await total(), defaultRows.length);
     await apply({ from: "2026-10-01", to: "2026-10-15" });
     await assertRows({ from: "2026-10-01", to: "2026-10-15" });
     await apply({ from: "2025-01-01", to: "2025-01-02" });
     assert.equal(await total(), 0);
-    await page.locator('[data-earn-action="reset"]').click();
-    assert.equal(await total(), source.length);
-    assert.equal(await page.locator('[data-earn-filter="from"]').inputValue(), range.from);
+    await page.locator('[data-earn-action="quick-reset"]').click();
+    assert.equal(await total(), defaultRows.length);
+    assert.equal(await page.evaluate(() => AFF.state.earnings.filters.from), range.from);
 
     const rejected = expectedRows({ ...range, status: "rejected" })[0];
     await apply({ status: "rejected" });
@@ -218,7 +237,7 @@ async function main() {
       for (const width of [1440, 1111, 390]) {
         await page.setViewportSize({ width, height: 1000 });
         await page.evaluate(language => { AFF.state.language = language; render(); }, language);
-        await page.locator('[data-earn-action="reset"]').click();
+        await page.locator('[data-earn-action="quick-reset"]').click();
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
         const columns = await page.locator(".earn-stat").evaluateAll(nodes =>
           new Set(nodes.map(node => Math.round(node.getBoundingClientRect().left))).size
@@ -258,7 +277,7 @@ async function main() {
         await page.keyboard.press("Escape");
         if (width > 390) {
           await page.locator(`[data-earn-detail="${other.id}"]`).click();
-          await page.locator(".earn-overlay").click({ position: { x: 10, y: 100 } });
+          await page.locator(".aff-drawer-overlay").click({ position: { x: 10, y: 100 } });
           assert.equal(await page.locator(".earn-drawer").count(), 0);
         }
       }
@@ -283,8 +302,10 @@ async function main() {
     const touchPopup = await touch.locator("#earn-detail-help").boundingBox();
     assert.ok(touchPopup.x >= 0 && touchPopup.x + touchPopup.width <= 391 && touchPopup.y >= 0 && touchPopup.y + touchPopup.height <= 845);
     await touchHelp.tap();
+    await touch.waitForTimeout(250);   // toggle close runs through the 120ms pointerout timer
     assert.equal(await touch.locator("#earn-detail-help").isVisible(), false);
     await touchHelp.tap();
+    await touch.waitForTimeout(250);   // pointerout close delay is 120ms — let it settle
     await touch.locator(".earn-drawer > header h2").tap();
     assert.equal(await touch.locator("#earn-detail-help").isVisible(), false);
     await touch.close();

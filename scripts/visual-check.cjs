@@ -14,9 +14,12 @@ const routes = [
   ["tracker", "回传配置"],
   ["assets", "素材库"],
   ["pay", "收益数据"],
+  ["statements", "结算单"],
   ["lookup", "归属查询"],
   ["wd", "提现"],
   ["guarantee", "保证金"],
+  ["account", "个人中心"],
+  ["support", "帮助与工单"],
   ["appeals", "申诉中心"],
   ["messages", "消息中心"],
   ["apply", "合作者计划"],
@@ -34,9 +37,12 @@ const routeGroups = {
   tracker: "推广管理",
   assets: "推广管理",
   pay: "收益中心",
+  statements: "收益中心",
   lookup: "推广管理",
   wd: "收益中心",
   guarantee: "收益中心",
+  account: "服务中心",
+  support: "服务中心",
   appeals: "服务中心",
   messages: "服务中心"
 };
@@ -140,11 +146,12 @@ async function main() {
   await page.fill("#login-form input[name=password]", "demo-password");
   await page.click("#login-form button[type=submit]");
   await page.waitForSelector("#app-view:not(.hidden)");
-  assertText(await page.locator("#main").innerText(), "可提现余额", "Dashboard");
+  await page.evaluate(() => navigate("dash"));
+  assertText(await page.locator(".topbar").innerText(), "可提现余额", "Dashboard topbar");
   const shellState = await page.evaluate(() => ({
     topbarLeft: document.querySelector(".topbar").getBoundingClientRect().left,
     topbarWidth: document.querySelector(".topbar").getBoundingClientRect().width,
-    brandText: document.querySelector(".topbar-brand").innerText.trim(),
+    brandText: document.querySelector(".topbar-brand .brand-text strong").innerText.trim(),
     brandImageLoaded: document.querySelector(".topbar-brand img")?.naturalWidth > 0,
     sidebarBrandCount: document.querySelectorAll(".sidebar .brand").length,
     breadcrumbCount: document.querySelectorAll(".breadcrumb").length,
@@ -174,7 +181,7 @@ async function main() {
   await page.locator("#wallet-toggle").hover();
   await page.locator("#wallet-popover").waitFor({ state: "visible" });
   const walletText = await page.locator("#wallet-popover").innerText();
-  for (const expected of ["可提现余额", "总收益", "提现"]) {
+  for (const expected of ["可提现余额", "总收益", "结算中", "资金详情", "提现"]) {
     assertText(walletText, expected, "Wallet popover");
   }
   await page.locator("#wallet-popover").hover();
@@ -191,17 +198,17 @@ async function main() {
   async function assertPromotionLink(expectedPage, expectedLanguage) {
     const text = await linkAddress.innerText();
     const url = new URL(text);
-    if (url.origin !== "https://track.example.com" || url.pathname !== "/r/AFF1001" ||
-        url.searchParams.get("utm_source") !== "partner" ||
+    if (url.origin !== "https://go.affiliate-cpa.example" || !url.pathname ||
         url.searchParams.get("page") !== expectedPage || url.searchParams.get("lang") !== expectedLanguage ||
+        url.searchParams.get("aff") !== "AFF1001" || url.searchParams.get("path_version") !== "PATH-20261104-1" ||
         (await linkCopy.getAttribute("data-copy")) !== text) {
       throw new Error(`Dashboard promotion link failed: ${text}`);
     }
   }
   await assertPromotionLink("register", "zh-cn");
   const pageOptions = [
-    ["首页", "home"], ["Standard·MT5开户页", "standard-mt5"], ["Pro·MT4开户页", "pro-mt4"],
-    ["Zero·MT5开户页", "zero-mt5"], ["注册页", "register"]
+    ["官方首页", "home"], ["Standard·MT5开户页", "standard-mt5"], ["Pro·MT4开户页", "pro-mt4"],
+    ["Zero·MT5开户页", "zero-mt5"], ["官方注册页", "register"]
   ];
   const languageOptions = [["English", "en"], ["ไทย", "th"], ["Tiếng Việt", "vi"], ["简体中文", "zh-cn"]];
   for (const [label, pageCode] of pageOptions) {
@@ -304,9 +311,9 @@ async function main() {
   }));
   if (!dropdownState.open || dropdownState.visibility !== "visible" || Number(dropdownState.opacity) < 0.99) throw new Error("Account dropdown hover failed");
   const dropdownText = await page.locator("#account-dropdown").innerText();
-  assertText(dropdownText, "账户管理", "Account menu item");
+  assertText(dropdownText, "个人中心", "Personal center menu item");
   assertText(dropdownText, "退出登录", "Logout menu item");
-  const accountItem = page.locator("[data-action='open-account']");
+  const accountItem = page.locator("#account-dropdown [data-route='account']");
   const itemBackgroundBefore = await accountItem.evaluate(node => getComputedStyle(node).backgroundColor);
   await accountItem.hover();
   await page.waitForTimeout(120);
@@ -314,20 +321,13 @@ async function main() {
   if (itemBackgroundBefore === itemBackgroundAfter) throw new Error("Account menu hover background failed");
 
   await accountItem.click();
-  await page.waitForSelector(".modal-layer.screen:not(.hidden)");
-  const modalBox = await page.locator(".account-modal").boundingBox();
-  if (!modalBox || Math.abs(modalBox.width - page.viewportSize().width) > 2 || Math.abs(modalBox.height - page.viewportSize().height) > 2) {
-    throw new Error("Account modal is not fullscreen");
+  await page.waitForSelector(".account-page");
+  const accountText = await page.locator(".account-page").innerText();
+  for (const expected of ["账户状态", "资料完整度", "收款资料", "税务资料", "可用能力"]) {
+    if (!accountText.includes(expected)) throw new Error(`Account center missing ${expected}`);
   }
-  assertText(await page.locator(".account-modal").innerText(), "U-P-001", "Account profile");
-  const accountModalText = await page.locator(".account-modal").innerText();
-  if (accountModalText.includes("registered-user@example.com") || !accountModalText.includes("r***@example.com")) {
-    throw new Error("Account modal email masking failed");
-  }
-  await page.fill("[data-account-field='displayName']", "合作者演示");
-  await page.click("[data-action='save-account']");
-  await page.waitForSelector(".modal-layer.screen", { state: "hidden" });
-  if ((await page.locator("#avatar-button").innerText()) !== "合") throw new Error("Saved account name did not update avatar");
+  await page.click(".account-tabs [data-account-tab='security']");
+  assertText(await page.locator(".account-page").innerText(), "接收邮件通知", "Email notification preference");
 
   await page.locator("#avatar-button").hover();
   await page.click("[data-action='logout']");
@@ -343,7 +343,7 @@ async function main() {
   await page.keyboard.press("ArrowDown");
   await page.waitForTimeout(300);
   const focusedMenuAction = await page.evaluate(() =>
-    document.activeElement?.classList?.contains("account-menu-item") ? (document.activeElement.dataset.action || document.activeElement.getAttribute("href")) : null);
+    document.activeElement?.classList?.contains("account-menu-item") ? (document.activeElement.dataset.action || document.activeElement.dataset.route || document.activeElement.getAttribute("href")) : null);
   if (!focusedMenuAction) throw new Error(`Account menu keyboard focus failed: ${await page.evaluate(() => ({tag: document.activeElement?.tagName, class: document.activeElement?.className, text: document.activeElement?.innerText}))}`);
   if (!(await page.locator("#account-menu").evaluate(node => node.classList.contains("open")))) throw new Error("Account menu keyboard open failed");
   await page.keyboard.press("Escape");
@@ -357,6 +357,9 @@ async function main() {
       await page.goto(`${baseUrl}/#/onboarding`, { waitUntil: "domcontentloaded" });
     } else if (route === "dash") {
       await page.click("#nav [data-route='dash']");
+    } else if (route === "account") {
+      await page.click("#avatar-button");
+      await page.click("#account-dropdown [data-route='account']");
     } else {
       const parent = page.locator(`[data-nav-group='${routeGroups[route]}']`);
       if ((await parent.getAttribute("aria-expanded")) !== "true") await parent.click();
@@ -368,15 +371,16 @@ async function main() {
   }
 
   await page.goto(`${baseUrl}/#/dash`, { waitUntil: "domcontentloaded" });
-  assertText(await page.locator("#kyc-banner").innerText(), "首次提现前需完成收款主体、受益所有人、收款账户与税务信息。", "Withdrawal KYB banner text");
-  await page.click("#kyc-banner [data-route='wd']");
+  assertText(await page.locator("#kyc-banner").innerText(), "您的账户资料未完善，部分功能可能受限。", "Account completion banner text");
+  await page.click("#dismiss-kyc");
+  await page.evaluate(() => navigate("wd"));
   assertText(await page.title(), "提现", "Withdrawal route");
   if (!(await page.locator("#kyc-banner").isHidden())) throw new Error("KYB banner should hide on withdrawal page");
   await page.goto(`${baseUrl}/#/onboarding`, { waitUntil: "domcontentloaded" });
   let onboardingText = await page.locator("#main").innerText();
-  assertText(onboardingText, "注册 → 资料 → 实时硬风控 → 协议 → 启用链接。", "Onboarding subtitle");
+  assertText(onboardingText, "注册 → 资料 → KYC 提交 → 协议 → 资质审核。", "Onboarding subtitle");
   const onboardingSteps = await page.locator(".steps .step-label").allTextContents();
-  if (onboardingSteps.join("|") !== "注册账号|基本资料与渠道|实时硬风控|接受协议与准则|启用推广链接") {
+  if (onboardingSteps.join("|") !== "注册账号|基本资料与渠道|KYC 提交|接受协议与准则|资质审核") {
     throw new Error(`Onboarding steps failed: ${onboardingSteps}`);
   }
   if (!(await page.locator("[data-action='onboarding-next']").isDisabled())) throw new Error("Onboarding email gate failed");
@@ -384,14 +388,31 @@ async function main() {
   assertText(await page.locator("#main").innerText(), "已验证", "Onboarding verified email");
   await page.click("[data-action='onboarding-next']");
   onboardingText = await page.locator("#main").innerText();
-  assertText(onboardingText, "基本资料", "Onboarding profile title");
-  assertText(onboardingText, "推广渠道类型", "Onboarding profile channel");
+  assertText(onboardingText, "基本资料与渠道", "Onboarding profile title");
+  if (await page.locator("[data-onboarding-country-selection]").count()) {
+    throw new Error("Optional onboarding profile fields should be hidden by default");
+  }
+  await page.click("[data-action='toggle-onboarding-details']");
+  assertText(await page.locator("#main").innerText(), "推广渠道类型", "Onboarding profile channel");
   await page.fill("[data-onboarding-name]", "Affiliate Partner");
+  const onboardingCountries = page.locator(".profile-select").filter({ has: page.locator("[data-onboarding-country-selection]") });
+  await onboardingCountries.locator("summary").click();
+  await onboardingCountries.locator("[data-profile-selection-search]").fill("Vietnam");
+  await onboardingCountries.locator("[data-profile-selection-choice][value='越南']").check();
+  await onboardingCountries.locator("[data-profile-selection-search]").fill("Thailand");
+  await onboardingCountries.locator("[data-profile-selection-choice][value='泰国']").check();
+  await onboardingCountries.locator("summary").click();
+  await page.fill("[data-onboarding-profile='websites']", "https://example.com,https://app.example.com");
   await page.click("[data-action='onboarding-next']");
   onboardingText = await page.locator("#main").innerText();
-  assertText(onboardingText, "实时硬风控", "Onboarding risk title");
-  assertText(onboardingText, "注册后先完成确定性风险检查，通过即可启用链接。", "Onboarding risk guide");
-  await page.click("[data-action='open-client-kyc']");
+  assertText(onboardingText, "KYC 提交", "Onboarding KYC title");
+  assertText(onboardingText, "请前往认证页面完成身份认证，完成后返回此页面继续申请。", "Onboarding KYC guide");
+  assertText(onboardingText, "去完成", "Onboarding KYC redirect action");
+  if (onboardingText.includes("CRM") || onboardingText.includes("模拟提交 KYC")) {
+    throw new Error("Onboarding KYC screen should use the external verification handoff copy");
+  }
+  await page.click("[data-action='open-onboarding-kyc']");
+  assertText(await page.locator("#toast").innerText(), "已打开认证页面", "Onboarding KYC redirect feedback");
   await page.click("[data-action='complete-onboarding-kyc']");
   onboardingText = await page.locator("#main").innerText();
   assertText(onboardingText, "接受协议与准则", "Onboarding agreements title");
@@ -406,11 +427,16 @@ async function main() {
   await page.check("[data-onboarding-agreement='2']");
   await page.click("[data-action='onboarding-next']");
   onboardingText = await page.locator("#main").innerText();
-  assertText(onboardingText, "启用推广链接", "Onboarding submit title");
+  assertText(onboardingText, "资质审核", "Onboarding submit title");
   await page.click("[data-action='submit-onboarding']");
   onboardingText = await page.locator("#main").innerText();
-  assertText(onboardingText, "已启用", "Onboarding enabled status");
-  assertText(onboardingText, "首次提现前完成KYB、收款账户与税务信息即可申请出金。", "Onboarding enabled note");
+  assertText(onboardingText, "审核中", "Onboarding review status");
+  if (await page.locator(".onboarding-submitted, [data-action='simulate-onboarding-review']").count()) {
+    throw new Error("Onboarding should submit directly without the redundant submitted panel");
+  }
+  if (onboardingText.includes("首个链接启用门禁") || onboardingText.includes("资质审核通过前，推广链接保持不可用")) {
+    throw new Error("Onboarding review screen should not show link-gate copy");
+  }
   await page.click("[data-onboarding-step='1']");
   assertText(await page.locator("#main").innerText(), "已验证", "Onboarding back navigation");
 
@@ -424,7 +450,8 @@ async function main() {
 
   await page.click("[data-route='clients']");
   await page.locator("[data-rp-client]").first().click();
-  assertText(await page.locator(".report-drawer").innerText(), "转化进度", "Client detail");
+  assertText(await page.locator(".report-drawer").innerText(), "三层状态", "Client three-layer status");
+  assertText(await page.locator(".report-drawer").innerText(), "转化阶段", "Client conversion stage");
   await page.locator(".report-drawer [data-rp-action='close']").first().click();
 
   await page.click("[data-route='promo']");
@@ -439,7 +466,7 @@ async function main() {
   await page.fill("[data-sc-filter='search']", "tg_group_01");
   await page.locator("[data-sc-filter-form] button[type='submit']").click();
   await page.click("[data-sc-toggle='tg_group_01']");
-  assertText(await page.locator(".sc-table tbody tr").innerText(), "已封禁", "Sub ID state");
+  assertText(await page.locator(".sc-table tbody tr").innerText(), "自己停用", "Sub ID state");
   await page.locator("[data-sc-detail='tg_group_01']").click();
   assertText(await page.locator(".sc-drawer").innerText(), "渠道表现", "Subchannel detail");
   await page.locator(".sc-drawer header [data-sc-action='close']").click();
@@ -517,6 +544,12 @@ async function main() {
   if ((await page.locator(".asset-gif-card").count()) !== 2) throw new Error("Asset GIF card count failed");
   const assetGridColumns = await page.locator(".asset-grid").evaluate(node => getComputedStyle(node).gridTemplateColumns.split(" ").length);
   if (assetGridColumns !== 4) throw new Error(`Asset grid should have four columns: ${assetGridColumns}`);
+  const assetVariantFonts = await page.locator(".asset-variant-row strong, .asset-variant-row span, .asset-variant-row em").evaluateAll(nodes =>
+    nodes.map(node => getComputedStyle(node).fontSize)
+  );
+  if (assetVariantFonts.some(size => size !== "11px")) {
+    throw new Error(`Asset variant typography failed: ${JSON.stringify([...new Set(assetVariantFonts)])}`);
+  }
   await page.click("[data-assets-filter='type'][data-value='横幅']");
   if ((await page.locator(".asset-card").count()) !== 4) throw new Error("Asset banner tab failed");
   const bannerVariantCards = await page.locator(".asset-banner-card").evaluateAll(cards => cards.map(card => [...card.querySelectorAll(".asset-variant-row")].map(node => ({
@@ -559,7 +592,7 @@ async function main() {
   await page.waitForTimeout(150);
   if ((await page.evaluate(() => navigator.clipboard.readText())) !== bannerAnchor) throw new Error("Banner anchor clipboard failed");
   await page.click("[data-action='download-asset-variant']");
-  await page.click(".asset-detail-drawer .close-button");
+  await page.click(".asset-detail-drawer .aff-drawer-close");
   await page.click("[data-assets-filter='type'][data-value='视频']");
   if ((await page.locator(".asset-card").count()) !== 3) throw new Error("Asset video tab failed");
   const firstVideo = page.locator(".asset-video-card").first();
@@ -606,7 +639,7 @@ async function main() {
   await page.waitForTimeout(150);
   if ((await page.evaluate(() => navigator.clipboard.readText())) !== videoIframe) throw new Error("Video iframe clipboard failed");
   await page.click("[data-action='download-asset-variant']");
-  await page.click(".asset-detail-drawer .close-button");
+  await page.click(".asset-detail-drawer .aff-drawer-close");
   await page.click("[data-assets-filter='type'][data-value='GIF']");
   if ((await page.locator(".asset-card").count()) !== 2) throw new Error("Asset GIF tab failed");
   const firstGif = page.locator(".asset-gif-card").first();
@@ -623,7 +656,7 @@ async function main() {
   }
   await firstGif.locator(".asset-preview-button").click();
   await page.waitForSelector(".asset-gif-drawer");
-  const gifFieldLabels = await page.locator(".asset-gif-fields .field span").allTextContents();
+  const gifFieldLabels = await page.locator(".asset-gif-fields .field > span:not(.aff-dd)").allTextContents();
   if (gifFieldLabels.join("|") !== "语言|尺寸|平台") throw new Error(`GIF drawer field order failed: ${gifFieldLabels}`);
   await page.selectOption("[data-asset-detail-option='language']", "English");
   await page.selectOption("[data-asset-detail-option='size']", "300x250");
@@ -643,7 +676,7 @@ async function main() {
   await page.waitForTimeout(150);
   if ((await page.evaluate(() => navigator.clipboard.readText())) !== gifAnchor) throw new Error("GIF anchor clipboard failed");
   await page.click("[data-action='download-asset-variant']");
-  await page.click(".asset-gif-drawer .close-button");
+  await page.click(".asset-gif-drawer .aff-drawer-close");
   await page.click("[data-assets-filter='type'][data-value='落地页']");
   if ((await page.locator(".asset-card").count()) !== 3) throw new Error("Asset landing tab failed");
   const firstLanding = page.locator(".asset-landing-card").first();
@@ -669,7 +702,9 @@ async function main() {
   await page.selectOption("[data-asset-detail-option='language']", "English");
   const landingUrlText = await page.locator("#asset-landing-url").innerText();
   const landingUrl = new URL(landingUrlText);
-  if (landingUrl.pathname !== "/lp/standard" || landingUrl.searchParams.get("material_language") !== "English") {
+  if (landingUrl.pathname !== "/register" ||
+      landingUrl.searchParams.get("page") !== "standard" ||
+      landingUrl.searchParams.get("material_language") !== "English") {
     throw new Error(`Landing URL failed: ${landingUrlText}`);
   }
   const landingView = page.locator(".asset-landing-actions a.button.primary");
@@ -681,7 +716,7 @@ async function main() {
   await page.click(".asset-landing-actions [data-copy]");
   await page.waitForTimeout(150);
   if ((await page.evaluate(() => navigator.clipboard.readText())) !== landingUrlText) throw new Error("Landing URL clipboard failed");
-  await page.click(".asset-landing-drawer .close-button");
+  await page.click(".asset-landing-drawer .aff-drawer-close");
   if (await page.locator("[data-action='load-more-assets']").count()) throw new Error("Asset load more should be hidden when all records fit one batch");
 
   await page.click("[data-route='apply']");
@@ -698,8 +733,8 @@ async function main() {
   for (const step of programSteps) assertText(stepsText, step, `Partner program step: ${step}`);
   let programText = await page.locator("#main").innerText();
   if (programText.includes("Commission Reward")) throw new Error("Commission page eyebrow should be removed");
-  assertText(programText, "L1-L4资格档与国家系数", "Commission page title");
-  assertText(programText, "参考CPA = 资格档单价 × 国家系数；全部数值可后台配置", "Commission page subtitle");
+  assertText(programText, "L1-L4资格档与国家佣金", "Commission page title");
+  assertText(programText, "参考CPA按国家直接配置；全部数值可后台配置", "Commission page subtitle");
   if (!(await page.locator(".commission-selector-card .commission-page-head > div > p").first().isVisible())) {
     throw new Error("Commission subtitle is not visible");
   }
@@ -722,8 +757,8 @@ async function main() {
   if (stepLayout.labelTop < stepLayout.numberBottom) throw new Error(`Step label is not below progress node: ${JSON.stringify(stepLayout)}`);
   const defaultModuleCount = await page.locator(".commission-module").count();
   if (defaultModuleCount !== 3) throw new Error(`Default commission country count failed: ${defaultModuleCount}`);
-  const defaultCountryCodes = await page.locator(".commission-module header span").allTextContents();
-  if (defaultCountryCodes.slice().sort().join(",") !== "NG ×1.5,SA ×1.4,TH ×1.2") throw new Error(`Default highest-commission countries failed: ${defaultCountryCodes}`);
+  const defaultCountries = await page.locator(".commission-module header h3").allTextContents();
+  if (defaultCountries.slice().sort().join(",") !== "尼日利亚,沙特阿拉伯,泰国") throw new Error(`Default highest-commission countries failed: ${defaultCountries}`);
   const commissionGridColumns = await page.locator(".commission-module-grid").evaluate(node => getComputedStyle(node).gridTemplateColumns.split(" ").length);
   if (commissionGridColumns !== 3) throw new Error(`Commission module columns failed: ${commissionGridColumns}`);
   const commissionHeaders = await page.locator(".commission-module").first().locator("th").allTextContents();
@@ -928,6 +963,24 @@ async function main() {
   });
   assertText(await page.locator("#main").innerText(), "暂无数据", "Empty scenario");
   await page.click("[data-action='reset-scenario']");
+  await page.evaluate(() => {
+    AFF.state.scenario = "loading-flow";
+    render();
+  });
+  const loadingState = await page.locator(".loading-page").evaluate(node => ({
+    busy: node.getAttribute("aria-busy"),
+    text: node.innerText,
+    cards: node.querySelectorAll(".skeleton-card").length,
+    rows: node.querySelectorAll(".skeleton-table > div").length,
+    overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth
+  }));
+  if (loadingState.busy !== "true" || !loadingState.text.includes("正在加载数据") || loadingState.cards !== 4 || loadingState.rows !== 7 || loadingState.overflow > 1) {
+    throw new Error(`Loading scenario failed: ${JSON.stringify(loadingState)}`);
+  }
+  await page.evaluate(() => {
+    AFF.state.scenario = "normal-flow";
+    render();
+  });
   await page.evaluate(() => {
     AFF.state.scenario = "api-error";
     render();

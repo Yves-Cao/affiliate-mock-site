@@ -10,7 +10,7 @@
 * {box-sizing:border-box;}
 body {margin:0;background:var(--canvas);color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;}
 button,input {font:inherit;}
-#admin-app {display:grid;grid-template-columns:236px minmax(0,1fr);min-height:100vh;}
+#admin-app {display:grid;grid-template-columns:276px minmax(0,1fr);min-height:100vh;}
 .tm-sidebar {position:sticky;top:0;display:flex;flex-direction:column;gap:24px;height:100vh;padding:22px 14px;background:var(--sidebar);color:var(--sidebar-text);}
 .tm-sidebar > strong {padding:0 10px;font-size:16px;}
 .tm-sidebar nav {display:grid;gap:6px;}

@@ -7,7 +7,7 @@ const root = path.resolve(__dirname, "..");
 function load() {
   const context = vm.createContext({ window: {}, Intl, Date, Map, Set, Math, JSON });
   context.window = context;
-  for (const filename of ["data.js", "report-data.js"]) {
+  for (const filename of ["data.js", "simulation-core.js", "report-data.js"]) {
     vm.runInContext(fs.readFileSync(path.join(root, filename), "utf8"), context, { filename });
   }
   return context.AFF.reporting;
@@ -60,7 +60,7 @@ for (const row of data.rows) {
     assert.equal(row.commissionReasonCode, "");
   }
   assert.equal(["held", "approved", "paid", "rejected", "reversed"].filter(key => row[key] > 0).length, row.effectiveAt && row.commissionStatus !== "pending" ? 1 : 0);
-  for (const key of ["ftdAmount", "expected", "held", "approved", "paid", "rejected", "reversed"]) {
+  for (const key of ["ftdAmount", "expected", "held", "approved", "paid", "settled", "rejected", "reversed"]) {
     assert.ok(Number.isFinite(row[key]) && row[key] >= 0);
   }
 }

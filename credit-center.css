@@ -1,0 +1,206 @@
+/* D-CREDIT-14 (2026-11-07 redesign, user: "design it with taste, brand deep blue"):
+ * deep-blue membership card. Big VIP level, title, 5 segmented tier bars, no numbers.
+ * Hierarchy: eyebrow -> level -> title -> meta -> segments. Blue-on-blue + white only. */
+.partner-credit-strip {
+  position: relative; display: flex; flex-direction: column; gap: 0; padding: 20px 22px 18px; overflow: hidden;
+  color: #fff; border: 0; border-radius: 12px;
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(0, 91, 255, .55) 0%, rgba(0, 91, 255, 0) 55%),
+    radial-gradient(80% 70% at 0% 100%, rgba(77, 125, 255, .22) 0%, rgba(77, 125, 255, 0) 60%),
+    linear-gradient(145deg, #0c2176 0%, #00187e 100%);
+  box-shadow: 0 10px 24px rgba(0, 24, 126, .22), inset 0 1px 0 rgba(255, 255, 255, .12);
+}
+/* faint concentric arcs, purely decorative */
+.partner-credit-strip::before, .partner-credit-strip::after {
+  content: ""; position: absolute; border-radius: 50%; pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, .08);
+}
+.partner-credit-strip::before { width: 220px; height: 220px; right: -70px; top: -90px; }
+.partner-credit-strip::after { width: 340px; height: 340px; right: -130px; top: -150px; border-color: rgba(255, 255, 255, .05); }
+.partner-credit-strip > * { position: relative; z-index: 1; }
+
+.credit-card-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.credit-card-top-actions { display: inline-flex; align-items: center; justify-content: flex-end; gap: 6px; flex-wrap: wrap; }
+.credit-card-eyebrow { color: rgba(255, 255, 255, .68); font-size: 12px; letter-spacing: .6px; }
+
+.credit-card-main { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+.credit-card-level {
+  font-size: 44px; line-height: 1; font-weight: 700; letter-spacing: 1px; color: #fff;
+  text-shadow: 0 2px 12px rgba(0, 91, 255, .55);
+}
+.credit-card-title {
+  display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px;
+  background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .22);
+  color: #fff; font-size: 12px; font-weight: 600; letter-spacing: .3px;
+}
+.credit-card-meta { margin: 8px 0 0; color: rgba(255, 255, 255, .6); font-size: 12px; }
+.credit-date-help {
+  display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; padding: 0;
+  border: 1px solid rgba(255, 255, 255, .42); border-radius: 50%; background: transparent; color: #fff;
+  font-size: 10px; line-height: 1; cursor: help; vertical-align: -2px;
+}
+.credit-date-help:hover, .credit-date-help[aria-expanded="true"] { background: rgba(255, 255, 255, .18); border-color: #fff; }
+.credit-date-help:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.credit-benefits-trigger {
+  display: inline-flex; align-items: center; min-height: 25px; padding: 3px 10px; border: 1px solid rgba(255, 255, 255, .28);
+  border-radius: 999px; background: transparent; color: rgba(255, 255, 255, .82); font-size: 12px; cursor: pointer;
+}
+.credit-benefits-trigger:hover, .credit-benefits-trigger:focus-visible { color: #fff; border-color: rgba(255, 255, 255, .72); background: rgba(255, 255, 255, .12); }
+.credit-benefits-trigger:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.credit-date-panel { max-width: 320px; }
+.credit-date-panel .credit-hint-footer { border-top: 0; padding-top: 0; }
+
+/* 5 segmented tier bars: achieved full, current partial, future empty. */
+.credit-segs { list-style: none; margin: 22px 0 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.credit-seg { display: grid; gap: 7px; min-width: 0; }
+.credit-seg-bar { position: relative; display: block; height: 6px; border-radius: 999px; background: rgba(255, 255, 255, .16); overflow: hidden; }
+.credit-seg-bar::after {
+  content: ""; position: absolute; inset: 0 auto 0 0; width: var(--fill, 0%); border-radius: inherit;
+  background: linear-gradient(90deg, #7fa8ff, #fff); transition: width .3s ease;
+}
+.credit-seg.is-current .credit-seg-bar::after { box-shadow: 0 0 10px rgba(173, 201, 255, .8); }
+.credit-seg-name { color: rgba(255, 255, 255, .5); font-size: 11px; font-weight: 600; letter-spacing: .4px; text-align: left; }
+.credit-seg.is-achieved .credit-seg-name { color: rgba(255, 255, 255, .78); }
+.credit-seg.is-current .credit-seg-name { color: #fff; }
+
+/* "等级提升？" trigger: dark on the dashboard card, light on the account page. */
+.credit-hint-trigger {
+  display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 4px; border-radius: 999px;
+  border: 1px solid var(--border); background: #fff; color: var(--brand); font-size: 12px; line-height: 1.4; cursor: help;
+}
+.credit-hint-trigger i {
+  display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--brand); color: #fff; font-style: normal; font-size: 11px; font-weight: 700;
+}
+.credit-hint-trigger:hover, .credit-hint-trigger[aria-expanded="true"] { border-color: var(--brand); }
+.credit-hint-trigger:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.partner-credit-strip .credit-hint-trigger { background: rgba(255, 255, 255, .12); border-color: rgba(255, 255, 255, .28); color: #fff; }
+.partner-credit-strip .credit-hint-trigger i { background: #fff; color: #00187e; }
+.partner-credit-strip .credit-hint-trigger:hover, .partner-credit-strip .credit-hint-trigger[aria-expanded="true"] { background: rgba(255, 255, 255, .22); border-color: rgba(255, 255, 255, .6); }
+.partner-credit-strip .credit-hint-trigger:focus-visible { outline-color: #fff; }
+
+/* Hint panel: fixed, placed by AFF.tooltip.position (D-04). */
+.credit-hint-panel {
+  position: fixed; z-index: 1200; box-sizing: border-box; display: grid; gap: 8px; padding: 14px 16px;
+  background: #fff; color: var(--body-text); border: 1px solid var(--border); border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 24, 126, .18); font-size: 12px; line-height: 1.6; text-align: left;
+}
+.credit-hint-panel[hidden] { display: none; }
+.credit-hint-title { margin: 0; color: var(--text); font-weight: 600; }
+.credit-hint-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.credit-hint-list li { display: grid; gap: 1px; padding-left: 10px; border-left: 2px solid var(--brand); }
+.credit-hint-list strong { color: var(--text); font-size: 12px; }
+.credit-hint-list span { color: var(--muted); }
+.credit-hint-footer { margin: 0; padding-top: 8px; border-top: 1px solid var(--border); color: var(--muted); }
+
+/* Account-page panel (light surface): level rail with brand-blue nodes, no numbers. */
+.partner-credit-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.partner-credit-caption { color: var(--muted); font-size: 12px; display: block; }
+.partner-rail { display: grid; gap: 0; padding: 0 4px; }
+.partner-rail-track { height: 5px; border-radius: 999px; background: #e3eaf6; overflow: hidden; margin: 17px 14px 0; }
+.partner-rail-track span { display: block; height: 100%; border-radius: 999px; background: var(--brand-gradient); transition: width .3s ease; }
+.partner-rail ul { margin: -17px 0 0; padding: 0; list-style: none; display: flex; justify-content: space-between; }
+.partner-rail li { display: grid; justify-items: center; gap: 3px; min-width: 22px; }
+.partner-rail-node {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 34px; height: 22px; padding: 0 6px; border-radius: 999px;
+  background: #fff; border: 1px solid #d7dfe9; color: var(--muted);
+  font-size: 10px; font-weight: 700; line-height: 1; letter-spacing: .3px;
+}
+.partner-rail li.is-achieved .partner-rail-node { border-color: var(--brand); background: var(--brand); color: #fff; }
+.partner-rail li.is-current .partner-rail-node { border-color: var(--brand); color: var(--brand); box-shadow: 0 0 0 3px rgba(0, 91, 255, .16); }
+.partner-rail li small { color: var(--muted); font-size: 11px; white-space: nowrap; }
+.partner-rail li.is-current small { color: var(--text); font-weight: 600; }
+.partner-rail-panel li small { display: block; }
+@media (max-width: 767px) { .partner-rail li small, .partner-rail-panel li small { display: none; } }
+
+@media (max-width: 767px) {
+  .partner-credit-strip { padding: 16px 16px 14px; }
+  .credit-card-level { font-size: 38px; }
+  .credit-seg-name { font-size: 10px; }
+}
+
+/* D-CREDIT-05 (2026-11-07): half-width row — funnel chart left, credit right. */
+.dashboard-credit-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-items: stretch; }
+.partner-funnel-card { display: grid; gap: 10px; padding: 14px 18px; align-content: start; }
+.partner-funnel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.partner-funnel-head h3 { margin: 0; font: var(--font-text-14-b, 600 14px/1.4); color: var(--text); }
+.partner-funnel-head small { color: var(--muted); font-size: 12px; }
+.partner-funnel { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.partner-funnel li { min-width: 0; }
+.partner-funnel-periods { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--border); border-radius: 6px; background: #f4f7fb; }
+.partner-funnel-periods button { min-height: 26px; padding: 2px 10px; border: 0; border-radius: 4px; background: transparent; color: var(--muted); font-size: 12px; cursor: pointer; }
+.partner-funnel-periods button.active { background: #fff; color: var(--brand); font-weight: 600; box-shadow: 0 1px 2px rgba(15, 34, 58, .1); }
+.partner-funnel-row { display: grid; grid-template-columns: 96px minmax(0, 1fr) 48px; align-items: center; gap: 10px; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; text-align: left; }
+.partner-funnel-row:hover .partner-funnel-label { color: var(--brand); }
+.partner-funnel-row:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.partner-funnel-label { color: var(--body-text); font-size: 12px; }
+.partner-funnel-track { height: 14px; border-radius: 4px; background: #eef2f8; overflow: hidden; }
+.partner-funnel-bar { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--brand), #4d7dff); transition: width .3s ease; }
+.partner-funnel-value { color: var(--text); font-size: 13px; font-weight: 600; text-align: right; }
+.partner-funnel-note { margin: 0; color: var(--muted); font-size: 12px; }
+
+@media (max-width: 1199px) { .dashboard-credit-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+@media (max-width: 991px) { .dashboard-credit-row { grid-template-columns: 1fr; } }
+@media (max-width: 767px) {
+  .partner-funnel-row { grid-template-columns: 84px minmax(0, 1fr) 44px; }
+  .partner-funnel-head { flex-wrap: wrap; }
+}
+
+/* D-CREDIT-09: benefits modal level rows — no horizontal scroll at any width. */
+.partner-credit-lvlist { display: grid; gap: 8px; }
+.partner-credit-lvlist-caption { margin: 0; font-weight: 600; color: var(--text); }
+.partner-credit-lvlist-caption small { display: block; margin-top: 2px; font-weight: 400; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.partner-credit-lvlist-head, .partner-credit-lvlist ul { margin: 0; padding: 0; list-style: none; }
+.partner-credit-lvlist-head { display: grid; grid-template-columns: minmax(0, 1fr) 110px 90px; gap: 8px; padding: 0 10px; }
+.partner-credit-lvlist-head span { color: var(--muted); font-size: 11px; }
+.partner-credit-lvlist-head span:nth-child(2) { text-align: right; }
+.partner-credit-lvlist-head span:nth-child(3) { text-align: right; }
+.partner-credit-lv { display: grid; grid-template-columns: minmax(0, 1fr) 110px 90px; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; background: #f8fbff; }
+.partner-credit-lv.is-current { background: #eaf0ff; border-color: var(--brand); }
+.partner-credit-lv-head { min-width: 0; color: var(--body-text); font-size: 13px; }
+.partner-credit-lv-head b { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin-right: 6px; border-radius: 50%; background: #fff; border: 1px solid #d7dfe9; color: var(--muted); font-size: 11px; font-weight: 600; vertical-align: middle; }
+.partner-credit-lv.is-current .partner-credit-lv-head b { border-color: var(--brand); color: var(--brand); }
+.partner-credit-lv-head small { color: var(--brand); font-weight: 500; margin-left: 6px; }
+.partner-credit-lv-ratio, .partner-credit-lv-fixed { text-align: right; font-size: 13px; color: var(--text); }
+.partner-credit-lv-ratio { font-weight: 600; }
+.partner-credit-lv-fixed { color: var(--muted); }
+@media (max-width: 480px) {
+  .partner-credit-lvlist-head { display: none; }
+  .partner-credit-lv { grid-template-columns: minmax(0, 1fr) auto; }
+  .partner-credit-lv-ratio { grid-column: 2; grid-row: 1; }
+  .partner-credit-lv-fixed { grid-column: 2; grid-row: 2; text-align: right; }
+}
+
+/* D-CREDIT-10: perk badges + adaptive columns (all-zero column hidden). */
+.partner-credit-perk {
+  display: inline-flex; align-items: center; padding: 2px 8px; margin: 2px 4px 0 0;
+  border-radius: 999px; border: 1px solid var(--border); background: #fff;
+  color: var(--body-text); font-size: 10px; font-style: normal; white-space: nowrap;
+}
+.partner-credit-lv.is-current .partner-credit-perk { border-color: var(--brand); color: var(--brand); background: #fff; }
+.partner-credit-lv-perks { grid-column: 1; grid-row: 2; display: flex; flex-wrap: wrap; min-width: 0; }
+.partner-credit-lv { grid-template-rows: auto auto; }
+.partner-credit-lvlist-head.no-fixed { grid-template-columns: minmax(0, 1fr) 110px; }
+.partner-credit-lvlist ul.no-fixed .partner-credit-lv { grid-template-columns: minmax(0, 1fr) 110px; }
+@media (max-width: 480px) {
+  .partner-credit-lv-perks { margin-top: 2px; }
+}
+.partner-credit-lvlist-head.no-ratio { grid-template-columns: minmax(0, 1fr) 90px; }
+.partner-credit-lvlist ul.no-ratio .partner-credit-lv { grid-template-columns: minmax(0, 1fr) 90px; }
+.partner-credit-lvlist ul.no-fixed.no-ratio .partner-credit-lv { grid-template-columns: minmax(0, 1fr); }
+
+/* D-CREDIT-13: 4-dimension benefit matrix in the modal. */
+.partner-credit-lvlist-head, .partner-credit-lv { grid-template-columns: minmax(0, 1.3fr) 76px 76px 84px 100px; }
+.partner-credit-lvlist-head span:nth-child(n+2), .partner-credit-lv-ratio, .partner-credit-lv-cell { text-align: right; }
+.partner-credit-lv-cell { font-size: 13px; color: var(--text); }
+.partner-credit-lv-head b { min-width: 40px; }
+@media (max-width: 560px) {
+  .partner-credit-lvlist-head { display: none; }
+  .partner-credit-lv { grid-template-columns: minmax(0, 1fr) auto; }
+  .partner-credit-lv-ratio { grid-column: 2; grid-row: 1; }
+  .partner-credit-lv-head { grid-row: 1 / span 2; }
+  .partner-credit-lv-cell:nth-of-type(3) { grid-column: 1; grid-row: 2; }
+  .partner-credit-lv-cell:nth-of-type(4) { grid-column: 1; grid-row: 3; }
+  .partner-credit-lv-cell:nth-of-type(5) { grid-column: 1; grid-row: 4; }
+}

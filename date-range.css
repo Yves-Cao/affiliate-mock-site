@@ -51,7 +51,7 @@
   font-variant-numeric: tabular-nums;
 }
 .date-range-grid button:hover:not(:disabled), .date-range-grid button:focus-visible { background: var(--row-hover); color: var(--brand); }
-.date-range-grid button.selected { background: var(--brand); color: #fff; font-weight: 650; }
+.date-range-grid button.selected { background: var(--brand); color: #fff; font-weight: 500; }
 .date-range-grid button.between { background: #f0f7ff; color: var(--brand); }
 .date-range-grid button:disabled { color: #b6c0cf; cursor: not-allowed; }
 .date-range-panel footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; color: var(--muted); font-size: 11px; }

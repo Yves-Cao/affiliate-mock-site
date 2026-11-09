@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:affiliate:prototype:task-queue",
+  "title": "Task queue fixture row, not a deployed HTTP API",
+  "type": "object",
+  "required": ["task_id","title","source_type","source_ref","task_purpose","purpose","status","workflow_state","result","owner","team","priority","object_type","object_id","object_summary","partner_id","customer_id","case_refs","risk_level","credit_level","impact","sla","sla_state","external_system","reason_codes","created_at","updated_at","version","allowed_actions","business_jump_url","data_quality"],
+  "properties": {
+    "task_id": {"type":"string","minLength":1,"maxLength":128},
+    "title": {"type":"string","minLength":1},
+    "source_type": {"enum":["risk_review","settlement_overdue","appeal","hold_extend","guarantee_offset","chargeback","circuit_breaker","credit_review","commission_exception","attribution_review","integration","data_backfill","offboarding_step"]},
+    "source_ref": {"type":"object","required":["kind","id"],"properties":{"kind":{"type":"string","minLength":1},"id":{"type":"string","minLength":1},"case_ref":{"$ref":"#/$defs/case"}}},
+    "task_purpose":{"type":"string","minLength":1},
+    "purpose":{"type":"string","minLength":1},
+    "status":{"enum":["open","processing","done"]},
+    "workflow_state":{"enum":["open","processing","waiting_material","pending_approval","pending_execution","executing","execution_failed","returned","done","closed"]},
+    "result":{"enum":[null,"resolved","rejected","duplicate","withdrawn","invalidated"]},
+    "owner":{"anyOf":[{"type":"null"},{"$ref":"#/$defs/actor"}]},
+    "team":{"type":"object","required":["id","name"],"properties":{"id":{"type":"string"},"name":{"type":"string"}}},
+    "priority":{"enum":["high","medium","low"]},
+    "object_type":{"type":"string"},"object_id":{"type":"string"},"object_summary":{"type":"string"},
+    "partner_id":{"type":["string","null"]},"customer_id":{"type":["string","null"]},
+    "case_refs":{"type":"array","items":{"$ref":"#/$defs/case"}},
+    "risk_level":{"enum":[null,"R0","R1","R2","R3"]},"credit_level":{"enum":[null,"C0","C1","C2","C3","C4"]},
+    "impact":{"anyOf":[{"type":"null"},{"$ref":"#/$defs/money"}]},
+    "sla":{"type":["object","null"]},
+    "sla_state":{"enum":["normal","warning","overdue","unconfigured"]},
+    "external_system":{"type":["string","null"]},"reason_codes":{"type":"array","items":{"type":"string"}},
+    "created_at":{"type":"string"},"updated_at":{"type":"string"},"version":{"type":"string","minLength":1},
+    "allowed_actions":{"type":"array","items":{"type":"object","required":["action","enabled","disabled_reason"],"properties":{"action":{"type":"string"},"enabled":{"type":"boolean"},"disabled_reason":{"type":["string","null"]}}}},
+    "business_jump_url":{"type":["string","null"]},
+    "data_quality":{"type":"object","required":["status","source_systems","missing_fields"],"properties":{"status":{"enum":["fresh","stale","partial","missing"]},"source_systems":{"type":"array"},"missing_fields":{"type":"array"}}}
+  },
+  "$defs": {
+    "actor":{"type":"object","required":["user_id","display_name","role_code"],"properties":{"user_id":{"type":"string","minLength":1},"display_name":{"type":"string"},"role_code":{"type":"string"}}},
+    "money":{"type":"object","required":["currency","amount"],"properties":{"currency":{"const":"USD"},"amount":{"type":"string","pattern":"^[0-9]{1,18}\\.[0-9]{2}$"}}},
+    "case":{"type":"object","required":["customer_id","commission_case_id","settlement_case_id","partner_id","settlement_batch_id"],"properties":{"customer_id":{"type":"string","minLength":1},"commission_case_id":{"type":"string","minLength":1},"settlement_case_id":{"type":"string","minLength":1},"partner_id":{"type":"string"},"settlement_batch_id":{"type":["string","null"]}}}
+  }
+}

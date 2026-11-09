@@ -66,6 +66,7 @@ async function main() {
     await page.locator("#login-form input[name=email]").fill("dashboard-qa@example.com");
     await page.locator("#login-form input[name=password]").fill("Password123!");
     await page.locator("#login-form button[type=submit]").click();
+    await dashboard();
     await page.locator(".dashboard-postbacks").waitFor();
     check(new URL(page.url()).hash === "#/dash", "The tracker platform panel is on the initial dashboard");
     check((await page.locator(".dashboard-postbacks").innerText()).includes("连接您的广告追踪器"), "Dashboard identifies the tracker connection area");
