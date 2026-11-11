@@ -112,7 +112,9 @@ async function main() {
     await page.selectOption("[data-message-filter='level']", "");
     await page.selectOption("[data-message-filter='type']", "结算延长");
     await page.locator("[data-message-detail]").first().click();
-    await page.locator(".finance-drawer [data-route='pay']").click();
+    const relatedContext = await page.locator(".finance-drawer").innerText();
+    assert.ok(relatedContext.includes("对象类型") && relatedContext.includes("对象编号") && relatedContext.includes("返回来源"), "Message CTA carries object context");
+    await page.locator(".finance-drawer [data-message-related]").click();
     await page.waitForFunction(() => AFF.state.route === "pay");
     await page.evaluate(() => navigate("messages"));
 

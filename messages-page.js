@@ -66,14 +66,14 @@
   }
 
   function relatedObject(row) {
-    if (row.supportTicketId) return { label: t("查看支持工单", "View support ticket"), route: "support", id: row.supportTicketId };
-    if (row.accountRequestId) return { label: t("查看个人中心", "View personal center"), route: "account", id: row.accountRequestId };
-    if (row.closureRequestId) return { label: t("查看清退状态", "View closure status"), route: "account", id: row.closureRequestId };
-    if (row.simulationViolationId) return { label: t("查看申诉中心", "View appeals"), route: "appeals", id: row.simulationViolationId };
-    if (row.investigationId) return { label: t("查看调查任务", "View investigation"), route: "appeals", id: row.investigationId };
-    if (row.commissionCaseId) return { label: t("查看收益数据", "View earnings"), route: "pay", id: row.commissionCaseId };
-    if (row.appealId) return { label: t("查看申诉", "View appeal"), route: "appeals", id: row.appealId };
-    if (String(row.id).startsWith("GL-")) return { label: t("查看保证金", "View guarantee"), route: "guarantee", id: row.id };
+    if (row.supportTicketId) return { label: t("查看支持工单", "View support ticket"), route: "support", id: row.supportTicketId, type: t("支持工单", "Support ticket") };
+    if (row.accountRequestId) return { label: t("查看个人中心", "View personal center"), route: "account", id: row.accountRequestId, type: t("账户资料", "Account profile") };
+    if (row.closureRequestId) return { label: t("查看清退状态", "View closure status"), route: "account", id: row.closureRequestId, type: t("清退申请", "Closure request") };
+    if (row.simulationViolationId) return { label: t("查看申诉中心", "View appeals"), route: "appeals", id: row.simulationViolationId, type: t("违规记录", "Violation record") };
+    if (row.investigationId) return { label: t("查看调查任务", "View investigation"), route: "appeals", id: row.investigationId, type: t("调查任务", "Investigation") };
+    if (row.commissionCaseId) return { label: t("查看收益数据", "View earnings"), route: "pay", id: row.commissionCaseId, type: t("佣金案件", "Commission case") };
+    if (row.appealId) return { label: t("查看申诉", "View appeal"), route: "appeals", id: row.appealId, type: t("申诉", "Appeal") };
+    if (String(row.id).startsWith("GL-")) return { label: t("查看保证金", "View guarantee"), route: "guarantee", id: row.id, type: t("保证金记录", "Guarantee record") };
     return null;
   }
 
@@ -99,13 +99,16 @@
               ${field(t("消息编号", "Message ID"), row.id)}
               ${field(t("状态", "Status"), row.status === "unread" ? t("未读", "Unread") : t("已读", "Read"))}
               ${field(t("规则版本", "Rule version"), row.version)}
-              ${field(t("关联对象", "Related object"), related ? related.id : "-")}
+              ${field(t("对象类型", "Object type"), related?.type || "-")}
+              ${field(t("对象编号", "Object ID"), related?.id || "-")}
+              ${field(t("下一步", "Next step"), related?.label || t("阅读消息", "Read message"))}
+              ${field(t("返回来源", "Return source"), t("消息中心", "Message center"))}
             </dl>
           </section>
           ${row.level === "required" ? `<section><h3>${t("强制确认", "Required acknowledgement")}</h3><p>${t("确认后仅记录阅读状态，不改变业务规则版本。", "Acknowledgement records reading status only; it does not change the rule version.")}</p></section>` : ""}
         </div>
         <footer>
-          ${related ? `<button class="button secondary" type="button" data-route="${related.route}">${related.label}</button>` : ""}
+          ${related ? `<button class="button secondary" type="button" data-message-related="${h(related.route)}" data-message-related-id="${h(related.id)}">${related.label}</button>` : ""}
           ${row.status === "unread" && row.level !== "info" ? `<button class="button primary" type="button" data-message-read="${h(row.id)}">${row.level === "required" ? t("确认已读", "Acknowledge") : t("标记已读", "Mark read")}</button>` : ""}
           <button class="button secondary" type="button" data-message-action="close">${t("关闭", "Close")}</button>
         </footer>
@@ -199,7 +202,7 @@
     if (AFF.state?.route !== "messages") return;
     const read = event.target.closest("[data-message-read]");
     if (read) return markRead(read.dataset.messageRead);
-    const target = event.target.closest("[data-message-action], [data-message-page], [data-message-detail], [data-aff-page]");
+    const target = event.target.closest("[data-message-action], [data-message-page], [data-message-detail], [data-message-related], [data-aff-page]");
     if (!target) return;
     const s = state();
     if (target.dataset.messageAction === "close") return closeDrawer();
@@ -220,6 +223,21 @@
       s.detail = target.dataset.messageDetail;
       render();
       return document.querySelector(".finance-drawer-close")?.focus();
+    }
+    if (target.dataset.messageRelated) {
+      const route = target.dataset.messageRelated;
+      const id = target.dataset.messageRelatedId;
+      if (route === "support") {
+        AFF.state.supportPage = { ...(AFF.state.supportPage || {}), search: id, detail: id };
+      } else if (route === "pay") {
+        AFF.state.earnings = { ...(AFF.state.earnings || {}), detail: id };
+      } else if (route === "appeals") {
+        AFF.state.appealsPage = { ...(AFF.state.appealsPage || {}), search: id };
+      } else if (route === "guarantee") {
+        AFF.state.guaranteePage = { ...(AFF.state.guaranteePage || {}), search: id };
+      }
+      closeDrawer();
+      return navigate(route);
     }
   });
 

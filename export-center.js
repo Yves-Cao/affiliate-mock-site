@@ -18,23 +18,27 @@
       {
         id: "EXP-0002", route: "clients", format: "CSV", status: "failed",
         range: "2026-10-01 — 2026-10-27", rows: 267, createdAt: "2026-11-04 16:20",
-        expiresAt: "-", reason: "", auditId: "AUD-EXP-0002"
+        expiresAt: "-", reason: "", auditId: "AUD-EXP-0002",
+        snapshotAt: "2026-11-04 16:20", dataAsOf: AFF.finance.asOf,
+        filterSummary: "客户数据 · 默认筛选"
       },
       {
         id: "EXP-0001", route: "perf", format: "CSV", status: "expired",
         range: "2026-09-01 — 2026-09-30", rows: 312, createdAt: "2026-11-03 10:12",
-        expiresAt: "2026-11-04 10:12", reason: "", auditId: "AUD-EXP-0001"
+        expiresAt: "2026-11-04 10:12", reason: "", auditId: "AUD-EXP-0001",
+        snapshotAt: "2026-11-03 10:12", dataAsOf: "2026-10-27",
+        filterSummary: "业绩数据 · 2026-09-01至2026-09-30"
       }
     ];
   }
 
   function tasks() {
-    if (!Array.isArray(AFF.state.exportTasks) || AFF.state.exportSeedVersion !== 2) {
+    if (!Array.isArray(AFF.state.exportTasks) || AFF.state.exportSeedVersion !== 3) {
       const custom = Array.isArray(AFF.state.exportTasks)
         ? AFF.state.exportTasks.filter(item => item.id.startsWith("EXP-U"))
         : [];
       AFF.state.exportTasks = [...custom, ...seedTasks()];
-      AFF.state.exportSeedVersion = 2;
+      AFF.state.exportSeedVersion = 3;
     }
     return AFF.state.exportTasks;
   }
@@ -55,6 +59,12 @@
   function create() {
     if (!["perf", "summary", "clients"].includes(AFF.state.route)) return;
     const snapshot = AFF.reports.exportCsv();
+    const reportState = AFF.reports.state();
+    const filterSummary = Object.entries(reportState.filters || {})
+      .filter(([, value]) => value !== "" && value !== null && value !== undefined)
+      .map(([key, value]) => `${key}=${Array.isArray(value) ? value.join("/") : value}`)
+      .join(" · ") || t("默认筛选", "default filters");
+    const snapshotAt = `${AFF.finance.asOf} ${new Date().toTimeString().slice(0, 8)}`;
     const existing = tasks();
     const task = {
       id: `EXP-U${String(existing.length + 1).padStart(4, "0")}`,
@@ -64,6 +74,9 @@
       range: `${AFF.reports.state().filters.from} — ${AFF.reports.state().filters.to}`,
       rows: snapshot.rows,
       createdAt: `${AFF.finance.asOf} ${new Date().toTimeString().slice(0, 8)}`,
+      snapshotAt,
+      dataAsOf: AFF.finance.asOf,
+      filterSummary,
       createdAtMs: Date.now(),
       expiresAt: "-",
       reason: "",
@@ -94,6 +107,35 @@
     persist();
     render();
     document.querySelector(`[data-export-task='${id}'] [data-export-action='retry']`)?.focus();
+    setTimeout(() => {
+      task.status = "ready";
+      task.createdAtMs = 0;
+      task.expiresAt = "24小时后";
+      persist();
+      if (["perf", "summary", "clients", "export"].includes(AFF.state.route)) render();
+    }, 800);
+  }
+
+  function regenerate(id) {
+    const source = tasks().find(item => item.id === id);
+    if (!source || source.status !== "expired") return;
+    const nextId = `EXP-U${String(tasks().length + 1).padStart(4, "0")}`;
+    const task = {
+      ...source,
+      id: nextId,
+      status: "processing",
+      createdAt: `${AFF.finance.asOf} ${new Date().toTimeString().slice(0, 8)}`,
+      createdAtMs: Date.now(),
+      expiresAt: "-",
+      reason: "",
+      auditId: `AUD-${nextId}`,
+      regeneratedFrom: source.id,
+      failOnComplete: false
+    };
+    tasks().unshift(task);
+    persist();
+    showToast(t("已按原筛选重新生成", "Regenerated with the original filters"));
+    render();
     setTimeout(() => {
       task.status = "ready";
       task.createdAtMs = 0;
@@ -180,23 +222,24 @@
       </div>
       <div class="export-stats">${stats().map(([label, value]) => `<span>${h(label)}<b>${value}</b></span>`).join("")}</div>
       <div class="export-table-wrap"><table>
-        <thead><tr><th>${t("任务编号", "Task ID")}</th><th>${t("页面", "Page")}</th><th>${t("范围", "Range")}</th><th>${t("记录数", "Rows")}</th><th>${t("状态", "Status")}</th><th>${t("创建时间", "Created")}</th><th>${t("过期时间", "Expiry")}</th><th>${t("说明", "Note")}</th><th>${t("操作", "Action")}</th></tr></thead>
+        <thead><tr><th>${t("任务编号", "Task ID")}</th><th>${t("页面与快照", "Page and snapshot")}</th><th>${t("范围与筛选", "Range and filters")}</th><th>${t("记录数", "Rows")}</th><th>${t("状态", "Status")}</th><th>${t("创建时间", "Created")}</th><th>${t("过期时间", "Expiry")}</th><th>${t("说明", "Note")}</th><th>${t("操作", "Action")}</th></tr></thead>
         <tbody>${filtered.length ? filtered.map(task => `<tr data-export-task="${h(task.id)}">
           <td>${h(task.id)}<small>${h(task.auditId)}</small></td>
-          <td>${h(routeLabels[task.route] ? t(...routeLabels[task.route]) : task.route)}</td>
-          <td>${h(task.range)}</td>
+          <td>${h(routeLabels[task.route] ? t(...routeLabels[task.route]) : task.route)}<small>${t("快照", "Snapshot")}: ${h(task.snapshotAt || task.createdAt)} · ${t("数据截至", "Data as of")}: ${h(task.dataAsOf || AFF.finance.asOf)}</small></td>
+          <td>${h(task.range)}<small>${h(task.filterSummary || t("默认筛选", "Default filters"))}</small></td>
           <td>${task.rows}</td>
           <td>${tag(task.status)}</td>
           <td>${h(task.createdAt)}</td>
           <td>${h(task.expiresAt)}</td>
-          <td>${task.status === "failed" ? h(task.reason || t("生成失败，可重试", "Failed; retry available")) : task.status === "expired" ? t("文件已过期，请重新创建", "File expired; create again") : t("邮箱等联系方式保持脱敏", "Contact data stays masked")}</td>
+          <td>${task.status === "failed" ? h(task.reason || t("生成失败，可重试", "Failed; retry available")) : task.status === "expired" ? t("文件已过期，须重新生成后下载", "File expired; regenerate before downloading") : t("导出按任务快照生成，邮箱等联系方式保持脱敏", "Export uses the task snapshot; contact data stays masked")}</td>
           <td><div class="wd-row-actions">
             <button class="button secondary small" type="button" data-export-action="download" data-export-id="${h(task.id)}" ${task.status === "ready" ? "" : "disabled"}>${t("下载", "Download")}</button>
             <button class="button secondary small" type="button" data-export-action="retry" data-export-id="${h(task.id)}" ${task.status === "failed" ? "" : "disabled"}>${t("重试", "Retry")}</button>
+            <button class="button primary small" type="button" data-export-action="regenerate" data-export-id="${h(task.id)}" ${task.status === "expired" ? "" : "disabled"}>${t("重新生成", "Regenerate")}</button>
           </div></td>
         </tr>`).join("") : `<tr><td colspan="9" class="finance-empty"><strong>${t("暂无导出任务", "No export tasks")}</strong><p>${t("在业绩、客户或总览数据页创建导出，任务会汇总到此处。", "Create exports from performance, client or summary pages; tasks aggregate here.")}</p></td></tr>`}</tbody>
       </table></div>
-      <p class="export-footnote">${t("导出文件24小时后过期；创建、下载和失败重试均写入审计。新的导出任务请在各数据页面发起。", "Export files expire after 24 hours; creation, download, and retry are audited. Start new exports from each data page.")}</p>
+      <p class="export-footnote">${t("导出按创建时快照和筛选生成，文件24小时后过期；创建、下载、失败重试和重新生成均写入审计。当前页面筛选变化不会改变已生成文件。", "Exports use the snapshot and filters captured at creation and expire after 24 hours. Creation, download, retry, and regeneration are audited. Changing current filters does not alter a generated file.")}</p>
     </div>`;
   }
 
@@ -207,6 +250,7 @@
     if (action === "create") return create();
     if (action === "download" && !target.disabled) return download(target.dataset.exportId);
     if (action === "retry" && !target.disabled) return retry(target.dataset.exportId);
+    if (action === "regenerate" && !target.disabled) return regenerate(target.dataset.exportId);
     if (action === "reset-filters" && AFF.state?.route === "export") {
       AFF.state.exportPageFilter = { status: "", source: "" };
       render();

@@ -40,7 +40,7 @@ async function main() {
     assert.equal(runtime.status, "pending_review");
     assert.equal(runtime.fee, 0);
     assert.equal(runtime.estimatedFee, 350);
-    await page.click(`[data-withdraw-review='${runtime.id}'][data-review-result='approve']`);
+    await page.evaluate(id => AFF.finance.approveWithdrawal(id), runtime.id);
     assert.equal(await page.evaluate(id => AFF.finance.allWithdrawals().find(order => order.id === id).status, runtime.id), "processing");
     const approved = await page.evaluate(id => AFF.finance.allWithdrawals().find(order => order.id === id), runtime.id);
     assert.equal(approved.crmPayout.status, "processing");
@@ -52,7 +52,7 @@ async function main() {
     assert.ok(crmDetail.includes("CRM处理状态") && crmDetail.includes("processing"));
     assert.ok(crmDetail.includes("更新时间") && crmDetail.includes("重试次数") && crmDetail.includes("对账状态"));
     await page.keyboard.press("Escape");
-    await page.click(`[data-withdraw-simulate='${runtime.id}'][data-result='failed']`);
+    await page.evaluate(id => AFF.finance.setWithdrawalStatus(id, "failed"), runtime.id);
     assert.equal(await page.evaluate(() => AFF.finance.balance()), before);
     const failed = await page.evaluate(id => AFF.finance.allWithdrawals().find(order => order.id === id), runtime.id);
     assert.equal(failed.status, "failed");
@@ -76,6 +76,24 @@ async function main() {
     }
     const failures = rows.filter(row => ["failed", "timeout"].includes(row.status));
     assert.ok(failures.every(order => order.fee === 0));
+    assert.equal(await page.locator("[data-withdraw-review]").count(), 0, "User side has no withdrawal review actions");
+    assert.equal(await page.locator("[data-withdraw-simulate]").count(), 0, "User side has no payment simulation actions");
+    const timeoutOrder = rows.find(row => row.status === "timeout");
+    if (timeoutOrder) {
+      await page.click(`[data-withdraw-detail='${timeoutOrder.id}']`);
+      const timeoutDrawer = await page.locator(".wd-drawer").innerText();
+      assert.ok(timeoutDrawer.includes("支付结果仍在确认中") && timeoutDrawer.includes("请勿重复提交"), "Timeout stays query-only");
+      assert.ok(await page.locator("[data-withdraw-action='query']").count() > 0, "Processing withdrawal offers query");
+      assert.ok(!timeoutDrawer.includes("全额退回"), "Timeout does not claim an automatic full refund");
+      await page.keyboard.press("Escape");
+    }
+
+    await page.locator(".wd-settlement-link").first().click();
+    await page.waitForFunction(() => AFF.state.route === "statements");
+    assert.ok(await page.locator(".statement-page").count() > 0, "Withdrawal settlement opens the monthly statement object");
+    assert.ok(await page.locator(".finance-drawer").count() > 0, "Monthly statement detail opens from a withdrawal reference");
+    await page.keyboard.press("Escape");
+    await page.evaluate(() => navigate("wd"));
 
     await page.locator("[data-withdraw-detail]").first().click();
     const drawer = await page.locator(".wd-drawer").innerText();

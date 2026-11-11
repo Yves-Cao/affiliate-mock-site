@@ -257,7 +257,7 @@
     const rows = records();
     const row = selected();
     return `<div class="statement-page">
-      ${AFF.helpers.pageHeader(t("结算单", "Statements"), t("按周期核对佣金、税费、保证金、冲正、提现与余额。", "Reconcile commissions, tax, guarantee, reversals, withdrawals, and balances."))}
+      ${AFF.helpers.pageHeader(t("月度结算单", "Monthly statements"), t("按周期核对佣金、税费、保证金、冲正、提现与余额。", "Reconcile commissions, tax, guarantee, reversals, withdrawals, and balances."))}
       ${AFF.partnerClosure.statementsBanner()}
       ${statsCard(row)}
       <section class="card"><div class="panel-header"><h2>${t("结算单列表", "Statement list")}</h2><span class="helper">${t("MVP仅提供结算单；发票/税单后置", "MVP provides statements only; invoices and tax forms are deferred")}</span></div>
@@ -330,6 +330,6 @@
     render();
   });
 
-  AFF.statements = { periods, records, selected, buildStatement, availableAt };
+  AFF.statements = { state, periods, records, selected, buildStatement, availableAt };
   AFF.pages.statements = renderPage;
 })();

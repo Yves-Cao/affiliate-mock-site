@@ -13,7 +13,7 @@
     approved: ["已入账", "Credited", "ok"],
     rejected: ["已拒绝", "Rejected", "danger"],
     reversed: ["已冲正", "Reversed", "danger"],
-    frozen: ["冻结", "Frozen", "danger"]
+    frozen: ["结算中", "In settlement", "warning"]
   };
   const typeLabels = {
     accrual: ["佣金应计", "Commission accrual"],
@@ -111,7 +111,7 @@
         held: t("结算中", "On hold"), manual_review: t("人工确认中", "Manual review"),
         payable: t("可提现", "Payable"), paid: t("已支付", "Paid"),
         rejected: t("已拒绝", "Rejected"), clawed_back: t("已冲正", "Clawed back"),
-        frozen: t("冻结", "Frozen"), settled_partial: t("已结算 / 部分支付", "Settled / partially paid"), disputed: t("争议处理中", "Disputed")
+        frozen: t("结算中", "In settlement"), settled_partial: t("已结算 / 部分支付", "Settled / partially paid"), disputed: t("争议处理中", "Disputed")
       }
     };
     return maps[kind]?.[value] || value || "—";
@@ -257,6 +257,12 @@
     return ["rejected", "reversed"].includes(row.status);
   }
 
+  function appealAvailability(row) {
+    if (canAppeal(row)) return t("当前处理结果允许申诉；提交申诉不会自动恢复佣金或变更可提现余额。", "This result allows an appeal. Submitting one does not automatically restore the commission or change the available balance.");
+    if (["held", "frozen"].includes(row.status)) return t("佣金仍在结算中，暂未开放申诉；复核结论出现后再进入申诉窗口。", "The commission is still in settlement; appeals open after a review conclusion.");
+    return t("当前状态没有可申诉的处理结论。", "The current status has no appealable decision.");
+  }
+
   function appealRecord(row) {
     return AFF.state.clientCommissionAppeals?.[row.id];
   }
@@ -271,7 +277,7 @@
     return `<p>${t("佣金观察期初始为1天，系统会根据账户风险分延长观察时间。每笔佣金的天数与预计释放日以详情为准，预计日期不代表届时一定可提现。", "The commission observation period starts at 1 day and may be extended based on the account risk score. See each commission for its duration and expected release date. The expected date does not guarantee withdrawal availability.")}</p>
       <dl><div><dt>${t("入金、交易或身份资料待核验", "Deposit, trading or identity checks")}</dt><dd>${t("核验未完成时可能继续结算中，具体天数随复核结果更新。", "An incomplete check may extend the hold. The duration is updated as the review progresses.")}</dd></div>
       <div><dt>${t("退款、拒付或账户异常待复核", "Refund, chargeback or account review")}</dt><dd>${t("可能触发进一步观察；原因与天数不是固定的一一对应关系。", "Further observation may be needed. Each reason does not have a fixed number of hold days.")}</dd></div>
-      <div><dt>${t(`观察期超过${AFF.finance.configuration.settlementFreezeThresholdDays}天`, `Observation exceeds ${AFF.finance.configuration.settlementFreezeThresholdDays} days`)}</dt><dd>${t("转为冻结并进入人工审核；释放时间以人工审核结果为准。", "The commission is frozen for manual review. Release timing depends on the review outcome.")}</dd></div></dl>`;
+      <div><dt>${t(`观察期超过${AFF.finance.configuration.settlementFreezeThresholdDays}天`, `Observation exceeds ${AFF.finance.configuration.settlementFreezeThresholdDays} days`)}</dt><dd>${t("继续结算中并进入人工审核；释放时间以人工审核结果为准。", "The commission remains in settlement for manual review. Release timing depends on the review outcome.")}</dd></div></dl>`;
   }
 
   function helpContent(id) {
@@ -408,7 +414,7 @@
       else if (row.status === "reversed") steps.push({ title: t("佣金冲正", "Commission reversed"), done: true, text: `${money(-Math.abs(row.amount))} · ${t("原入账明细与扣回记录未提供", "Original credit and recovery records unavailable")}` });
     else if (row.status === "frozen") {
       const threshold = AFF.finance.configuration.settlementFreezeThresholdDays;
-      steps.push({ title: t("冻结与人工审核", "Frozen for manual review"), done: true, text: t(`超过${threshold}天，人工审核结果待定`, `Over ${threshold} days; manual review pending`) });
+      steps.push({ title: t("结算中与人工审核", "In settlement for manual review"), done: true, text: t(`超过${threshold}天，人工审核结果待定`, `Over ${threshold} days; manual review pending`) });
     }
     else steps.push({ title: t("佣金入账", "Commission credit"), done: false, text: t("尚未到达", "Not reached") });
     return `<ol class="earn-flow">${steps.map(step => `<li class="${step.done ? "complete" : ""}"><div><strong>${step.title}</strong><span>${h(step.text)}</span></div><time>${h(step.date || (step.done ? unavailable : t("—", "—")))}</time></li>`).join("")}</ol>`;
@@ -424,7 +430,7 @@
       <header><div><h2 id="earn-detail-title">${t("佣金详情", "Commission details")}</h2><p>${h(row.id)}</p></div><button class="earn-icon-button" type="button" data-earn-action="close" aria-label="${t("关闭", "Close")}">${icon("close")}</button></header>
       <div class="earn-drawer-body">
         <section class="earn-detail-section"><div class="earn-detail-amount"><strong>${money(row.amount)}</strong>${badge(row.status)}${withdrawalBadge(row)}</div><p>${h(reason(row))}</p><dl class="earn-detail-grid">${field(t("佣金编号", "Commission ID"), row.id)}${field(t("结算单编号", "Settlement ID"), row.withdrawal?.settlementId)}${field(t("佣金分段", "Commission segment"), segmentLabel(row))}${field(t("更新日期", "Updated date"), row.date)}${field(t("本案件金额", "Case amount"), money(Math.abs(row.amount)))}${field(t("已支付分摊", "Paid allocation"), money(row.paidAmount))}${field(t("税费", "Tax"), money(row.settlement?.taxAmount / 100 || 0))}${field(t("保证金", "Guarantee"), money(row.settlement?.guaranteeAmount / 100 || 0))}${field(t("结算入账", "Settlement credit"), money(row.settlement?.availableAmount / 100 || 0))}</dl>
-          ${canAppeal(row) ? `<p class="earn-muted">${h(c.commissionReasonCode)}</p>` : ""}
+          <p class="earn-muted">${canAppeal(row) ? h(c.commissionReasonCode) : h(appealAvailability(row))}</p>
         </section>
         ${c.riskHandlingStatus !== "none" ? `<section class="earn-detail-section"><h3>${t("风险处理", "Risk handling")}</h3><dl class="earn-detail-grid">
           ${field(t("处理状态", "Status"), t(...riskLabel(row).slice(0, 2)))}

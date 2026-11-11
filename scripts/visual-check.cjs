@@ -498,7 +498,7 @@ async function main() {
   await page.waitForTimeout(250);
   await page.fill("#lookup-input", "C-10241");
   await page.click("[data-action='lookup']");
-  assertText(await page.locator("#main").innerText(), "30天归因窗口", "Attribution lookup");
+  assertText(await page.locator("#main").innerText(), "标准点击归属窗口", "Attribution lookup");
 
   await page.click("[data-route='assets']");
   assertText(await page.locator("#main").innerText(), "使用素材前，请先阅读推广行为准则", "Asset gate");

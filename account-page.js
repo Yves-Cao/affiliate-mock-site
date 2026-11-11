@@ -96,10 +96,10 @@
 
   function capabilitySummary() {
     const status = accountStatus();
-    if (status === "normal") return t("推广、结算和提现可用", "Promotion, settlement, and withdrawal available");
+    if (status === "normal") return t("资料与认证已确认；推广、结算和提现能力以对应页面状态为准。", "Profile and verification are confirmed; promotion, settlement, and withdrawal follow each page's status.");
     if (status === "reviewing") return t("资料正在审核，部分能力暂待确认", "Profile review in progress; some capabilities are pending");
     if (status === "terminated") return t("账户正在清退，推广入口已停止", "Account closing; promotion access is stopped");
-    return t("资料完善后可恢复相关账户能力", "Complete profile details to restore account capabilities");
+    return t("资料待完善；推广、结算和提现能力以对应页面状态为准。", "Profile details are incomplete; promotion, settlement, and withdrawal follow each page's status.");
   }
 
   function financeStatus(kind) {
