@@ -3,7 +3,7 @@ import path from "node:path";
 
 async function collectMarkdownFiles(dir, files = []) {
   for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
-    if ([".git", "node_modules", "mock-admin", "flowcharts", "PRD"].includes(entry.name)) continue;
+    if ([".git", "node_modules", "mock-admin", "mock-user", "flowcharts", "PRD"].includes(entry.name)) continue;
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) await collectMarkdownFiles(full, files);
     else if (entry.name.endsWith(".md")) files.push(full);

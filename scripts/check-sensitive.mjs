@@ -13,7 +13,7 @@ const errors = [];
 
 async function walk(dir) {
   for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
-    if ([".git", "node_modules", "mock-admin", "flowcharts", "PRD"].includes(entry.name)) continue;
+    if ([".git", "node_modules", "mock-admin", "mock-user", "flowcharts", "PRD"].includes(entry.name)) continue;
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
       await walk(full);

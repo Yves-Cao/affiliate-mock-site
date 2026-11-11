@@ -1,0 +1,36 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const vm = require("node:vm");
+const sandbox = {window:{},console,Date,Map,Set,Promise};
+vm.runInNewContext(fs.readFileSync(path.join(__dirname,"../admin-prototype-data.js"),"utf8"),sandbox);
+const service = sandbox.window.AFF_SUPPORT_SERVICE;
+const ops = {role:"operations",user_id:"U-SUPPORT01"};
+const call = async (operation,params,context=ops) => (await service.request(operation,params,context)).data;
+const ref = (object_type,object_id,ticket_id="T-CS004") => ({ticket_id,object_type,object_id});
+async function main(){
+  const {ticket} = await call("detail",{ticket_id:"T-CS004"});
+  assert.equal(ticket.partner.partner_id,"partner-1021");
+  assert.equal(ticket.assignee.display_name,"周亦辰");
+  assert.equal(ticket.related_objects[0].object_id,"wd-404");
+  assert.equal((await call("relatedObject",ref("withdrawal","wd-404"))).route,"admin-modules/withdrawal-list/wd-404");
+  assert.equal((await call("relatedObject",ref("partner","partner-1021"))).route,"partner-360/partner-1021?tab=overview");
+  assert.equal((await call("relatedObject",ref("partner","P-DEMO01","T-CS009"))).available,false);
+  await assert.rejects(call("relatedObject",ref("withdrawal","wd-401")),e=>e.code==="AFF-40401");
+  await assert.rejects(call("relatedObject",ref("partner","partner-1001")),e=>e.code==="AFF-40401");
+  await assert.rejects(call("relatedObject",ref("withdrawal","wd-404"),{role:"operations",user_id:"U-SUPPORT01",entity_ids:[]}),e=>e.code==="AFF-40401");
+  const canonical=sandbox.window.AFF_ADMIN_PROTOTYPE.funds360.withdrawals.find(w=>w.id==="wd-404");
+  canonical.partner="partner-1001";
+  assert.equal((await call("relatedObject",ref("withdrawal","wd-404"))).available,false);
+  canonical.partner="partner-1021";
+  const task=await call("collaborationDetail",{ticket_id:"T-CS004",task_id:"TASK-04B"});
+  assert.equal(task.source,"客服专业协作");
+  assert.equal(task.assignee.display_name,"陆星河");
+  assert.match(task.task.public_summary,/PAY-WD404/);
+  const finance={role:"finance",user_id:"U-FINANCE01",collaboration_id:"CO-17A"};
+  assert.equal((await call("collaborationDetail",{ticket_id:"T-CS017",task_id:"TASK-17A"},finance)).task.task_id,"TASK-17A");
+  await assert.rejects(call("collaborationDetail",{ticket_id:"T-CS017",task_id:"TASK-17B"},finance),e=>e.code==="AFF-40401");
+  await assert.rejects(call("collaborationDetail",{ticket_id:"T-CS004",task_id:"TASK-04A"},{role:"partner",partner_id:"partner-1021"}),e=>e.code==="AFF-40301");
+  console.log("Customer service routing checks passed (16 assertions).");
+}
+main().catch(error=>{console.error(error);process.exitCode=1;});
