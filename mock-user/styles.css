@@ -2550,8 +2550,8 @@ th:last-child { background: var(--table-header-bg); }
 .route-apply .commission-page-head h2 { font: var(--font-text-18-b); }
 .route-apply .steps .step { min-width: 120px; }
 .route-apply .step-label { max-width: 144px; min-height: 32px; font-size: 13px; line-height: 1.5; }
-.route-apply .simulation-launcher,
 .route-apply .toast { bottom: 104px; }
+.route-apply .simulation-launcher { bottom: 158px; }
 .program-reward-overview { margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
 .program-reward-overview h3,
 .program-funds-flow h3,

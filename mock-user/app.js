@@ -111,7 +111,19 @@ const defaultState = {
   programSupportQuery: "",
   programAssetFilters: { device: "全部", platform: "全部", type: "全部" },
   programCompleted: false,
-  wdTab: "withdraw"
+  wdTab: "withdraw",
+  helpAssistant: {
+    assistantOpen: false,
+    drawerOpen: false,
+    assistantQuery: "",
+    query: "",
+    expandedId: null,
+    faqId: null,
+    category: null,
+    article: null,
+    recentRoutes: [],
+    clickedArticles: []
+  }
 };
 
 const englishLabels = {
@@ -318,6 +330,14 @@ function currentState() {
     merged.dashboardLinkPageQuery = "";
     merged.dashboardLinkLanguageQuery = "";
     merged.programAssetFilters = { ...structuredClone(defaultState.programAssetFilters), ...(savedState.programAssetFilters || {}) };
+    const savedHelp = savedState.helpAssistant || {};
+    const validHelpIds = articleId => (AFF.help?.articles || []).some(item => item.id === articleId);
+    const validRoutes = route => AFF.routes.some(item => item.id === route);
+    merged.helpAssistant = {
+      ...structuredClone(defaultState.helpAssistant),
+      recentRoutes: Array.isArray(savedHelp.recentRoutes) ? savedHelp.recentRoutes.filter(validRoutes).slice(0, 8) : [],
+      clickedArticles: Array.isArray(savedHelp.clickedArticles) ? savedHelp.clickedArticles.filter(validHelpIds).slice(0, 8) : []
+    };
     merged.perf = {
       ...structuredClone(defaultState.perf),
       ...(savedState.perf || {}),
@@ -521,6 +541,7 @@ function render() {
     button.setAttribute("aria-checked", String(button.dataset.language === AFF.state.language));
   });
   document.title = `${routeLabel(route)} · Affiliate CPA`;
+  AFF.help?.render();
   persist();
 }
 

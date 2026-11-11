@@ -1,7 +1,7 @@
 .simulation-launcher {
   position: fixed;
   right: 22px;
-  bottom: 24px;
+  bottom: 78px;
   z-index: 950;
   min-height: 40px;
   padding: 9px 14px;
@@ -89,7 +89,7 @@
 .sim-section ol span { color: var(--muted); }
 .sim-section ol p { margin-top: 3px; }
 @media (max-width: 767px) {
-  .simulation-launcher { right: 14px; bottom: 16px; }
+  .simulation-launcher { right: 14px; bottom: 70px; }
   .aff-drawer.sim-drawer { width: 100%; }
   .sim-body, .sim-drawer > header, .sim-tabs, .sim-drawer > footer { padding-inline: 14px; }
   .sim-tabs { gap: 2px; }
