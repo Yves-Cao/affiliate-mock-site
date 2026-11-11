@@ -1,0 +1,134 @@
+{
+  "users": {
+    "partner": {
+      "userId": "U-P-001",
+      "name": "Mock Partner",
+      "role": "partner",
+      "profileComplete": true,
+      "permissions": ["clients:read", "commissions:read", "withdrawals:create"]
+    },
+    "operator": {
+      "userId": "U-OP-001",
+      "name": "Mock Operator",
+      "role": "operator",
+      "profileComplete": true,
+      "permissions": ["clients:read", "partners:read", "partner-audits:decide", "settlements:decide", "risk-events:decide"]
+    },
+    "compliance": {
+      "userId": "U-CO-001",
+      "name": "Mock Compliance",
+      "role": "compliance",
+      "profileComplete": true,
+      "permissions": ["clients:read", "partners:read", "partner-audits:decide", "risk-events:decide"]
+    },
+    "finance": {
+      "userId": "U-FI-001",
+      "name": "Mock Finance",
+      "role": "finance",
+      "profileComplete": true,
+      "permissions": ["partners:read", "settlements:decide"]
+    },
+    "admin": {
+      "userId": "U-AD-001",
+      "name": "Mock Admin",
+      "role": "admin",
+      "profileComplete": true,
+      "permissions": ["*"]
+    }
+  },
+  "partners": [
+    {
+      "partnerId": "P-001",
+      "displayName": "Mock Partner Alpha",
+      "emailMasked": "a***@example.com",
+      "status": "active",
+      "country": "SG",
+      "riskScore": 12,
+      "riskBand": "R0",
+      "activeClients": 18,
+      "validFtdCount": 12
+    },
+    {
+      "partnerId": "P-002",
+      "displayName": "Mock Partner Beta",
+      "emailMasked": "b***@example.com",
+      "status": "pending",
+      "country": "BR",
+      "riskScore": 43,
+      "riskBand": "R2",
+      "activeClients": 3,
+      "validFtdCount": 1
+    }
+  ],
+  "partnerAudits": [
+    {
+      "auditId": "pa-001",
+      "partnerId": "P-002",
+      "displayName": "Mock Partner Beta",
+      "emailMasked": "b***@example.com",
+      "status": "pending",
+      "submittedAt": "2026-10-23T08:00:00Z"
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "C-001",
+      "emailMasked": "c***@example.com",
+      "country": "SG",
+      "attributionStatus": "attributed",
+      "qualificationStatus": "qualified",
+      "hasRealTrade": true,
+      "createdAt": "2026-10-20T10:00:00Z"
+    },
+    {
+      "clientId": "C-002",
+      "emailMasked": "d***@example.com",
+      "country": "BR",
+      "attributionStatus": "attributed",
+      "qualificationStatus": "trading",
+      "hasRealTrade": true,
+      "createdAt": "2026-10-21T10:00:00Z"
+    }
+  ],
+  "commissions": [
+    {
+      "commissionId": "cm-001",
+      "partnerId": "P-001",
+      "clientId": "C-001",
+      "amount": "120.00",
+      "currency": "USD",
+      "status": "approved",
+      "holdDays": 1,
+      "occurredAt": "2026-10-22T10:00:00Z"
+    }
+  ],
+  "commissionSummary": {
+    "withdrawable": "120.00",
+    "holding": "0.00",
+    "rejected": "0.00",
+    "paidReversed": "0.00",
+    "currency": "USD",
+    "minimumWithdrawal": "NONE"
+  },
+  "settlements": [
+    {
+      "settlementId": "st-001",
+      "partnerId": "P-001",
+      "clientId": "C-001",
+      "amount": "120.00",
+      "currency": "USD",
+      "status": "pending",
+      "settlementDate": "2026-10-23"
+    }
+  ],
+  "riskEvents": [
+    {
+      "eventId": "re-001",
+      "partnerId": "P-002",
+      "eventType": "traffic-anomaly",
+      "severity": "medium",
+      "status": "open",
+      "detectedAt": "2026-10-23T09:00:00Z"
+    }
+  ]
+}

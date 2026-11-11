@@ -1,0 +1,14 @@
+{
+  "meta": {
+    "sourceRefs": ["Q-007"],
+    "decisionStatus": "confirmed"
+  },
+  "settlementCycle": "daily",
+  "minimumWithdrawal": "NONE",
+  "dynamicHold": {
+    "initialDays": 1,
+    "freezeThresholdDays": 30,
+    "mappingStatus": "pending"
+  },
+  "chargeback": "full-reversal-negative-carry-forward"
+}

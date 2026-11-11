@@ -1,0 +1,13 @@
+{
+  "meta": { "mockOnly": true, "scenario": "kyc-pending", "sourceRefs": ["S-002", "page-spec-20"] },
+  "users": {
+    "partner": {
+      "userId": "U-P-002",
+      "name": "Incomplete Partner",
+      "role": "partner",
+      "profileComplete": false,
+      "permissions": ["clients:read", "commissions:read"]
+    }
+  },
+  "clients": []
+}

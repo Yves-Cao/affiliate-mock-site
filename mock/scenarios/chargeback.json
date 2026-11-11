@@ -1,0 +1,22 @@
+{
+  "meta": { "mockOnly": true, "scenario": "chargeback", "sourceRefs": ["Q-007"] },
+  "commissions": [
+    {
+      "commissionId": "cm-003",
+      "partnerId": "P-001",
+      "clientId": "C-001",
+      "amount": "-120.00",
+      "currency": "USD",
+      "status": "reversed",
+      "occurredAt": "2026-10-23T10:00:00Z"
+    }
+  ],
+  "commissionSummary": {
+    "withdrawable": "-120.00",
+    "holding": "0.00",
+    "rejected": "0.00",
+    "paidReversed": "120.00",
+    "currency": "USD",
+    "minimumWithdrawal": "NONE"
+  }
+}

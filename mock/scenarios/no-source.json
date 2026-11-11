@@ -1,0 +1,15 @@
+{
+  "meta": { "mockOnly": true, "scenario": "no-source", "sourceRefs": ["Q-008"] },
+  "clients": [
+    {
+      "clientId": "C-003",
+      "emailMasked": "n***@example.com",
+      "country": "SG",
+      "attributionStatus": "no-source",
+      "qualificationStatus": "registered",
+      "hasRealTrade": false,
+      "exclusionReason": "No affiliate click within 30 days; no default attribution.",
+      "createdAt": "2026-10-23T09:00:00Z"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "meta": { "mockOnly": true, "scenario": "ib-excluded", "sourceRefs": ["CFD-D-009", "Q-011"] },
+  "clients": [
+    {
+      "clientId": "C-004",
+      "emailMasked": "i***@example.com",
+      "country": "BR",
+      "attributionStatus": "ib-excluded",
+      "qualificationStatus": "registered",
+      "hasRealTrade": false,
+      "exclusionReason": "Existing IB attribution is retained in raw events and excluded from affiliate business metrics.",
+      "createdAt": "2026-10-23T09:10:00Z"
+    }
+  ]
+}

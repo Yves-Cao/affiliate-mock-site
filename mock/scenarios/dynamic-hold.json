@@ -1,0 +1,23 @@
+{
+  "meta": { "mockOnly": true, "scenario": "dynamic-hold", "sourceRefs": ["Q-007"] },
+  "commissions": [
+    {
+      "commissionId": "cm-002",
+      "partnerId": "P-001",
+      "clientId": "C-002",
+      "amount": "80.00",
+      "currency": "USD",
+      "status": "holding",
+      "holdDays": 5,
+      "occurredAt": "2026-10-23T08:30:00Z"
+    }
+  ],
+  "commissionSummary": {
+    "withdrawable": "40.00",
+    "holding": "80.00",
+    "rejected": "0.00",
+    "paidReversed": "0.00",
+    "currency": "USD",
+    "minimumWithdrawal": "NONE"
+  }
+}

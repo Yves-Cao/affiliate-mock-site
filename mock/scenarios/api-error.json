@@ -1,0 +1,8 @@
+{
+  "meta": { "mockOnly": true, "scenario": "api-error" },
+  "response": {
+    "status": 503,
+    "code": "SERVICE_UNAVAILABLE",
+    "message": "Mock service intentionally returns an error in this scenario."
+  }
+}

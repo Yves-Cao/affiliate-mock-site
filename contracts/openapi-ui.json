@@ -1,0 +1,1370 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Affiliate UI API",
+    "version": "0.1.0",
+    "description": "P0 UI contract for Affiliate CPA. Paths and fields are design drafts pending backend review.",
+    "contact": {
+      "name": "Affiliate Product"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4000/api/v1",
+      "description": "Local mock server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "session"
+    },
+    {
+      "name": "partners"
+    },
+    {
+      "name": "clients"
+    },
+    {
+      "name": "commissions"
+    },
+    {
+      "name": "settlements"
+    },
+    {
+      "name": "risk"
+    },
+    {
+      "name": "configuration"
+    }
+  ],
+  "security": [
+    {
+      "MockRole": []
+    }
+  ],
+  "paths": {
+    "/me": {
+      "get": {
+        "tags": [
+          "session"
+        ],
+        "operationId": "getCurrentUser",
+        "summary": "Get current mock user and permissions",
+        "responses": {
+          "200": {
+            "description": "Current user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                },
+                "example": {
+                  "data": {
+                    "userId": "U-OP-001",
+                    "name": "Mock Operator",
+                    "role": "operator",
+                    "profileComplete": true,
+                    "permissions": [
+                      "partners:read",
+                      "settlements:decide"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/partners": {
+      "get": {
+        "tags": [
+          "partners"
+        ],
+        "operationId": "listPartners",
+        "summary": "List partners",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/MockScenario"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "pending",
+                "suspended",
+                "banned"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Partner list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerPageResponse"
+                },
+                "example": {
+                  "data": [
+                    {
+                      "partnerId": "P-001",
+                      "displayName": "Mock Partner",
+                      "emailMasked": "p***@example.com",
+                      "status": "active",
+                      "country": "SG",
+                      "riskScore": 12,
+                      "riskBand": "R0",
+                      "activeClients": 18,
+                      "validFtdCount": 12
+                    }
+                  ],
+                  "page": {
+                    "page": 1,
+                    "pageSize": 10,
+                    "total": 1
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/partners/{partnerId}": {
+      "get": {
+        "tags": [
+          "partners"
+        ],
+        "operationId": "getPartner",
+        "summary": "Get partner detail",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Partner detail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/partner-audits": {
+      "get": {
+        "tags": [
+          "partners"
+        ],
+        "operationId": "listPartnerAudits",
+        "summary": "List partner audit queue",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/MockScenario"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Audit queue",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerAuditPageResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/partner-audits/{auditId}/decision": {
+      "post": {
+        "tags": [
+          "partners"
+        ],
+        "operationId": "decidePartnerAudit",
+        "summary": "Approve, reject, or request materials for a partner audit",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuditId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionRequest"
+              },
+              "example": {
+                "decision": "approve",
+                "reason": "Materials complete"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Decision accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerAuditResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/clients": {
+      "get": {
+        "tags": [
+          "clients"
+        ],
+        "operationId": "listClients",
+        "summary": "List attributed clients",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/MockScenario"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Client list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientPageResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/clients/{clientId}": {
+      "get": {
+        "tags": [
+          "clients"
+        ],
+        "operationId": "getClient",
+        "summary": "Get client attribution and qualification detail",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClientId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Client detail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/commissions": {
+      "get": {
+        "tags": [
+          "commissions"
+        ],
+        "operationId": "listCommissions",
+        "summary": "List commission records",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/MockScenario"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Commission list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommissionPageResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/commissions/summary": {
+      "get": {
+        "tags": [
+          "commissions"
+        ],
+        "operationId": "getCommissionSummary",
+        "summary": "Get wallet and commission summary",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MockScenario"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Commission summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommissionSummaryResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/settlements": {
+      "get": {
+        "tags": [
+          "settlements"
+        ],
+        "operationId": "listSettlements",
+        "summary": "List daily settlement queue",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/MockScenario"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Settlement queue",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettlementPageResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/settlements/{settlementId}/decision": {
+      "post": {
+        "tags": [
+          "settlements"
+        ],
+        "operationId": "decideSettlement",
+        "summary": "Approve, reject, or freeze a settlement",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SettlementId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Decision accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettlementResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/risk-events": {
+      "get": {
+        "tags": [
+          "risk"
+        ],
+        "operationId": "listRiskEvents",
+        "summary": "List risk events",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/MockScenario"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Risk event list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiskEventPageResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/risk-events/{eventId}/decision": {
+      "post": {
+        "tags": [
+          "risk"
+        ],
+        "operationId": "decideRiskEvent",
+        "summary": "Resolve or escalate a risk event",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RiskEventId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Decision accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiskEventResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/parameters": {
+      "get": {
+        "tags": [
+          "configuration"
+        ],
+        "operationId": "getMockParameters",
+        "summary": "Get mock qualification, settlement, and country-tier parameters",
+        "description": "Returns confirmed structures and pending values. Values marked pending or mock-only must not be treated as approved business parameters.",
+        "responses": {
+          "200": {
+            "description": "Mock parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MockParametersResponse"
+                },
+                "example": {
+                  "data": {
+                    "meta": {
+                      "mockOnly": true,
+                      "sourceRefs": [
+                        "Q-007",
+                        "CFD-D-015"
+                      ]
+                    },
+                    "settlement": {
+                      "cycle": "daily",
+                      "minimumWithdrawal": "NONE"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "MockRole": {
+        "type": "apiKey",
+        "description": "Development-only role switch. Production authentication is pending review.",
+        "in": "header",
+        "name": "X-Mock-Role"
+      }
+    },
+    "parameters": {
+      "Page": {
+        "name": "page",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        }
+      },
+      "PageSize": {
+        "name": "pageSize",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 10
+        }
+      },
+      "Sort": {
+        "name": "sort",
+        "in": "query",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "MockScenario": {
+        "name": "scenario",
+        "in": "query",
+        "description": "Development-only scenario selector",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "normal-flow",
+            "no-source",
+            "ib-excluded",
+            "high-risk",
+            "dynamic-hold",
+            "chargeback",
+            "kyc-pending",
+            "empty-state",
+            "api-error"
+          ]
+        }
+      },
+      "IdempotencyKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "schema": {
+          "type": "string",
+          "minLength": 8
+        }
+      },
+      "PartnerId": {
+        "name": "partnerId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "pattern": "^P-[0-9]+$"
+        }
+      },
+      "AuditId": {
+        "name": "auditId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "pattern": "^pa-[0-9]+$"
+        }
+      },
+      "ClientId": {
+        "name": "clientId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "pattern": "^C-[0-9]+$"
+        }
+      },
+      "SettlementId": {
+        "name": "settlementId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "pattern": "^st-[0-9]+$"
+        }
+      },
+      "RiskEventId": {
+        "name": "eventId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "pattern": "^re-[0-9]+$"
+        }
+      }
+    },
+    "responses": {
+      "Error": {
+        "description": "Error response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Page": {
+        "type": "object",
+        "required": [
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "required": [
+          "userId",
+          "role",
+          "profileComplete",
+          "permissions"
+        ],
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "partner",
+              "operator",
+              "compliance",
+              "finance",
+              "admin"
+            ]
+          },
+          "profileComplete": {
+            "type": "boolean"
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "Partner": {
+        "type": "object",
+        "required": [
+          "partnerId",
+          "displayName",
+          "emailMasked",
+          "status",
+          "country",
+          "riskScore",
+          "riskBand"
+        ],
+        "properties": {
+          "partnerId": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "emailMasked": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "pending",
+              "suspended",
+              "banned"
+            ]
+          },
+          "country": {
+            "type": "string"
+          },
+          "riskScore": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "riskBand": {
+            "type": "string",
+            "enum": [
+              "R0",
+              "R1",
+              "R2",
+              "R3",
+              "R4"
+            ]
+          },
+          "activeClients": {
+            "type": "integer"
+          },
+          "validFtdCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "PartnerAudit": {
+        "type": "object",
+        "required": [
+          "auditId",
+          "partnerId",
+          "status",
+          "submittedAt"
+        ],
+        "properties": {
+          "auditId": {
+            "type": "string"
+          },
+          "partnerId": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "emailMasked": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "approved",
+              "rejected",
+              "materials-required"
+            ]
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "Client": {
+        "type": "object",
+        "required": [
+          "clientId",
+          "emailMasked",
+          "country",
+          "attributionStatus",
+          "qualificationStatus",
+          "createdAt"
+        ],
+        "properties": {
+          "clientId": {
+            "type": "string"
+          },
+          "emailMasked": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "attributionStatus": {
+            "type": "string",
+            "enum": [
+              "attributed",
+              "no-source",
+              "ib-excluded"
+            ]
+          },
+          "qualificationStatus": {
+            "type": "string",
+            "enum": [
+              "registered",
+              "kyc-approved",
+              "ftd-completed",
+              "trading",
+              "qualified",
+              "rejected"
+            ]
+          },
+          "hasRealTrade": {
+            "type": "boolean"
+          },
+          "exclusionReason": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Commission": {
+        "type": "object",
+        "required": [
+          "commissionId",
+          "partnerId",
+          "clientId",
+          "amount",
+          "currency",
+          "status",
+          "occurredAt"
+        ],
+        "properties": {
+          "commissionId": {
+            "type": "string"
+          },
+          "partnerId": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^[0-9]+\\.[0-9]{2}$"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "USD"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "candidate",
+              "holding",
+              "frozen-manual-review",
+              "approved",
+              "paid",
+              "rejected",
+              "reversed"
+            ]
+          },
+          "holdDays": {
+            "type": "integer"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CommissionSummary": {
+        "type": "object",
+        "required": [
+          "withdrawable",
+          "holding",
+          "rejected",
+          "paidReversed",
+          "currency",
+          "minimumWithdrawal"
+        ],
+        "properties": {
+          "withdrawable": {
+            "type": "string"
+          },
+          "holding": {
+            "type": "string"
+          },
+          "rejected": {
+            "type": "string"
+          },
+          "paidReversed": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "USD"
+            ]
+          },
+          "minimumWithdrawal": {
+            "type": "string",
+            "enum": [
+              "NONE"
+            ]
+          }
+        }
+      },
+      "Settlement": {
+        "type": "object",
+        "required": [
+          "settlementId",
+          "partnerId",
+          "clientId",
+          "amount",
+          "currency",
+          "status",
+          "settlementDate"
+        ],
+        "properties": {
+          "settlementId": {
+            "type": "string"
+          },
+          "partnerId": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "USD"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "approved",
+              "rejected",
+              "frozen"
+            ]
+          },
+          "settlementDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "RiskEvent": {
+        "type": "object",
+        "required": [
+          "eventId",
+          "partnerId",
+          "eventType",
+          "severity",
+          "status",
+          "detectedAt"
+        ],
+        "properties": {
+          "eventId": {
+            "type": "string"
+          },
+          "partnerId": {
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "investigating",
+              "resolved",
+              "escalated"
+            ]
+          },
+          "detectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "DecisionRequest": {
+        "type": "object",
+        "required": [
+          "decision"
+        ],
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "approve",
+              "reject",
+              "freeze",
+              "materials-required",
+              "resolve",
+              "escalate"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 2
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": [
+              "code",
+              "message",
+              "traceId"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "details": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "traceId": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "UserResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "PartnerResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Partner"
+          }
+        }
+      },
+      "PartnerPageResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "page"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Partner"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/Page"
+          }
+        }
+      },
+      "PartnerAuditResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/PartnerAudit"
+          }
+        }
+      },
+      "PartnerAuditPageResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "page"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartnerAudit"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/Page"
+          }
+        }
+      },
+      "ClientResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Client"
+          }
+        }
+      },
+      "ClientPageResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "page"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Client"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/Page"
+          }
+        }
+      },
+      "CommissionPageResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "page"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Commission"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/Page"
+          }
+        }
+      },
+      "CommissionSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/CommissionSummary"
+          }
+        }
+      },
+      "SettlementResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Settlement"
+          }
+        }
+      },
+      "SettlementPageResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "page"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Settlement"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/Page"
+          }
+        }
+      },
+      "RiskEventResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/RiskEvent"
+          }
+        }
+      },
+      "RiskEventPageResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "page"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RiskEvent"
+            }
+          },
+          "page": {
+            "$ref": "#/components/schemas/Page"
+          }
+        }
+      },
+      "MockParameters": {
+        "type": "object",
+        "required": [
+          "meta",
+          "qualification",
+          "settlement",
+          "countryTier"
+        ],
+        "properties": {
+          "meta": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "qualification": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "settlement": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "countryTier": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "MockParametersResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/MockParameters"
+          }
+        }
+      }
+    }
+  }
+}

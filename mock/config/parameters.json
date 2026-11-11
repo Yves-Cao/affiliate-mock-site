@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "mockOnly": true,
+    "sourceRefs": ["Q-007", "CFD-D-015"],
+    "generatedAt": "2026-10-23T00:00:00Z"
+  },
+  "qualification": {
+    "qualityCondition": "deposit-plus-real-trade",
+    "minimumFirstDeposit": { "value": null, "status": "pending" },
+    "minimumTradeAmount": { "value": null, "status": "pending" },
+    "minimumTradeLots": { "value": null, "status": "pending" },
+    "qualificationWindowDays": { "value": null, "range": [30, 90], "status": "pending" },
+    "demoTradeCounts": false
+  },
+  "settlement": {
+    "cycle": "daily",
+    "minimumWithdrawal": "NONE",
+    "dynamicHold": {
+      "initialDays": 1,
+      "freezeThresholdDays": 30,
+      "increaseMapping": {
+        "status": "mock-only",
+        "value": [
+          { "riskBand": "R0", "days": 1 },
+          { "riskBand": "R1", "days": 2 },
+          { "riskBand": "R2", "days": 5 },
+          { "riskBand": "R3", "days": 15 },
+          { "riskBand": "R4", "days": 30 }
+        ]
+      }
+    },
+    "chargeback": {
+      "reversal": "full",
+      "negativeBalanceAllowed": true
+    }
+  },
+  "countryTier": {
+    "status": "mock-only",
+    "value": [
+      { "country": "SG", "tier": "A", "sampleAmount": "120.00" },
+      { "country": "BR", "tier": "B", "sampleAmount": "80.00" },
+      { "country": "VN", "tier": "C", "sampleAmount": "60.00" }
+    ]
+  }
+}

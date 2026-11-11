@@ -1,0 +1,26 @@
+{
+  "meta": { "mockOnly": true, "scenario": "high-risk", "sourceRefs": ["risk-v0.3"] },
+  "partners": [
+    {
+      "partnerId": "P-001",
+      "displayName": "Mock Partner Alpha",
+      "emailMasked": "a***@example.com",
+      "status": "active",
+      "country": "SG",
+      "riskScore": 86,
+      "riskBand": "R4",
+      "activeClients": 18,
+      "validFtdCount": 12
+    }
+  ],
+  "riskEvents": [
+    {
+      "eventId": "re-002",
+      "partnerId": "P-001",
+      "eventType": "device-cluster",
+      "severity": "high",
+      "status": "open",
+      "detectedAt": "2026-10-23T09:20:00Z"
+    }
+  ]
+}

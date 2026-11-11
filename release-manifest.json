@@ -1,0 +1,282 @@
+{
+  "schemaVersion": "1.0",
+  "generatedAt": "2026-10-23T08:09:30.434Z",
+  "sourceOfTruth": "Affiliate project master documents; repo-native files are owned by this repository",
+  "files": [
+    {
+      "path": "contracts/openapi-ui.json",
+      "source": "affiliate-mock: generated contract source",
+      "sha256": "6d30adb31577c4590249a96d60699e687728f7d39217ddace5f2e1e84faeef7d"
+    },
+    {
+      "path": "docs/api-conventions.md",
+      "source": "affiliate-mock: repo-native contract convention",
+      "sha256": "c73ae27398a0bf36609fad2c5d30945f0239659bbb2001d435e872c0a477fc64"
+    },
+    {
+      "path": "docs/confirmed-decisions.md",
+      "source": "Affiliate/待决事项.md: derived confirmed-decision summary",
+      "sha256": "a1bdee8da5b562bb792a6167722052b9c5d482509283fa0bd608238cd2d7762b"
+    },
+    {
+      "path": "docs/event-flow-v0.3.md",
+      "source": "Affiliate/接口文档/事件流转综合文档-v0.3.md",
+      "sha256": "16bdd9d1809a788491ace5680aef5d6a0d949dd3e841b26e6b179f9c2a761556"
+    },
+    {
+      "path": "docs/interface-v0.2.md",
+      "source": "Affiliate/接口文档/Affiliate接口文档-v0.2-设计稿.md",
+      "sha256": "2dc54e2aa57933990e9cf41b040fdbb221e6a3a9094f156f0feb7e376d674e82"
+    },
+    {
+      "path": "docs/mock-release-plan-v0.1.md",
+      "source": "Affiliate/Affiliate Mock发布包方案-v0.1.md",
+      "sha256": "cb2970cfdf6b81d22b7eb12e3d32e75248290df62c36efdf2936451529913ec6"
+    },
+    {
+      "path": "docs/mrd-v1.1.md",
+      "source": "Affiliate/Affiliate市场需求文档-MRD-v1.1.md",
+      "sha256": "36ae58b8da0146d6a2041efc2670602aa07e87c63600a7467435c6ea314e867b"
+    },
+    {
+      "path": "docs/page-specs/00-使用说明.md",
+      "source": "affiliate-mock: docs/page-specs/00-使用说明.md",
+      "sha256": "a12a2177d73f193a4a040cb211996c75e0ae2cfe1d7ac5081966e57a3a806501"
+    },
+    {
+      "path": "docs/page-specs/01-推广端-仪表盘.md",
+      "source": "affiliate-mock: docs/page-specs/01-推广端-仪表盘.md",
+      "sha256": "5a7e33499f0a22276fc9e019008bc76e26b12d79883d436c45f7972064c6d962"
+    },
+    {
+      "path": "docs/page-specs/02-推广端-业绩数据.md",
+      "source": "affiliate-mock: docs/page-specs/02-推广端-业绩数据.md",
+      "sha256": "a37dfc3b1ca61141cf48bdea1d0c3ea22899f2288312c16ed82c90c61ad556b7"
+    },
+    {
+      "path": "docs/page-specs/03-推广端-客户列表.md",
+      "source": "affiliate-mock: docs/page-specs/03-推广端-客户列表.md",
+      "sha256": "a2188d35ddd531eb7a60ccaf16544d6d5407136ee7909d384909fb068edb9724"
+    },
+    {
+      "path": "docs/page-specs/04-推广端-推广链接与活动.md",
+      "source": "affiliate-mock: docs/page-specs/04-推广端-推广链接与活动.md",
+      "sha256": "3adc1e72a64dc87275a89e97ea635c1dddef10d7c2272d97a34b2546e5557a92"
+    },
+    {
+      "path": "docs/page-specs/04b-推广端-深度链接.md",
+      "source": "affiliate-mock: docs/page-specs/04b-推广端-深度链接.md",
+      "sha256": "5cded13bb405e4565792056ca03d3a6558def7e34d08fd69cf98e0cb672f264f"
+    },
+    {
+      "path": "docs/page-specs/05-推广端-收益与提现.md",
+      "source": "affiliate-mock: docs/page-specs/05-推广端-收益与提现.md",
+      "sha256": "9651d1a03886fb29c71bfd29fa5cf205337eff7908017d22c69f023be48f9e25"
+    },
+    {
+      "path": "docs/page-specs/06-推广端-客户归属查询.md",
+      "source": "affiliate-mock: docs/page-specs/06-推广端-客户归属查询.md",
+      "sha256": "16f4c2dd72e70c1ab4b9bce7208d50628a6756fcd31cb115c549fc1e48809afc"
+    },
+    {
+      "path": "docs/page-specs/07-运营端-合作者列表.md",
+      "source": "affiliate-mock: docs/page-specs/07-运营端-合作者列表.md",
+      "sha256": "62204825fd2dec8fcda4a62d2d6cfe8844932498b6bbefa449041c4192ecfba8"
+    },
+    {
+      "path": "docs/page-specs/08-运营端-合作者审核.md",
+      "source": "affiliate-mock: docs/page-specs/08-运营端-合作者审核.md",
+      "sha256": "d95d410136833066e7303afd9c99f1bcca5fd103c3ac49b1e54c5c11a633998e"
+    },
+    {
+      "path": "docs/page-specs/09-运营端-结算审批.md",
+      "source": "affiliate-mock: docs/page-specs/09-运营端-结算审批.md",
+      "sha256": "eab9a7dcab107a383a349769c3e56dc97c271d8313a122304a500fe2ec01534f"
+    },
+    {
+      "path": "docs/page-specs/10-运营端-归因限制配置.md",
+      "source": "affiliate-mock: docs/page-specs/10-运营端-归因限制配置.md",
+      "sha256": "574260a0b87af6b96b69a5ba29d9f6ccb85b94cc2996fd4dfaf35a13bd65b70a"
+    },
+    {
+      "path": "docs/page-specs/11-运营端-风控事件处置.md",
+      "source": "affiliate-mock: docs/page-specs/11-运营端-风控事件处置.md",
+      "sha256": "3c80dff4373acde28d6fc82bd3b6b8d8e355a320b81cc709935c2a8203ccd45c"
+    },
+    {
+      "path": "docs/page-specs/12-运营端-流量与转化.md",
+      "source": "affiliate-mock: docs/page-specs/12-运营端-流量与转化.md",
+      "sha256": "40fc9e331ce1e5db25b44ac20b92d196290ce652818ae5e9927ca20b47ecf265"
+    },
+    {
+      "path": "docs/page-specs/13-运营端-渠道分析.md",
+      "source": "affiliate-mock: docs/page-specs/13-运营端-渠道分析.md",
+      "sha256": "bde1f2e7f0bd9bf0e13dcc113aa2f1164e565c9b144c896d6b334403e7ef9c03"
+    },
+    {
+      "path": "docs/page-specs/14-运营端-财务统计.md",
+      "source": "affiliate-mock: docs/page-specs/14-运营端-财务统计.md",
+      "sha256": "5ce3c382732942408f2f31228a4dc8747d7f4c2c87971b9df9c79c53ac0d5ce9"
+    },
+    {
+      "path": "docs/page-specs/15-运营端-规则配置.md",
+      "source": "affiliate-mock: docs/page-specs/15-运营端-规则配置.md",
+      "sha256": "db5904158cce1a6df69294eae5fd526a5a66e332e6fcd8a86d31ed246b6bb6b4"
+    },
+    {
+      "path": "docs/page-specs/16-运营端-参数配置.md",
+      "source": "affiliate-mock: docs/page-specs/16-运营端-参数配置.md",
+      "sha256": "8cd830b9ece70fb6092b11d2d673b52958fdb1324e021acd38859e173de95a90"
+    },
+    {
+      "path": "docs/page-specs/17-运营端-菜单配置.md",
+      "source": "affiliate-mock: docs/page-specs/17-运营端-菜单配置.md",
+      "sha256": "881bb546feb9244c156399125f06083bfbc64f3b7c676c360f3e3dc7f192375a"
+    },
+    {
+      "path": "docs/page-specs/18-运营端-账户配置.md",
+      "source": "affiliate-mock: docs/page-specs/18-运营端-账户配置.md",
+      "sha256": "ac34b46299fcd89b9ee49cbe6edcb1fb3be33415a6c55163715d270478a6cc21"
+    },
+    {
+      "path": "docs/page-specs/19-推广端-素材库.md",
+      "source": "affiliate-mock: docs/page-specs/19-推广端-素材库.md",
+      "sha256": "155f6062873263c76703a69acc02d177c7fd27216e4193401be0cf26369c8bc6"
+    },
+    {
+      "path": "docs/page-specs/20-推广端-入驻申请.md",
+      "source": "affiliate-mock: docs/page-specs/20-推广端-入驻申请.md",
+      "sha256": "93a24095931179233f97fad6e32ca802f53a310d777159959ac8b34c3fe26578"
+    },
+    {
+      "path": "docs/page-specs/21-推广端-提现.md",
+      "source": "affiliate-mock: docs/page-specs/21-推广端-提现.md",
+      "sha256": "272fe2fa48153c8a4f492c3ec79d7f7e251ead77e8e1a955b62210ee8239e5fc"
+    },
+    {
+      "path": "docs/page-specs/22-运营端-出金审批.md",
+      "source": "affiliate-mock: docs/page-specs/22-运营端-出金审批.md",
+      "sha256": "032d72c415b2ec6cd64be407a2e545d6fc8faf9123f3c5f49b81a6041269ecf9"
+    },
+    {
+      "path": "docs/page-specs/23-运营端-CPA档位表.md",
+      "source": "affiliate-mock: docs/page-specs/23-运营端-CPA档位表.md",
+      "sha256": "94592f640b84e4ad765e24a996463158d84b81d95efa00e78b9fc7c7e403b663"
+    },
+    {
+      "path": "docs/page-specs/26-运营端-通知模板管理.md",
+      "source": "affiliate-mock: docs/page-specs/26-运营端-通知模板管理.md",
+      "sha256": "331fbd33b2c38311427bd6725efa7efd8e9f9c4dd7ddfa8d27c3aed462162896"
+    },
+    {
+      "path": "docs/page-specs/27-运营端-操作审计日志.md",
+      "source": "affiliate-mock: docs/page-specs/27-运营端-操作审计日志.md",
+      "sha256": "5dbecc62919bcc4a6f386dc74946b70c85c797e4543efe8e3d57c8e9abde25e6"
+    },
+    {
+      "path": "docs/page-specs/28-运营端-支付渠道配置.md",
+      "source": "affiliate-mock: docs/page-specs/28-运营端-支付渠道配置.md",
+      "sha256": "c7a8eae8022c217bd8c8bf0792c45c3f203aa17c69d4d34f6120a01a05c8bccb"
+    },
+    {
+      "path": "docs/page-specs/29-运营端-国家地区配置.md",
+      "source": "affiliate-mock: docs/page-specs/29-运营端-国家地区配置.md",
+      "sha256": "190a6857bc3ded0d661fe08151a82c8f98e388acbd0ed144813cbbf615ea3f19"
+    },
+    {
+      "path": "docs/page-specs/30-运营端-黑名单管理.md",
+      "source": "affiliate-mock: docs/page-specs/30-运营端-黑名单管理.md",
+      "sha256": "361024fd0ceda3702098f837bb230e866a2e9d2e012b596296f5c1f4ed14346c"
+    },
+    {
+      "path": "docs/rbac.md",
+      "source": "affiliate-mock: repo-native permission draft",
+      "sha256": "f02c7baf73ff89fdc11eebb1ee10218975b42a8db9b0f0e8ff33e5e8bf0973ad"
+    },
+    {
+      "path": "docs/risk-v0.3.md",
+      "source": "Affiliate/Affiliate CPA风控方案-v0.3.md",
+      "sha256": "69c2ffeedb7f898c70155a0cb63a87567cf55534041ae49df37889fbe8da2591"
+    },
+    {
+      "path": "mock/config/parameters.json",
+      "source": "affiliate-mock: mock/config/parameters.json",
+      "sha256": "ec15a728814c416aa239bd63174fc3dcdf71997a9c7b3d1500a307201c391855"
+    },
+    {
+      "path": "mock/config/risk-bands.json",
+      "source": "affiliate-mock: mock/config/risk-bands.json",
+      "sha256": "b6eca823f0db3438b8b369d8bd18729d4992f7984ca5ace1a7a04b523cbf3462"
+    },
+    {
+      "path": "mock/config/settlement-rules.json",
+      "source": "affiliate-mock: mock/config/settlement-rules.json",
+      "sha256": "5fa8afd3f319a529ce8950c3441ddf1312e1fa32dad1bf3ca08be5eb54530ad8"
+    },
+    {
+      "path": "mock/data/base.json",
+      "source": "affiliate-mock: mock/data/base.json",
+      "sha256": "6388d5a09b6c58938b25d66c2cb3cbc0f7fc33c6539c3b17a688eda8086e5e6f"
+    },
+    {
+      "path": "mock/scenarios/api-error.json",
+      "source": "affiliate-mock: mock/scenarios/api-error.json",
+      "sha256": "ed53f612b1da8a74a2aeaa64280e24af19b5e46692a5503a49fe922afd9c63fa"
+    },
+    {
+      "path": "mock/scenarios/chargeback.json",
+      "source": "affiliate-mock: mock/scenarios/chargeback.json",
+      "sha256": "c283bf1e92245554b069ef2c6080b5e010f73b96db2dfbce7010a6fdcdf3f882"
+    },
+    {
+      "path": "mock/scenarios/dynamic-hold.json",
+      "source": "affiliate-mock: mock/scenarios/dynamic-hold.json",
+      "sha256": "35b8c1fdb925f060ab9467327ce4835bb39ceb601d7cdfc2c5e85b983ff2fd48"
+    },
+    {
+      "path": "mock/scenarios/empty-state.json",
+      "source": "affiliate-mock: mock/scenarios/empty-state.json",
+      "sha256": "a9a8da449242d33409d2130cb9806a3ec7b2399625f3469a48f6b77ff759ed55"
+    },
+    {
+      "path": "mock/scenarios/high-risk.json",
+      "source": "affiliate-mock: mock/scenarios/high-risk.json",
+      "sha256": "91f97161ca21e8aa4201cc846d3856b133a0285f703fcd4f459d6d404af31647"
+    },
+    {
+      "path": "mock/scenarios/ib-excluded.json",
+      "source": "affiliate-mock: mock/scenarios/ib-excluded.json",
+      "sha256": "9005335560f36cc65bccb6f64fe7014421dceb7c5e8bc21cdcee600b60427bbe"
+    },
+    {
+      "path": "mock/scenarios/kyc-pending.json",
+      "source": "affiliate-mock: mock/scenarios/kyc-pending.json",
+      "sha256": "f34396c9380af19b681ed962343c60d9d095d90d5a70c883381985f080c6998c"
+    },
+    {
+      "path": "mock/scenarios/no-source.json",
+      "source": "affiliate-mock: mock/scenarios/no-source.json",
+      "sha256": "162bf8526fdd4da72693db3da1c5696e1196e202eec99cde25cdbb7ac2c65f97"
+    },
+    {
+      "path": "mock/scenarios/normal-flow.json",
+      "source": "affiliate-mock: mock/scenarios/normal-flow.json",
+      "sha256": "14adbb1322e957e3a7488fde264a9cb12c354eacc37695a8138c35530acece5d"
+    },
+    {
+      "path": "prototype/mock-console.html",
+      "source": "affiliate-mock: zero-dependency contract console",
+      "sha256": "34460f1fdfce4b7842fe8d7daaa395bb1b235e4de0dfdf9477ba4e98118f79ca"
+    },
+    {
+      "path": "prototype/v0.21.html",
+      "source": "Affiliate/原型/Affiliate评审原型-v0.21.html",
+      "sha256": "e39c3e4404cf4f03af7ecb411cc6c9bffabbe6e41af7c079cce9a1fb20606670"
+    },
+    {
+      "path": "traceability.json",
+      "source": "affiliate-mock: generated traceability source",
+      "sha256": "faf928e290c086833a182828b105b5a35fc0045bdb08d8da6a1b34e5ea7ba6a4"
+    }
+  ]
+}

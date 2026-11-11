@@ -1,0 +1,17 @@
+{
+  "meta": { "mockOnly": true, "scenario": "empty-state" },
+  "partners": [],
+  "partnerAudits": [],
+  "clients": [],
+  "commissions": [],
+  "settlements": [],
+  "riskEvents": [],
+  "commissionSummary": {
+    "withdrawable": "0.00",
+    "holding": "0.00",
+    "rejected": "0.00",
+    "paidReversed": "0.00",
+    "currency": "USD",
+    "minimumWithdrawal": "NONE"
+  }
+}

@@ -1,0 +1,12 @@
+# Default owner for repository-wide review.
+* @maxgooder
+
+# Product decisions and page contracts require product review.
+/docs/ @maxgooder
+/prototype/ @maxgooder
+/traceability.json @maxgooder
+
+# API and Mock behavior require engineering review.
+/contracts/ @maxgooder
+/mock/ @maxgooder
+/tests/ @maxgooder

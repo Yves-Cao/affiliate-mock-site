@@ -1,0 +1,188 @@
+{
+  "schemaVersion": "1.0",
+  "generatedAt": "2026-10-23T00:00:00Z",
+  "records": [
+    {
+      "id": "TR-001",
+      "sourceRefs": [
+        "S-002",
+        "CFD-D-016"
+      ],
+      "requirement": "Partner can enter the application flow and incomplete profile restricts features.",
+      "pageSpec": "docs/page-specs/20-推广端-入驻申请.md",
+      "api": "/api/v1/me",
+      "scenarios": [
+        "kyc-pending"
+      ],
+      "tests": [
+        "server.test.mjs: current user reflects incomplete profile"
+      ],
+      "implementationStatus": "mock-ready"
+    },
+    {
+      "id": "TR-002",
+      "sourceRefs": [
+        "S-002"
+      ],
+      "requirement": "Operations can review a partner application and record a decision.",
+      "pageSpec": "docs/page-specs/08-运营端-合作者审核.md",
+      "api": "/api/v1/partner-audits/{auditId}/decision",
+      "scenarios": [
+        "normal-flow"
+      ],
+      "tests": [
+        "server.test.mjs: partner audit decision is stateful and idempotent"
+      ],
+      "implementationStatus": "mock-ready"
+    },
+    {
+      "id": "TR-003",
+      "sourceRefs": [
+        "Q-008"
+      ],
+      "requirement": "A registration without a source does not receive default attribution.",
+      "pageSpec": "docs/page-specs/06-推广端-客户归属查询.md",
+      "api": "/api/v1/clients",
+      "scenarios": [
+        "no-source"
+      ],
+      "tests": [
+        "server.test.mjs: no-source client is not attributed"
+      ],
+      "implementationStatus": "mock-ready"
+    },
+    {
+      "id": "TR-004",
+      "sourceRefs": [
+        "CFD-D-009",
+        "Q-011"
+      ],
+      "requirement": "IB-attributed clients remain in raw events but are excluded from affiliate business metrics.",
+      "pageSpec": "docs/page-specs/03-推广端-客户列表.md",
+      "api": "/api/v1/clients",
+      "scenarios": [
+        "ib-excluded"
+      ],
+      "tests": [
+        "traceability.test.mjs: all traceability references exist"
+      ],
+      "implementationStatus": "mock-ready"
+    },
+    {
+      "id": "TR-005",
+      "sourceRefs": [
+        "CFD-D-013",
+        "CFD-D-015"
+      ],
+      "requirement": "Valid FTD is a CRM successful FTD plus Affiliate compliance check; demo trading never counts.",
+      "pageSpec": "docs/page-specs/03-推广端-客户列表.md",
+      "api": "/api/v1/clients/{clientId}",
+      "scenarios": [
+        "normal-flow"
+      ],
+      "tests": [
+        "server.test.mjs: normal client has real trade"
+      ],
+      "implementationStatus": "mock-ready"
+    },
+    {
+      "id": "TR-006",
+      "sourceRefs": [
+        "Q-007"
+      ],
+      "requirement": "Commission is settled daily with no minimum withdrawal.",
+      "pageSpec": "docs/page-specs/05-推广端-收益与提现.md",
+      "api": "/api/v1/commissions/summary",
+      "scenarios": [
+        "normal-flow",
+        "empty-state"
+      ],
+      "tests": [
+        "server.test.mjs: commission summary uses daily settlement rules"
+      ],
+      "implementationStatus": "mock-ready"
+    },
+    {
+      "id": "TR-007",
+      "sourceRefs": [
+        "Q-007"
+      ],
+      "requirement": "Dynamic Hold starts at one day, increases by risk score, and freezes after thirty days.",
+      "pageSpec": "docs/page-specs/16-运营端-参数配置.md",
+      "api": "/api/v1/commissions",
+      "scenarios": [
+        "dynamic-hold"
+      ],
+      "tests": [
+        "server.test.mjs: dynamic hold uses holding status"
+      ],
+      "implementationStatus": "mock-ready"
+    },
+    {
+      "id": "TR-008",
+      "sourceRefs": [
+        "Q-007"
+      ],
+      "requirement": "Chargeback fully reverses commission and carries a negative balance forward.",
+      "pageSpec": "docs/page-specs/05-推广端-收益与提现.md",
+      "api": "/api/v1/commissions",
+      "scenarios": [
+        "chargeback"
+      ],
+      "tests": [
+        "server.test.mjs: chargeback creates negative balance"
+      ],
+      "implementationStatus": "mock-ready"
+    },
+    {
+      "id": "TR-009",
+      "sourceRefs": [
+        "risk-v0.3"
+      ],
+      "requirement": "Risk events expose severity and can be resolved or escalated.",
+      "pageSpec": "docs/page-specs/11-运营端-风控事件处置.md",
+      "api": "/api/v1/risk-events/{eventId}/decision",
+      "scenarios": [
+        "high-risk"
+      ],
+      "tests": [
+        "server.test.mjs: high risk partner uses R4"
+      ],
+      "implementationStatus": "mock-ready"
+    },
+    {
+      "id": "TR-010",
+      "sourceRefs": [
+        "CFD-D-016"
+      ],
+      "requirement": "Pages must handle empty and service-error states without inventing data.",
+      "pageSpec": "docs/page-specs/00-使用说明.md",
+      "api": "/api/v1/commissions",
+      "scenarios": [
+        "empty-state",
+        "api-error"
+      ],
+      "tests": [
+        "server.test.mjs: api error returns structured 503"
+      ],
+      "implementationStatus": "mock-ready"
+    },
+    {
+      "id": "TR-011",
+      "sourceRefs": [
+        "Q-007",
+        "CFD-D-015"
+      ],
+      "requirement": "API consumers can inspect qualification and settlement parameter status without hard-coding pending values.",
+      "pageSpec": "docs/page-specs/16-运营端-参数配置.md",
+      "api": "/api/v1/parameters",
+      "scenarios": [
+        "normal-flow"
+      ],
+      "tests": [
+        "server.test.mjs: mock parameters are available to API consumers"
+      ],
+      "implementationStatus": "mock-ready"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "meta": {
+    "mockOnly": true,
+    "sourceRefs": ["Q-007", "risk-v0.3"],
+    "note": "Score band structure is defined; event weights and enforcement mapping remain pending review."
+  },
+  "scoreRange": [0, 100],
+  "bands": [
+    { "band": "R0", "min": 0, "max": 19, "action": "normal" },
+    { "band": "R1", "min": 20, "max": 39, "action": "monitor" },
+    { "band": "R2", "min": 40, "max": 59, "action": "review" },
+    { "band": "R3", "min": 60, "max": 79, "action": "restrict-and-review", "status": "structural" },
+    { "band": "R4", "min": 80, "max": 100, "action": "freeze-and-ban-review", "status": "structural" }
+  ]
+}
