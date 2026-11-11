@@ -17,6 +17,10 @@
   box-shadow: 0 10px 24px rgba(0, 91, 255, .26);
 }
 .help-launcher:hover { filter: brightness(1.08); }
+.help-launcher[aria-expanded="true"] {
+  background: linear-gradient(135deg, #003a99 0%, #0047c4 100%);
+  box-shadow: 0 10px 24px rgba(0, 58, 153, .3);
+}
 .help-launcher svg { width: 21px; height: 21px; }
 .help-launcher:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
@@ -68,6 +72,7 @@
   padding: 14px 16px;
   overflow-y: auto;
 }
+.help-assistant-results { display: grid; align-content: start; gap: 8px; }
 .help-drawer-search {
   display: grid;
   gap: 6px;

@@ -2,6 +2,7 @@
   const h = value => AFF.helpers.h(value);
   const text = value => Array.isArray(value) ? (AFF.state.language === "en" ? value[1] : value[0]) : value;
   const t = (zh, en) => AFF.state.language === "en" ? en : zh;
+  let assistantSearchComposition = false;
 
   const categories = [
     { id: "start", name: ["快速入门", "Getting started"], description: ["认识计划与基础流程。", "Understand the program and basic flow."] },
@@ -220,7 +221,6 @@
   function assistantPanel() {
     const s = state();
     const expanded = s.expandedId ? article(s.expandedId) : null;
-    const results = searchArticles(s.assistantQuery);
     const recommended = recommendations();
     return `
       <section class="help-assistant" id="help-assistant-panel" role="dialog" aria-label="${h(t("智能客服", "Smart assistant"))}" ${s.assistantOpen ? "" : "hidden"}>
@@ -232,12 +232,7 @@
           <button class="help-icon-button" type="button" data-help-action="close-assistant" aria-label="${h(t("关闭智能客服", "Close assistant"))}">×</button>
         </header>
         <div class="help-assistant-body">
-          ${s.assistantQuery ? results.slice(0, 4).map(item => `
-            <button class="help-result" type="button" data-help-action="assistant-question" data-article="${h(item.id)}">
-              <strong>${highlight(text(item.title), s.assistantQuery)}</strong>
-              <span>${h(text(item.summary))}</span>
-            </button>
-          `).join("") || `<p class="help-empty">${h(t("没有找到匹配内容，可打开帮助中心继续查看。", "No matches. Open the help center for more."))}</p>` : ""}
+          <div class="help-assistant-results" data-help-assistant-results>${assistantResultsMarkup(s.assistantQuery)}</div>
           <section class="help-assistant-section">
             <h3>${h(t("可能想问", "You may ask"))}</h3>
             <div class="help-question-list">
@@ -268,6 +263,17 @@
         </footer>
       </section>
     `;
+  }
+
+  function assistantResultsMarkup(query) {
+    const results = searchArticles(query);
+    if (!query.trim()) return "";
+    return results.slice(0, 4).map(item => `
+      <button class="help-result" type="button" data-help-action="assistant-question" data-article="${h(item.id)}">
+        <strong>${highlight(text(item.title), query)}</strong>
+        <span>${h(text(item.summary))}</span>
+      </button>
+    `).join("") || `<p class="help-empty">${h(t("没有找到匹配内容，可打开帮助中心继续查看。", "No matches. Open the help center for more."))}</p>`;
   }
 
   function drawerBody() {
@@ -422,6 +428,15 @@
 
   function openAssistant(trigger) {
     const s = state();
+    if (s.assistantOpen) {
+      s.assistantOpen = false;
+      render(".help-launcher");
+      const returnTarget = trigger?.classList?.contains("help-launcher")
+        ? root()?.querySelector(".help-launcher")
+        : trigger;
+      returnTarget?.focus();
+      return;
+    }
     s.assistantOpen = true;
     render("[data-help-assistant-search]");
     if (trigger) trigger.setAttribute("aria-expanded", "true");
@@ -437,12 +452,13 @@
   function updateAssistantSearch(value) {
     const s = state();
     s.assistantQuery = value;
-    const input = root()?.querySelector("[data-help-assistant-search]");
-    const position = input?.selectionStart ?? value.length;
-    render();
-    const next = root()?.querySelector("[data-help-assistant-search]");
-    next?.focus();
-    next?.setSelectionRange(position, position);
+    const results = root()?.querySelector("[data-help-assistant-results]");
+    if (results) {
+      results.innerHTML = assistantResultsMarkup(value);
+      wireHelpControls(results);
+    } else {
+      render("[data-help-assistant-search]");
+    }
   }
 
   function updateDrawerSearch(value) {
@@ -542,7 +558,18 @@
         processHelpAction(control);
       });
     });
-    container.querySelector("[data-help-assistant-search]")?.addEventListener("input", event => updateAssistantSearch(event.target.value));
+    const assistantSearch = container.querySelector("[data-help-assistant-search]");
+    assistantSearch?.addEventListener("input", event => {
+      if (event.isComposing || assistantSearchComposition) return;
+      updateAssistantSearch(event.target.value);
+    });
+    assistantSearch?.addEventListener("compositionstart", () => {
+      assistantSearchComposition = true;
+    });
+    assistantSearch?.addEventListener("compositionend", event => {
+      assistantSearchComposition = false;
+      updateAssistantSearch(event.target.value);
+    });
     container.querySelector("[data-help-search]")?.addEventListener("input", event => updateDrawerSearch(event.target.value));
   }
 
@@ -568,6 +595,7 @@
       return;
     }
     if (event.key === "Enter" && event.target.matches("[data-help-assistant-search]")) {
+      if (event.isComposing || assistantSearchComposition) return;
       const first = searchArticles(s.assistantQuery)[0];
       if (first) {
         event.preventDefault();
