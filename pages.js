@@ -1416,6 +1416,7 @@ AFF.pages.applyStep = () => {
         <h3>基础推广：先拿链接和素材</h3>
         <p>适合内容站、社群和KOL先开始投放；不需要先配置Sub ID或回传。</p>
       </div>
+      <section class="funds-stage-card funds-stage-card-compact">${AFF.fundsStageChain("settling")}</section>
       <div class="program-share-links">
         ${[["网页链接", "适用于网站与桌面浏览器", webLink.href, "globe"], ["移动/手机链接", "适用于应用与移动端推广", mobileLink.href, "smartphone"]].map(([label, hint, url, icon]) => `
           <div class="program-share-link">
