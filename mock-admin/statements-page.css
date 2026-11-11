@@ -1,0 +1,40 @@
+.statement-page { display: grid; gap: 16px; }
+.statement-page > * { min-width: 0; }
+.statement-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.statement-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; padding: 0 18px 16px; }
+.statement-filters label { display: grid; min-width: 150px; gap: 5px; }
+.statement-filters span { color: var(--muted); font-size: 11px; }
+.statement-filters select { min-height: 32px; padding: 5px 8px; border: 1px solid var(--control-border); border-radius: 4px; background: #fff; }
+.statement-table-wrap { width: 100%; overflow-x: auto; border-top: 1px solid var(--border); }
+.statement-table-wrap table { width: 100%; min-width: 1180px; border-collapse: collapse; }
+.statement-table-wrap th, .statement-table-wrap td { padding: 10px 12px; border-bottom: 1px solid var(--table-row-border); text-align: left; font-size: var(--table-body-size); white-space: nowrap; }
+.statement-table-wrap th { background: var(--table-header-bg); color: var(--table-header-text); font-weight: var(--table-header-weight); }
+.statement-table-wrap td.numeric { text-align: right; font-variant-numeric: tabular-nums; }
+.statement-modal {
+  position: fixed;
+  z-index: 902;
+  top: 50%;
+  left: 50%;
+  width: min(480px, calc(100vw - 32px));
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.statement-modal header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.statement-modal h2 { margin: 0; color: var(--blue-black); font-size: 16px; }
+.statement-modal header button { width: 32px; height: 32px; border: 0; border-radius: 4px; background: var(--surface-soft); font-size: 20px; }
+.statement-modal p { margin: 14px 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.statement-modal dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0; }
+.statement-modal dt { margin-bottom: 4px; color: var(--muted); font-size: 12px; }
+.statement-modal dd { margin: 0; color: var(--text); font-size: 13px; }
+.statement-modal footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+@media (max-width: 991px) { .statement-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 767px) {
+  .statement-cards, .statement-modal dl { grid-template-columns: 1fr; }
+  .statement-filters { padding: 0 12px 12px; }
+  .statement-filters label { flex: 1 1 100%; }
+  .statement-modal footer button { flex: 1; }
+}

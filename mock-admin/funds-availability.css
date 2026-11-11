@@ -1,0 +1,45 @@
+.funds-availability { display: grid; gap: 16px; padding: 18px; }
+.funds-availability > *, .funds-body > * { min-width: 0; }
+.funds-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.funds-header h2 { margin: 0; color: var(--blue-black); font-size: 16px; }
+.funds-header span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
+.funds-time-note { margin: 10px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.funds-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.funds-cards article { min-width: 0; display: grid; gap: 5px; padding: 13px; border: 1px solid var(--border); border-radius: 5px; background: #f8fbff; }
+.funds-cards span, .funds-cards small { color: var(--muted); font-size: 12px; }
+.funds-cards strong { color: var(--text); font: var(--font-text-20-b); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.funds-body { display: grid; grid-template-columns: minmax(280px, .8fr) minmax(0, 1.2fr); gap: 18px; }
+.funds-body h3 { margin: 0 0 12px; color: var(--blue-black); font-size: 14px; }
+.funds-body p { margin: 10px 0 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.funds-waterfall { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; }
+.funds-waterfall li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; background: #fff; color: var(--body-text); font-size: 12px; }
+.funds-waterfall strong { color: var(--text); font-variant-numeric: tabular-nums; }
+.funds-waterfall .funds-minus strong { color: var(--danger); }
+.funds-waterfall .funds-total { background: #f8fbff; }
+.funds-waterfall .funds-result { border-color: #b8d4ff; background: #f0f7ff; }
+.funds-waterfall .funds-result strong { color: var(--brand); }
+.funds-table-wrap { width: 100%; overflow-x: auto; border: 1px solid var(--border); border-radius: 4px; }
+.funds-table-wrap table { width: 100%; min-width: 780px; border-collapse: collapse; background: #fff; }
+.funds-table-wrap th, .funds-table-wrap td { padding: 9px 10px; border-bottom: 1px solid var(--table-row-border); text-align: left; font-size: var(--table-body-size); vertical-align: top; }
+.funds-table-wrap th { background: var(--table-header-bg); color: var(--table-header-text); font-weight: var(--table-header-weight); }
+.funds-table-wrap td:nth-child(3) { text-align: right; font-variant-numeric: tabular-nums; }
+.funds-empty { padding: 26px; color: var(--muted); text-align: center; }
+.funds-untriggered { display: grid; gap: 6px; margin-top: 10px; padding: 10px; border: 1px dashed var(--control-border); border-radius: 4px; }
+.funds-untriggered strong { color: var(--body-text); font-size: 12px; }
+.funds-untriggered span { color: var(--muted); font-size: 12px; line-height: 1.6; }
+.wallet-popover-processing { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.wallet-popover-processing strong { color: var(--body-text); font-size: 13px; font-variant-numeric: tabular-nums; }
+.wallet-popover-details { display: grid; gap: 8px; margin: 12px 0; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.wallet-popover-details > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.wallet-popover-details span, .wallet-data-item > span { display: grid; gap: 2px; color: var(--muted); font-size: 12px; }
+.wallet-data-item > span { color: var(--text); font-weight: 700; }
+.wallet-data-item > span small { color: var(--muted); font-size: 10px; font-weight: 400; line-height: 1.35; }
+.wallet-popover-details strong { color: var(--body-text); font-size: 13px; font-variant-numeric: tabular-nums; }
+.wallet-value-link { padding: 0; border: 0; background: transparent; color: var(--brand); font: inherit; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; cursor: pointer; }
+.wallet-value-link:hover, .wallet-value-link:focus-visible { color: var(--brand-deep); text-decoration: underline; }
+.wallet-value-link:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; border-radius: 2px; }
+.wallet-popover-reason { margin: 0; color: var(--muted); font-size: 12px; }
+.wallet-popover-links { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 18px; }
+.wallet-popover-links .button.secondary { min-height: 30px; }
+@media (max-width: 991px) { .funds-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } .funds-body { grid-template-columns: 1fr; } }
+@media (max-width: 767px) { .funds-cards { grid-template-columns: 1fr; } .funds-table-wrap th, .funds-table-wrap td { white-space: normal; } .funds-table-wrap td:nth-child(3) { text-align: left; } .wallet-popover-links { grid-template-columns: 1fr; } }

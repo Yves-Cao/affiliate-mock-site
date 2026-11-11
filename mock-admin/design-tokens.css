@@ -1,0 +1,53 @@
+:root {
+  /* Figma Color Styles */
+  --brand-deep: #00187e;
+  --brand: #005bff;
+  --nav-text: #6b7897;
+  --side-icon: #828a9a;
+  --side-text: #2c3751;
+  --brand-gradient: linear-gradient(135deg, #0c2176 0%, #005bff 100%);
+  --brand-gradient-reverse: linear-gradient(135deg, #015bfe 0%, #0c2176 100%);
+  --blue-black: #0f1b3d;
+  --gold: #b48755;
+  --gold-gradient: linear-gradient(135deg, #f7e4cf 0%, #b48755 100%);
+
+  /* CRM working surface and semantic colors */
+  --canvas: #f8f9fa;
+  --surface: #fff;
+  --surface-soft: #ecf0f4;
+  --surface-accent: #f8fbff;
+  --border: #e8eef7;
+  --control-border: #c8d1da;
+  --text: #171717;
+  --body-text: #344054;
+  --muted: #667085;
+  --row-hover: #eef7ff;
+  --ok: #07865d;
+  --ok-bg: #e6f6ee;
+  --warning: #c76a08;
+  --warning-bg: #fdf3e4;
+  --danger: #d75851;
+  --danger-bg: #fdeeee;
+  --info: #2563eb;
+  --info-bg: #eaf1ff;
+  --shadow: 0 12px 30px rgba(15, 23, 42, .06);
+
+  /* Shared control and data-table tokens */
+  --control-weight: 500;
+  --strong-weight: 700;
+  --table-header-bg: var(--surface-accent);
+  --table-header-text: #1d2939;
+  --table-row-border: #eef2f7;
+  --table-header-weight: 600;
+  --table-body-size: 13px;
+
+  /* Figma Text Styles */
+  --font-family-user: Poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-text-14-r: 400 14px/20px var(--font-family-user);
+  --font-text-14-m: 500 14px/20px var(--font-family-user);
+  --font-text-16-r: 400 16px/24px var(--font-family-user);
+  --font-text-16-m: 500 16px/24px var(--font-family-user);
+  --font-text-18-b: 700 18px/26px var(--font-family-user);
+  --font-text-20-b: 700 20px/28px var(--font-family-user);
+  --font-text-24-b: 700 24px/32px var(--font-family-user);
+}
