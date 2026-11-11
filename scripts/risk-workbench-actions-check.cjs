@@ -11,7 +11,10 @@ vm.runInNewContext(
 );
 
 const prototype = sandbox.window.AFF_ADMIN_PROTOTYPE;
+// Retain coverage for the review-enabled policy alongside the demo policy suite.
+prototype.demoPolicy.approvalRequired = true;
 const queue = prototype.taskQueue;
+queue.reset();
 let sequence = 0;
 
 function request(prefix) {

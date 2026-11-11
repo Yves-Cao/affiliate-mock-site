@@ -32,7 +32,7 @@ for (const marker of [
   "24小时"
 ]) assert.ok(page.includes(marker), `Statement page includes ${marker}`);
 
-assert.ok(page.includes("Math.abs(netChange - expectedChange)"), "Period balance is checked against movements");
+assert.ok(page.includes("const expectedChange") && page.includes("Math.abs(netChange - expectedChange)"), "Statement balance is checked against movements");
 assert.ok(page.includes('format === "pdf"') && page.includes("%PDF-1.4"), "PDF download is generated");
 assert.ok(page.includes("text/csv;charset=utf-8"), "CSV download is generated");
 assert.ok(!page.includes("data-route=\"invoices\"") && !page.includes("data-route=\"tax-forms\""), "No invoice or tax-form route");

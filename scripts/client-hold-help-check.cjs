@@ -51,10 +51,10 @@ async function main() {
       rows: AFF.reporting.rows, metrics: AFF.dashboard.metrics,
       revenue: AFF.dashboard.totalRevenue, appeals: AFF.state.clientCommissionAppeals
     }));
-    for (const status of ["pending_review", "settled_partial", "rejected", "clawed_back"]) {
+    for (const status of ["processing", "settled", "blocked"]) {
       await openClient(page, status);
-      assert.equal(await page.locator(triggerSelector).count(), 0);
-      if (["rejected", "reversed"].includes(status)) {
+      assert.equal(await page.locator(triggerSelector).count(), status === "processing" ? 1 : 0);
+      if (status === "blocked") {
         assert.ok(await page.locator(".report-drawer [data-rp-appeal]").isEnabled());
         const expected = await page.evaluate(() => {
           const row = AFF.reporting.rows.find(row => row.clientId === AFF.reports.state("clients").client);
@@ -89,7 +89,8 @@ async function main() {
         const expected = await page.evaluate(() => AFF.earnings.holdRules());
         const normalize = html => html.replace(/>\s+</g, "><").replace(/\s+/g, " ").trim();
         assert.equal(normalize(content), normalize(expected));
-        assert.ok((await popup.innerText()).includes(language === "en" ? "30 days" : "超过30天"));
+        const freezeDays = await page.evaluate(() => AFF.finance.configuration.settlementFreezeThresholdDays);
+        assert.ok((await popup.innerText()).includes(language === "en" ? `${freezeDays} days` : `超过${freezeDays}天`));
         await withinDrawer(page);
         const scrollTop = await page.locator(".report-drawer-body").evaluate(node => node.scrollTop);
         await popup.hover();

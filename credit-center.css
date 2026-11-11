@@ -3,7 +3,8 @@
  * Hierarchy: eyebrow -> level -> title -> meta -> segments. Blue-on-blue + white only. */
 .partner-credit-strip {
   position: relative; display: flex; flex-direction: column; gap: 0; padding: 20px 22px 18px; overflow: hidden;
-  color: #fff; border: 0; border-radius: 12px;
+  container-type: inline-size;
+  color: #fff; border: 0; border-radius: 8px;
   background:
     radial-gradient(120% 90% at 100% 0%, rgba(0, 91, 255, .55) 0%, rgba(0, 91, 255, 0) 55%),
     radial-gradient(80% 70% at 0% 100%, rgba(77, 125, 255, .22) 0%, rgba(77, 125, 255, 0) 60%),
@@ -23,7 +24,12 @@
 .credit-card-top-actions { display: inline-flex; align-items: center; justify-content: flex-end; gap: 6px; flex-wrap: wrap; }
 .credit-card-eyebrow { color: rgba(255, 255, 255, .68); font-size: 12px; letter-spacing: .6px; }
 
-.credit-card-main { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+.credit-card-overview {
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: start; margin-top: 12px;
+}
+.credit-card-primary { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 16px; min-width: 0; }
+.credit-card-main { display: flex; grid-row: 1 / span 2; align-items: baseline; gap: 8px; flex-wrap: wrap; margin: 0; }
+.credit-card-actions { grid-column: 2; }
 .credit-card-level {
   font-size: 44px; line-height: 1; font-weight: 700; letter-spacing: 1px; color: #fff;
   text-shadow: 0 2px 12px rgba(0, 91, 255, .55);
@@ -33,7 +39,7 @@
   background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .22);
   color: #fff; font-size: 12px; font-weight: 600; letter-spacing: .3px;
 }
-.credit-card-meta { margin: 8px 0 0; color: rgba(255, 255, 255, .6); font-size: 12px; }
+.credit-card-meta { margin: 0; color: rgba(255, 255, 255, .6); font-size: 12px; }
 .credit-date-help {
   display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; padding: 0;
   border: 1px solid rgba(255, 255, 255, .42); border-radius: 50%; background: transparent; color: #fff;
@@ -47,6 +53,37 @@
 }
 .credit-benefits-trigger:hover, .credit-benefits-trigger:focus-visible { color: #fff; border-color: rgba(255, 255, 255, .72); background: rgba(255, 255, 255, .12); }
 .credit-benefits-trigger:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.credit-benefit-summary {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-content: start; min-width: 0; padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, .18);
+}
+.credit-benefit-group {
+  min-width: 0;
+}
+.credit-benefit-group header {
+  display: flex; align-items: baseline; gap: 8px; padding-bottom: 7px;
+  border-bottom: 1px solid rgba(255, 255, 255, .16); color: rgba(255, 255, 255, .82); font-size: 12px;
+}
+.credit-benefit-group header strong { color: #fff; font-size: 12px; letter-spacing: 0; }
+.credit-benefit-group ul { display: grid; gap: 5px; margin: 8px 0 0; padding: 0; list-style: none; }
+.credit-benefit-group li {
+  display: grid; grid-template-columns: minmax(0, max-content) max-content; justify-content: start; align-items: baseline; gap: 6px; min-width: 0;
+  color: rgba(255, 255, 255, .82); font-size: 12px; line-height: 1.5;
+}
+.credit-benefit-group li span { min-width: 0; }
+.credit-benefit-group li strong { color: #fff; font-size: 12px; font-weight: 600; white-space: nowrap; }
+@container (min-width: 600px) {
+  .credit-card-overview { grid-template-columns: 200px minmax(0, 1fr); gap: 16px; }
+  .credit-card-primary { display: block; }
+  .credit-card-main { margin-top: 14px; }
+  .credit-card-meta { margin-top: 8px; }
+  .credit-benefit-summary { padding: 0 0 0 16px; border-top: 0; border-left: 1px solid rgba(255, 255, 255, .18); }
+}
+@container (max-width: 359px) {
+  .credit-card-primary { display: block; }
+  .credit-card-meta { margin-top: 8px; }
+  .credit-benefit-summary { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+}
 .credit-date-panel { max-width: 320px; }
 .credit-date-panel .credit-hint-footer { border-top: 0; padding-top: 0; }
 
@@ -121,7 +158,7 @@
 }
 
 /* D-CREDIT-05 (2026-11-07): half-width row — funnel chart left, credit right. */
-.dashboard-credit-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-items: stretch; }
+.dashboard-credit-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: stretch; margin-bottom: 16px; }
 .partner-funnel-card { display: grid; gap: 10px; padding: 14px 18px; align-content: start; }
 .partner-funnel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .partner-funnel-head h3 { margin: 0; font: var(--font-text-14-b, 600 14px/1.4); color: var(--text); }

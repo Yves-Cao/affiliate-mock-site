@@ -24,10 +24,12 @@ assert.ok(moduleSource.includes("材料补充与人工复核") && moduleSource.i
 assert.ok(moduleSource.includes("最早预计"), "Estimated release dates are labeled as estimates");
 assert.ok(moduleSource.includes("不在总额中重复扣减"), "Waterfall explains overlapping review dimensions");
 
-assert.ok(earnings.includes('AFF.fundsAvailability.full("pay")'), "Earnings embed the shared component");
-assert.ok(withdrawals.includes('AFF.fundsAvailability.full("wd")'), "Withdrawal embeds the shared component");
+assert.ok(!earnings.includes('AFF.fundsAvailability.full("pay")'), "Earnings keep the removed waterfall block out of the page");
+assert.ok(!withdrawals.includes('AFF.fundsAvailability.full("wd")'), "Withdrawals keep the removed waterfall block out of the page");
 assert.ok(html.includes("funds-availability.css") && html.includes("funds-availability.js"), "Availability assets are loaded");
-assert.ok(html.includes('id="wallet-processing"') && html.includes('id="wallet-main-reason"'), "Wallet popover has processing and reason");
+assert.ok(html.includes('id="wallet-total-revenue"'), "Wallet popover has total revenue");
+assert.ok(html.includes('id="wallet-available-commission"') && html.includes('id="wallet-available-guarantee"'), "Wallet popover splits available commission and guarantee");
+assert.ok(html.includes('id="wallet-processing"'), "Wallet popover has in-settlement commission");
 assert.ok(app.includes("AFF.fundsAvailability.walletSummary()"), "Wallet values use the shared component");
 for (const breakpoint of ["991px", "767px"]) assert.ok(css.includes(breakpoint), `Responsive rule at ${breakpoint}`);
 

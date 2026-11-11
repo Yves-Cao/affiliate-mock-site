@@ -9,19 +9,20 @@
   <link rel="alternate icon" type="image/png" sizes="32x32" href="./assets/affiliate-icon-32.png">
   <link rel="apple-touch-icon" href="./assets/affiliate-icon-180.png">
   <link rel="stylesheet" href="./design-tokens.css?v=p0-20261105-1">
-  <link rel="stylesheet" href="./styles.css?v=p0-20261105-11">
+  <link rel="stylesheet" href="./styles.css?v=partner-guide-20261110-1">
   <link rel="stylesheet" href="./postbacks.css?v=p0-20261030">
   <link rel="stylesheet" href="./reports.css?v=summary-cards-20261109">
   <link rel="stylesheet" href="./clients-page.css?v=p0-20261108-1">
   <link rel="stylesheet" href="./subchannels.css?v=p0-20261030">
   <link rel="stylesheet" href="./earnings.css?v=p0-20261108-3">
   <link rel="stylesheet" href="./withdrawals.css?v=p0-20261030-2">
-  <link rel="stylesheet" href="./finance.css?v=p0-20261030-3">
+  <link rel="stylesheet" href="./finance.css?v=appeal-supplement-20261110">
   <link rel="stylesheet" href="./account-page.css?v=p0-20261105-1">
   <link rel="stylesheet" href="./profile-select.css?v=profile-controls-20261109">
   <link rel="stylesheet" href="./funds-availability.css?v=p0-20261105-1">
   <link rel="stylesheet" href="./statements-page.css?v=p0-20261105-1">
   <link rel="stylesheet" href="./support-page.css?v=p0-20261105-1">
+  <link rel="stylesheet" href="./help-center.css?v=help-center-20261111-3">
   <link rel="stylesheet" href="./credit-center.css?v=p0-20261105-1">
   <link rel="stylesheet" href="./export-center.css?v=p0-20261105-1">
   <link rel="stylesheet" href="./partner-closure.css?v=p0-20261105-1">
@@ -139,25 +140,26 @@
           </div>
           <div class="wallet-menu" id="wallet-menu" data-aff-popover="wallet">
             <button class="wallet" id="wallet-toggle" type="button" aria-expanded="false" aria-controls="wallet-popover" data-aff-popover-trigger>
-              <span>可提现余额</span>
-              <strong id="wallet-balance">$12,480.50</strong>
+              <span>钱包</span>
+              <strong id="wallet-balance">$19,343.40</strong>
             </button>
             <section class="wallet-popover" id="wallet-popover" aria-label="钱包概览" hidden data-aff-popover-panel>
-              <div class="wallet-popover-balance"><span>可提现余额</span><button class="wallet-value-link" type="button" data-route="wd" id="wallet-popover-balance">$12,480.50</button></div>
-              <div class="wallet-popover-total wallet-data-item"><span>总收益<small>已提现佣金+钱包余额+全部保证金</small></span><button class="wallet-value-link" type="button" data-route="pay" id="wallet-total-revenue">$34,215.00</button></div>
-              <div class="wallet-popover-details">
-                <div class="wallet-data-item"><span>已提现<small>已提现金额+已提现保证金</small></span><button class="wallet-value-link" type="button" data-route="wd" id="wallet-paid">$0.00</button></div>
-                <div class="wallet-data-item"><span>结算中<small id="wallet-main-reason">结算中的佣金</small></span><button class="wallet-value-link" type="button" data-route="pay" id="wallet-processing">$0.00</button></div>
-                <div class="wallet-data-item"><span>暂扣保证金<small>暂扣中的保证金</small></span><button class="wallet-value-link" type="button" data-route="guarantee" id="wallet-guarantee">$0.00</button></div>
-                <div class="wallet-data-item"><span>冻结佣金<small>申诉中的佣金</small></span><button class="wallet-value-link" type="button" data-route="appeals" id="wallet-frozen">$0.00</button></div>
+              <div class="wallet-popover-hero">
+                <div class="wallet-data-item"><span>总收益</span><button class="wallet-value-link" type="button" data-route="pay" id="wallet-total-revenue">$34,215.00</button></div>
+                <small>完成结算的历史总佣金</small>
               </div>
+              <div class="wallet-popover-details">
+                <div class="wallet-data-item"><span>可提现佣金</span><button class="wallet-value-link" type="button" data-route="pay" id="wallet-available-commission">$0.00</button></div>
+                <div class="wallet-data-item"><span>可提现保证金</span><button class="wallet-value-link" type="button" data-route="guarantee" id="wallet-available-guarantee">$0.00</button></div>
+              </div>
+              <div class="wallet-popover-processing wallet-data-item"><span>结算中佣金</span><button class="wallet-value-link" type="button" data-route="pay" id="wallet-processing">$0.00</button></div>
               <div class="wallet-popover-links">
                 <button class="button secondary" type="button" data-route="pay">资金详情</button>
                 <button class="button primary" type="button" data-route="wd">提现</button>
               </div>
             </section>
           </div>
-          <button class="icon-button circular" type="button" data-route="support" aria-label="帮助中心">
+          <button class="icon-button circular" type="button" data-help-open="assistant" aria-label="帮助中心" aria-controls="help-assistant-panel">
             <span aria-hidden="true">?</span>
           </button>
           <button class="icon-button circular notice" type="button" data-route="messages" aria-label="消息中心">
@@ -226,6 +228,7 @@
 
       <main id="main" class="main" tabindex="-1"></main>
       <button id="simulation-toggle" class="simulation-launcher" type="button" aria-expanded="false" aria-controls="simulation-console-root">模拟</button>
+      <div id="help-center-root"></div>
 
     </div>
   </div>
@@ -234,13 +237,14 @@
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
   <div id="simulation-console-root"></div>
 
-  <script src="./data.js?v=p0-20261105-3"></script>
+  <script src="./data.js?v=partner-guide-20261110-1"></script>
   <script src="./campaign-links.js?v=p0-20261105-1"></script>
   <script src="./simulation-core.js?v=p0-20261106-1"></script>
   <script src="./report-data.js?v=settled-summary-20261109"></script>
   <script src="./finance-data.js?v=settled-summary-20261109"></script>
+  <script src="./api-adapter.js?v=mock-api-v1-20261109"></script>
   <script src="./partner-closure.js?v=p0-20261105-1"></script>
-  <script src="./pages.js?v=profile-controls-20261109"></script>
+  <script src="./pages.js?v=partner-guide-20261110-1"></script>
   <script src="./profile-select.js?v=profile-controls-20261109"></script>
   <script src="./date-range.js?v=p0-20261030-2"></script>
   <script src="./postbacks.js?v=p0-20261105-2"></script>
@@ -249,13 +253,14 @@
   <script src="./earnings.js?v=p0-20261108-1"></script>
   <script src="./withdrawals.js?v=p0-20261104-1"></script>
   <script src="./guarantee-page.js?v=p0-20261104-1"></script>
-  <script src="./appeals-page.js?v=p0-20261105-3"></script>
+  <script src="./appeals-page.js?v=appeal-supplement-20261110"></script>
   <script src="./messages-page.js?v=p0-20261105-2"></script>
   <script src="./account-page.js?v=profile-controls-20261109"></script>
   <script src="./funds-availability.js?v=p0-20261105-1"></script>
   <script src="./statements-page.js?v=p0-20261105-1"></script>
   <script src="./support-page.js?v=p0-20261105-2"></script>
-  <script src="./credit-center.js?v=p0-20261105-1"></script>
+  <script src="./help-center.js?v=help-center-20261111-3"></script>
+  <script src="./credit-center.js?v=credit-settlement-20261111-1"></script>
   <script src="./export-center.js?v=p0-20261105-2"></script>
   <script src="./pagination.js?v=p0-20261106-1"></script>
   <script src="./popover.js?v=p0-20261106-1"></script>

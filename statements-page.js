@@ -6,9 +6,9 @@
   const dollars = value => Number((value / 100).toFixed(2));
   const statusLabels = {
     generated: ["已生成", "Generated", "ok"],
-    generating: ["生成中", "Generating", "info"],
-    failed: ["生成失败", "Failed", "danger"],
-    recalculating: ["重算中", "Recalculating", "warning"]
+    reviewing: ["审核中", "Reviewing", "info"],
+    confirmed: ["已确认", "Confirmed", "ok"],
+    cancelled: ["已取消", "Cancelled", "danger"]
   };
   let detailReturnFocus = null;
 
@@ -28,20 +28,11 @@
   }
 
   function periods() {
-    const result = [];
-    let cursor = monthStart(AFF.reporting.from);
-    const end = monthStart(AFF.finance.asOf);
-    while (cursor <= end) {
-      result.push(cursor.slice(0, 7));
-      cursor = nextMonthStart(cursor);
-    }
-    return result;
+    return AFF.finance.statementBatches.map(item => item.id);
   }
 
   function defaultPeriod() {
-    const current = monthStart(AFF.finance.asOf).slice(0, 7);
-    const complete = periods().filter(period => period !== current);
-    return complete.at(-1) || current;
+    return periods().at(-1) || "";
   }
 
   function defaults() {
@@ -60,58 +51,43 @@
       .filter(lot => lot.date <= date)
       .reduce((sum, lot) => sum + lot.amount, 0);
     const withdrawn = AFF.finance.allWithdrawals()
-      .filter(order => order.date <= date && !["failed", "timeout", "closed"].includes(order.status))
+      .filter(order => order.date <= date && !["failed", "timeout", "closed", "rejected"].includes(order.status))
       .reduce((sum, order) => sum + order.allocations.reduce((total, item) => total + item.amount, 0), 0);
     return generated - withdrawn;
   }
 
-  function buildStatement(period) {
-    const from = `${period}-01`;
-    const to = monthEnd(from);
-    const inPeriod = (value, source = from) => value >= source && value <= to;
-    const settlements = AFF.finance.settlements.filter(item => inPeriod(item.settledAt));
-    const gross = settlements.reduce((sum, item) => sum + item.grossAmount, 0);
-    const tax = AFF.finance.taxRecords
-      .filter(item => item.type === "withheld" && inPeriod(item.date))
-      .reduce((sum, item) => sum + item.amount, 0);
-    const guaranteeRetained = AFF.finance.guaranteeRecords
-      .filter(item => item.type === "retained" && inPeriod(item.retainedAt || item.date))
-      .reduce((sum, item) => sum + item.amount, 0);
-    const guaranteeReleased = AFF.finance.availableLots
-      .filter(item => item.source === "guarantee_release" && inPeriod(item.date))
-      .reduce((sum, item) => sum + item.amount, 0);
-    const reversalUsed = AFF.finance.guaranteeRecords
-      .filter(item => item.type === "used" && inPeriod(item.date))
-      .reduce((sum, item) => sum + item.amount, 0);
-    const withdrawals = AFF.finance.allWithdrawals().filter(item => inPeriod(item.date));
-    const withdrawalPaid = withdrawals.filter(item => item.status === "paid")
-      .reduce((sum, item) => sum + item.amount, 0);
-    const withdrawalProcessing = withdrawals.filter(item => item.status === "processing")
-      .reduce((sum, item) => sum + item.amount, 0);
-    const failedReturned = withdrawals.filter(item => ["failed", "timeout"].includes(item.status))
-      .reduce((sum, item) => sum + item.amount, 0);
-    const openingDate = new Date(Date.parse(`${from}T00:00:00Z`) - 86400000).toISOString().slice(0, 10);
-    const opening = availableAt(openingDate);
-    const closing = availableAt(to);
-    const netChange = closing - opening;
-    const expectedChange = gross - tax - guaranteeRetained + guaranteeReleased -
-      withdrawalPaid - withdrawalProcessing;
-    const override = state().overrides[period] || {};
+  function buildStatement(statementId) {
+    const source = AFF.finance.statementBatches.find(item => item.id === statementId);
+    if (!source) return null;
+    const withdrawal = AFF.finance.allWithdrawals().find(item => item.id === source.withdrawalId);
+    const status = source.statementStatus || "generated";
+    const withdrawalPaid = withdrawal?.status === "paid" ? (withdrawal.amount || 0) : 0;
+    const withdrawalProcessing = withdrawal && ["pending_review", "approved", "processing"].includes(withdrawal.status) ? withdrawal.amount : 0;
+    const failedReturned = withdrawal && ["failed", "timeout", "returned", "rejected"].includes(withdrawal.status) ? withdrawal.amount : 0;
+    const gross = source.grossAmount / 100;
+    const tax = source.taxAmount / 100;
+    const guaranteeRetained = source.guaranteeAmount / 100;
+    const guaranteeReleased = 0;
+    const reversalUsed = 0;
+    const opening = 0;
+    const credited = source.availableAmount / 100;
+    const expectedChange = Number((credited - withdrawalPaid / 100 - withdrawalProcessing / 100 + failedReturned / 100).toFixed(2));
+    const closing = Math.max(0, Number((opening + expectedChange).toFixed(2)));
+    const netChange = Number((closing - opening).toFixed(2));
+    const balanced = Math.abs(netChange - expectedChange) < 0.01;
     return {
-      period, from, to,
-      status: override.status || "generated",
-      version: override.version || 1,
-      opening: dollars(opening), closing: dollars(closing), netChange: dollars(netChange),
-      gross: dollars(gross), tax: dollars(tax),
-      guaranteeRetained: dollars(guaranteeRetained), guaranteeReleased: dollars(guaranteeReleased),
-      reversalUsed: dollars(reversalUsed),
-      withdrawalPaid: dollars(withdrawalPaid), withdrawalProcessing: dollars(withdrawalProcessing),
-      failedReturned: dollars(failedReturned),
-      balanced: Math.abs(netChange - expectedChange) <= 1,
-      generatedAt: `${to} 23:59:59`,
-      ruleVersion: AFF.finance.configuration.version,
-      settlementCount: settlements.length,
-      withdrawalCount: withdrawals.length
+      period: source.id, statementId: source.id, withdrawalId: source.withdrawalId,
+      from: source.settledAt, to: source.settledAt,
+      status, version: 1,
+      opening, closing, netChange, expectedChange,
+      gross, tax, guaranteeRetained, guaranteeReleased, reversalUsed,
+      withdrawalPaid: withdrawalPaid / 100, withdrawalProcessing: withdrawalProcessing / 100,
+      failedReturned: failedReturned / 100,
+      balanced,
+      generatedAt: source.settledAt,
+      ruleVersion: source.ruleVersion || AFF.finance.configuration.version,
+      settlementCount: source.commissionCaseIds.length,
+      withdrawalCount: 1
     };
   }
 
@@ -119,6 +95,7 @@
     const s = state();
     return periods()
       .map(buildStatement)
+      .filter(Boolean)
       .filter(row => !s.status || row.status === s.status)
       .sort((left, right) => right.period.localeCompare(left.period));
   }
@@ -218,7 +195,7 @@
   function filters() {
     const s = state();
     return `<div class="statement-filters">
-      <label><span>${t("周期", "Period")}</span><select data-statement-filter="period">${periods().map(period => `<option value="${period}" ${period === s.period ? "selected" : ""}>${period}</option>`).join("")}</select></label>
+      <label><span>${t("结算单编号", "Statement ID")}</span><select data-statement-filter="period">${periods().map(period => `<option value="${period}" ${period === s.period ? "selected" : ""}>${period}</option>`).join("")}</select></label>
       <label><span>${t("状态", "Status")}</span><select data-statement-filter="status"><option value="">${t("全部", "All")}</option>${Object.entries(statusLabels).map(([key, item]) => `<option value="${key}" ${key === s.status ? "selected" : ""}>${t(item[0], item[1])}</option>`).join("")}</select></label>
       <button class="button secondary" type="button" data-statement-action="reset">${t("重置", "Reset")}</button>
     </div>`;
@@ -226,7 +203,7 @@
 
   function table(rows) {
     return `<div class="statement-table-wrap"><table>
-      <thead><tr><th>${t("周期", "Period")}</th><th>${t("状态", "Status")}</th><th>${t("期初", "Opening")}</th><th>${t("佣金", "Commission")}</th><th>${t("税费", "Tax")}</th><th>${t("保证金变动", "Guarantee change")}</th><th>${t("冲正", "Reversal")}</th><th>${t("提现", "Withdrawal")}</th><th>${t("期末", "Closing")}</th><th>${t("操作", "Action")}</th></tr></thead>
+      <thead><tr><th>${t("结算单编号", "Statement ID")}</th><th>${t("状态", "Status")}</th><th>${t("期初", "Opening")}</th><th>${t("佣金", "Commission")}</th><th>${t("税费", "Tax")}</th><th>${t("保证金变动", "Guarantee change")}</th><th>${t("冲正", "Reversal")}</th><th>${t("提现", "Withdrawal")}</th><th>${t("期末", "Closing")}</th><th>${t("操作", "Action")}</th></tr></thead>
       <tbody>${rows.length ? rows.map(row => `<tr>
         <td>${row.period}</td><td>${tag(row.status)}</td><td class="numeric">${money(row.opening)}</td><td class="numeric">${money(row.gross)}</td><td class="numeric">${money(row.tax)}</td><td class="numeric">${money(row.guaranteeReleased - row.guaranteeRetained)}</td><td class="numeric">${money(row.reversalUsed)}</td><td class="numeric">${money(row.withdrawalPaid + row.withdrawalProcessing)}</td><td class="numeric">${money(row.closing)}</td>
         <td><div class="wd-row-actions"><button class="button secondary small" type="button" data-statement-detail="${row.period}">${t("详情", "Details")}</button><button class="button secondary small" type="button" data-statement-download="${row.period}" ${["generating", "recalculating", "failed"].includes(row.status) ? "disabled" : ""}>${t("下载", "Download")}</button></div></td>

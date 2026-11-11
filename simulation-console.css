@@ -1,7 +1,7 @@
 .simulation-launcher {
   position: fixed;
   right: 22px;
-  bottom: 24px;
+  bottom: 78px;
   z-index: 950;
   min-height: 40px;
   padding: 9px 14px;
@@ -41,6 +41,14 @@
   background: #fff; color: var(--body-text); font-size: 13px;
 }
 .sim-time-actions button { flex: 1; background: #f8fbff; border-color: #b8d4ff; color: var(--brand); }
+.sim-settlement-run { display: grid; gap: 10px; padding: 12px; border: 1px solid #b8d4ff; border-radius: 4px; background: #f8fbff; }
+.sim-settlement-run > div:first-child { display: grid; gap: 4px; }
+.sim-settlement-run strong { color: var(--blue-black); font-size: 13px; }
+.sim-settlement-run .button { justify-self: start; }
+.sim-settlement-run-meta { display: grid; gap: 6px; margin: 0; }
+.sim-settlement-run-meta > div { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; }
+.sim-settlement-run-meta dt { color: var(--muted); }
+.sim-settlement-run-meta dd { margin: 0; color: var(--body-text); font-variant-numeric: tabular-nums; text-align: right; word-break: break-word; }
 .sim-scenarios { display: grid; gap: 8px; }
 .sim-scenarios button { display: grid; gap: 4px; padding: 11px; border: 1px solid var(--border); border-radius: 4px; background: #fff; text-align: left; }
 .sim-scenarios button.active { border-color: var(--brand); background: #f0f7ff; }
@@ -51,6 +59,20 @@
 .sim-state dt { color: var(--muted); font-size: 11px; }
 .sim-state dd { margin: 4px 0 0; color: var(--text); font-size: 14px; font-weight: 500; }
 .sim-actions-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.sim-credit-level { display: grid; gap: 14px; }
+.sim-credit-level > div:first-child { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+.sim-credit-level span, .sim-credit-level small { color: var(--muted); font-size: 12px; }
+.sim-credit-level strong { color: var(--brand); font: var(--font-text-18-b); }
+.sim-credit-points { display: grid; gap: 14px; padding-top: 18px; border-top: 1px solid var(--border); }
+.sim-credit-progress-label { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.sim-credit-progress-label strong { color: var(--body-text); font-size: 13px; font-variant-numeric: tabular-nums; }
+.sim-credit progress { display: block; width: 100%; height: 8px; overflow: hidden; appearance: none; border: 0; border-radius: 4px; background: var(--surface-soft); accent-color: var(--brand); }
+.sim-credit progress::-webkit-progress-bar { background: var(--surface-soft); border-radius: 4px; }
+.sim-credit progress::-webkit-progress-value { background: var(--brand); border-radius: 4px; transition: width .2s; }
+.sim-credit progress::-moz-progress-bar { background: var(--brand); border-radius: 4px; }
+.sim-credit input { width: 100%; box-sizing: border-box; }
+.sim-credit .sim-actions-row button:disabled { cursor: not-allowed; opacity: .45; }
+.sim-credit .sim-actions-row button:not(:disabled):hover { color: var(--brand); border-color: var(--brand); }
 .sim-drawer .danger { border-color: #f2b8b5; background: #fff; color: var(--danger); }
 .sim-error { margin: 0 0 14px; padding: 10px; border: 1px solid #f2b8b5; border-radius: 4px; background: #fff; color: var(--danger); font-size: 12px; }
 .sim-summary { display: grid; gap: 10px; margin-bottom: 16px; padding: 12px; border: 1px solid #b8d4ff; border-radius: 4px; background: #f8fbff; }
@@ -67,7 +89,9 @@
 .sim-section ol span { color: var(--muted); }
 .sim-section ol p { margin-top: 3px; }
 @media (max-width: 767px) {
-  .simulation-launcher { right: 14px; bottom: 16px; }
-  .sim-drawer { width: 100vw; }
+  .simulation-launcher { right: 14px; bottom: 70px; }
+  .aff-drawer.sim-drawer { width: 100%; }
   .sim-body, .sim-drawer > header, .sim-tabs, .sim-drawer > footer { padding-inline: 14px; }
+  .sim-tabs { gap: 2px; }
+  .sim-tabs button { padding-inline: 9px; }
 }

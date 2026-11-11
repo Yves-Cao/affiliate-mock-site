@@ -22,7 +22,7 @@
   const scenarioLabels = {
     normal_l1: "正常L1全链路", normal_l2: "正常L2全链路", tier_downgrade: "档位取低",
     ftd_only: "仅FTD", qftd_pending: "有效FTD待确认", quality_void: "质量服务未达标",
-    hold_extended: "动态结算延长", frozen_d30: "D+30冻结", chargeback: "拒付冲正",
+    hold_extended: "动态结算延长", frozen_d30: "结算超时冻结", chargeback: "拒付冲正",
     not_new_customer: "非新客户", fraud_hit: "欺诈库命中", appeal_overturned: "申诉改判"
   };
 
@@ -32,6 +32,7 @@
     guaranteeRate: 0.10,
     guaranteeReleaseDays: 90,
     terminationRetentionDays: 30,
+    settlementFreezeThresholdDays: 30,
     taxRates,
     countryTax,
     countryHold,
@@ -136,6 +137,10 @@
   function buildCase(row, original, index) {
     if (!original?.amount) return;
     const sourceStatus = row.scenarioCode ? row.commissionStatus : original.status;
+    const commissionStatus = sourceStatus === "reversed" ? "reversed"
+      : sourceStatus === "rejected" ? "rejected"
+      : sourceStatus === "approved" ? "approved"
+      : "holding";
     const item = {
       ...original,
       clientId: row.clientId,
@@ -147,8 +152,16 @@
       holdStartedAt: original.confirmedAt,
       theoreticalReleaseAt: shiftDate(original.confirmedAt, holdDays(row, original)),
       status: sourceStatus,
+      commissionStatus,
+      settlementStatus: "processing",
+      withdrawalStatus: "unavailable",
+      statementId: null,
       reasonCode: row.commissionReasonCode,
-      reason: row.commissionReason
+      reason: row.commissionReason,
+      settlementCaseId: `SET-${row.clientId}-${String(index + 1).padStart(2, "0")}`,
+      riskSignalId: row.forceFund === "frozen" ? `RISK-${row.clientId}-SETTLEMENT` : "",
+      freezeThresholdDays: configuration.settlementFreezeThresholdDays,
+      appealVisible: false
     };
     item.released = item.theoreticalReleaseAt <= now;
     const canSettle = ["approved", "paid"].includes(sourceStatus) && item.released && !["frozen", "manual_review"].includes(row.forceFund);
@@ -160,10 +173,11 @@
       const guaranteeAmount = Math.round(item.amountCents * configuration.guaranteeRate);
       const availableAmount = item.amountCents - taxAmount - guaranteeAmount;
       item.status = "settled";
-      const statementId = `STL-${item.theoreticalReleaseAt.slice(0, 7)}`;
+      item.commissionStatus = "approved";
+      item.settlementStatus = "settled";
       item.settlement = {
         id: `STL-${item.id}`,
-        statementId,
+        statementId: null,
         commissionCaseId: item.id,
         settledAt: item.theoreticalReleaseAt,
         grossAmount: item.amountCents,
@@ -177,13 +191,13 @@
       settlements.push(item.settlement);
       taxRecords.push({
         id: `TAX-${item.id}`, type: "withheld", clientId: row.clientId, commissionCaseId: item.id,
-        statementId, date: item.theoreticalReleaseAt, taxTier, rate: taxRate, amount: taxAmount,
+        statementId: null, date: item.theoreticalReleaseAt, taxTier, rate: taxRate, amount: taxAmount,
         status: "withheld", ruleVersion: configuration.version
       });
       const releaseDate = shiftDate(item.theoreticalReleaseAt, configuration.guaranteeReleaseDays);
       const guarantee = {
         id: `GL-${item.id}`, type: "retained", clientId: row.clientId, commissionCaseId: item.id,
-        statementId,
+        statementId: null,
         date: item.theoreticalReleaseAt, rate: configuration.guaranteeRate, amount: guaranteeAmount,
         status: releaseDate <= now ? "released" : "retained",
         retainedAt: item.theoreticalReleaseAt, normalReleaseAt: releaseDate,
@@ -193,17 +207,19 @@
       item.guarantee = guarantee;
       availableLots.push({
         id: `LOT-${item.id}-NET`, source: "commission", sourceId: item.id, clientId: row.clientId,
-        statementId, date: item.theoreticalReleaseAt, amount: availableAmount, remaining: availableAmount, staticRemaining: availableAmount
+        statementId: null, commissionCaseId: item.id, date: item.theoreticalReleaseAt, amount: availableAmount, remaining: availableAmount, staticRemaining: availableAmount
       });
       if (guarantee.status === "released") {
         availableLots.push({
           id: `LOT-${item.id}-GR`, source: "guarantee_release", sourceId: guarantee.id,
-          statementId, commissionCaseId: item.id, clientId: row.clientId, date: releaseDate,
+          statementId: null, commissionCaseId: item.id, clientId: row.clientId, date: releaseDate,
           amount: guaranteeAmount, remaining: guaranteeAmount, staticRemaining: guaranteeAmount
         });
       }
     } else if (sourceStatus === "reversed") {
       item.status = "reversed";
+      item.commissionStatus = "reversed";
+      item.settlementStatus = "failed";
       const taxAmount = Math.round(item.amountCents * taxRates[countryTax[row.country] || "T2"].rate);
       item.reversal = { taxAmount, guaranteeUsed: Math.round(item.amountCents * configuration.guaranteeRate) };
       taxRecords.push({
@@ -218,14 +234,26 @@
       });
     } else if (sourceStatus === "rejected") {
       item.status = "rejected";
+      item.commissionStatus = "rejected";
+      item.settlementStatus = "blocked";
     } else if (row.forceFund === "frozen") {
       item.status = "frozen";
+      item.commissionStatus = "holding";
+      item.settlementStatus = "frozen";
+      item.freezeReasonCode = "SETTLEMENT-OVERDUE";
+      item.freezeReason = `结算观察超过${configuration.settlementFreezeThresholdDays}天，等待人工复核。`;
+      item.appealVisible = false;
     } else if (row.forceFund === "manual_review") {
       item.status = "manual_review";
+      item.commissionStatus = "holding";
+      item.settlementStatus = "blocked";
     } else if (item.released) {
       item.status = original.status;
+      item.settlementStatus = "processing";
     } else {
       item.status = "held";
+      item.commissionStatus = "holding";
+      item.settlementStatus = "processing";
     }
     commissionCases.push(item);
     return item;
@@ -264,23 +292,6 @@
     frozenGuarantee.freezeReason = "关联客户风险复核中，释放自动暂停。";
   }
 
-  const statementBatches = [...new Set(settlements.map(item => item.statementId).filter(Boolean))].map(statementId => {
-    const batchSettlements = settlements.filter(item => item.statementId === statementId);
-    const batchGuarantees = guaranteeRecords.filter(item => item.statementId === statementId);
-    return {
-      id: statementId,
-      period: statementId.replace(/^STL-/, ""),
-      settledAt: batchSettlements.map(item => item.settledAt).sort().at(-1),
-      commissionCaseIds: batchSettlements.map(item => item.commissionCaseId),
-      guaranteeIds: batchGuarantees.map(item => item.id),
-      grossAmount: batchSettlements.reduce((sum, item) => sum + item.grossAmount, 0),
-      taxAmount: batchSettlements.reduce((sum, item) => sum + item.taxAmount, 0),
-      guaranteeAmount: batchSettlements.reduce((sum, item) => sum + item.guaranteeAmount, 0),
-      availableAmount: batchSettlements.reduce((sum, item) => sum + item.availableAmount, 0),
-      ruleVersion: batchSettlements[0]?.ruleVersion
-    };
-  });
-
   function feeFor(amountCents, method) {
     const rule = configuration.feeRules[method] || configuration.feeRules.wire;
     const raw = rule.fixed + Math.round(amountCents * rule.rate);
@@ -300,8 +311,11 @@
     const method = paymentMethods[digits(lots[0].sourceId) % paymentMethods.length];
     const failed = staticWithdrawals.length % 17 === 9;
     const fee = failed ? 0 : feeFor(amount, method);
+    const orderId = `WOD-${String(staticWithdrawals.length + 1).padStart(5, "0")}`;
+    const statementId = `STMT-${orderId}`;
     const order = {
-      id: `WOD-${String(staticWithdrawals.length + 1).padStart(5, "0")}`,
+      id: orderId,
+      statementId,
       date: shiftDate(lots.at(-1).date, 1) > now ? now : shiftDate(lots.at(-1).date, 1),
       method,
       amount, estimatedFee: feeFor(amount, method), fee,
@@ -311,9 +325,18 @@
       ruleVersion: configuration.version,
       allocations: lots.map(lot => ({
         lotId: lot.id, source: lot.source, sourceId: lot.sourceId,
-        commissionCaseId: lot.commissionCaseId || lot.sourceId, settlementId: lot.statementId || "", clientId: lot.clientId, amount: lot.amount
+        commissionCaseId: lot.commissionCaseId || lot.sourceId, settlementId: statementId, clientId: lot.clientId, amount: lot.amount
       }))
     };
+    lots.forEach(lot => {
+      lot.statementId = statementId;
+      if (lot.commissionCaseId) {
+        const settlement = settlements.find(item => item.commissionCaseId === lot.commissionCaseId);
+        if (settlement) settlement.statementId = statementId;
+        const guarantee = guaranteeRecords.find(item => item.id === lot.sourceId || item.commissionCaseId === lot.commissionCaseId);
+        if (guarantee) guarantee.statementId = statementId;
+      }
+    });
     if (!failed) lots.forEach(lot => { lot.remaining = 0; lot.staticRemaining = 0; });
     staticWithdrawals.push(order);
   }
@@ -322,8 +345,32 @@
     return AFF.state?.withdrawalOrders || [];
   }
 
+  function buildStatementBatches() {
+    return [...runtimeWithdrawals(), ...staticWithdrawals].map(order => {
+      const allocations = order.allocations || [];
+      const commissionCaseIds = [...new Set(allocations.map(item => item.commissionCaseId).filter(Boolean))];
+      const guaranteeIds = [...new Set(allocations.filter(item => item.source === "guarantee_release").map(item => item.sourceId).filter(Boolean))];
+      const batchSettlements = settlements.filter(item => commissionCaseIds.includes(item.commissionCaseId));
+      const batchGuarantees = guaranteeRecords.filter(item => guaranteeIds.includes(item.id));
+      return {
+        id: order.statementId || `STMT-${order.id}`,
+        withdrawalId: order.id,
+        statementStatus: order.statementStatus || "generated",
+        period: order.date?.slice(0, 7) || now.slice(0, 7),
+        settledAt: order.date,
+        commissionCaseIds,
+        guaranteeIds,
+        grossAmount: batchSettlements.reduce((sum, item) => sum + item.grossAmount, 0),
+        taxAmount: batchSettlements.reduce((sum, item) => sum + item.taxAmount, 0),
+        guaranteeAmount: batchSettlements.reduce((sum, item) => sum + item.guaranteeAmount, 0),
+        availableAmount: allocations.reduce((sum, item) => sum + item.amount, 0),
+        ruleVersion: order.ruleVersion || configuration.version
+      };
+    });
+  }
+
   function runtimeAllocated(lotId) {
-    return runtimeWithdrawals().filter(order => !["failed", "timeout", "closed"].includes(order.status))
+    return runtimeWithdrawals().filter(order => !["failed", "timeout", "returned", "closed", "rejected"].includes(order.status))
       .reduce((sum, order) => sum + order.allocations.filter(allocation => allocation.lotId === lotId)
         .reduce((total, allocation) => total + allocation.amount, 0), 0);
   }
@@ -362,24 +409,106 @@
   function createWithdrawal(amount, method = "wire") {
     const preview = previewWithdrawal(amount, method);
     const orders = runtimeWithdrawals();
+    const id = `WOD-U${String(orders.length + 1).padStart(4, "0")}`;
+    const statementId = `STMT-${id}`;
+    const allocations = allocate(preview.amount).map(item => ({ ...item, settlementId: statementId }));
     const order = {
-      id: `WOD-U${String(orders.length + 1).padStart(4, "0")}`,
+      id,
+      statementId,
       date: now, method, amount: preview.amount, estimatedFee: preview.estimatedFee,
-      fee: 0, received: 0, status: "processing", receiver: "A*** P***", account: "**** 6621",
-      ruleVersion: configuration.version, allocations: allocate(preview.amount)
+      fee: 0, received: 0, status: "pending_review", receiver: "A*** P***", account: "**** 6621",
+      statementStatus: "generated",
+      ruleVersion: configuration.version, allocations
     };
     if (!Array.isArray(AFF.state?.withdrawalOrders)) AFF.state.withdrawalOrders = orders;
     orders.push(order);
     return order;
   }
 
+  function approveWithdrawal(id) {
+    const order = runtimeWithdrawals().find(item => item.id === id);
+    if (!order || order.status !== "pending_review") return null;
+    order.status = "processing";
+    order.reviewedAt = now;
+    order.reviewStatus = "approved";
+    order.statementStatus = "reviewing";
+    order.crmPayout = {
+      requestId: `CRM-REQ-${order.id}`,
+      payoutId: "",
+      status: "processing",
+      statusReason: "Affiliate审核通过，等待CRM打款",
+      requestedAt: now,
+      updatedAt: now,
+      retryCount: 0,
+      reconciliationStatus: "pending"
+    };
+    return order;
+  }
+
+  function rejectWithdrawal(id, reason = "人工审核未通过") {
+    const order = runtimeWithdrawals().find(item => item.id === id);
+    if (!order || order.status !== "pending_review") return null;
+    order.status = "rejected";
+    order.reviewedAt = now;
+    order.reviewStatus = "rejected";
+    order.reviewReason = reason;
+    order.statementStatus = "cancelled";
+    order.fee = 0;
+    order.received = 0;
+    return order;
+  }
+
   function setWithdrawalStatus(id, status) {
     const order = runtimeWithdrawals().find(item => item.id === id);
-    if (!order || !["processing", "paid", "failed", "timeout"].includes(status)) return null;
+    const transitions = {
+      pending_review: ["processing", "rejected"],
+      processing: ["paid", "failed", "timeout", "returned"]
+    };
+    if (!order || !transitions[order.status]?.includes(status)) return null;
     order.status = status;
     order.fee = status === "paid" ? order.estimatedFee : 0;
     order.received = status === "paid" ? order.amount - order.fee : 0;
+    order.crmPayout = {
+      ...(order.crmPayout || {}),
+      requestId: order.crmPayout?.requestId || `CRM-REQ-${order.id}`,
+      payoutId: order.crmPayout?.payoutId || `CRM-PAY-${order.id}`,
+      status,
+      statusReason: status === "paid" ? "CRM已返回成功回执" : status === "returned" ? "CRM返回银行退回" : status === "failed" ? "CRM返回打款失败" : "等待CRM处理",
+      externalTransactionId: status === "paid" ? `EXT-${order.id}` : (order.crmPayout?.externalTransactionId || ""),
+      updatedAt: now,
+      reconciliationStatus: status === "paid" ? "synced" : "pending"
+    };
     return order;
+  }
+
+  function runAutomaticSettlement() {
+    const runs = Array.isArray(AFF.state?.settlementRuns) ? AFF.state.settlementRuns : [];
+    const existing = runs.find(item => item.date === now);
+    if (existing) return existing;
+    const eligibleCases = commissionCases.filter(item => item.settlementStatus === "settled");
+    const blockedCases = commissionCases.filter(item => ["blocked", "frozen"].includes(item.settlementStatus));
+    const failedCases = commissionCases.filter(item => item.settlementStatus === "failed");
+    const run = {
+      id: `SET-RUN-${now.replace(/\D/g, "").slice(0, 12)}`,
+      date: now,
+      executionTimezone: "UTC+8",
+      scheduledAt: `${now} 00:00:00`,
+      startedAt: `${now} 00:00:00`,
+      executedAt: `${now} 00:03:00`,
+      completedAt: `${now} 00:03:00`,
+      ruleVersion: configuration.version,
+      processedCount: eligibleCases.length,
+      processedAmount: eligibleCases.reduce((sum, item) => sum + item.amountCents, 0),
+      blockedCount: blockedCases.length,
+      blockedAmount: blockedCases.reduce((sum, item) => sum + item.amountCents, 0),
+      failedCount: failedCases.length,
+      failedAmount: failedCases.reduce((sum, item) => sum + item.amountCents, 0),
+      status: "completed",
+      traceId: `trace-${now}-settlement`
+    };
+    runs.unshift(run);
+    AFF.state.settlementRuns = runs;
+    return run;
   }
 
   function summary(sourceRows = clientRows) {
@@ -398,7 +527,17 @@
       .filter(allocation => guaranteeLotIds.has(allocation.lotId))
       .reduce((amount, allocation) => amount + allocation.amount, 0), 0) / 100;
     const paidCommission = Number((sum("paid") + runtimePaid / 100 - paidGuarantee).toFixed(2));
-    const available = sourceRows === clientRows ? Number((balance() / 100).toFixed(2)) : Number(sum("available").toFixed(2));
+    const availableCommissionCents = sourceRows === clientRows
+      ? availableLots.filter(lot => lot.source === "commission" && lot.staticRemaining)
+          .reduce((total, lot) => total + Math.max(0, lot.remaining - runtimeAllocated(lot.id)), 0)
+      : 0;
+    const availableGuaranteeCents = sourceRows === clientRows
+      ? availableLots.filter(lot => lot.source === "guarantee_release" && lot.staticRemaining)
+          .reduce((total, lot) => total + Math.max(0, lot.remaining - runtimeAllocated(lot.id)), 0)
+      : 0;
+    const available = sourceRows === clientRows
+      ? Number(((availableCommissionCents + availableGuaranteeCents) / 100).toFixed(2))
+      : Number(sum("available").toFixed(2));
     return {
       registrations: rows.length,
       ftd: rows.filter(row => row.ftdAt).length,
@@ -417,6 +556,8 @@
       tax: sum("tax"),
       frozen: Number(frozen.toFixed(2)),
       available,
+      availableCommission: Number((availableCommissionCents / 100).toFixed(2)),
+      availableGuarantee: Number((availableGuaranteeCents / 100).toFixed(2)),
       paid: paidCommission,
       totalRevenue: Number((paidCommission + available + guaranteeAll).toFixed(2))
     };
@@ -433,11 +574,15 @@
       .reduce((sum, item) => sum + item.settlement.availableAmount / 100, 0);
     row.tax = cases.filter(item => item.status === "settled")
       .reduce((sum, item) => sum + item.settlement.taxAmount / 100, 0);
+    row.taxAssessmentStatus = cases.some(item => item.settlement?.taxAmount != null) ? "calculated" : "not_calculated";
     row.guarantee = (row.commissionCases || []).reduce((sum, item) => {
       if (item.guarantee?.status === "retained") return sum + item.guarantee.amount / 100;
       if (item.guarantee?.status === "frozen") return sum + item.guarantee.amount / 100;
       return sum;
     }, 0);
+    row.guaranteeStatus = row.guarantee > 0
+      ? (cases.some(item => item.guarantee?.status === "frozen") ? "frozen" : "retained")
+      : "released";
     row.rejected = cases.filter(item => item.status === "rejected").reduce((sum, item) => sum + item.amountCents / 100, 0);
     row.reversed = cases.filter(item => item.status === "reversed").reduce((sum, item) => sum + item.amountCents / 100, 0);
     row.available = availableLots.filter(lot => lot.clientId === row.clientId && lot.staticRemaining)
@@ -455,7 +600,22 @@
       : cases.some(item => item.status === "frozen") ? "frozen"
       : cases.some(item => item.status === "manual_review") ? "manual_review"
       : cases.some(item => item.status === "held") ? "held" : "pending_review";
-    row.commissionStatus = row.fundStatus;
+    row.commissionStatus = !cases.length ? "not_generated"
+      : cases.some(item => item.commissionStatus === "reversed") ? "reversed"
+      : cases.some(item => item.commissionStatus === "rejected") ? "rejected"
+      : cases.every(item => item.commissionStatus === "approved") ? "approved"
+      : "holding";
+    row.settlementStatus = !cases.length ? "not_generated"
+      : cases.some(item => item.settlementStatus === "frozen") ? "frozen"
+      : cases.some(item => item.settlementStatus === "blocked") ? "blocked"
+      : cases.every(item => item.settlementStatus === "settled") ? "settled"
+      : "processing";
+    const rowAllocations = [...staticWithdrawals, ...runtimeWithdrawals()]
+      .flatMap(order => (order.allocations || []).map(allocation => ({ ...allocation, order })))
+      .filter(allocation => allocation.clientId === row.clientId);
+    row.withdrawalStatus = rowAllocations.some(item => item.order.status === "paid") ? "paid"
+      : rowAllocations.some(item => ["pending_review", "approved", "processing"].includes(item.order.status)) ? "processing"
+      : "unavailable";
     row.commissionId = cases[0]?.id || null;
     row.progress = {
       kyc: row.kyc === "通过",
@@ -523,7 +683,7 @@
   };
 
   const messages = [
-    { id: "MSG-001", level: "required", type: "规则变更", title: "保证金规则更新", date: "2026-10-20", status: "unread", body: "自下一结算版本起，佣金结算时按10%扣留滚动保证金，90个自然日后无风险自动释放。", version: configuration.version },
+    { id: "MSG-001", level: "required", type: "规则变更", title: "保证金规则更新", date: "2026-10-20", status: "unread", body: `自下一结算版本起，佣金结算时按${configuration.guaranteeRate * 100}%扣留滚动保证金，${configuration.guaranteeReleaseDays}个自然日后无风险自动释放。`, version: configuration.version },
     { id: "MSG-002", level: "normal", type: "结算延长", title: "1笔佣金延长观察期", date: "2026-10-23", status: "unread", body: "因国家与支付方式风险档叠加，对应佣金动态结算延长。", commissionCaseId: "COM-C-12006-QS" },
     { id: "MSG-003", level: "normal", type: "申诉进度", title: "申诉已改判", date: "2026-10-18", status: "read", body: "复核确认误扣保证金，相关金额已释放至可提现余额。", appealId: "APL-0012" },
     { id: "MSG-004", level: "info", type: "系统维护", title: "报表延迟维护完成", date: "2026-10-16", status: "read", body: "数据报表延迟10分钟，已恢复。" }
@@ -584,7 +744,7 @@
     clients,
     commissionCases,
     settlements,
-    statementBatches,
+    get statementBatches() { return buildStatementBatches(); },
     taxRecords,
     guaranteeRecords,
     availableLots,
@@ -595,7 +755,10 @@
     balance,
     previewWithdrawal,
     createWithdrawal,
+    approveWithdrawal,
+    rejectWithdrawal,
     setWithdrawalStatus,
+    runAutomaticSettlement,
     summary,
     allWithdrawals: () => [...runtimeWithdrawals(), ...staticWithdrawals].sort((left, right) => right.date.localeCompare(left.date) || right.id.localeCompare(left.id))
   };

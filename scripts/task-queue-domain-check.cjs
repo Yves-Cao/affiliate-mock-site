@@ -4,6 +4,9 @@ const vm = require("node:vm");
 const sandbox = {window:{},console,Date,JSON,BigInt,URLSearchParams};
 vm.runInNewContext(fs.readFileSync(require("node:path").join(__dirname,"../admin-prototype-data.js"),"utf8"),sandbox);
 const q=sandbox.window.AFF_ADMIN_PROTOTYPE.taskQueue;
+// These contracts exercise review-enabled workflows, separately from local demo bypass.
+sandbox.window.AFF_ADMIN_PROTOTYPE.demoPolicy.approvalRequired=true;
+q.reset();
 const schema=JSON.parse(fs.readFileSync(require("node:path").join(__dirname,"../openapi/schemas/task-queue.json"),"utf8"));
 function validateSchema(value,s,path="$") {
   if(s.$ref)s=schema.$defs[s.$ref.split("/").pop()];
@@ -61,6 +64,7 @@ test("all twelve fixed scenarios match their concrete page contract",()=>{
   const s12=t(12);assert.equal(s12.source_type,"attribution_review");assert.equal(s12.workflow_state,"processing");assert.equal(s12.owner.user_id,"DEMO-OPS-01");assert.equal(s12.fields.crm_attribution.channel,"IB");assert.ok(s12.fields.authorized_owner_refs.every(ref=>ref.startsWith("DEMO-IB")));
   error(()=>draft(s12.task_id,{conclusion:"change_request",proposed_owner_ref:"Affiliate"},"operations"),"AFF-42201");
   const expected={risk_review:"风险复核",settlement_overdue:"结算超时复核",appeal:"申诉复核",hold_extend:"结算延长复核",guarantee_offset:"保证金抵扣",chargeback:"冲正追回",circuit_breaker:"熔断复核",credit_review:"信用调级复核",commission_exception:"佣金异常",attribution_review:"归属争议复核",integration:"集成失败",data_backfill:"事件补数",offboarding_step:"清退步骤"};
+  expected.partner_followup="合作方跟进";
   for(const type of q.options("system_admin").source_types)assert.equal(type.label_zh,expected[type.key]);
 });
 test("claim checks versions, ownership and preserves SLA",()=>{

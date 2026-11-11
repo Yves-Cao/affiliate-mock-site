@@ -202,3 +202,19 @@
 /* D-07: rich empty states (strong + p) in table cells. */
 .finance-empty strong { display: block; color: var(--text); font-weight: 600; margin-bottom: 4px; }
 .finance-empty p { margin: 0; color: var(--muted); font-size: 12px; }
+
+.appeal-supplement-section { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+.appeal-supplement-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.appeal-supplement-heading strong { color: var(--blue-black); font-size: 13px; }
+.appeal-supplement-form { display: grid; gap: 12px; margin-top: 16px; padding: 14px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface-soft); }
+.appeal-supplement-form label { display: grid; gap: 6px; color: var(--body-text); font-size: 13px; }
+.appeal-supplement-form label > span { color: var(--muted); font-size: 12px; }
+.appeal-supplement-form textarea { width: 100%; min-height: 92px; padding: 8px 10px; border: 1px solid var(--control-border); border-radius: 4px; background: var(--surface); color: var(--body-text); font: inherit; resize: vertical; }
+.appeal-supplement-upload input { width: 100%; min-height: 34px; padding: 6px 8px; border: 1px solid var(--control-border); border-radius: 4px; background: var(--surface); color: var(--body-text); font: inherit; }
+.appeal-supplement-upload small { color: var(--muted); font-size: 12px; line-height: 1.5; }
+.appeal-supplement-files { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.appeal-supplement-files li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); font-size: 12px; }
+.appeal-supplement-files li span { min-width: 0; overflow-wrap: anywhere; }
+.appeal-supplement-timeline { margin-top: 12px; }
+.appeal-supplement-timeline small { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+.finance-empty-note { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }

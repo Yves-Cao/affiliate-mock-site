@@ -22,15 +22,18 @@ for (const level of ["C0", "C1", "C2", "C3", "C4"]) assert.ok(source.includes(`$
 for (const stage of ["FTD段", "有效FTD段", "质量服务"]) assert.ok(source.includes(stage), `Shows ${stage} benefit`);
 /* D-CREDIT-04 (2026-11-07, user-confirmed): levels display 1-5; point progress bar
  * WITHOUT values + hover hint; benefits hidden behind a modal entry. */
-for (const marker of ["原因类别", "恢复方向", "等级提升？", "影响积分", "data-credit-funnel-period", "partner-rail", "credit-card-level", "credit-seg", "data-credit-hint", "data-credit-benefits", "以平台配置为准", "全部等级权益对照", "等级提升？", "客户质量", "业绩规模", "权重与升降级阈值由平台配置", "guaranteeCut", "holdDays", "settleFree", "佣金加成", "保证金减免", "保证金暂扣天数", "免结算额度"]) {
+for (const marker of ["原因类别", "恢复方向", "等级提升？", "影响积分", "data-credit-funnel-period", "partner-rail", "credit-card-level", "credit-seg", "data-credit-hint", "data-credit-benefits", "以平台配置为准", "全部等级权益对照", "等级提升？", "客户质量", "业绩规模", "权重与升降级阈值由平台配置", "guaranteeCut", "holdDays", "settleFree", "佣金加成", "保证金减免", "保证金结算天数减免", "免结算额度", "benefitSummaryMarkup", "credit-benefit-summary", "当前等级权益", "下级权益"]) {
   assert.ok(partnerOutput.includes(marker), `Credit output includes ${marker}`);
 }
+assert.ok(!source.includes("保证金" + "暂扣"), "Credit output retires the guarantee-hold wording");
 /* D-CREDIT-08: level NUMBER is shown (flat brand block, no gold-pill flourish);
  * point values still hidden. */
 assert.ok(source.includes("display}"), "VIP level code rendered");
 assert.ok(account.includes("levelNumber"), "Account drawer shows number + title");
 assert.ok(!source.includes("--gold"), "No gold flourish on the emblem");
 assert.ok(source.includes("percent(cfg.ratio)"), "Commission bonus renders in modal");
+assert.ok(source.includes("if (currentIndex > 0)"), "VIP1 omits current-level benefits");
+assert.ok(source.includes("definition.visible(cfg[definition.key])"), "Zero-value benefits are filtered");
 /* D-CREDIT-14: redesigned dashboard card, brand deep blue, no gold, hint is a floating panel. */
 assert.ok(css.includes("#00187e") && css.includes("credit-hint-panel"), "Deep-blue card and hint panel styles exist");
 assert.ok(source.includes("AFF.tooltip.position"), "Hint uses unified tooltip placement");

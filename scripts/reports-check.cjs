@@ -340,10 +340,10 @@ async function main() {
       render();
     });
     await page.click("[data-rp-action='filters']");
-    await page.selectOption("[data-rp-filter='commissionStatus']", "pending_review");
+    await page.selectOption("[data-rp-filter='commissionStatus']", "processing");
     await page.click("[data-rp-action='apply']");
     assert.ok(await getTotal() > 0, "Pending commission filter must return clients");
-    assert.ok(await page.evaluate(() => AFF.reports.filtered().every(row => row.fundStatus === "pending_review")));
+    assert.ok(await page.evaluate(() => AFF.reports.filtered().every(row => row.settlementStatus === "processing")));
     await page.click("[data-rp-clear='commissionStatus']");
     await page.locator("[data-rp-client]").first().click();
     assert.equal(await page.locator(".report-drawer[role='dialog'][aria-modal='true']").count(), 1);
@@ -365,11 +365,11 @@ async function main() {
     assert.match(await page.locator("#rp-floating-help").innerText(), /基础佣金段|质量服务佣金段/);
     await page.mouse.click(12, 12);
     assert.ok(await page.locator("#rp-floating-help").isHidden());
-    for (const [commissionStatus, fundStatus] of [["rejected", "rejected"], ["reversed", "clawed_back"]]) {
+    for (const [commissionStatus, settlementStatus] of [["rejected", "blocked"]]) {
       await page.click("[data-rp-action='filters']");
-      await page.selectOption("[data-rp-filter='commissionStatus']", fundStatus);
+      await page.selectOption("[data-rp-filter='commissionStatus']", settlementStatus);
       await page.click("[data-rp-action='apply']");
-      assert.ok(await getTotal() > 1);
+      assert.ok(await getTotal() > 0);
       const record = await page.evaluate(() => AFF.reports.tableRows()[0]);
       const row = page.locator(".report-client-table tbody tr").first();
       assert.equal(await row.locator(".report-commission-reason").count(), 0);

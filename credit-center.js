@@ -5,7 +5,7 @@
    * Internal keys stay C0-C4 (scheme v1.1); display maps C0->1 ... C4->5.
    * Point progress shows a bar WITHOUT numeric values (points are internal). */
   /* D-CREDIT-13: per-level benefit matrix. Mock values now, admin API later.
-   * commission = 佣金加成；guaranteeCut = 保证金减免；holdDays = 保证金暂扣天数；
+   * commission = 佣金加成；guaranteeCut = 保证金减免；holdDays = 保证金结算天数；
    * settleFree = 免结算额度（USD/月）。 */
   const levels = {
     C0: { display: "VIP1", ratio: 0, fixed: 0, label: ["启航合作", "Launch partnership"], guaranteeCut: 0, holdDays: 90, settleFree: 0 },
@@ -14,6 +14,8 @@
     C3: { display: "VIP4", ratio: 0.07, fixed: 0, label: ["优质合作", "Premium"], guaranteeCut: 15, holdDays: 45, settleFree: 50000 },
     C4: { display: "VIP5", ratio: 0.10, fixed: 0, label: ["战略合作", "Strategic"], guaranteeCut: 20, holdDays: 30, settleFree: 200000 }
   };
+  const baseSettlementDays = 90;
+  const settlementDayReduction = value => Math.max(0, baseSettlementDays - Number(value || 0));
   const order = Object.keys(levels);
   /* D-CREDIT-14: metrics that influence the level score — scope only, no values. */
   const HINT_METRICS = [
@@ -47,11 +49,18 @@
       reason = t("资料与认证审核中", "Profile and verification reviewing");
       nextStep = t("等待审核完成后进入观察期", "Enter observation after review");
     }
+    const simulated = AFF.simulation?.state().credit;
+    if (simulated && levels[simulated.level]) {
+      level = simulated.level;
+      reason = t("模拟信用等级", "Simulated credit level");
+    }
     const benefit = levels[level];
     /* Demo progress (mock only): share of the way to the next level's bar.
-     * No numeric value is exposed anywhere — bar width only. */
+     * Ordinary pages show bar width only; points stay in the Mock console. */
     const idx = order.indexOf(level);
-    const demoProgress = level === "C0" ? 0.1 : level === "C4" ? 1 : [0.1, 0.45, 0.55, 0.75, 1][idx];
+    const demoProgress = level === "C4" ? 1 : simulated
+      ? simulated.points / AFF.simulation.creditPointsPerLevel
+      : [0.1, 0.45, 0.55, 0.75, 1][idx];
     return {
       level,
       levelNumber: benefit.display,
@@ -62,7 +71,7 @@
       nextStep,
       progress: demoProgress,
       nextLevel: idx < order.length - 1 ? levels[order[idx + 1]].display : null,
-      effectiveAt: AFF.finance.asOf,
+      effectiveAt: simulated?.effectiveAt || AFF.finance.asOf,
       version: AFF.finance.configuration.version,
       stages: [
         ["ftd", t("FTD段", "FTD")],
@@ -74,6 +83,62 @@
 
   function percent(value) { return `${Math.round(value * 1000) / 10}%`; }
   function fixedAmount(value) { return value ? `$${value.toFixed(2)}` : "$0.00"; }
+
+  const BENEFIT_DEFINITIONS = [
+    {
+      key: "ratio",
+      label: ["佣金加成", "Commission bonus"],
+      format: value => `+${percent(value)}`,
+      visible: value => Number(value) > 0
+    },
+    {
+      key: "guaranteeCut",
+      label: ["保证金减免", "Guarantee reduction"],
+      format: value => `-${value}%`,
+      visible: value => Number(value) > 0
+    },
+    {
+      key: "holdDays",
+      label: ["保证金结算天数减免", "Guarantee settlement-day reduction"],
+      format: value => `${settlementDayReduction(value)}${t("天", "d")}`,
+      visible: value => settlementDayReduction(value) > 0
+    },
+    {
+      key: "settleFree",
+      label: ["免结算额度", "Settlement-free quota"],
+      format: value => `$${new Intl.NumberFormat("en-US").format(value)}${t("/月", "/mo")}`,
+      visible: value => Number(value) > 0
+    }
+  ];
+
+  function benefitSummaryMarkup(info) {
+    const currentIndex = order.indexOf(info.level);
+    const levelsToShow = [];
+    // VIP1 has no earned benefits to summarize; show only the next level.
+    if (currentIndex > 0) levelsToShow.push({ kind: "current", key: info.level, title: ["当前等级权益", "Current-level benefits"] });
+    if (currentIndex < order.length - 1) {
+      levelsToShow.push({
+        kind: "next",
+        key: order[currentIndex + 1],
+        title: ["下级权益", "Next-level benefits"]
+      });
+    }
+    if (!levelsToShow.length) return "";
+    return `<div class="credit-benefit-summary" aria-label="${t("等级权益摘要", "Level benefit summary")}">
+      ${levelsToShow.map(({ kind, key, title }) => {
+        const cfg = levels[key];
+        const items = BENEFIT_DEFINITIONS
+          .filter(definition => definition.visible(cfg[definition.key]))
+          .map(definition => `<li><span>${h(t(...definition.label))}</span><strong>${h(definition.format(cfg[definition.key]))}</strong></li>`)
+          .join("");
+        if (!items) return "";
+        return `<section class="credit-benefit-group is-${kind}">
+          <header><span>${h(t(...title))}</span><strong>${h(cfg.display)}</strong></header>
+          <ul>${items}</ul>
+        </section>`;
+      }).join("")}
+    </div>`;
+  }
 
   /* D-CREDIT-05 (2026-11-07 user-confirmed): the credit component shares a
    * half-width row with a funnel chart on the dashboard.
@@ -123,9 +188,8 @@
   }
 
   /* D-CREDIT-14 (2026-11-07 redesign): deep-blue membership card.
-   * Left: eyebrow + large VIP level + title chip. Right: "等级提升？" hint.
-   * Bottom: 5 segmented tier bars (achieved full / current partial / future empty),
-   * no numeric values. Benefits stay in the "查看权益" modal. */
+   * Left: current level summary. Right: earned and next-level benefits.
+   * Bottom: 5 segmented tier bars (achieved full / current partial / future empty). */
   function dashboardStrip() {
     const info = summary();
     const idx = order.indexOf(info.level);
@@ -145,13 +209,18 @@
           ${hintTrigger()}
         </div>
       </header>
-      <div class="credit-card-main">
-        <strong class="credit-card-level" aria-label="${h(levels[info.level].display)}">${levels[info.level].display}</strong>
-        <span class="credit-card-title">${h(info.position)}</span>
-      </div>
-      <p class="credit-card-meta">${t("生效", "Effective")} ${h(info.effectiveAt)} <span aria-hidden="true">·</span> <button type="button" class="credit-date-help" data-credit-date-hint aria-expanded="false" aria-label="${t("等级计算规则", "Level calculation rules")}">?</button></p>
-      <div class="credit-card-actions">
-        <button type="button" class="credit-benefits-trigger" data-credit-benefits>${t("等级权益？", "Level benefits?")}</button>
+      <div class="credit-card-overview">
+        <div class="credit-card-primary">
+          <div class="credit-card-main">
+            <strong class="credit-card-level" aria-label="${h(levels[info.level].display)}">${levels[info.level].display}</strong>
+            <span class="credit-card-title">${h(info.position)}</span>
+          </div>
+          <p class="credit-card-meta">${t("生效", "Effective")} ${h(info.effectiveAt)} <span aria-hidden="true">·</span> <button type="button" class="credit-date-help" data-credit-date-hint aria-expanded="false" aria-label="${t("等级计算规则", "Level calculation rules")}">?</button></p>
+          <div class="credit-card-actions">
+            <button type="button" class="credit-benefits-trigger" data-credit-benefits>${t("等级权益？", "Level benefits?")}</button>
+          </div>
+        </div>
+        ${benefitSummaryMarkup(info)}
       </div>
       <ol class="credit-segs" role="img" aria-label="${t("等级进度", "Level progress")}：${levels[info.level].display}">${segments}</ol>
       ${hintPanelMarkup()}
@@ -174,14 +243,14 @@
         <span class="partner-credit-lv-head"><b>${cfg.display}</b> ${h(t(...cfg.label))}${current ? `<small>${t("当前", "current")}</small>` : ""}</span>
         <span class="partner-credit-lv-ratio">+${percent(cfg.ratio)}</span>
         <span class="partner-credit-lv-cell">${cfg.guaranteeCut ? `-${cfg.guaranteeCut}%` : "—"}</span>
-        <span class="partner-credit-lv-cell">${cfg.holdDays}${t("天", "d")}</span>
+        <span class="partner-credit-lv-cell">${settlementDayReduction(cfg.holdDays) ? `${settlementDayReduction(cfg.holdDays)}${t("天", "d")}` : "—"}</span>
         <span class="partner-credit-lv-cell">${money(cfg.settleFree)}${cfg.settleFree ? t("/月", "/mo") : ""}</span>
       </li>`;
     }).join("");
     showModal(modalShell(t("等级权益详情", "Level benefit details"), `
       <div class="partner-credit-lvlist" aria-label="${t("全部等级权益对照", "All-level benefit comparison")}">
         <p class="partner-credit-lvlist-caption">${t("全部等级权益对照", "All-level benefit comparison")}<small>${t("示例数值，以平台配置为准；佣金生成时锁定当时权益，等级变化不追溯已生成佣金。", "Sample values, platform config prevails; benefits lock when a commission is generated.")}</small></p>
-        <div class="partner-credit-lvlist-head" aria-hidden="true"><span>${t("等级", "Level")}</span><span>${t("佣金加成", "Commission bonus")}</span><span>${t("保证金减免", "Guarantee cut")}</span><span>${t("保证金暂扣天数", "Guarantee hold days")}</span><span>${t("免结算额度", "Settlement-free quota")}</span></div>
+        <div class="partner-credit-lvlist-head" aria-hidden="true"><span>${t("等级", "Level")}</span><span>${t("佣金加成", "Commission bonus")}</span><span>${t("保证金减免", "Guarantee cut")}</span><span>${t("保证金结算天数减免", "Guarantee settlement-day reduction")}</span><span>${t("免结算额度", "Settlement-free quota")}</span></div>
         <ul>${rows}</ul>
       </div>`, `<button class="button primary" type="button" data-action="close-modal">${t("关闭", "Close")}</button>`), false, t("等级权益详情", "Level benefit details"));
   }

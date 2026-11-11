@@ -96,10 +96,10 @@ async function main() {
       !(await page.locator(".dashboard-metrics").innerText()).includes("已提现余额"),
     "Dashboard removes the four funding amount cards");
     await page.locator("#wallet-toggle").click();
-    check((await page.locator("#wallet-popover").innerText()).includes(money(totals.available)) &&
-      (await page.locator("#wallet-popover").innerText()).includes(money(totals.held)) &&
-      (await page.locator("#wallet-popover").innerText()).includes(money(totals.guarantee)) &&
-      (await page.locator("#wallet-popover").innerText()).includes(money(totals.paid + totals.paidGuarantee)),
+    check((await page.locator("#wallet-popover").innerText()).includes(money(totals.totalRevenue)) &&
+      (await page.locator("#wallet-popover").innerText()).includes(money(totals.availableCommission)) &&
+      (await page.locator("#wallet-popover").innerText()).includes(money(totals.availableGuarantee)) &&
+      (await page.locator("#wallet-popover").innerText()).includes(money(totals.held)),
     "Wallet popover contains all funding amounts");
     await drill('.dashboard-metrics [data-metric="effective"]', true);
     for (const period of ["today", "past7", "past30", "lastWeek", "lastMonth"]) {

@@ -3,18 +3,24 @@
   const t = (zh, en) => AFF.state.language === "en" ? en : zh;
   const money = cents => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
   const labels = {
+    pending_review: ["待人工审核", "Pending review", "warning"],
     processing: ["支付中", "Processing", "info"],
     paid: ["已支付", "Paid", "ok"],
     failed: ["支付失败", "Payment failed", "danger"],
     timeout: ["已超时", "Timed out", "danger"],
+    returned: ["已退回", "Returned", "danger"],
+    rejected: ["审核驳回", "Review rejected", "danger"],
     closed: ["已关闭", "Closed", "muted"]
   };
   const methods = { wire: ["银行电汇", "Bank transfer"], wallet: ["电子钱包", "E-wallet"] };
   const notes = {
+    pending_review: ["申请已提交，等待人工审核；审核通过后才会进入支付中。", "The request was submitted and is awaiting manual review. Payment starts only after approval."],
     processing: ["支付结果等待渠道返回；手续费仅在成功后确认。", "Awaiting the payment result. Fee is confirmed only after success."],
     paid: ["支付成功，实际到账金额已扣除手续费。", "Payment succeeded. The received amount is net of fee."],
     failed: ["支付失败，申请金额已全额退回可提现余额，不收手续费。", "Payment failed. The full amount was returned and no fee is charged."],
     timeout: ["支付超时，申请金额已全额退回可提现余额，不收手续费。", "Payment timed out. The full amount was returned and no fee is charged."],
+    returned: ["CRM或银行已退回本次打款，金额已回到可提现余额。", "CRM or the bank returned the payout. The amount is available again."],
+    rejected: ["人工审核未通过，申请金额已全额退回可提现余额，不收手续费。", "Manual review was rejected. The full amount was returned and no fee is charged."],
     closed: ["提现单已关闭，未产生支付。", "The request was closed without payment."]
   };
   const initial = new WeakSet();
@@ -96,10 +102,10 @@
       ${[t("申请编号", "Request ID"), t("申请日期", "Request date"), t("提现方式", "Method"), t("收款账户", "Receiving account"), t("申请金额", "Requested amount"), t("手续费", "Fee"), t("实际到账", "Received"), t("结算单编号", "Settlement ID"), t("关联来源", "Sources"), t("提现状态", "Withdrawal status"), t("操作", "Action")].map(item => `<th scope="col">${item}</th>`).join("")}
       </tr></thead><tbody>${visible.length ? visible.map(row => `<tr>
         <td>${h(row.id)}</td><td>${h(row.date)}</td><td>${method(row)}</td><td>${h(row.account)}</td>
-        <td class="wd-money">${money(row.amount)}</td><td class="wd-money">${row.status === "paid" ? money(row.fee) : `${money(row.estimatedFee)}*`}</td><td class="wd-money">${row.status === "paid" ? money(row.received) : "-"}</td>
+        <td class="wd-money">${money(row.amount)}</td><td class="wd-money">${row.status === "paid" ? money(row.fee) : ["failed", "timeout", "rejected"].includes(row.status) ? money(0) : `${money(row.estimatedFee)}*`}</td><td class="wd-money">${row.status === "paid" ? money(row.received) : "-"}</td>
         <td>${settlementIds(row).length ? settlementIds(row).map(id => `<button class="wd-settlement-link" type="button" data-withdraw-settlement="${h(id)}">${h(id)}</button>`).join("<br>") : "-"}</td>
         <td>${row.allocations.length} ${t("笔", "lots")}</td><td>${badge(row)}</td>
-        <td><div class="wd-row-actions"><button class="button secondary small" type="button" data-withdraw-detail="${row.id}" data-statement-detail="${row.id}">${t("详情", "Details")}</button>${row.id.startsWith("WOD-U") && row.status === "processing" ? `<button class="button primary small" type="button" data-withdraw-simulate="${row.id}" data-result="paid">${t("模拟成功", "Simulate success")}</button><button class="button secondary small" type="button" data-withdraw-simulate="${row.id}" data-result="failed">${t("模拟失败", "Simulate failure")}</button>` : ""}</div></td>
+        <td><div class="wd-row-actions"><button class="button secondary small" type="button" data-withdraw-detail="${row.id}" data-statement-detail="${row.id}">${t("详情", "Details")}</button>${row.id.startsWith("WOD-U") && row.status === "pending_review" ? `<button class="button primary small" type="button" data-withdraw-review="${row.id}" data-review-result="approve">${t("审核通过", "Approve")}</button><button class="button secondary small" type="button" data-withdraw-review="${row.id}" data-review-result="reject">${t("驳回", "Reject")}</button>` : ""}${row.id.startsWith("WOD-U") && row.status === "processing" ? `<button class="button primary small" type="button" data-withdraw-simulate="${row.id}" data-result="paid">${t("模拟成功", "Simulate success")}</button><button class="button secondary small" type="button" data-withdraw-simulate="${row.id}" data-result="failed">${t("模拟失败", "Simulate failure")}</button><button class="button secondary small" type="button" data-withdraw-simulate="${row.id}" data-result="returned">${t("模拟退回", "Simulate return")}</button>` : ""}</div></td>
       </tr>`).join("") : `<tr><td colspan="11" class="wd-empty"><strong>${t("暂无提现记录", "No withdrawal records")}</strong><p>${t("请调整筛选条件后查询。", "Adjust filters and search again.")}</p></td></tr>`}</tbody></table></div>
       ${AFF.pagination.component({ page: s.page, pageSize: s.pageSize, total: rows.length, channel: "withdrawals" })}`;
   }
@@ -115,9 +121,21 @@
         <section class="wd-detail-amount"><span>${t("申请金额", "Requested amount")}</span><strong>${money(row.amount)}</strong>${badge(row)}</section>
         <section><h3>${t("支付信息", "Payment information")}</h3><p class="wd-status-note">${h(note(row))}</p><dl class="wd-details">
           ${field(t("申请日期", "Request date"), row.date)}${field(t("提现方式", "Method"), method(row))}
-          ${field(t("预估手续费", "Estimated fee"), money(row.estimatedFee))}${field(t("确认手续费", "Confirmed fee"), row.status === "paid" ? money(row.fee) : t("支付成功后确认", "Confirmed after success"))}
+          ${field(t("预估手续费", "Estimated fee"), money(row.estimatedFee))}${field(t("确认手续费", "Confirmed fee"), row.status === "paid" ? money(row.fee) : ["failed", "timeout", "rejected"].includes(row.status) ? money(0) : t("支付成功后确认", "Confirmed after success"))}
           ${field(t("实际到账", "Received"), row.status === "paid" ? money(row.received) : "-")}${field(t("收款账户", "Receiving account"), `${row.receiver} · ${row.account}`)}
+          ${field(t("审核状态", "Review status"), row.reviewStatus === "approved" ? t("已通过", "Approved") : row.reviewStatus === "rejected" ? t("已驳回", "Rejected") : t("待审核", "Pending review"))}
+          ${row.reviewReason ? field(t("驳回原因", "Review reason"), row.reviewReason) : ""}
           ${field(t("规则版本", "Rule version"), row.ruleVersion)}
+          ${field(t("结算单编号", "Statement ID"), row.statementId || "—")}
+          ${row.crmPayout ? field(t("CRM打款请求", "CRM payout request"), row.crmPayout.requestId) : ""}
+          ${row.crmPayout?.payoutId ? field(t("CRM打款编号", "CRM payout ID"), row.crmPayout.payoutId) : ""}
+          ${row.crmPayout ? field(t("CRM处理状态", "CRM processing status"), row.crmPayout.status) : ""}
+          ${row.crmPayout ? field(t("CRM状态说明", "CRM status reason"), row.crmPayout.statusReason) : ""}
+          ${row.crmPayout?.externalTransactionId ? field(t("外部交易流水", "External transaction"), row.crmPayout.externalTransactionId) : ""}
+          ${row.crmPayout ? field(t("请求时间", "Requested at"), row.crmPayout.requestedAt) : ""}
+          ${row.crmPayout ? field(t("更新时间", "Updated at"), row.crmPayout.updatedAt) : ""}
+          ${row.crmPayout ? field(t("重试次数", "Retry count"), row.crmPayout.retryCount) : ""}
+          ${row.crmPayout ? field(t("对账状态", "Reconciliation"), row.crmPayout.reconciliationStatus) : ""}
         </dl></section>
         <section><h3>${t("先进先出分摊", "FIFO allocations")}</h3><div class="wd-table-scroll"><table class="wd-table"><thead><tr><th>${t("来源", "Source")}</th><th>${t("来源编号", "Source ID")}</th><th>${t("结算单编号", "Settlement ID")}</th><th>${t("客户", "Client")}</th><th>${t("佣金案件", "Case")}</th><th>${t("金额", "Amount")}</th></tr></thead><tbody>
           ${row.allocations.map(item => {
@@ -202,7 +220,7 @@
 
   document.addEventListener("click", event => {
     if (AFF.state?.route !== "wd") return;
-    const target = event.target.closest("[data-withdraw-tab],[data-withdraw-detail],[data-withdraw-settlement],[data-withdraw-action],[data-withdraw-page],[data-withdraw-simulate],[data-withdraw-method-choice],[data-aff-page]");
+    const target = event.target.closest("[data-withdraw-tab],[data-withdraw-detail],[data-withdraw-settlement],[data-withdraw-action],[data-withdraw-page],[data-withdraw-simulate],[data-withdraw-review],[data-withdraw-method-choice],[data-aff-page]");
     if (!target) return;
     const s = state(), d = target.dataset;
     if (d.withdrawTab) { AFF.state.wdTab = d.withdrawTab; s.detail = null; return rerender(`[data-withdraw-tab="${d.withdrawTab}"]`); }
@@ -237,6 +255,16 @@
       showToast(d.result === "paid" ? t("支付成功，手续费已确认。", "Payment succeeded; fee confirmed.") : t("支付失败，金额已退回且不收费。", "Payment failed; amount returned with no fee."));
       return rerender(`[data-withdraw-simulate="${d.withdrawSimulate}"]`);
     }
+    if (d.withdrawReview) {
+      const order = d.reviewResult === "approve"
+        ? AFF.finance.approveWithdrawal(d.withdrawReview)
+        : AFF.finance.rejectWithdrawal(d.withdrawReview);
+      if (!order) return showToast(t("该提现单当前不可审核。", "This withdrawal cannot be reviewed in its current state."));
+      showToast(d.reviewResult === "approve"
+        ? t("审核通过，提现单已进入支付中。", "Approved. The withdrawal is now processing.")
+        : t("审核已驳回，金额已退回且不收费。", "Rejected. The amount was returned with no fee."));
+      return rerender(`[data-withdraw-review="${d.withdrawReview}"]`);
+    }
     if (d.withdrawAction === "close") { s.detail = null; return rerender(focusBack); }
     if (d.withdrawAction === "complete-kyc") {
       AFF.state.kybCompleted = true;
@@ -249,7 +277,7 @@
       try {
         AFF.finance.createWithdrawal(AFF.state.wdForm.amount, AFF.state.wdForm.method);
         AFF.state.wdTab = "records";
-        showToast(t("提现申请已提交，等待支付渠道处理。", "Withdrawal submitted and awaiting processing."));
+        showToast(t("提现申请已提交，等待人工审核。", "Withdrawal submitted and awaiting manual review."));
         return rerender('[data-withdraw-tab="records"]');
       } catch { return showToast(t("提现金额无效或超过可提现余额。", "Invalid amount or insufficient available balance.")); }
     }

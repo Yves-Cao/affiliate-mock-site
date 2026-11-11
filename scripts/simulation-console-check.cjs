@@ -24,6 +24,14 @@ async function main() {
     for (const label of ["时间", "录入", "违规", "场景", "数据", "日志"]) {
       assert.ok((await page.locator(".sim-tabs").innerText()).includes(label), `Simulation tab ${label} exists`);
     }
+    assert.ok(await page.locator("[data-sim-run-settlement]").isVisible(), "Daily settlement action is visible");
+    await page.click("[data-sim-run-settlement]");
+    const settlementRun = await page.evaluate(() => AFF.state.settlementRuns?.[0]);
+    assert.equal(settlementRun.status, "completed", "Daily settlement run completes");
+    assert.ok(settlementRun.traceId, "Daily settlement run stores trace id");
+    await page.click("[data-sim-run-settlement]");
+    assert.equal(await page.evaluate(() => AFF.state.settlementRuns.length), 1, "Daily settlement is idempotent for a mock date");
+    assert.ok(await page.locator(".sim-settlement-run-meta").isVisible(), "Settlement run details render");
 
     await page.click("[data-sim-advance='7']");
     await page.waitForFunction(() => window.AFF?.simulation?.date() === "2026-11-03");

@@ -66,6 +66,7 @@ aff.state = { withdrawalOrders: [] };
 const before = finance.balance();
 const order = finance.createWithdrawal("100.00", "wire");
 assert.equal(finance.balance(), before - order.amount);
+finance.setWithdrawalStatus(order.id, "processing");
 finance.setWithdrawalStatus(order.id, "failed");
 assert.equal(finance.balance(), before);
 assert.equal(order.fee, 0);

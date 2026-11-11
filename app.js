@@ -111,7 +111,19 @@ const defaultState = {
   programSupportQuery: "",
   programAssetFilters: { device: "全部", platform: "全部", type: "全部" },
   programCompleted: false,
-  wdTab: "withdraw"
+  wdTab: "withdraw",
+  helpAssistant: {
+    assistantOpen: false,
+    drawerOpen: false,
+    assistantQuery: "",
+    query: "",
+    expandedId: null,
+    faqId: null,
+    category: null,
+    article: null,
+    recentRoutes: [],
+    clickedArticles: []
+  }
 };
 
 const englishLabels = {
@@ -258,8 +270,8 @@ function initializeElements() {
     "profile-entry", "sidebar-toggle", "language-toggle", "language-menu",
     "kyc-banner", "dismiss-kyc", "main", "modal-root", "toast", "scenario-select",
     "account-menu", "avatar-button", "account-dropdown", "wallet-menu", "wallet-toggle",
-    "wallet-popover", "wallet-balance", "wallet-popover-balance", "wallet-total-revenue", "message-count",
-  "wallet-processing", "wallet-held", "wallet-guarantee", "wallet-paid", "wallet-frozen", "wallet-main-reason",
+    "wallet-popover", "wallet-balance", "wallet-total-revenue", "wallet-available-commission", "wallet-available-guarantee", "message-count",
+    "wallet-processing",
     "server-time", "server-time-zone", "local-time", "local-time-zone"
   ]) elements[id] = document.getElementById(id);
 }
@@ -318,6 +330,14 @@ function currentState() {
     merged.dashboardLinkPageQuery = "";
     merged.dashboardLinkLanguageQuery = "";
     merged.programAssetFilters = { ...structuredClone(defaultState.programAssetFilters), ...(savedState.programAssetFilters || {}) };
+    const savedHelp = savedState.helpAssistant || {};
+    const validHelpIds = articleId => (AFF.help?.articles || []).some(item => item.id === articleId);
+    const validRoutes = route => AFF.routes.some(item => item.id === route);
+    merged.helpAssistant = {
+      ...structuredClone(defaultState.helpAssistant),
+      recentRoutes: Array.isArray(savedHelp.recentRoutes) ? savedHelp.recentRoutes.filter(validRoutes).slice(0, 8) : [],
+      clickedArticles: Array.isArray(savedHelp.clickedArticles) ? savedHelp.clickedArticles.filter(validHelpIds).slice(0, 8) : []
+    };
     merged.perf = {
       ...structuredClone(defaultState.perf),
       ...(savedState.perf || {}),
@@ -401,7 +421,7 @@ function routeLabel(route) {
 }
 
 function renderNav() {
-  const groups = [...new Set(AFF.routes.filter(route => !route.hidden && !["apply", "onboarding"].includes(route.id)).map(route => route.group))];
+  const groups = [...new Set(AFF.routes.filter(route => !route.hidden && !["account", "apply", "onboarding"].includes(route.id)).map(route => route.group))];
   const groupIcons = {
     "仪表盘": "dashboard",
     "数据总览": "overview",
@@ -410,7 +430,7 @@ function renderNav() {
     "服务中心": "clients"
   };
   elements.nav.innerHTML = groups.map(group => {
-    const routes = AFF.routes.filter(route => !route.hidden && !["apply", "onboarding"].includes(route.id) && route.group === group);
+    const routes = AFF.routes.filter(route => !route.hidden && !["account", "apply", "onboarding"].includes(route.id) && route.group === group);
     const groupLabel = AFF.state.language === "en" ? (englishGroupLabels[group] || group) : group;
     const open = AFF.state.navGroups.includes(group) || (AFF.state.route === "account" && group === "服务中心");
     if (group === "仪表盘") {
@@ -493,16 +513,11 @@ function render() {
   renderNav();
   const reportMoney = value => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
   elements["wallet-balance"].textContent = reportMoney(AFF.finance.balance() / 100);
-  elements["wallet-popover-balance"].textContent = reportMoney(AFF.finance.balance() / 100);
   const walletAvailability = AFF.fundsAvailability.walletSummary();
-  const financeSummary = AFF.finance.summary();
-  elements["wallet-total-revenue"].textContent = reportMoney(financeSummary.totalRevenue);
-  elements["wallet-processing"].textContent = reportMoney(financeSummary.held);
-  if (elements["wallet-main-reason"]) elements["wallet-main-reason"].textContent = walletAvailability.mainReason;
-  if (elements["wallet-held"]) elements["wallet-held"].textContent = reportMoney(financeSummary.held);
-  if (elements["wallet-guarantee"]) elements["wallet-guarantee"].textContent = reportMoney(financeSummary.guarantee);
-  if (elements["wallet-paid"]) elements["wallet-paid"].textContent = reportMoney(financeSummary.paid + financeSummary.paidGuarantee);
-  if (elements["wallet-frozen"]) elements["wallet-frozen"].textContent = reportMoney(financeSummary.frozen);
+  elements["wallet-total-revenue"].textContent = reportMoney(walletAvailability.totalRevenue);
+  elements["wallet-available-commission"].textContent = reportMoney(walletAvailability.availableCommission);
+  elements["wallet-available-guarantee"].textContent = reportMoney(walletAvailability.availableGuarantee);
+  elements["wallet-processing"].textContent = reportMoney(walletAvailability.inSettlement);
   elements["message-count"].textContent = (AFF.messages?.allMessages() || AFF.finance.messages)
     .filter(message => message.status === "unread").length;
   elements["avatar-button"].textContent = accountInitial();
@@ -526,6 +541,7 @@ function render() {
     button.setAttribute("aria-checked", String(button.dataset.language === AFF.state.language));
   });
   document.title = `${routeLabel(route)} · Affiliate CPA`;
+  AFF.help?.render();
   persist();
 }
 
@@ -547,7 +563,7 @@ function syncTopbarLanguage() {
   const clockLabels = document.querySelectorAll(".topbar-clock > div > span");
   if (clockLabels[0]) clockLabels[0].textContent = english ? "Server time" : "服务器时间";
   if (clockLabels[1]) clockLabels[1].textContent = english ? "Local time" : "本地时间";
-  document.querySelector("#wallet-toggle > span").textContent = english ? "Available balance" : "可提现余额";
+  document.querySelector("#wallet-toggle > span").textContent = english ? "Wallet" : "钱包";
   const accountLabels = document.querySelectorAll("#account-dropdown .account-menu-item span:last-child");
   if (accountLabels[0]) accountLabels[0].textContent = english ? "Personal center" : "个人中心";
   if (accountLabels[1]) accountLabels[1].textContent = english ? "Sign out" : "退出登录";
@@ -1681,7 +1697,15 @@ async function handleLogin(event) {
   const markerKey = await partnerProgramMarkerKey(email);
   const isFirstLogin = localStorage.getItem(markerKey) !== "1";
   if (isFirstLogin) localStorage.setItem(markerKey, "1");
-  AFF.state.route = isFirstLogin ? "apply" : "dash";
+  if (!AFF.state.programCompleted) {
+    AFF.state.applyStep = Math.min(6, Math.max(1, Number(AFF.state.programMaxStep) || Number(AFF.state.applyStep) || 1));
+    AFF.state.route = "apply";
+  } else if (!AFF.state.onboarding.submitted) {
+    AFF.state.onboarding.step = Math.min(5, Math.max(1, Number(AFF.state.onboarding.maxStep) || Number(AFF.state.onboarding.step) || 1));
+    AFF.state.route = "onboarding";
+  } else {
+    AFF.state.route = "dash";
+  }
   history.replaceState(null, "", `${location.pathname}${location.search}#/${AFF.state.route}`);
   elements["login-view"].classList.add("hidden");
   elements["app-view"].classList.remove("hidden");

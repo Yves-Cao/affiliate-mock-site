@@ -29,7 +29,7 @@
 .funds-untriggered span { color: var(--muted); font-size: 12px; line-height: 1.6; }
 .wallet-popover-processing { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .wallet-popover-processing strong { color: var(--body-text); font-size: 13px; font-variant-numeric: tabular-nums; }
-.wallet-popover-details { display: grid; gap: 8px; margin: 12px 0; padding-top: 12px; border-top: 1px solid var(--border); }
+.wallet-popover-details { display: grid; gap: 8px; margin: 12px 0; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
 .wallet-popover-details > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .wallet-popover-details span, .wallet-data-item > span { display: grid; gap: 2px; color: var(--muted); font-size: 12px; }
 .wallet-data-item > span { color: var(--text); font-weight: 700; }
@@ -38,9 +38,8 @@
 .wallet-value-link { padding: 0; border: 0; background: transparent; color: var(--brand); font: inherit; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; cursor: pointer; }
 .wallet-value-link:hover, .wallet-value-link:focus-visible { color: var(--brand-deep); text-decoration: underline; }
 .wallet-value-link:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; border-radius: 2px; }
-.wallet-popover-balance .wallet-value-link { color: var(--text); font: var(--font-text-24-b); }
 .wallet-popover-reason { margin: 0; color: var(--muted); font-size: 12px; }
-.wallet-popover-links { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.wallet-popover-links { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 18px; }
 .wallet-popover-links .button.secondary { min-height: 30px; }
 @media (max-width: 991px) { .funds-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } .funds-body { grid-template-columns: 1fr; } }
 @media (max-width: 767px) { .funds-cards { grid-template-columns: 1fr; } .funds-table-wrap th, .funds-table-wrap td { white-space: normal; } .funds-table-wrap td:nth-child(3) { text-align: left; } .wallet-popover-links { grid-template-columns: 1fr; } }

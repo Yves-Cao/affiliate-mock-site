@@ -1037,7 +1037,7 @@ AFF.pages.onboarding = () => {
 
 AFF.pages.apply = () => {
   const state = AFF.state;
-  const steps = ["查看佣金奖励", "高转化地区", "查看支持地区", "素材库总览", "系统使用指引", "分享简介链接"];
+  const steps = ["查看佣金奖励", "高转化地区", "查看支持地区", "素材库总览", "收益与系统指引", "分享简介链接"];
   const reached = Math.max(state.programMaxStep || 1, state.applyStep);
   const content = AFF.pages.applyStep();
   return `
@@ -1062,6 +1062,10 @@ AFF.pages.apply = () => {
 
 AFF.pages.applyStep = () => {
   const state = AFF.state;
+  const rules = AFF.finance.configuration;
+  const guaranteeRate = Number.isFinite(rules.guaranteeRate) ? `${Number((rules.guaranteeRate * 100).toFixed(2))}%` : "待确认";
+  const guaranteePeriod = Number.isFinite(rules.guaranteeReleaseDays)
+    ? `${rules.guaranteeReleaseDays}${state.language === "en" ? " days" : "天"}` : "待确认";
 
   const percent = value => `${value.toFixed(1)}%`;
   const effective = values => values[0] * values[1] * values[2] / 10000;
@@ -1071,6 +1075,7 @@ AFF.pages.applyStep = () => {
     const selectedCountries = AFF.sortedCommissionCountries().filter(item => state.programCommissionCountries.includes(item.code));
     const isEnglish = state.language === "en";
     const calculator = AFF.programCalculatorResult();
+    const settlementAmount = calculator.gross - calculator.guarantee;
     const calculatorInput = (field, label, value, attributes = "") => `
       <label><span>${AFF.helpers.h(label)}</span><input data-calculator-field="${field}" value="${AFF.helpers.h(value)}" ${attributes}></label>`;
     const countryLabel = isEnglish ? "Country / Region" : "国家/地区";
@@ -1080,9 +1085,18 @@ AFF.pages.applyStep = () => {
       <div class="commission-page-head">
         <div>
           <h2>L1-L4资格档与国家佣金</h2>
-          <p>参考CPA按国家直接配置；全部数值可后台配置</p>
+          <p>了解佣金的组成，再按推广国家查看相应资格要求与奖励。</p>
         </div>
       </div>
+      <section class="program-reward-overview" aria-labelledby="program-reward-title">
+        <h3 id="program-reward-title">佣金如何产生</h3>
+        <ol class="program-reward-stages">
+          <li><span class="program-stage-label">首次入金</span><h4>FTD</h4><p>客户完成首次入金，进入后续资格确认阶段。仅完成首次入金，尚不能获得可提现佣金。</p></li>
+          <li><span class="program-stage-label">确认基础奖励</span><h4>有效FTD</h4><p>达到相应资格要求后，确认基础CPA佣金。FTD与有效FTD两段共同构成完整的基础奖励。</p></li>
+          <li><span class="program-stage-label">获得额外奖励</span><h4>质量服务</h4><p>进一步达到质量服务要求，可获得基础CPA之外的额外奖励；未达成不影响已经成立的基础佣金。</p></li>
+        </ol>
+        <p class="program-rule-note">FTD与有效FTD两段的基础比例合计100%；三个阶段不代表分三次付款，质量服务奖励不占用基础CPA比例。</p>
+      </section>
       <div class="country-picker ${state.programCountryPickerOpen ? "open" : ""}">
         <span class="field-label">${AFF.helpers.h(countryLabel)}</span>
         <button class="country-picker-button" type="button" data-action="toggle-country-picker" aria-haspopup="listbox" aria-expanded="${state.programCountryPickerOpen}">
@@ -1109,7 +1123,7 @@ AFF.pages.applyStep = () => {
         </section>`).join("") : `<div class="card state-panel"><strong>暂无数据</strong><span>请至少选择一个国家</span></div>`}
     </div>
     <section class="card commission-calculator">
-      <div class="panel-header"><h2>${isEnglish ? "Commission calculator" : "佣金计算器"}</h2><span class="helper">${isEnglish ? "Reference values, configurable" : "演示参考值，可配置"}</span></div>
+      <div class="panel-header"><h2>${isEnglish ? "Commission calculator" : "佣金计算器"}</h2><span class="helper">${isEnglish ? "Illustrative estimate" : "试算示例"}</span></div>
       <div class="panel-body calculator-grid">
         <div class="calculator-fields">
           <label><span>${isEnglish ? "Country" : "国家"}</span>
@@ -1129,12 +1143,25 @@ AFF.pages.applyStep = () => {
         <div class="calculator-result">
           <span>${isEnglish ? "Qualified tier" : "所达资格档"}</span><strong>${calculator.tier.tier}</strong>
           <div><span>${isEnglish ? "Commission total" : "佣金总额"}</span><strong>$${calculator.gross.toFixed(2)}</strong></div>
-          <div><span>${isEnglish ? "Tax" : "税费"} ${calculator.taxTier} ${(calculator.taxRate * 100).toFixed(0)}%</span><strong>$${calculator.tax.toFixed(2)}</strong></div>
-          <div><span>${isEnglish ? "Guarantee 10%" : "保证金 10%"}</span><strong>$${calculator.guarantee.toFixed(2)}</strong></div>
-          <div><span>${isEnglish ? "Available credit" : "结算入账"}</span><strong>$${calculator.available.toFixed(2)}</strong></div>
+          <div><span>${isEnglish ? "Guarantee" : "保证金"} ${guaranteeRate}</span><strong>$${calculator.guarantee.toFixed(2)}</strong></div>
+          <div class="program-settlement-amount"><span>${isEnglish ? "Settlement amount" : "结算金额"}</span><strong>$${settlementAmount.toFixed(2)}</strong></div>
           <small>${isEnglish ? "Payment method affects only the dynamic hold date, not price." : "入金方式只影响动态结算日期，不影响档位和佣金总额。"}</small>
-          <small>${isEnglish ? "Dynamic hold" : "动态结算"} ${calculator.holdDays}${isEnglish ? "d" : "天"} · ${calculator.releaseDate}；${isEnglish ? "Guarantee release" : "保证金释放"} ${calculator.guaranteeDate}</small>
+          <small>${isEnglish ? "Illustrative settlement period" : "试算结算周期"} ${calculator.holdDays}${isEnglish ? "d" : "天"} · ${isEnglish ? "Estimated settlement" : "预计结算"} ${calculator.releaseDate}；${isEnglish ? "Estimated guarantee release" : "预计保证金释放"} ${calculator.guaranteeDate}</small>
+          <small>比例、天数及日期仅供试算；实际以适用规则及核验结果为准。</small>
         </div>
+      </div>
+      <div class="program-settlement-summary">
+        <p>佣金确认后进入结算流程，符合条件的金额按日自动结算。结算时按适用规则留存部分佣金作为保证金，保证金符合释放条件后可提现。</p>
+        <details class="program-rule-details" open>
+          <summary>了解结算与保证金</summary>
+          <div class="program-detail-copy">
+            <p><strong>结算周期：</strong>佣金需要经过适用的观察与核验周期，再参与每日自动结算。每日结算不代表新佣金次日一定可提现。</p>
+            <p><strong>保证金：</strong>所有合作者均适用保证金规则。留存金额单独记录，满足期限及释放条件后转为可提现保证金；如涉及调整或抵扣，可查看明细与原因。</p>
+            ${Math.max(state.programMaxStep || 1, state.applyStep) >= 5
+              ? '<button class="program-text-link" type="button" data-apply-step="5">查看完整资金流程 <span aria-hidden="true">→</span></button>'
+              : "<p>后续「收益与系统指引」将说明完整资金流程，以及在哪里查看进度。</p>"}
+          </div>
+        </details>
       </div>
     </section>
     <section class="commission-info-grid">
@@ -1291,22 +1318,57 @@ AFF.pages.applyStep = () => {
   }
 
   if (state.applyStep === 5) return `
-    <div class="program-section-head">
-      <div><h3>系统使用指引</h3><p>三个入口覆盖客户数据、业绩明细和整体数据，帮助合作者定位问题并决定投入。</p></div>
-      ${AFF.helpers.tag("快速入口")}
+    <div class="program-intro">
+      <h2>收益与系统指引</h2>
+      <p>了解佣金从确认到可提现的过程，以及在哪里查看客户、收益和保证金。</p>
     </div>
+    <section class="program-funds-flow" aria-labelledby="program-funds-title">
+      <h3 id="program-funds-title">从佣金确认到提现</h3>
+      <ol class="program-funds-timeline">
+        <li><span>01</span><strong>佣金确认</strong><p>达到有效FTD或质量服务要求，确认对应奖励。</p></li>
+        <li><span>02</span><strong>结算中</strong><p>经过适用的观察与核验周期，符合条件后参与每日自动结算。</p></li>
+        <li><span>03</span><strong>可提现佣金</strong><p>完成结算后，符合提现条件的佣金进入可提现余额。</p></li>
+        <li><span>04</span><strong>申请提现</strong><p>完成所需资料并满足提现条件后，申请提取可提现余额。</p></li>
+      </ol>
+    </section>
+    <div class="program-funds-rules">
+      <section>
+        <h3>佣金何时可以提现</h3>
+        <p>佣金确认后开始观察与核验，周期按适用规则确定。符合条件的金额每日自动结算，通常在凌晨执行；准确时间与时区以适用规则为准。</p>
+        <p>每日结算不代表新佣金次日一定可提现。需要补充资料或进一步核验时，收益详情会显示当前阶段与下一步；提现到账属于后续流程。</p>
+      </section>
+      <section>
+        <h3>何时收取保证金</h3>
+        <p>佣金完成结算时，系统按适用比例从本次佣金中留存保证金，所有合作者均适用。保证金单独记录，您可在保证金页面查看留存金额、对应佣金和预计释放时间。</p>
+        <p>满足期限及释放条件后，保证金转为可提现金额，仍需申请提现；如涉及核验、调整或抵扣，可查看明细和原因。</p>
+      </section>
+    </div>
+    <details class="program-rule-details program-rule-example">
+      <summary>查看当前试算规则与金额说明</summary>
+      <div class="program-detail-copy">
+        <dl class="program-rule-values">
+          <div><dt>结算频率</dt><dd>每日自动结算</dd></div>
+          <div><dt>结算周期</dt><dd>按国家、入金方式及核验情况确定</dd></div>
+          <div><dt>保证金比例示例</dt><dd>${guaranteeRate}</dd></div>
+          <div><dt>保证金保留期限示例</dt><dd>${guaranteePeriod}</dd></div>
+        </dl>
+        <p>比例与天数为试算示例，实际以适用规则为准。预计结算及释放日期在具备充分依据时展示；仍在核验时，查看当前阶段与下一步。</p>
+        <button class="program-text-link" type="button" data-apply-step="1">返回佣金计算器试算 <span aria-hidden="true">→</span></button>
+      </div>
+    </details>
+    <div class="program-section-head program-entry-head"><div><h3>在哪里查看进度</h3><p>从客户转化到资金明细，随时回到对应页面查看。</p></div></div>
     <div class="program-guide-grid">
       <article>
-        <span>入口 01</span><strong>查看客户数据</strong><p>按客户看注册、KYC、国家、资格日期、预计收益、已付、拒绝和结算中状态。</p>
+        <span>客户转化</span><strong>查看客户数据</strong><p>查看客户的注册信息、KYC状态、转化阶段和对应佣金。</p>
         <button class="button secondary" type="button" data-route="clients">进入客户列表</button>
       </article>
       <article>
-        <span>入口 02</span><strong>查看业绩</strong><p>按国家、活动、UTM和平台分析点击、注册、FTD、有效FTD与质量服务。</p>
-        <button class="button secondary" type="button" data-route="perf">进入业绩数据</button>
+        <span>佣金结算</span><strong>查看收益数据</strong><p>查看逐笔佣金的金额、结算进度，以及需要您处理的事项。</p>
+        <button class="button secondary" type="button" data-route="pay">进入收益数据</button>
       </article>
       <article>
-        <span>入口 03</span><strong>查看整体数据</strong><p>从仪表盘看可提现、结算中、进行中里程碑和本月有效FTD。</p>
-        <button class="button secondary" type="button" data-route="dash">进入仪表盘</button>
+        <span>保证金释放</span><strong>查看保证金</strong><p>查看保证金留存、预计释放时间、可提现金额和调整记录。</p>
+        <button class="button secondary" type="button" data-route="guarantee">进入保证金</button>
       </article>
     </div>`;
 
@@ -1331,9 +1393,25 @@ AFF.pages.applyStep = () => {
           </div>`).join("")}
       </div>
       <p class="program-share-note">您可以随时返回仪表盘获取推广链接。投放前请查看支持地区，并根据受众的语言、设备和目标页面选择对应链接。</p>
+      <section class="program-share-recap" aria-labelledby="program-recap-title">
+        <h3 id="program-recap-title">推广前，再记住这三点</h3>
+        <ul>
+          <li>达到有效FTD要求后确认基础佣金，质量服务可带来额外奖励。</li>
+          <li>佣金符合条件并完成结算后，才进入可提现余额。</li>
+          <li>保证金单独记录，符合释放条件后可提现。</li>
+        </ul>
+      </section>
       <div class="program-share-shortcuts">
         <button class="program-text-link" type="button" data-route="deep">配置专属深度链接 <span aria-hidden="true">→</span></button>
+        <button class="program-text-link" type="button" data-apply-step="1">查看奖励规则 <span aria-hidden="true">→</span></button>
+        <button class="program-text-link" type="button" data-apply-step="5">查看结算规则 <span aria-hidden="true">→</span></button>
       </div>
+      <section class="program-postback-guide" aria-labelledby="program-postback-title">
+        <h3 id="program-postback-title">用回传链接连接您的追踪平台</h3>
+        <p>适合使用广告追踪器或自建数据系统管理投放的合作者。</p>
+        <p>配置回传链接后，系统会将您选择的转化事件发送至您的平台，帮助您关联广告点击与客户转化、比较渠道效果并优化投放。</p>
+        <button class="program-text-link" type="button" data-route="tracker">配置回传链接 <span aria-hidden="true">→</span></button>
+      </section>
     </div>`;
 };
 

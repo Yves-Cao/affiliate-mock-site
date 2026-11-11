@@ -71,6 +71,23 @@ async function main() {
     assert.ok(!investigationDrawer.includes("内部评分") && !investigationDrawer.includes("证据全文"));
     await page.keyboard.press("Escape");
     await page.locator("[data-appeal-action='reset']").click();
+    await page.selectOption("[data-appeal-filter='status']", "materials");
+    const materialsRow = page.locator("[data-appeal-detail]").first();
+    assert.ok(await materialsRow.count(), "A materials-required investigation is available");
+    await materialsRow.click();
+    await page.locator("[data-appeal-action='open-supplement']").click();
+    await page.fill("[data-appeal-supplement-field='reason']", "补充说明当前投放来源及客户沟通记录。");
+    await page.locator("[data-appeal-supplement-files]").setInputFiles({
+      name: "traffic-note.txt",
+      mimeType: "text/plain",
+      buffer: Buffer.from("mock supplement")
+    });
+    await page.locator("[data-appeal-action='submit-supplement']").click();
+    assert.ok((await page.locator(".finance-drawer").innerText()).includes("补充材料已提交"), "Supplement success feedback is shown");
+    assert.ok((await page.locator(".finance-drawer").innerText()).includes("traffic-note.txt"), "Submitted attachment is kept in the timeline");
+    await page.keyboard.press("Escape");
+    await page.locator("[data-appeal-action='reset']").click();
+    await page.selectOption("[data-appeal-filter='status']", "reviewing");
     await page.locator("[data-appeal-action='toggle']").click();
     await page.fill("[data-appeal-field='objectId']", "COM-C-12008-QF");
     await page.fill("[data-appeal-field='reason']", "请复核关联客户首次入金证据。");
@@ -93,7 +110,7 @@ async function main() {
     assert.equal(unreadAfter, unreadBefore - 1, "Acknowledgement syncs topbar unread count");
     await page.keyboard.press("Escape");
     await page.selectOption("[data-message-filter='level']", "");
-    await page.selectOption("[data-message-filter='type']", "Hold延长");
+    await page.selectOption("[data-message-filter='type']", "结算延长");
     await page.locator("[data-message-detail]").first().click();
     await page.locator(".finance-drawer [data-route='pay']").click();
     await page.waitForFunction(() => AFF.state.route === "pay");

@@ -73,7 +73,10 @@
     const info = data();
     return {
       available: info.finance.available,
-      totalRevenue: info.finance.paid,
+      availableCommission: info.finance.availableCommission,
+      availableGuarantee: info.finance.availableGuarantee,
+      totalRevenue: info.finance.totalRevenue,
+      inSettlement: info.finance.held,
       processing: info.processing,
       mainReason: info.mainReason
     };

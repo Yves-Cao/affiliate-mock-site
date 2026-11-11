@@ -12,6 +12,7 @@ const userStyleFiles = [
   "styles.css", "account-page.css", "clients-page.css", "credit-center.css", "date-range.css",
   "earnings.css", "export-center.css", "finance.css", "funds-availability.css", "reports.css",
   "statements-page.css", "subchannels.css", "support-page.css", "withdrawals.css", "partner-closure.css", "drawer-footer.css", "simulation-console.css"
+  , "help-center.css"
 ];
 
 const requiredTokens = [

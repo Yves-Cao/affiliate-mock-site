@@ -6,6 +6,7 @@
   let recordDraft = null;
   let violationDraft = null;
   let importText = "";
+  let creditPointAmount = "10";
   let error = "";
 
   const h = value => AFF.helpers.h(value);
@@ -49,12 +50,19 @@
   }
 
   function timePanel() {
+    const runs = Array.isArray(AFF.state?.settlementRuns) ? AFF.state.settlementRuns : [];
+    const latestRun = runs[0];
     return `${summaryDelta()}<section class="sim-section">
       <h3>${t("模拟时间", "Mock time")}</h3>
       <p>当前Mock日期：<b>${AFF.simulation.date()}</b></p>
       <div class="sim-time-actions">${[1, 7, 30].map(days => `<button type="button" data-sim-advance="${days}">+${days}${t("天", "d")}</button>`).join("")}</div>
       <form data-sim-time-form><label><span>${t("自定义天数", "Custom days")}</span><input type="number" min="1" max="180" value="1" data-sim-days></label><button type="submit" class="button primary">${t("推进时间", "Advance")}</button></form>
       <p>${t("时间推进会重放数据管道：动态结算、保证金、结算周期、提现和申诉阶段同步更新。人工任务不会自动通过。", "Time advance replays the data pipeline: dynamic hold, guarantee, settlement periods, withdrawals, and appeal stages update together. Manual tasks do not auto-pass.")}</p>
+      <div class="sim-settlement-run">
+        <div><strong>${t("每日自动结算", "Daily automatic settlement")}</strong><p>${t("模拟在当前日期凌晨运行一次，将符合条件的金额进入可提现余额；不会创建提现记录，也不会直接打款。", "Run the midnight settlement job for the current mock date. Eligible amounts enter available balance; no withdrawal or direct payout is created.")}</p></div>
+        <button type="button" class="button secondary" data-sim-run-settlement>${t("运行每日自动结算", "Run daily settlement")}</button>
+        ${latestRun ? `<dl class="sim-settlement-run-meta"><div><dt>${t("最近运行", "Last run")}</dt><dd>${h(latestRun.id)}</dd></div><div><dt>${t("处理/阻断/失败", "Processed / blocked / failed")}</dt><dd>${latestRun.processedCount} / ${latestRun.blockedCount} / ${latestRun.failedCount}</dd></div><div><dt>${t("处理金额", "Processed amount")}</dt><dd>${money((latestRun.processedAmount || 0) / 100)}</dd></div><div><dt>${t("执行时区", "Timezone")}</dt><dd>${h(latestRun.executionTimezone || "UTC+8")}</dd></div><div><dt>TraceId</dt><dd>${h(latestRun.traceId)}</dd></div></dl>` : `<small>${t("尚未运行自动结算", "No automatic settlement run yet")}</small>`}
+      </div>
     </section>`;
   }
 
@@ -100,6 +108,37 @@
     return `<section class="sim-section"><h3>${t("一键场景", "Scenarios")}</h3><div class="sim-scenarios">${scenarios().map(([id, zh, en]) => `<button type="button" class="${AFF.state.scenario === id ? "active" : ""}" data-sim-scenario="${id}"><strong>${zh}</strong><span>${en}</span></button>`).join("")}</div></section>`;
   }
 
+  function creditPanel() {
+    const info = AFF.creditCenter.summary();
+    const state = AFF.simulation.state().credit;
+    const limit = AFF.simulation.creditPointsPerLevel;
+    const points = state?.points ?? Math.round(info.progress * limit);
+    return `<section class="sim-section sim-credit">
+      <h3>${t("信用等级与积分", "Credit level and points")}</h3>
+      <div class="sim-credit-level">
+        <div><span>${t("当前等级", "Current level")}</span><strong>${h(info.levelNumber)}</strong><small>${h(info.position)}</small></div>
+        <div class="sim-actions-row">
+          <button type="button" data-sim-credit-level="-1" ${info.level === "C0" ? "disabled" : ""}>${t("降低一级", "Lower one level")}</button>
+          <button type="button" data-sim-credit-level="1" ${info.level === "C4" ? "disabled" : ""}>${t("提升一级", "Raise one level")}</button>
+        </div>
+      </div>
+      <p>${t("每次调整一个等级，范围为VIP1–VIP5；调级后本级演示积分归零。", "Adjust one level at a time, from VIP1 to VIP5. Changing level resets demo points to zero.")}</p>
+      <div class="sim-credit-points">
+        <div class="sim-credit-progress-label"><label for="sim-credit-progress">${t("本级演示积分", "Demo points in this level")}</label><strong aria-live="polite">${points} / ${limit}</strong></div>
+        <progress id="sim-credit-progress" max="${limit}" value="${points}">${points} / ${limit}</progress>
+        <form data-sim-credit-form>
+          <label for="sim-credit-amount"><span>${t("每次调整积分", "Points per adjustment")}</span><input id="sim-credit-amount" type="number" min="1" max="${limit}" step="1" inputmode="numeric" value="${h(creditPointAmount)}" data-sim-credit-amount></label>
+          <div class="sim-actions-row">
+            <button type="button" data-sim-credit-points="-1" ${points === 0 ? "disabled" : ""}>${t("减少积分", "Subtract points")}</button>
+            <button type="submit" data-sim-credit-points="1" ${points === limit ? "disabled" : ""}>${t("增加积分", "Add points")}</button>
+          </div>
+        </form>
+        <p>${t("积分使用0–100的演示刻度，仅用于测试进度条。满格后不自动升级，可点击“提升一级”；最高等级的页面进度保持满格。", "Points use a 0–100 demo scale to test progress. A full bar does not auto-upgrade; use Raise one level. Page progress stays full at the highest level.")}</p>
+      </div>
+      <p>${t("调整即时同步等级、权益与页面进度，刷新后保留；不会更改历史佣金和认证状态。", "Changes update level, benefits and page progress immediately and persist after refresh. Historical commissions and verification remain unchanged.")}</p>
+    </section>`;
+  }
+
   function dataPanel() {
     const state = AFF.simulation.state();
     return `<section class="sim-section"><h3>${t("数据管理", "Data management")}</h3>
@@ -108,7 +147,7 @@
       <label><span>${t("导入快照JSON", "Import snapshot JSON")}</span><textarea rows="7" data-sim-import>${h(importText)}</textarea></label>
       <button type="button" data-sim-import-snapshot>${t("导入并重放", "Import and replay")}</button>
       <button type="button" class="danger" data-sim-reset>${t("重置模拟环境", "Reset mock environment")}</button>
-      <p>${t("重置仅恢复初始Mock日期（2026-10-27）与正常流场景；仿真客户、违规事件和操作日志全部保留，可继续查看。", "Reset only restores the initial mock date (2026-10-27) and the normal-flow scenario. Synthetic clients, violations, and logs are all kept for continued review.")}</p>
+      <p>${t("重置恢复初始Mock日期（2026-10-27）、正常流场景及初始信用等级与积分；仿真客户、违规事件和操作日志全部保留，可继续查看。", "Reset restores the initial mock date (2026-10-27), normal-flow scenario, and baseline credit level and points. Synthetic clients, violations, and logs are all kept for continued review.")}</p>
     </section>`;
   }
 
@@ -117,20 +156,40 @@
     return `<section class="sim-section"><h3>${t("操作日志", "Operation log")}</h3>${logs.length ? `<ol>${logs.map(item => `<li><strong>${item.action}</strong><span>${item.operatedAt.replace("T", " ").slice(0, 19)}</span><p>${h(item.detail)}</p></li>`).join("")}</ol>` : `<p>${t("暂无操作日志")}</p>`}</section>`;
   }
 
-  function render() {
+  function render(focusSelector = "button[data-sim-close]") {
     launcher.setAttribute("aria-expanded", String(open));
     if (!open) {
       root.innerHTML = "";
       return;
     }
-    const tabs = [["time", "时间"], ["record", "录入"], ["violation", "违规"], ["scenario", "场景"], ["data", "数据"], ["log", "日志"]];
+    const tabs = [["time", "时间"], ["record", "录入"], ["violation", "违规"], ["credit", "信用"], ["scenario", "场景"], ["data", "数据"], ["log", "日志"]];
     root.innerHTML = `<div class="aff-drawer-overlay aff-drawer-overlay--top" data-sim-close></div><aside class="aff-drawer aff-drawer--compact sim-drawer" role="dialog" aria-modal="true" aria-labelledby="simulation-title">
       <header><div><h2 id="simulation-title">${t("模拟控制台", "Simulation console")}</h2><span>${t("Mock演示 · 不代表生产参数", "Mock demo · not production parameters")}</span></div><button type="button" data-sim-close aria-label="${t("关闭", "Close")}">×</button></header>
       <div class="sim-tabs" role="tablist" aria-label="模拟控制台页签">${tabs.map(([id, label]) => `<button type="button" class="${tab === id ? "active" : ""}" data-sim-tab="${id}">${label}</button>`).join("")}</div>
-      <div class="sim-body">${error ? `<p class="sim-error" role="alert">${h(error)}</p>` : ""}${tab === "time" ? timePanel() : ""}${tab === "record" ? recordPanel() : ""}${tab === "violation" ? violationPanel() : ""}${tab === "scenario" ? scenarioPanel() : ""}${tab === "data" ? dataPanel() : ""}${tab === "log" ? logPanel() : ""}</div>
+      <div class="sim-body">${error ? `<p class="sim-error" role="alert">${h(error)}</p>` : ""}${tab === "time" ? timePanel() : ""}${tab === "record" ? recordPanel() : ""}${tab === "violation" ? violationPanel() : ""}${tab === "credit" ? creditPanel() : ""}${tab === "scenario" ? scenarioPanel() : ""}${tab === "data" ? dataPanel() : ""}${tab === "log" ? logPanel() : ""}</div>
       <footer><button type="button" class="button secondary" data-sim-close>${t("关闭", "Close")}</button></footer>
     </aside>`;
-    root.querySelector("[data-sim-close]")?.focus();
+    (root.querySelector(focusSelector) || root.querySelector("button[data-sim-close]"))?.focus();
+  }
+
+  function adjustCredit(kind, direction) {
+    error = "";
+    try {
+      const baseline = AFF.creditCenter.summary();
+      if (kind === "level") {
+        AFF.simulation.changeCreditLevel(direction, baseline);
+      } else {
+        const amount = Number(creditPointAmount);
+        if (!Number.isSafeInteger(amount) || amount < 1 || amount > AFF.simulation.creditPointsPerLevel) {
+          throw new Error(t("请输入1–100之间的整数积分。", "Enter a whole number from 1 to 100."));
+        }
+        AFF.simulation.changeCreditPoints(direction * amount, baseline);
+      }
+      window.render();
+    } catch (adjustError) {
+      error = adjustError.message;
+    }
+    render(kind === "points" ? "[data-sim-credit-amount]" : `[data-sim-credit-level="${direction}"]:not(:disabled)`);
   }
 
   function replay() {
@@ -190,13 +249,23 @@
     const tabButton = event.target.closest("[data-sim-tab]");
     if (tabButton) {
       tab = tabButton.dataset.simTab;
-      return render();
+      error = "";
+      return render(`[data-sim-tab="${tab}"]`);
     }
     if (event.target.closest("[data-sim-close]")) {
       open = false; sessionStorage.removeItem("affiliate-simulation-console-open"); return render();
     }
+    const creditLevel = event.target.closest("[data-sim-credit-level]");
+    if (creditLevel) return adjustCredit("level", Number(creditLevel.dataset.simCreditLevel));
+    const creditPoints = event.target.closest('button[type="button"][data-sim-credit-points]');
+    if (creditPoints) return adjustCredit("points", Number(creditPoints.dataset.simCreditPoints));
     const advance = event.target.closest("[data-sim-advance]");
     if (advance) { AFF.simulation.advanceDays(Number(advance.dataset.simAdvance), AFF.finance.summary()); return replay(); }
+    if (event.target.closest("[data-sim-run-settlement]")) {
+      const run = AFF.finance.runAutomaticSettlement();
+      AFF.simulation.log?.("run-automatic-settlement", `运行每日自动结算 ${run.id}：处理${run.processedCount}，阻断${run.blockedCount}，失败${run.failedCount}`, [run.id]);
+      return render();
+    }
     const scenario = event.target.closest("[data-sim-scenario]");
     if (scenario) {
       const id = scenario.dataset.simScenario;
@@ -225,6 +294,10 @@
     }
   });
   root.addEventListener("submit", event => {
+    if (event.target.matches("[data-sim-credit-form]")) {
+      event.preventDefault();
+      return adjustCredit("points", 1);
+    }
     if (event.target.matches("[data-sim-time-form]")) {
       event.preventDefault(); const days = Number(root.querySelector("[data-sim-days]")?.value) || 1;
       AFF.simulation.advanceDays(days, AFF.finance.summary()); return replay();
@@ -236,6 +309,7 @@
     const recordField = event.target.closest("[data-sim-record]");
     const violationField = event.target.closest("[data-sim-violation]");
     const importField = event.target.closest("[data-sim-import]");
+    if (event.target.matches("[data-sim-credit-amount]")) creditPointAmount = event.target.value;
     if (recordField) recordDraft[recordField.dataset.simRecord] = recordField.value;
     if (violationField) violationDraft[violationField.dataset.simViolation] = violationField.value;
     if (importField) importText = importField.value;

@@ -1,8 +1,10 @@
 (() => {
   const prototype = window.AFF_ADMIN_PROTOTYPE;
   if (!prototype) throw new Error("AFF_ADMIN_PROTOTYPE is required");
-  // 业务配置版本在演示环境直通生效；风险、提现和其他后台审批继续按各自流程运行。
+  // 本地演示跳过审核节点，业务校验和执行结果仍由各领域处理。
   const CONFIG_VERSION_APPROVAL_ENABLED = false;
+  function demoSkipsApproval() { return prototype.demoPolicy?.approvalRequired === false; }
+  window.AFF_ADMIN_CLOCK = window.AFF_ADMIN_CLOCK || {now:()=>Date.now()};
 
   prototype.routes.push({id:"tickets",title:"客户服务",group:"风控",kind:"customer-service",tabs:[{id:"customer-service",title:"客户服务",description:"",columns:[],statuses:["submitted","processing","waiting_partner","waiting_external","resolved","closed"]}]});
   const supportMenuGroup = prototype.menuBlueprint.find(group => group.id === "risk");
@@ -14,10 +16,10 @@
   const legacySupportMenu = prototype.menuBlueprint.find(group => group.id === "processing")?.items.find(item => item.id === "nav-appeals");
   if (legacySupportMenu) {legacySupportMenu.label = "申诉处理";legacySupportMenu.summary = "进入专业申诉任务；一般服务工单在客户服务处理。";}
   const taskQueueStates = ["open","processing","waiting_material","pending_approval","returned","pending_execution","executing","execution_failed","done","closed"];
-  Object.assign(prototype.scenarios,{batch_partial:"批量部分失败",write_timeout:"写入响应超时",summary_error:"统计暂不可用"});
+  Object.assign(prototype.scenarios,{batch_partial:"批量部分失败",write_timeout:"写入响应超时",summary_error:"统计暂不可用",boundary:"边界数据检查"});
   prototype.routes.push(
     {id:"tasks",title:"任务队列",group:"工作台",kind:"workspace",tabs:[{id:"task-queue",title:"任务队列",profile:"task-queue",description:"",columns:[],statuses:taskQueueStates}]},
-    {id:"workbench",title:"审批队列",group:"工作台",kind:"workspace",tabs:[{id:"approvals",title:"审批队列",profile:"task-approvals",description:"",columns:[],statuses:["pending_approval","approved","rejected","returned"]}]}
+    {id:"workbench",title:demoSkipsApproval() ? "历史审批记录" : "审批队列",group:"工作台",kind:"workspace",tabs:[{id:"approvals",title:demoSkipsApproval() ? "历史审批记录" : "审批队列",profile:"task-approvals",description:"",columns:[],statuses:["pending_approval","approved","rejected","returned"]}]}
   );
   const taskMenuGroup = prototype.menuBlueprint.find(group => group.id === "processing");
   if (taskMenuGroup) {
@@ -25,7 +27,7 @@
     taskMenuGroup.match.routeTabs = {...taskMenuGroup.match.routeTabs,tasks:["task-queue"],workbench:["approvals"]};
     const taskMenuItem = taskMenuGroup.items.find(item => item.id === "nav-tasks");
     if (taskMenuItem) Object.assign(taskMenuItem,{routeId:"tasks",tabId:"task-queue",summary:"查看、认领和处理授权范围内的任务。"});
-    taskMenuGroup.items.splice(1,0,{id:"nav-task-approvals",label:"审批队列",stage:"MVP",routeId:"workbench",tabId:"approvals",summary:"查看待审申请、串行审批节点及执行记录。",objects:["审批申请"],actions:["查看","审批","退回"],dependency:["统一任务服务"]});
+    taskMenuGroup.items.splice(1,0,{id:"nav-task-approvals",label:demoSkipsApproval() ? "历史审批记录" : "审批队列",stage:"MVP",routeId:"workbench",tabId:"approvals",summary:demoSkipsApproval() ? "查看既有审批记录；当前操作不进入审核流程。" : "查看待审申请、串行审批节点及执行记录。",objects:["审批申请"],actions:demoSkipsApproval() ? ["查看"] : ["查看","审批","退回"],dependency:["统一任务服务"]});
   }
   prototype.routes.push({
     id:"partner-360",
@@ -53,10 +55,15 @@
     };
   }
   prototype.routes.find(item => item.id === "admin-workbench").tabs[0].statuses = taskQueueStates;
+  prototype.routes.push({id:"customer-360",title:"客户360",group:"客户与归因",kind:"customer-360",tabs:[
+    {id:"overview",title:"概览"},{id:"attribution",title:"归属与转化"},{id:"finance",title:"佣金与结算"},{id:"risk",title:"风险与关联"},{id:"events",title:"事件时间线"}
+  ]});
+  const customerMenuGroup=prototype.menuBlueprint.find(group=>group.id==="customers");
+  if(customerMenuGroup)customerMenuGroup.match.routeTabs={...customerMenuGroup.match.routeTabs,"customer-360":["overview","attribution","finance","risk","events"]};
   const routes = new Map(prototype.routes.map(route => [route.id, route]));
   const tabs = new Map(prototype.routes.flatMap(route => route.tabs.map(item => [item.id, item])));
   const statusLabels = {
-    active:"生效中", pending:"待处理", open:"待认领", done:"已完成", waiting_material:"待补件", pending_execution:"待执行", executing:"执行中", execution_failed:"执行失败", pending_review:"待审核", pending_approval:"待审批", draft:"草稿",
+    active:"生效中", pending:"待处理", open:"待认领", done:"已完成", waiting_material:"待补件", pending_execution:"待执行", executing:"执行中", execution_failed:"执行失败", pending_review:"待审核", pending_approval:demoSkipsApproval() ? "待接续" : "待审批", draft:"草稿",
     returned:"已退回", rejected:"已拒绝", approved:"已通过", scheduled:"待生效", inactive:"已失效", activation_failed:"生效失败",
     pending_validation:"待校验", pending_simulation:"待试算", voided:"已作废", withdrawn:"已撤回",
     processing:"处理中", success:"成功", failed:"失败", blocked:"已阻断", false_positive:"误报",
@@ -75,7 +82,8 @@
     sensitive:"敏感", restricted:"受限", containing:"处置中", monitoring:"观察中", notified:"已通知",
     applying:"申请中", reviewing:"审核中", onboarded:"已入驻", watching:"观察/暂停", offboarding:"清退中", archived:"已归档",
     registered:"已注册", ftd:"FTD", valid_ftd:"有效FTD", churned:"流失", paid:"已支付", reversed:"已冲正",
-    R0:"R0 正常", R1:"R1 关注", R2:"R2 较高", R3:"R3 高", R4:"R4 严重",
+    R0:"R0 正常", R1:"R1 关注", R2:"R2 较高", R3:"R3 高",
+    manual_review:"人工复核", not_started:"未开始", not_required:"无需审核", passed:"已通过", verified:"已认证",
     click:"点击", registration:"注册", commission:"计佣", hold:"结算中", holding:"结算中", release:"释放",
     settlement:"结算", withdrawal:"提现", exception:"异常", gap:"缺数", confirmed_exc:"已确认",
     duplicate_attr:"重复归属", missing_events:"事件缺数", invalid_source:"来源无效", path_missing:"路径未入库",
@@ -186,7 +194,7 @@
     "tracker":{export:"导出追踪"},
     "commission-list":{export:"导出佣金"},
     "statement-list":{export:"导出结算单"},
-    "withdrawal-list":{claim:"认领提现"},
+    "withdrawal-list":{claim:"查看资金核对任务"},
     "tax-list":{export:"导出税务"},
     "reversal-list":{claim:"认领冲正"},
     "reconciliation":{claim:"处理对账"},
@@ -209,7 +217,7 @@
     ].filter(Boolean),
     "client-list":row => [
       {id:"detail",label:"详情"},
-      row.riskGrade && ["R3","R4"].includes(row.riskGrade) ? {id:"client_review",label:"风险复核",target:row.id} : null
+      row.riskGrade && ["R3"].includes(row.riskGrade) ? {id:"client_review",label:"风险复核",target:row.id} : null
     ].filter(Boolean),
     "attribution-links":row => [
       {id:"detail",label:"详情"},
@@ -254,7 +262,7 @@
       {id:"detail",label:"详情"},
       row.status === "pending" ? {id:"fund_approve",label:"审核",target:row.id} : null,
       row.status === "manual_required" ? {id:"goto_review",label:"转复核",target:row.id} : null,
-      row.status === "failed" ? {id:"fund_retry",label:"重试",target:row.id} : null
+      row.status === "failed" ? {id:"fund_retry",label:"核对支付",target:row.id} : null
     ].filter(Boolean),
     "reversal-list":row => [
       {id:"detail",label:"详情"},
@@ -314,6 +322,12 @@
   const cockpitViewTitles = Object.fromEntries(cockpitViews.map(view => [view.id,view.title]));
   const roleDefaultCockpitView = {operations:"tasks",risk:"risk",risk_supervisor:"risk",finance:"funds",compliance:"tasks",system_admin:"tasks",audit:"tasks"};
   const topbarRoleIds = new Set(["operations","finance","risk_supervisor","system_admin"]);
+  function normalizeEmployeeRole(role) {
+    return topbarRoleIds.has(role) ? role : ({
+      risk:"risk_supervisor",risk_reviewer:"risk_supervisor",finance_reviewer:"finance",
+      compliance:"system_admin",audit:"system_admin",supervisor:"risk_supervisor"
+    }[role] || "system_admin");
+  }
   const sessionRole = (() => {
     try { return sessionStorage.getItem("affiliate:admin:role") || ""; } catch { return ""; }
   })();
@@ -322,7 +336,7 @@
       const requested = /tickets|support-ticket/.test(location.hash)
         ? (window.AFF_SUPPORT_CONTEXT?.role === "supervisor" ? "risk_supervisor" : window.AFF_SUPPORT_CONTEXT?.role || "operations")
         : sessionRole || "system_admin";
-      return topbarRoleIds.has(requested) ? requested : "system_admin";
+      return normalizeEmployeeRole(requested);
     })(), scenario:"normal", legacyRiskRoute:false,
     cockpitView:null,
     partner360View:null,
@@ -403,9 +417,9 @@
   const tab = () => tabs.get(state.tabId);
 
   function createDate(dayOffset) {
-    const date = new Date(Date.UTC(2026,10,5,9,30,0));
-    date.setUTCDate(date.getUTCDate() - dayOffset);
-    return `${date.getUTCFullYear()}-${pad(date.getUTCMonth()+1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}`;
+    const date = new Date(window.AFF_ADMIN_CLOCK?.now() || Date.now());
+    date.setDate(date.getDate() - dayOffset);
+    return new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Shanghai",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false}).format(date);
   }
 
   function moduleRows(routeId,tabId,currentTab) {
@@ -692,27 +706,27 @@
     if (tabId === "commission-list") return f.commissions.map(c => ({
       id:c.id,name:c.name,partner:pn(c.partner),type:c.type,amount:c.amount,status:c.status,
       settlementBlock:c.settlementBlock,updated:c.updated,traceId:c.traceId,risk:c.status==="blocked"?"high":c.status==="failed"?"high":"low",
-      owner:"财务/Finance",rowKind:"commission",name_full:c.name,note:c.note || ""
+      owner:"财务/Finance",rowKind:"commission",name_full:c.name,note:c.note || "",fundRef:c
     }));
     if (tabId === "statement-list") return f.statements.map(s => ({
       id:s.id,name:s.name,partner:pn(s.partner),grossLabel:money(s.gross),taxLabel:money(s.tax),
       guaranteeLabel:money(s.guarantee),netLabel:money(s.net),status:s.status,
       gross:s.gross,tax:s.tax,guarantee:s.guarantee,net:s.net,period:s.period,note:s.note || "",
-      updated:"2026-11-05",risk:"low",owner:"财务/Finance",rowKind:"statement",name_full:s.name
+      updated:s.updated || s.period.split("~").at(-1),risk:"low",owner:"财务/Finance",rowKind:"statement",name_full:s.name,fundRef:s
     }));
     if (tabId === "withdrawal-list") return f.withdrawals.map(w => ({
       id:w.id,name:w.name,partner:pn(w.partner),amount:w.amount,fee:w.fee,status:w.status,updated:w.updated,
       steps:w.steps,risk:w.status==="manual_required"||w.status==="failed"?"high":"low",
-      owner:"财务/Finance",rowKind:"withdrawal",name_full:w.name
+      owner:"财务/Finance",rowKind:"withdrawal",name_full:w.name,fundRef:w,traceId:w.traceId || `trace-${w.id}`
     }));
     if (tabId === "reversal-list") return f.reversals.map(r => ({
       id:r.id,name:r.name,partner:pn(r.partner),type:r.type,amount:r.amount,liable:r.liable,status:r.status,updated:r.updated,
-      path:r.path,risk:"high",owner:"财务/Finance",rowKind:"reversal",name_full:r.name
+      path:r.path,risk:"high",owner:"财务/Finance",rowKind:"reversal",name_full:r.name,fundRef:r
     }));
     if (tabId === "reconciliation") return f.reconciliations.map(r => ({
       id:r.id,name:r.name,type:r.type,affiliate:money(r.affiliate),external:money(r.external),
       diffLabel:r.diff === 0 ? "无差异" : money(r.diff),diff:r.diff,status:r.status,updated:r.updated,note:r.note || "",
-      risk:r.diff === 0 ? "low" : "medium",owner:"财务/Finance",rowKind:"recon",name_full:r.name
+      risk:r.diff === 0 ? "low" : "medium",owner:"财务/Finance",rowKind:"recon",name_full:r.name,fundRef:r
     }));
     return [];
   }
@@ -1025,6 +1039,12 @@
     const [hashPath,hashQuery = ""] = (location.hash || "#/admin-workbench").replace(/^#\//,"").split("?");
     const params = new URLSearchParams(hashQuery);
     const parts = hashPath.split("/").filter(Boolean);
+    if(parts[0]==="admin-review" && legacyTaskTypes[parts[1]]) {
+      const type=legacyTaskTypes[parts[1]];
+      params.set("scope","authorized");params.set("source_type",type);
+      history.replaceState(null,"",`#/tasks?${params}`);
+      return {routeId:"tasks",tabId:"task-queue",detailId:null,view:null};
+    }
     if (parts[0] === "exports") {
       return {routeId:"admin-review",tabId:"integration",detailId:null,view:null,openExportCenter:true};
     }
@@ -1032,6 +1052,10 @@
       const target = "./admin-rebuild.html#/analytics-performance";
       if (!location.href.endsWith(target)) location.replace(target);
       return {routeId:"admin-workbench",tabId:"tasks",detailId:null,view:null};
+    }
+    if (parts[0] === "customer-360") {
+      const tabId=["overview","attribution","finance","risk","events"].includes(params.get("tab"))?params.get("tab"):"overview";
+      return {routeId:"customer-360",tabId,detailId:decodeURIComponent(parts[1] || ""),view:null};
     }
     if (parts[0] === "partner-360") {
       const pageTabs = new Set(["overview","promotion","compliance","finance","risk","follow-up"]);
@@ -1042,7 +1066,8 @@
         return {routeId:"admin-modules",tabId:"partner-list",detailId:null,view:null};
       }
       if (!params.has("tab")) {
-        history.replaceState(null,"",`#/partner-360/${encodeURIComponent(parts[1])}?tab=overview`);
+        params.set("tab","overview");
+        history.replaceState(null,"",`#/partner-360/${encodeURIComponent(parts[1])}?${params}`);
       }
       return {
         routeId:"partner-360",
@@ -1080,7 +1105,7 @@
     const nextTab = currentRoute.tabs.some(item => item.id === requestedTab) ? requestedTab : currentRoute.tabs[0].id;
     const lastPart = parts[2] || null;
     const viewMatch = typeof lastPart === "string" ? lastPart.match(/^view=(\w+)$/) : null;
-    if (nextRoute === "admin-modules" && nextTab === "partner-list" && lastPart && !viewMatch) {
+    if (nextRoute === "admin-modules" && nextTab === "partner-list" && lastPart && !viewMatch && params.get("review")!=="1") {
       const legacyTab = params.get("drawer_tab") || "overview";
       const pageTab = ["overview","promotion","compliance","finance","risk","follow-up"].includes(legacyTab) ? legacyTab : legacyTab === "certs" ? "compliance" : legacyTab === "performance" || legacyTab === "credit" ? "overview" : "overview";
       const canonical = `#/partner-360/${encodeURIComponent(lastPart)}?tab=${encodeURIComponent(pageTab)}`;
@@ -1090,7 +1115,7 @@
     const viewValue = viewMatch ? viewMatch[1] : null;
     const nextCockpitView = viewValue && cockpitViewTitles[viewValue] ? viewValue : null;
     // Removed list views must not leave invisible filters on legacy URLs.
-    const nextPartner360View = null;
+    const nextPartner360View = nextRoute==="admin-modules"&&nextTab==="partner-list"&&params.get("review")==="1" ? "onboarding" : null;
     const client360Views = ["risk","valid"];
     const nextClient360View = viewValue && nextRoute === "admin-modules" && nextTab === "client-list" && client360Views.includes(viewValue) ? viewValue : null;
     const attributionViews = ["exception"];
@@ -1219,6 +1244,7 @@
   function rememberOpenTab() {
     const currentRoute = route(); const currentTab = tab();
     const entry = {id:`${state.routeId}:${state.tabId}`,routeId:state.routeId,tabId:state.tabId,routeTitle:currentRoute.title,tabTitle:currentTab.title};
+    if(taskObjectPageActive() || ["tasks","workbench"].includes(state.routeId))entry.hash=location.hash;
     state.openTabs = state.openTabs.filter(item => item.id !== entry.id);
     state.openTabs.push(entry);
     if (state.openTabs.length > 12) state.openTabs.shift();
@@ -1228,6 +1254,10 @@
     const normalized = `#/${String(path).replace(/^#\/?/,"")}`;
     if (state.routeId === "tickets" && !supportUI.beforeLeave(normalized)) return;
     if (typeof taskQueueBeforeLeave === "function" && !taskQueueBeforeLeave(normalized)) return;
+    if (normalized.startsWith("#/risk-workbench") && normalized !== location.hash && state.riskCaseId) {
+      state.riskCaseId=null;
+      state.riskCaseModal=null;
+    }
     if (normalized === location.hash) render(); else location.hash = normalized;
   }
   function basePath() { return `${state.routeId}/${state.tabId}`; }
@@ -1256,7 +1286,7 @@
       if (p360View === "notes" && !prototype.partner360.noteTemplates.some(note => note.partnerId === row.id)) queueMatched = false;
       if (state.routeId === "admin-modules" && state.tabId === "client-list") {
         const c360View = state.client360View || null;
-        if (c360View === "risk" && !["R3","R4"].includes(row.riskGrade)) queueMatched = false;
+        if (c360View === "risk" && !["R3"].includes(row.riskGrade)) queueMatched = false;
         if (c360View === "valid" && row.stage !== "valid_ftd") queueMatched = false;
       }
       if (state.routeId === "admin-modules" && state.tabId === "attribution-links" && state.attributionView === "exception" && !row.excRef) queueMatched = false;
@@ -1279,7 +1309,7 @@
       const rowDate = String(row.updated || "").slice(0,10);
       const fromMatched = !state.filters.from || rowDate >= state.filters.from;
       const toMatched = !state.filters.to || rowDate <= state.filters.to;
-      return queueMatched && keywordMatched && statusMatched && riskMatched && ownerMatched && countryMatched && typeMatched && stageMatched && fromMatched && toMatched;
+      return dashboardDrillMatches(row) && queueMatched && keywordMatched && statusMatched && riskMatched && ownerMatched && countryMatched && typeMatched && stageMatched && fromMatched && toMatched;
     }).sort((a,b) => {
       const direction = state.sort.dir === "asc" ? 1 : -1;
       const left = a[state.sort.key]; const right = b[state.sort.key];
@@ -1327,6 +1357,29 @@
     return actionIds.map(id => [id,actionCatalog[id]]).filter(([,action]) => action.roles.includes(state.role));
   }
 
+  function legacyActionAllowed(actionId,row) {
+    if (!row) return false;
+    const states = {
+      claim:["pending","open"],assign:["pending","open","processing","waiting_material","returned"],
+      supplement:["processing","returned"],submit:["processing","returned","draft"],
+      approve:["pending_approval"],cancel:["pending","open","processing","returned","draft"],
+      create_review:["pending","open","active","blocked","failed","manual_required"]
+    };
+    return !states[actionId] || states[actionId].includes(row.status);
+  }
+
+  const legacyTaskTypes = {
+    "guarantee-offset":"guarantee_offset","risk-review":"risk_review","hold-review":"hold_extend",
+    appeal:"appeal","credit-review":"credit_review",chargeback:"chargeback","circuit-breaker":"circuit_breaker"
+  };
+  function openUnifiedTasks(type,partnerId) {
+    const params = new URLSearchParams({scope:"authorized",status_group:"active"});
+    if (type) params.set("source_type",type);
+    if (partnerId) params.set("partner_id",partnerId);
+    state.riskCaseId=null;state.riskCaseModal=null;state.modal=null;
+    return navigate(`tasks?${params}`);
+  }
+
   const maxValue = (rows,key) => rows.length ? Math.max(...rows.map(row => Number(row[key] || 0))) : 0;
   const minValue = (rows,key) => rows.length ? Math.min(...rows.map(row => Number(row[key] || 0))) : 0;
 
@@ -1366,7 +1419,7 @@
           ["FTD",compact(clients360.filter(c=>c.stage==="ftd").length)],
           ["有效FTD",compact(clients360.filter(c=>c.stage==="valid_ftd").length)],
           ["流失",compact(clients360.filter(c=>c.stage==="churned").length)],
-          ["高风险(R3/R4)",compact(clients360.filter(c=>["R3","R4"].includes(c.rGrade)).length)],
+          ["高风险(R3)",compact(clients360.filter(c=>["R3"].includes(c.rGrade)).length)],
           ["累计FTD金额",money(clients360.reduce((sum,c)=>sum+c.ftdAmount,0))],
           ["累计佣金",money(clients360.reduce((sum,c)=>sum+c.commissionTotal,0))]
         ];
@@ -1632,18 +1685,13 @@
   }
 
   function workbenchQueueCount(queue) {
-    const rows = seedRows();
-    if (queue === "mine") return rows.filter(row => row.ownerRole === state.role).length;
-    if (queue === "approvals") return rows.filter(row => row.status === "pending_approval").length;
-    if (queue === "overdue") return rows.filter(row => row.overdue).length;
-    if (queue === "integrations") return rows.filter(row => row.type === "集成失败" || row.status === "execution_failed").length;
-    return rows.length;
+    return dashboardQueueRows(queue).length;
   }
 
   function workbenchSwitcher() {
     if (state.routeId !== "admin-workbench") return "";
     return `<section class="dev-queue-bar" aria-label="任务队列">${prototype.workbenchQueues.map(queue =>
-      `<button class="${state.workbenchQueue===queue.id?"active":""}" data-queue="${h(queue.id)}">${h(queue.title)}<span>${workbenchQueueCount(queue.id)}</span></button>`).join("")}</section>`;
+      `<button class="${state.workbenchQueue===queue.id?"active":""}" data-queue="${h(queue.id)}">${h(demoSkipsApproval() && queue.id==="approvals" ? "待接续" : queue.title)}<span>${workbenchQueueCount(queue.id)}</span></button>`).join("")}</section>`;
   }
 
   function workbenchQuickFilter() {
@@ -1661,51 +1709,120 @@
     last7:"最近7天",
     last30:"最近30天",
     month:"本月",
-    lastMonth:"上月",
-    custom:"自定义"
+    lastMonth:"上月"
   };
 
+  function dashboardNow() {
+    return window.AFF_ADMIN_CLOCK?.now?.() ?? Date.now();
+  }
+
+  function dashboardPeriod() {
+    const now = new Date(dashboardNow() + 8 * 3600000);
+    const day = new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()));
+    let start = new Date(day), end = new Date(day);
+    if (state.dashboardRange === "yesterday") start.setUTCDate(start.getUTCDate()-1), end.setUTCDate(end.getUTCDate()-1);
+    else if (state.dashboardRange === "last7") start.setUTCDate(start.getUTCDate()-6);
+    else if (state.dashboardRange === "last30") start.setUTCDate(start.getUTCDate()-29);
+    else if (state.dashboardRange === "month") start.setUTCDate(1);
+    else if (state.dashboardRange === "lastMonth") {
+      start = new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth()-1,1));
+      end = new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),0));
+    }
+    return {from:start.toISOString().slice(0,10),to:end.toISOString().slice(0,10)};
+  }
+
+  function dashboardInPeriod(value, period = dashboardPeriod()) {
+    const date = String(value || "").slice(0,10);
+    return Boolean(date && date >= period.from && date <= period.to);
+  }
+
+  function dashboardClients() {
+    return prototype.client360.clients.filter(client => dashboardInPeriod(client.attribution?.attributedAt));
+  }
+
+  function dashboardCommissions() {
+    return prototype.funds360.commissions.filter(item => dashboardInPeriod(item.updated));
+  }
+
+  function dashboardTaskRows() {
+    return (prototype.taskQueue?.toLegacyRows(state.role) || []).filter(row =>
+      !["done","closed"].includes(row.status) && !row.boundary_sample
+    );
+  }
+
+  function dashboardQueueRows(queue = state.workbenchQueue) {
+    return dashboardTaskRows().filter(row => {
+      if (queue === "mine") return row.ownerRole === state.role;
+      if (queue === "approvals") return row.status === "pending_approval";
+      if (queue === "overdue") return row.overdue;
+      if (queue === "integrations") return row.source_type === "integration";
+      return true;
+    });
+  }
+
+  function dashboardApprovals() {
+    const currentUser = prototype.taskQueue?.options(state.role)?.current_user;
+    return (prototype.taskQueue?.approvals({role:state.role}) || []).filter(approval => {
+      const node = approval.nodes?.[approval.current_node_index || 0];
+      return approval.status === "pending_approval" && node?.status === "pending" &&
+        (node.role_code || node.required_role) === state.role &&
+        approval.applicant?.user_id !== currentUser?.user_id;
+    });
+  }
+
   function dashboardSnapshot() {
+    const period = dashboardPeriod();
+    const drill = (path,metric,includePeriod=true) => `${path}?${new URLSearchParams({
+      dashboard_metric:metric,...(includePeriod ? {dashboard_from:period.from,dashboard_to:period.to} : {})
+    })}`;
+    const clients = dashboardClients();
+    const tasks = dashboardTaskRows();
+    const ftd = clients.filter(client => Number(client.ftdAmount) > 0);
+    const valid = clients.filter(client => client.stage === "valid_ftd");
+    const commissions = dashboardCommissions();
+    const sum = rows => rows.reduce((total,row)=>total + Number(row.amount || 0),0);
+    const range = dashboardRangeLabels[state.dashboardRange] || "今日";
+    const cohort = `${range}归属客户 · 当前阶段`;
+    const onboarding = prototype.partner360.partners.filter(partner => ["applying","reviewing"].includes(partner.stage));
+    const withdrawals = prototype.funds360.withdrawals;
+    const pendingWithdrawals = withdrawals.filter(item => ["pending","pending_approval","manual_required"].includes(item.status));
+    const settlement = prototype.funds360.commissions.filter(item => item.status === "pending");
     const values = {
       operations:[
-        ["点击量","18,421","最近7天","admin-modules/tracking"],
-        ["注册量","2,286","最近7天","admin-modules/client-list"],
-        ["有效FTD","312","最近7天","admin-modules/client-list"],
-        ["新增佣金","$48,250","最近7天","admin-modules/commission-list"],
-        ["待审核入驻","6","当前未完成","admin-modules/partner-list"]
+        ["新增归属客户",compact(clients.length),range,drill("admin-modules/client-list","attributed")],
+        ["已入金客户",compact(ftd.length),cohort,drill("admin-modules/client-list","ftd")],
+        ["有效FTD客户",compact(valid.length),cohort,drill("admin-modules/client-list","valid")],
+        ["佣金变更金额",money(sum(commissions)),`${range}更新的佣金`,drill("admin-modules/commission-list","commission")],
+        ["待审核入驻",compact(onboarding.length),"当前未完成",drill("admin-modules/partner-list","onboarding",false)]
       ],
       finance:[
-        ["点击量","18,421","最近7天","admin-modules/tracking"],
-        ["注册量","2,286","最近7天","admin-modules/client-list"],
-        ["有效FTD","312","最近7天","admin-modules/client-list"],
-        ["结算中金额","$82,460","本月","admin-modules/commission-list"],
-        ["待审批提现","5","当前未完成","admin-modules/withdrawal-list"]
+        ["佣金变更金额",money(sum(commissions)),`${range}更新的佣金`,drill("admin-modules/commission-list","commission")],
+        ["结算中金额",money(sum(settlement)),"当前未完成",drill("admin-modules/commission-list","settlement",false)],
+        ["待处理提现",compact(pendingWithdrawals.length),demoSkipsApproval() ? "待核对或执行" : "待审批或人工复核",drill("admin-modules/withdrawal-list","withdrawal_pending",false)],
+        ["提现失败",compact(withdrawals.filter(item=>item.status==="failed").length),"当前待核对",drill("admin-modules/withdrawal-list","withdrawal_failed",false)],
+        ["我的待办",compact(dashboardQueueRows("mine").length),"当前未完成","tasks?scope=mine"]
       ],
       risk_supervisor:[
-        ["待我审批","5","当前未完成","admin-review/risk-review"],
-        ["跨团队待协调","8","当前未完成","admin-workbench/tasks"],
-        ["高影响风险事项","4","当前未完成","admin-risk/risk-event"],
-        ["被阻断结算金额","$36,200","本月","admin-review/d-plus-n"],
-        ["即将超时","3","当前未完成","admin-workbench/tasks"]
+        [demoSkipsApproval() ? "待接续任务" : "待我审批",compact(demoSkipsApproval() ? dashboardQueueRows("approvals").length : dashboardApprovals().length),demoSkipsApproval() ? "核对后直接提交执行" : "当前审批节点",demoSkipsApproval() ? "tasks?scope=authorized&workflow_states=pending_approval" : "workbench?tab=approvals"],
+        ["可见待办",compact(tasks.length),"当前授权范围","tasks?scope=authorized"],
+        ["高优先级待办",compact(tasks.filter(item=>item.priority==="high").length),"当前未完成","tasks?scope=authorized&priority=high"],
+        ["阻断佣金金额",money(sum(prototype.funds360.commissions.filter(item=>item.status==="blocked"))),"当前结算受阻",drill("admin-modules/commission-list","blocked",false)],
+        ["超时待办",compact(dashboardQueueRows("overdue").length),"当前未完成","tasks?scope=authorized&sla_state=overdue"]
       ],
       system_admin:[
-        ["全部待办","26","当前未完成","admin-workbench/tasks"],
-        ["全部待审批","5","当前未完成","admin-workbench/tasks"],
-        ["异常信号","4","当前状态","admin-review/integration"],
-        ["配置发布状态","2","当前状态","admin-config/overview"],
-        ["权限待处理","3","当前未完成","admin-review/integration"]
+        ["全部待办",compact(tasks.length),"当前授权范围","tasks?scope=authorized"],
+        [demoSkipsApproval() ? "待接续任务" : "待审批任务",compact(dashboardQueueRows("approvals").length),"当前未完成","tasks?scope=authorized&workflow_states=pending_approval"],
+        ["超时待办",compact(dashboardQueueRows("overdue").length),"当前未完成","tasks?scope=authorized&sla_state=overdue"],
+        ["执行失败",compact(tasks.filter(item=>item.status==="execution_failed").length),"当前未完成","tasks?scope=authorized&workflow_states=execution_failed"],
+        ["集成待办",compact(dashboardQueueRows("integrations").length),"当前未完成","tasks?scope=authorized&source_types=integration"]
       ]
     };
-    return values[state.role] || values.operations;
+    const viewRole = {finance_reviewer:"finance",risk:"risk_supervisor",risk_reviewer:"risk_supervisor",audit:"system_admin"}[state.role] || state.role;
+    return values[viewRole] || values.operations;
   }
 
   function dashboardRows() {
-    let rows = seedRows();
-    const queue = state.workbenchQueue;
-    if (queue === "mine") rows = rows.filter(row => row.ownerRole === state.role);
-    if (queue === "approvals") rows = rows.filter(row => row.status === "pending_approval");
-    if (queue === "overdue") rows = rows.filter(row => row.overdue);
-    if (queue === "integrations") rows = rows.filter(row => row.type === "集成失败" || row.status === "execution_failed");
+    let rows = dashboardQueueRows();
     if (state.dashboardStatus) rows = rows.filter(row => row.status === state.dashboardStatus);
     return rows.sort((a,b) =>
       Number(b.overdue) - Number(a.overdue) ||
@@ -1714,20 +1831,51 @@
     );
   }
 
+  function dashboardDrillMatches(row) {
+    const params = new URLSearchParams((location.hash.split("?")[1] || ""));
+    const metric = params.get("dashboard_metric");
+    if (!metric) return true;
+    const period = {from:params.get("dashboard_from") || "",to:params.get("dashboard_to") || "9999-12-31"};
+    if (["attributed","ftd","valid"].includes(metric)) {
+      const client = row.clientRef;
+      return Boolean(client && dashboardInPeriod(client.attribution?.attributedAt,period) &&
+        (metric !== "ftd" || Number(client.ftdAmount)>0) &&
+        (metric !== "valid" || client.stage === "valid_ftd"));
+    }
+    if (metric === "commission") return dashboardInPeriod(row.updated,period);
+    if (metric === "onboarding") return ["applying","reviewing"].includes(row.stage);
+    if (metric === "reserve") return ["confirmed","paid"].includes(row.status);
+    if (metric === "settlement") return row.status === "pending";
+    if (metric === "blocked") return row.status === "blocked";
+    if (metric === "withdrawal_pending") return ["pending","pending_approval","manual_required"].includes(row.status);
+    if (metric === "withdrawal_failed") return row.status === "failed";
+    if (metric === "reconciliation") return ["reconcile_failed","manual_required"].includes(row.status);
+    return true;
+  }
+
+  function dashboardDrillNotice() {
+    const params = new URLSearchParams(location.hash.split("?")[1] || "");
+    const metric = params.get("dashboard_metric");
+    const labels = {attributed:"新增归属客户",ftd:"归属客户中的已入金客户",valid:"归属客户中的有效FTD客户",commission:"佣金变更",onboarding:"待审核入驻",reserve:"已确认及已支付结算单的保证金计提",settlement:"结算中佣金",blocked:"结算受阻佣金",withdrawal_pending:"待处理提现",withdrawal_failed:"失败提现",reconciliation:"待处理对账差异"};
+    if (!labels[metric]) return "";
+    const from = params.get("dashboard_from"), to = params.get("dashboard_to");
+    return `<div class="dash-v2-drill-notice"><span>仪表盘下钻：${h(labels[metric])}${from && to ? ` · ${h(from)} 至 ${h(to)}` : ""}</span><button type="button" class="tm-button secondary compact" data-dashboard-clear-drill>清除下钻筛选</button></div>`;
+  }
+
   function dashboardQueueBar() {
     return `<div class="dash-v2-queue-tabs" role="tablist" aria-label="待处理队列">
       ${prototype.workbenchQueues.map(queue => `<button type="button" role="tab" aria-selected="${state.workbenchQueue===queue.id}" class="${state.workbenchQueue===queue.id?"active":""}" data-dashboard-queue="${h(queue.id)}">
-        <span>${h(queue.title)}</span><strong>${workbenchQueueCount(queue.id)}</strong>
+        <span>${h(demoSkipsApproval() && queue.id==="approvals" ? "待接续" : queue.title)}</span><strong>${workbenchQueueCount(queue.id)}</strong>
       </button>`).join("")}
     </div>`;
   }
 
   function dashboardQueueTable() {
     const rows = dashboardRows().slice(0,10);
-    const statusOptions = [["","全部状态"], ...tab().statuses.map(value => [value,statusLabel(value)])];
+    const statusOptions = [["","全部状态"], ...tab().statuses.filter(value=>!["done","closed"].includes(value)).map(value => [value,statusLabel(value)])];
     return `<section class="dash-v2-panel dash-v2-queue" aria-label="待处理队列">
       <header class="dash-v2-panel-head">
-        <div><h2>待处理队列</h2><p>首屏展示当前角色最需要处理的10项任务，点击查看完整列表。</p></div>
+        <div><h2>待处理队列</h2><p>展示当前队列优先处理的10项任务；待办为当前状态，不受上方统计周期影响。</p></div>
         <button class="tm-button secondary" data-dashboard-expand="1">查看完整列表</button>
       </header>
       ${dashboardQueueBar()}
@@ -1737,14 +1885,14 @@
       </div>
       <div class="tm-table-wrap dash-v2-table-wrap">
         <table class="dash-v2-table">
-          <thead><tr><th>优先级</th><th>任务</th><th>对象</th><th>状态</th><th>责任角色</th><th>SLA状态</th><th class="numeric">影响金额</th><th>更新时间</th><th class="dash-v2-action">操作</th></tr></thead>
+          <thead><tr><th>优先级</th><th>任务</th><th>对象</th><th>状态</th><th>责任人</th><th>SLA状态</th><th class="numeric">影响金额</th><th>更新时间</th><th class="dash-v2-action">操作</th></tr></thead>
           <tbody>${rows.length ? rows.map(row => `<tr>
-            <td>${statusTag(row.priority || row.risk || "normal")}</td>
-            <td><strong>${h(row.name)}</strong><small>${h(row.type)} · ${h(row.id)}</small></td>
-            <td>${h(row.linked)}</td>
+            <td><span class="dev-status">${h(({high:"高",medium:"中",low:"低",normal:"普通",urgent:"紧急"})[row.priority] || "普通")}</span></td>
+            <td title="${h(row.name)}"><strong>${h(row.name)}</strong><small>${h(row.type)} · ${h(row.id)}</small></td>
+            <td>${h(row.customerId || row.customer_id || row.partnerId || row.partner_id || row.source || "待关联对象")}</td>
             <td>${statusTag(row.status)}</td>
             <td>${h(row.owner)}</td>
-            <td>${row.overdue ? `<span class="dash-v2-sla danger">已超时</span>` : `<span class="dash-v2-sla">${h(row.due)}</span>`}</td>
+            <td>${row.overdue ? `<span class="dash-v2-sla danger">已超时</span>` : `<span class="dash-v2-sla">${h(row.sla?.includes("T") ? tqDate(row.sla) : row.due || row.sla || "未配置")}</span>`}</td>
             <td class="numeric">${money(row.amount)}</td>
             <td>${h(row.updated)}</td>
             <td class="dash-v2-action"><button class="tm-button secondary" data-dashboard-task="${h(row.id)}">查看</button></td>
@@ -1756,7 +1904,7 @@
 
   function dashboardTaskListPage() {
     const rows = dashboardRows();
-    const statusOptions = [["","全部状态"], ...tab().statuses.map(value => [value,statusLabel(value)])];
+    const statusOptions = [["","全部状态"], ...tab().statuses.filter(value=>!["done","closed"].includes(value)).map(value => [value,statusLabel(value)])];
     return `<section class="dash-v2-panel dash-v2-queue dash-v2-task-list" aria-label="完整任务列表">
       <header class="dash-v2-panel-head">
         <div><h2>任务筛选与结果</h2><p>按当前角色、队列和状态展示全部可见任务。</p></div>
@@ -1768,69 +1916,93 @@
       </div>
       <div class="tm-table-wrap dash-v2-table-wrap">
         <table class="dash-v2-table">
-          <thead><tr><th>优先级</th><th>任务</th><th>对象</th><th>状态</th><th>责任角色</th><th>SLA状态</th><th class="numeric">影响金额</th><th>更新时间</th><th class="dash-v2-action">操作</th></tr></thead>
+          <thead><tr><th>优先级</th><th>任务</th><th>对象</th><th>状态</th><th>责任人</th><th>SLA状态</th><th class="numeric">影响金额</th><th>更新时间</th><th class="dash-v2-action">操作</th></tr></thead>
           <tbody>${rows.length ? rows.map(row => `<tr>
             <td>${statusTag(row.priority || row.risk || "normal")}</td>
-            <td><strong>${h(row.name)}</strong><small>${h(row.type)} · ${h(row.id)}</small></td>
-            <td>${h(row.linked)}</td>
+            <td title="${h(row.name)}"><strong>${h(row.name)}</strong><small>${h(row.type)} · ${h(row.id)}</small></td>
+            <td>${h(row.customerId || row.customer_id || row.partnerId || row.partner_id || row.source || "待关联对象")}</td>
             <td>${statusTag(row.status)}</td>
             <td>${h(row.owner)}</td>
-            <td>${row.overdue ? `<span class="dash-v2-sla danger">已超时</span>` : `<span class="dash-v2-sla">${h(row.due)}</span>`}</td>
+            <td>${row.overdue ? `<span class="dash-v2-sla danger">已超时</span>` : `<span class="dash-v2-sla">${h(row.due || row.sla || "未配置")}</span>`}</td>
             <td class="numeric">${money(row.amount)}</td>
             <td>${h(row.updated)}</td>
-            <td class="dash-v2-action"><button class="tm-button secondary" data-source-link="${h(row.id)}">查看</button></td>
+            <td class="dash-v2-action"><button class="tm-button secondary" data-dashboard-task="${h(row.id)}">查看</button></td>
           </tr>`).join("") : `<tr><td colspan="9" class="tm-empty">当前条件暂无任务<br><small>可以切换队列或清除状态筛选</small></td></tr>`}</tbody>
         </table>
       </div>
     </section>`;
   }
 
+  function dashboardTrendData() {
+    const period = dashboardPeriod();
+    const buckets = new Map();
+    for (let time=Date.parse(`${period.from}T00:00:00Z`);time<=Date.parse(`${period.to}T00:00:00Z`);time+=86400000) {
+      const date = new Date(time).toISOString().slice(0,10);
+      buckets.set(date,{date,clients:0,ftd:0,valid:0});
+    }
+    dashboardClients().forEach(client => {
+      const bucket = buckets.get(String(client.attribution?.attributedAt || "").slice(0,10));
+      if (!bucket) return;
+      bucket.clients++;
+      if (Number(client.ftdAmount)>0) bucket.ftd++;
+      if (client.stage === "valid_ftd") bucket.valid++;
+    });
+    return [...buckets.values()];
+  }
+
   function dashboardTrendPanel() {
-    const series = state.dashboardRange === "today"
-      ? [["09:00",48,12,5],["11:00",76,18,8],["13:00",92,22,11],["15:00",114,28,13],["17:00",132,34,17]]
-      : [["周一",2120,268,38],["周二",2450,302,42],["周三",2380,291,39],["周四",2760,344,48],["周五",2940,366,52],["周六",3120,389,57],["周日",2651,326,49]];
-    const max = Math.max(...series.map(item => item[1]));
+    const series = dashboardTrendData();
+    const totals = series.reduce((sum,item)=>({clients:sum.clients+item.clients,ftd:sum.ftd+item.ftd,valid:sum.valid+item.valid}),{clients:0,ftd:0,valid:0});
+    const max = Math.max(1,...series.map(item => item.clients));
+    const rate = (value,total) => total ? `${(value/total*100).toFixed(1)}%` : "—";
     return `<section class="dash-v2-panel dash-v2-trend">
-      <header class="dash-v2-panel-head"><div><h2>业务趋势与转化</h2><p>点击、注册和有效FTD按${state.dashboardRange==="today"?"小时":"天"}汇总。</p></div><span class="dash-v2-source">数据源 · ${h(prototype.dataSource.name)}</span></header>
-      <div class="dash-v2-legend"><span><i class="click"></i>点击</span><span><i class="register"></i>注册</span><span><i class="valid"></i>有效FTD</span></div>
-      <div class="dash-v2-chart" aria-label="趋势图">${series.map(item => `<div class="dash-v2-chart-col"><div class="dash-v2-bars"><i class="click" style="height:${Math.max(8,item[1]/max*100)}%" title="点击 ${item[1]}"></i><i class="register" style="height:${Math.max(8,item[2]/max*100)}%" title="注册 ${item[2]}"></i><i class="valid" style="height:${Math.max(8,item[3]/max*100)}%" title="有效FTD ${item[3]}"></i></div><small>${h(item[0])}</small></div>`).join("")}</div>
-      <div class="dash-v2-mini-table"><div><span>点击→注册</span><strong>12.4%</strong></div><div><span>注册→FTD</span><strong>4.2%</strong></div><div><span>FTD→有效FTD</span><strong>1.7%</strong></div></div>
+      <header class="dash-v2-panel-head"><div><h2>客户归属与转化</h2><p>按归属日期统计同一批客户；入金与有效FTD取客户当前事实。</p></div></header>
+      <div class="dash-v2-legend"><span><i class="click"></i>归属客户</span><span><i class="register"></i>已入金客户</span><span><i class="valid"></i>有效FTD客户</span></div>
+      <div class="dash-v2-chart" aria-label="客户归属与转化趋势">${series.map(item => `<div class="dash-v2-chart-col"><div class="dash-v2-bars">${[["click","归属客户",item.clients],["register","已入金客户",item.ftd],["valid","有效FTD客户",item.valid]].map(([tone,label,value])=>`<i class="${tone}${value ? "" : " is-zero"}" style="height:${value/max*100}%" title="${item.date} ${label} ${value}"></i>`).join("")}</div><small>${h(item.date.slice(5))}</small></div>`).join("")}</div>
+      <div class="dash-v2-mini-table"><div><span>归属客户</span><strong>${compact(totals.clients)}</strong></div><div><span>归属客户→已入金</span><strong>${rate(totals.ftd,totals.clients)}</strong></div><div><span>已入金→有效FTD</span><strong>${rate(totals.valid,totals.ftd)}</strong></div></div>
     </section>`;
   }
 
-  function dashboardFundsPanel() {
-    const funds = [
-      ["结算中佣金","$82,460","按结算单聚合","admin-modules/commission-list"],
-      ["保证金余额","$960,000","当前资金对象","admin-review/guarantee-offset"],
-      ["待审批提现","5笔","当前未完成","admin-modules/withdrawal-list"],
-      ["提现失败","3笔","支付重试队列","admin-modules/withdrawal-list"],
-      ["对账差异","2项","等待人工核对","admin-modules/reconciliation"]
+  function dashboardFundsData() {
+    const funds = prototype.funds360;
+    const sum = (rows,key) => rows.reduce((total,row)=>total+Number(row[key] || 0),0);
+    const drill = (path,metric) => `${path}?dashboard_metric=${metric}`;
+    return [
+      ["结算中佣金",money(sum(funds.commissions.filter(item=>item.status==="pending"),"amount")),"当前未完成",drill("admin-modules/commission-list","settlement")],
+      ["已计提保证金",money(sum(funds.statements.filter(item=>["confirmed","paid"].includes(item.status)),"guarantee")),"已确认/已支付结算单计提",drill("admin-modules/statement-list","reserve")],
+      ["待处理提现",`${funds.withdrawals.filter(item=>["pending","pending_approval","manual_required"].includes(item.status)).length}笔`,demoSkipsApproval() ? "待核对或执行" : "待审批或人工复核",drill("admin-modules/withdrawal-list","withdrawal_pending")],
+      ["提现失败",`${funds.withdrawals.filter(item=>item.status==="failed").length}笔`,"等待核对支付回执",drill("admin-modules/withdrawal-list","withdrawal_failed")],
+      ["对账差异",`${funds.reconciliations.filter(item=>["reconcile_failed","manual_required"].includes(item.status)).length}项`,"等待人工核对",drill("admin-modules/reconciliation","reconciliation")]
     ];
+  }
+
+  function dashboardFundsPanel() {
+    const funds = dashboardFundsData();
     return `<section class="dash-v2-panel dash-v2-funds">
-      <header class="dash-v2-panel-head"><div><h2>资金与结算</h2><p>资金状态按本月统计，结算中、保证金和提现保持分开。</p></div><span class="dash-v2-source">更新于 ${h(prototype.dataSource.updatedAt)}</span></header>
+      <header class="dash-v2-panel-head"><div><h2>资金与结算</h2><p>按当前账务记录汇总，不受经营统计周期影响。</p></div></header>
       <div class="dash-v2-fund-list">${funds.map(([label,value,hint,target]) => `<button type="button" data-dashboard-drill="${h(target)}"><span>${h(label)}</span><strong>${h(value)}</strong><small>${h(hint)}</small><b>›</b></button>`).join("")}</div>
     </section>`;
   }
 
   function dashboardSignals() {
+    const tasks = dashboardTaskRows();
     const signals = [
-      {tone:"danger",title:"CRM注册事件回调失败",detail:"5次失败 · 已生成集成任务",target:"admin-review/integration"},
-      {tone:"warning",title:"结算阻断待复核",detail:"3个案件组 · 影响$36,200",target:"admin-review/d-plus-n"},
-      {tone:"warning",title:"提现通道有失败记录",detail:"3笔失败 · 等待重试",target:"admin-modules/withdrawal-list"},
-      {tone:"info",title:"数据延迟",detail:"部分指标延迟42秒",target:"admin-workbench/tasks"}
+      {tone:"danger",title:"超时待办",detail:`${dashboardQueueRows("overdue").length}项 · 优先查看当前责任人与处理要求`,target:"tasks?scope=authorized&sla_state=overdue"},
+      {tone:"warning",title:demoSkipsApproval() ? "待接续任务" : "待我审批",detail:demoSkipsApproval() ? `${dashboardQueueRows("approvals").length}项 · 核对后直接提交执行` : `${dashboardApprovals().length}项 · 按当前审批节点办理`,target:demoSkipsApproval() ? "tasks?scope=authorized&workflow_states=pending_approval" : "workbench?tab=approvals"},
+      {tone:"warning",title:"待补充材料",detail:`${tasks.filter(item=>item.status==="waiting_material").length}项 · 跟进材料提交`,target:"tasks?scope=authorized&workflow_states=waiting_material"}
     ];
     return `<section class="dash-v2-panel dash-v2-signals">
-      <header class="dash-v2-panel-head"><div><h2>异常信号</h2><p>展示已生成的事实信号，不在仪表盘直接修改阈值。</p></div><span class="dash-v2-count">${signals.length}</span></header>
+      <header class="dash-v2-panel-head"><div><h2>办理提醒</h2><p>从当前授权待办中汇总需要跟进的事项。</p></div></header>
       <div class="dash-v2-signal-list">${signals.map(signal => `<button type="button" data-dashboard-drill="${h(signal.target)}"><i class="${h(signal.tone)}"></i><span><strong>${h(signal.title)}</strong><small>${h(signal.detail)}</small></span><b>›</b></button>`).join("")}</div>
     </section>`;
   }
 
   function dashboardQuickLinks() {
     const links = {
-      operations:[["入驻审核","admin-modules/partner-list"],["客户数据","admin-modules/client-list"],["活动与链接","admin-modules/campaign-list"],["素材库","admin-modules/material-list"],["任务处理","admin-review/appeal"]],
-      finance:[["佣金数据","admin-modules/commission-list"],["提现记录","admin-modules/withdrawal-list"],["保证金","admin-review/guarantee-offset"],["对账","admin-modules/reconciliation"],["财务统计","admin-performance/report-finance"]],
-      risk_supervisor:[["风险复核","admin-review/risk-review"],["结算阻断","admin-review/d-plus-n"],["信用档案","admin-risk/credit-insight"],["案件组","admin-risk/cluster"],["经营报表","admin-performance/roi"]],
-      system_admin:[["集成任务","admin-review/integration"],["配置发布","admin-config/overview"],["权限管理","admin-modules/permission"],["操作审计","admin-modules/audit"],["数据治理","admin-review/integration"]]
+      operations:[["入驻审核","admin-modules/partner-list?dashboard_metric=onboarding"],["客户数据","admin-modules/client-list"],["活动与链接","admin-modules/campaign-list"],["素材库","admin-modules/material-list"],["任务处理","tasks?scope=mine"]],
+      finance:[["佣金数据","admin-modules/commission-list"],["提现记录","admin-modules/withdrawal-list"],["保证金计提","admin-modules/statement-list?dashboard_metric=reserve"],["对账","admin-modules/reconciliation"],["财务统计","admin-modules/report-finance"]],
+      risk_supervisor:[["风险复核","risk-workbench?tab=objects"],["结算阻断","risk-workbench?tab=objects"],["信用档案","admin-risk/credit-insight"],["案件组","risk-workbench?tab=clusters"],["经营报表","admin-performance/roi"]],
+      system_admin:[["集成任务","tasks?scope=authorized&source_types=integration"],["业务配置","admin-config/overview"],["权限管理","admin-modules/permission"],["操作审计","admin-modules/audit"],["事件流水","admin-modules/event-stream"]]
     };
     const current = links[state.role] || links.operations;
     return `<section class="dash-v2-panel dash-v2-quick">
@@ -1841,9 +2013,9 @@
 
   function dashboardPage() {
     if (state.detailId === "full") return dashboardTaskListPage();
-    const roleLabel = dashboardRoleNames[state.role] || "运营";
+    const roleLabel = dashboardRoleNames[state.role] || prototype.roles[state.role] || "当前岗位";
     return `<section class="dash-v2-page" aria-label="管理端仪表盘">
-      <div class="dash-v2-meta"><span>${h(roleLabel)}视角 · 数据范围：${h(dashboardRangeLabels[state.dashboardRange])}</span><span class="dash-v2-fresh"><i></i>数据已同步 · 下次刷新 04:32</span></div>
+      <div class="dash-v2-meta"><span>${h(roleLabel)}视角 · 经营统计：${h(dashboardPeriod().from)} 至 ${h(dashboardPeriod().to)}</span><span class="dash-v2-fresh"><i></i>待办与资金展示当前状态</span></div>
       <section class="dash-v2-snapshot" aria-label="业务快照">
         ${dashboardSnapshot().map(([label,value,hint,target]) => `<button type="button" data-dashboard-drill="${h(target)}"><span>${h(label)}</span><strong>${h(value)}</strong><small>${h(hint)}</small><b>›</b></button>`).join("")}
       </section>
@@ -1866,14 +2038,11 @@
   }
 
   function roleSwitcher() {
-    if (state.routeId === "tickets") return `<span class="cs-session-identity">${h(window.AFF_SUPPORT_CONTEXT?.display_name || (state.role === "operations" ? "演示客服一" : prototype.roles[state.role] || "服务协作者"))}</span>`;
-    const roles = [
-      ["operations","运营"],
-      ["finance","财务"],
-      ["risk_supervisor","主管"],
-      ["system_admin","管理员"]
-    ];
-    return `<label class="tm-role-switch"><span>当前角色</span><select data-role aria-label="切换角色" title="切换角色">${roles.map(([value,name]) =>
+    const roles = [...topbarRoleIds].map(role => {
+      const user = prototype.taskQueue?.options(role)?.current_user;
+      return [role,`${user?.display_name || ""} · ${dashboardRoleNames[role]}`];
+    });
+    return `<label class="tm-role-switch"><span>当前员工</span><select data-role aria-label="切换角色" title="切换员工及其岗位">${roles.map(([value,name]) =>
       `<option value="${h(value)}" ${state.role===value?"selected":""}>${h(name)}</option>`).join("")}</select></label>`;
   }
 
@@ -1970,7 +2139,7 @@
       },
       risk:{
         summary:[
-          ["高风险对象",compact(riskyObjects.length),"R3/R4档待结论"],
+          ["高风险对象",compact(riskyObjects.length),"R3档待结论"],
           ["活跃案件组",compact(prototype.riskCases.length),"统一隔离队列"],
           ["隔离佣金总额",money(activeQuarantine.reduce((sum,item)=>sum+item.quarantine.amount,0)),"只阻断结算不阻断计佣"],
           ["SLA超时数",compact(riskTasks.filter(row=>row.overdue).length),"调查SLA剩余优先"]
@@ -2114,19 +2283,7 @@
   }
 
   function configVersionItems() {
-    const versions = prototype.configSeeds.versions || [];
-    if (!CONFIG_VERSION_APPROVAL_ENABLED) {
-      versions.forEach(item => {
-        if (item.status !== "pending_approval") return;
-        item.status = "draft";
-        item.locked = false;
-        item.publishedAt = "-";
-        item.effectiveTime = item.effectiveTime === "待审批" ? "-" : item.effectiveTime;
-        item.publishMode = item.publishMode === "双人确认" ? "即时生效" : item.publishMode;
-        item.updated = item.updated || item.created || createDate(0);
-      });
-    }
-    return versions;
+    return businessConfigMenuItems().flatMap(item => configSubgroupVersions(item));
   }
 
   function configOverviewItems() {
@@ -2135,50 +2292,12 @@
 
   function configItemVersions(item) {
     if (!item) return [];
-    const domainMap = {
-      "item-pricing":["价格表","价格与佣金档"],
-      "item-qualification":["资格档与里程碑","资格档"],
-      "item-quality":["质量服务"],
-      "item-credit":["信用等级与权益"],
-      "item-partner-tier":["合作者等级与个人附加"],
-      "item-country":["国家与主体"],
-      "item-hold":["动态结算","动态结算中","动态Hold"],
-      "item-dn":["D+N冻结与熔断","D+N"],
-      "item-funds":["保证金/税费","保证金与税费"],
-      "item-settlement-withdrawal":["结算与提现规则"],
-      "item-cluster":["集群识别与集群结算中","集群规则"],
-      "item-hard-rule":["D1-D10硬规则","硬规则"],
-      "item-risk-score":["R0-R3风险评分","风险评分规则"],
-      "item-violation":["违规规则"],
-      "item-risk-propagation":["合作者风险传导"],
-      "item-data":["数据治理"],
-      "item-approval":["审批流","自动审核"],
-      "item-content":["官方路径治理","官方路径","落地页"]
-    };
-    const aliases = new Set([
-      item.name,
-      item.name.replace(/规则|与|档|及|组合/g,""),
-      ...(item.versionDomains || []),
-      ...(domainMap[item.id] || [])
-    ]);
-    return configVersionItems().filter(version =>
-      version.domains.some(domain => [...aliases].some(alias => alias && (domain.includes(alias) || alias.includes(domain))))
-    );
+    const menuItem = configMenuItemForOverview(item) || businessConfigMenuItem(item.id);
+    return menuItem ? configSubgroupVersions(menuItem) : [];
   }
 
   function configItemCurrentVersion(item) {
-    const versions = configItemVersions(item);
-    if (versions.length) {
-      return versions.find(version => version.status === "active" && version.locked)
-        || versions.find(version => version.status === "scheduled")
-        || versions[0]
-        || null;
-    }
-    const menuItem = configMenuItemForOverview(item);
-    const subgroupVersions = menuItem ? configSubgroupVersions(menuItem) : [];
-    return subgroupVersions.find(version => version.status === "active" && version.locked)
-      || subgroupVersions[0]
-      || null;
+    return configItemVersions(item).find(version => version.status === "active") || null;
   }
 
   const subgroupVersionCodes = {
@@ -2203,6 +2322,83 @@
     "official-content":"official-content"
   };
   const subgroupVersionCache = new Map();
+
+  function configVersionNow() {
+    return new Date(window.AFF_ADMIN_CLOCK?.now?.() ?? Date.now()).getTime();
+  }
+
+  function configVersionTime(value = configVersionNow()) {
+    const date = new Date(value + 8 * 60 * 60 * 1000);
+    return `${date.getUTCFullYear()}-${pad(date.getUTCMonth()+1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}`;
+  }
+
+  function configScheduledTime(value) {
+    const match = String(value || "").match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/);
+    if (!match) return NaN;
+    const [year,month,day,hour,minute,second] = match.slice(1).map(value => Number(value || 0));
+    const local = new Date(Date.UTC(year,month-1,day,hour,minute,second));
+    if (local.getUTCFullYear() !== year || local.getUTCMonth() !== month-1 || local.getUTCDate() !== day ||
+      local.getUTCHours() !== hour || local.getUTCMinutes() !== minute || local.getUTCSeconds() !== second) return NaN;
+    return local.getTime() - 8 * 60 * 60 * 1000;
+  }
+
+  function activateConfigVersion(item, versions, effectiveAt, operator) {
+    const time = configVersionTime(effectiveAt);
+    versions.filter(version => version.id !== item.id && version.status === "active").forEach(version => {
+      version.status = "inactive";
+      version.effectiveTime = "-";
+      version.updated = time;
+      version.locked = true;
+    });
+    Object.assign(item,{
+      status:"active",locked:true,lockTime:time,publishedAt:time,effectiveTime:time,
+      scheduledEffectiveTime:"-",updated:time,lockReason:operator === "系统" ? "定时生效完成" : "立即生效完成"
+    });
+  }
+
+  function reconcileConfigVersions(versions, now = configVersionNow()) {
+    let changed = false;
+    versions.filter(version => version.status === "scheduled").forEach(version => {
+      const due = configScheduledTime(version.scheduledEffectiveTime);
+      if (!Number.isFinite(due) || due > now) return;
+      activateConfigVersion(version,versions,due,"系统");
+      version.lastAction = {action:"scheduled_activate",reason:"到达计划生效时间",operator:"系统",time:version.updated};
+      prototype.auditRecords.unshift({
+        id:`audit-config-scheduled-${version.id}`,time:version.updated,action:"配置版本定时生效",
+        object:version.version,operator:"系统",result:"active",trace_id:version.traceId,self_review:false
+      });
+      changed = true;
+    });
+    return changed;
+  }
+
+  function configRefreshScheduledVersions() {
+    let changed = false;
+    subgroupVersionCache.forEach(versions => {if (reconcileConfigVersions(versions)) changed = true;});
+    return changed;
+  }
+
+  function configSnapshotSummary(snapshot) {
+    if (!snapshot) return "暂无配置快照";
+    if (snapshot.basePricing) {
+      const price = snapshot.basePricing;
+      return `L1–L4：${[price.l1,price.l2,price.l3,price.l4].join(" / ")} USD；FTD ${price.ftdRatio}，有效FTD ${price.validFtdRatio}；${snapshot.countries?.length || 0}个国家`;
+    }
+    const rows = snapshot.milestones || snapshot.settings || snapshot.rules || snapshot.finance || snapshot.levels || snapshot.steps || snapshot.rows || [];
+    return rows.slice(0,3).map(row => [row.name || row.label || row.event || row.level || row.step || row.key || row.country || row.title, row.value ?? row.netDeposit ?? row.baseDays ?? row.condition ?? row.rule ?? row.action ?? row.entity ?? row.path].filter(value=>value!==undefined&&value!==null&&value!=="").join("：")).filter(Boolean).join("；") || "已保存配置快照";
+  }
+
+  function configSnapshotError(snapshot) {
+    if (!snapshot) return "缺少配置快照，请先保存配置内容";
+    if (snapshot.kind !== "price") return "";
+    const price = snapshot.basePricing || {};
+    if (["l1","l2","l3","l4"].some(key => price[key] === "" || !Number.isFinite(Number(price[key])) || Number(price[key]) < 0)) return "四档基础金额必须填写非负数";
+    const ratio = value => /^\d+(?:\.\d+)?%?$/.test(String(value)) ? Number(String(value).replace("%","")) : NaN;
+    const ftd = ratio(price.ftdRatio), validFtd = ratio(price.validFtdRatio);
+    if (!Number.isFinite(ftd) || !Number.isFinite(validFtd) || ftd > 100 || validFtd > 100 || Math.abs(ftd + validFtd - 100) > 0.000001) return "FTD与有效FTD基础比例合计必须为100%";
+    if ((snapshot.countries || []).some(country => country.coefficient === "" || !Number.isFinite(Number(country.coefficient)) || Number(country.coefficient) < 0)) return "国家系数必须填写非负数";
+    return "";
+  }
 
   function configMenuItemForOverview(item) {
     if (!item) return null;
@@ -2398,27 +2594,20 @@
 
   function configSubgroupVersions(item) {
     if (!item) return [];
-    if (subgroupVersionCache.has(item.id)) return subgroupVersionCache.get(item.id);
+    if (subgroupVersionCache.has(item.id)) {
+      const versions = subgroupVersionCache.get(item.id);
+      reconcileConfigVersions(versions);
+      return versions;
+    }
     const code = configSubgroupCode(item);
-    const overviewItem = configOverviewItems().find(row => row.id === ({
-      price:"item-pricing", qualification:"item-qualification", "quality-service":"item-quality",
-      "credit-benefit":"item-credit", "partner-tier":"item-partner-tier", "country-entity":"item-country",
-      hold:"item-hold", "d-plus-n":"item-dn", "guarantee-tax":"item-funds",
-      "settlement-withdrawal":"item-settlement-withdrawal", "cluster-rule":"item-cluster",
-      "hard-rule":"item-hard-rule", "risk-score":"item-risk-score", "violation-rule":"item-violation",
-      "risk-propagation":"item-risk-propagation", "data-governance":"item-data",
-      approval:"item-approval", simulation:"item-simulation", "official-content":"item-content"
-    }[item.tabId]));
-    const source = overviewItem ? configItemVersions(overviewItem) : [];
-    const base = source.find(version => version.status === "active") || source[0];
     const snapshot = configSubgroupSnapshot(item, "active");
     const versions = [
       {
         id:`subcfg-${item.id}-active`, configItemId:item.id, version:subgroupVersionNumber(item,"20261105091000","01"),
         name:`${item.label}基线`, status:"active", locked:true, owner:item.owner || "业务负责人", createdBy:item.owner || "业务负责人",
         created:"2026-11-05 08:30", publishedAt:"2026-11-05 09:10", effectiveTime:"2026-11-05 09:10",
-        scheduledEffectiveTime:"-", updated:"2026-11-05 09:10", previousVersion:base?.version || "-",
-        basedOn:base?.version || "-", changeSummary:item.summary, impact:"参考试算已通过",
+        scheduledEffectiveTime:"-", updated:"2026-11-05 09:10", previousVersion:subgroupVersionNumber(item,"20261020113000","01"),
+        basedOn:subgroupVersionNumber(item,"20261020113000","01"), changeSummary:item.summary, impact:"参考试算已通过",
         traceId:`trace-subcfg-${code}-01`, parameters:"结构化配置快照", snapshot
       },
       {
@@ -2445,6 +2634,14 @@
         traceId:`trace-subcfg-${code}-voided`, parameters:"结构化配置快照", snapshot
       }
     ];
+    if(item.tabId!=="price"&&state.scenario!=="boundary"){
+      const failedIndex=versions.findIndex(version=>version.status==="activation_failed");
+      if(failedIndex>=0)versions.splice(failedIndex,1);
+    }
+    versions.forEach(version => {
+      version.domains = [item.label];
+      version.snapshot = JSON.parse(JSON.stringify(version.snapshot));
+    });
     subgroupVersionCache.set(item.id, versions);
     return versions;
   }
@@ -2458,7 +2655,7 @@
   }
 
   function configVersionById(id) {
-    return configVersionItems().find(item => item.id === id) || configSubgroupVersionById(id);
+    return configSubgroupVersionById(id);
   }
 
   function configVersionCollection(item) {
@@ -2472,8 +2669,7 @@
   }
 
   function nextSubgroupVersion(item) {
-    const now = new Date();
-    const stamp = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+    const stamp = configVersionTime().replace(/\D/g,"");
     const used = new Set(configSubgroupVersions(item).map(version => version.version));
     let sequence = 1;
     let candidate = subgroupVersionNumber(item, stamp, String(sequence).padStart(2,"0"));
@@ -2595,7 +2791,7 @@
       <header><div><h3>四档公用基础价格</h3><p>国家金额 = 公用档位金额 × 国家系数；暂不支持国家自定义金额覆盖，质量服务比例独立于基础100%。</p></div><span class="dev-snapshot-lock">只读快照</span></header>
       <div class="dev-config-value-grid"><article><span>L1基础金额</span><strong>${money(pricing.l1)}</strong><small>${h(pricing.currency)} · 参考值</small></article><article><span>L2基础金额</span><strong>${money(pricing.l2)}</strong><small>${h(pricing.currency)} · 参考值</small></article><article><span>L3基础金额</span><strong>${money(pricing.l3)}</strong><small>${h(pricing.currency)} · 参考值</small></article><article><span>L4基础金额</span><strong>${money(pricing.l4)}</strong><small>${h(pricing.currency)} · 参考值</small></article></div>
       <div class="dev-config-rule-strip"><span>FTD基础比例：${h(pricing.ftdRatio)}</span><span>有效FTD基础比例：${h(pricing.validFtdRatio)}</span><span>质量服务附加比例：${h(pricing.qualityServiceRatio)}（不占基础100%）</span></div>
-      <div class="tm-table-wrap dev-snapshot-table"><table><thead><tr><th>国家</th><th>国家系数</th><th>L1公式值</th><th>L2公式值</th><th>L3公式值</th><th>L4公式值</th><th>质量服务</th><th>计算方式</th></tr></thead><tbody>${snapshot.countries.map(row => `<tr><td><strong>${h(row.country)}</strong><small>${h(row.code)}</small></td><td>${h(row.coefficient)}</td><td>${money(row.formula[0])}</td><td>${money(row.formula[1])}</td><td>${money(row.formula[2])}</td><td>${money(row.formula[3])}</td><td>${row.qualityEnabled ? `已开启 · ${h(row.qualityRatio)}` : "未开启"}</td><td>公用金额 × 国家系数</td></tr>`).join("")}</tbody></table></div>
+      <div class="tm-table-wrap dev-snapshot-table"><table><thead><tr><th>国家</th><th>国家系数</th><th>L1公式值</th><th>L2公式值</th><th>L3公式值</th><th>L4公式值</th><th>质量服务</th><th>计算方式</th></tr></thead><tbody>${snapshot.countries.map(row => `<tr><td><strong>${h(row.country)}</strong><small>${h(row.code)}</small></td><td>${h(row.coefficient)}</td>${["l1","l2","l3","l4"].map(level => `<td>${money(Number(pricing[level]) * Number(row.coefficient))}</td>`).join("")}<td>${row.qualityEnabled ? `已开启 · ${h(row.qualityRatio)}` : "未开启"}</td><td>公用金额 × 国家系数</td></tr>`).join("")}</tbody></table></div>
     </section>`;
   }
 
@@ -2642,7 +2838,7 @@
         <div class="dev-config-edit-grid">${[
           ["basePricing.l1","L1基础金额",pricing.l1],["basePricing.l2","L2基础金额",pricing.l2],["basePricing.l3","L3基础金额",pricing.l3],["basePricing.l4","L4基础金额",pricing.l4],
           ["basePricing.ftdRatio","FTD基础比例",pricing.ftdRatio],["basePricing.validFtdRatio","有效FTD基础比例",pricing.validFtdRatio],["basePricing.qualityServiceRatio","质量服务附加比例",pricing.qualityServiceRatio]
-        ].map(([path,label,value]) => field(path,label,value)).join("")}</div>
+        ].map(([path,label,value]) => field(path,label,value,/\.l[1-4]$/.test(path) ? "number" : "text",/\.l[1-4]$/.test(path) ? {min:0,step:"0.01"} : {})).join("")}</div>
         <div class="tm-table-wrap dev-snapshot-table"><table><thead><tr><th>国家</th><th>国家系数</th><th>质量服务开关</th><th>质量服务比例</th></tr></thead><tbody>${(snapshot.countries || []).map((row,index) => `<tr><td><strong>${h(row.country)}</strong><small>${h(row.code)}</small></td><td>${field(`countries.${index}.coefficient`,"国家系数",row.coefficient,"number",{step:"0.01"})}</td><td>${field(`countries.${index}.qualityEnabled`,"质量服务",row.qualityEnabled,"checkbox")}</td><td>${field(`countries.${index}.qualityRatio`,"质量服务比例",row.qualityRatio)}</td></tr>`).join("")}</tbody></table></div>
       </section>`;
     } else if (snapshot.kind === "qualification") {
@@ -2668,7 +2864,7 @@
         <div class="tm-table-wrap dev-snapshot-table"><table><thead><tr><th>规则编号</th><th>触发事件</th><th>配置值</th><th>处理方式</th></tr></thead><tbody>${(snapshot.rules || []).map((row,index) => `<tr><td><strong>${h(row.id)}</strong></td><td>${h(row.event)}</td><td>${field(`rules.${index}.value`,"配置值",row.value)}</td><td>${field(`rules.${index}.action`,"处理方式",row.action)}</td></tr>`).join("")}</tbody></table></div>
       </section>`;
     } else if (snapshot.kind === "approval") {
-      content = `<section class="dev-config-snapshot-section"><header><div><h3>审批节点配置</h3><p>业务配置版本审核已关闭；这里仅维护其他业务流程的节点说明。</p></div><span class="dev-snapshot-lock">草稿可编辑</span></header>
+      content = `<section class="dev-config-snapshot-section"><header><div><h3>审批节点配置</h3><p>${demoSkipsApproval() ? "演示操作暂不经过审核；节点配置保留，当前流程不启用。" : "业务配置版本审核已关闭；这里仅维护其他业务流程的节点说明。"}</p></div><span class="dev-snapshot-lock">草稿可编辑</span></header>
         <div class="tm-table-wrap dev-snapshot-table"><table><thead><tr><th>步骤</th><th>负责人</th><th>规则说明</th></tr></thead><tbody>${(snapshot.steps || []).map((row,index) => `<tr><td><strong>${h(row.step)}</strong></td><td>${field(`steps.${index}.owner`,"负责人",row.owner)}</td><td>${field(`steps.${index}.rule`,"规则说明",row.rule)}</td></tr>`).join("")}</tbody></table></div>
       </section>`;
     } else {
@@ -2719,7 +2915,7 @@
       <header class="dev-config-snapshot-head"><div><span>当前查看版本</span><strong>${h(version?.version || "-")}</strong><small>${h(version?.name || "")} · ${configSubgroupVersionStatus(version)}</small>${version?.failureReason ? `<em class="dev-config-failure-note">失败原因：${h(version.failureReason)}</em>` : ""}</div><div><span>配置状态</span><strong>${version?.locked ? "已锁定" : "可继续办理"}</strong><small>${h(snapshot.note || "生效成功后自动锁定")}</small></div></header>
       ${content}
       ${editable ? `<footer class="dev-config-edit-footer"><span>当前为未锁定草稿，修改后统一保存到此版本。</span><button class="tm-button primary" data-config-save="${h(version.id)}">保存配置</button></footer>` : ""}
-      <section class="dev-config-approval-card"><div><strong>版本操作</strong><p>${CONFIG_VERSION_APPROVAL_ENABLED ? "配置内容不单独设置生效开关，是否生效完全由顶部版本列表控制；版本提交后进入审批和生效治理。" : "当前演示环境已关闭业务配置版本审核；保存后可直接执行立即生效或设置定时生效。风险、提现等其他业务审批流程不受影响。"}</p></div><div class="dev-config-approval-meta"><span>版本审核：${CONFIG_VERSION_APPROVAL_ENABLED ? "已开启" : "已关闭（演示）"}</span><span>审批人：${CONFIG_VERSION_APPROVAL_ENABLED ? h(snapshot.approval?.approver || "-") : "-"}</span><span>复核人：${CONFIG_VERSION_APPROVAL_ENABLED ? h(snapshot.approval?.reviewer || "-") : "-"}</span><span>SLA：${CONFIG_VERSION_APPROVAL_ENABLED ? h(snapshot.approval?.reviewCycle || "-") : "-"}</span></div></section>
+      <section class="dev-config-approval-card"><div><strong>版本操作</strong><p>${CONFIG_VERSION_APPROVAL_ENABLED ? "配置内容不单独设置生效开关，是否生效完全由顶部版本列表控制；版本提交后进入审批和生效治理。" : demoSkipsApproval() ? "保存后可直接立即生效或设置定时生效。当前演示操作均不经过审核。" : "当前演示环境已关闭业务配置版本审核；保存后可直接执行立即生效或设置定时生效。风险、提现等其他业务审批流程不受影响。"}</p></div><div class="dev-config-approval-meta"><span>版本审核：${CONFIG_VERSION_APPROVAL_ENABLED ? "已开启" : "已关闭（演示）"}</span><span>审批人：${CONFIG_VERSION_APPROVAL_ENABLED ? h(snapshot.approval?.approver || "-") : "-"}</span><span>复核人：${CONFIG_VERSION_APPROVAL_ENABLED ? h(snapshot.approval?.reviewer || "-") : "-"}</span><span>SLA：${CONFIG_VERSION_APPROVAL_ENABLED ? h(snapshot.approval?.reviewCycle || "-") : "-"}</span></div></section>
     </section>`;
   }
 
@@ -2745,19 +2941,15 @@
   function configOverviewRows() {
     return configOverviewItems().map(item => {
       const versions = configItemVersions(item);
-      const section = businessConfigMenuSections().find(group => group.items.some(child => child.id === item.id));
       const menuItem = configMenuItemForOverview(item);
-      const subgroupVersions = menuItem ? configSubgroupVersions(menuItem) : [];
-      const current = versions.find(version => version.status === "active")
-        || subgroupVersions.find(version => version.status === "active")
-        || null;
-      const scheduled = versions.find(version => version.status === "scheduled")
-        || subgroupVersions.find(version => version.status === "scheduled")
-        || null;
-      const status = item.status === "activation_failed" ? "activation_failed"
-        : item.status === "pending_approval" ? "pending_approval"
-        : scheduled ? "scheduled"
+      const section = businessConfigMenuSections().find(group => group.items.some(child => child.id === menuItem?.id));
+      const current = versions.find(version => version.status === "active") || null;
+      const scheduled = versions.find(version => version.status === "scheduled") || null;
+      const failedVersions = versions.filter(version => version.status === "activation_failed");
+      const latest = [...versions].sort((a,b) => String(b.updated).localeCompare(String(a.updated)))[0];
+      const status = scheduled ? "scheduled"
         : current ? "active"
+        : failedVersions.length ? "activation_failed"
         : "draft";
       return {
         ...item,
@@ -2766,11 +2958,14 @@
         sectionTitle: section?.title || item.category || "-",
         current,
         scheduled,
+        failedVersions,
+        pendingVersions:versions.filter(version => ["draft","scheduled"].includes(version.status)),
         status,
-        parameterSummary: String(item.currentSummary || current?.parameters || "暂无参数摘要").replace(/Hold/g, "结算中"),
-        effectiveTime: current?.effectiveTime || item.effectiveTime || "-",
-        scheduledEffectiveTime: scheduled?.effectiveTime || "-",
-        lastModified: item.updated || current?.updated || "-"
+        parameterSummary: configSnapshotSummary(current?.snapshot).replace(/Hold/g, "结算中"),
+        effectiveTime: current?.effectiveTime || "-",
+        scheduledEffectiveTime: scheduled?.scheduledEffectiveTime || "-",
+        owner:latest?.lastAction?.operator || latest?.owner || item.owner,
+        lastModified: latest?.updated || "-"
       };
     });
   }
@@ -2783,22 +2978,23 @@
       const text = `${row.displayName} ${row.category} ${row.current?.version || ""} ${row.owner || ""}`.toLowerCase();
       const keywordMatched = !keyword || text.includes(keyword);
       const groupMatched = !state.configOverviewGroup || row.category === state.configOverviewGroup;
-      const statusMatched = !state.configOverviewStatus || row.status === state.configOverviewStatus;
+      const statusMatched = !state.configOverviewStatus || row.status === state.configOverviewStatus ||
+        (state.configOverviewStatus === "activation_failed" && row.failedVersions.length > 0);
       return keywordMatched && groupMatched && statusMatched;
     });
     const activeCount = allRows.filter(row => row.current).length;
-    const pendingCount = allRows.filter(row => ["draft","scheduled"].includes(row.status)).length;
-    const failedCount = allRows.filter(row => row.status === "activation_failed").length;
-    const changedThisMonth = allRows.filter(row => String(row.lastModified).startsWith("2026-11")).length;
+    const pendingCount = allRows.reduce((sum,row) => sum + row.pendingVersions.length,0);
+    const failedCount = allRows.reduce((sum,row) => sum + row.failedVersions.length,0);
+    const changedThisMonth = allRows.filter(row => String(row.lastModified).startsWith(configVersionTime().slice(0,7))).length;
     const groups = [...new Set(allRows.map(row => row.category).filter(Boolean))];
-    const statusOptions = [...new Set(allRows.map(row => row.status))];
+    const statusOptions = [...new Set([...allRows.map(row => row.status),...(failedCount ? ["activation_failed"] : [])])];
     const filterSelect = (key,value,options,label,empty,quick=false) => `<label>${h(label)}<select ${quick ? `data-config-overview-${key}` : `data-config-overview-draft="${key}"`}><option value="">${h(empty)}</option>${options.map(option => `<option value="${h(option)}" ${value===option?"selected":""}>${h(key==="status" ? statusLabel(option) : option)}</option>`).join("")}</select></label>`;
     const filterTags = [["search","关键词",state.configOverviewSearch],["group","业务分类",state.configOverviewGroup],["status","状态",state.configOverviewStatus]].filter(([, ,value]) => value);
     const draft = state.configOverviewDraft;
     return `<section class="dev-config-overview-panel" aria-label="业务配置总览">
       <header class="dev-config-overview-head">
         <div><span class="dev-config-detail-eyebrow">系统设置 / 业务配置</span><h2>配置总览</h2><p>先确认每个业务配置当前使用哪个版本，再进入对应配置小组处理草稿和生效。系统配置独立维护，不出现在这里。</p></div>
-        <div class="dev-config-version-actions"><button class="tm-button secondary" data-config-system-open="1">查看系统配置</button><button class="tm-button primary" data-config-version-new>创建配置版本</button></div>
+        <div class="dev-config-version-actions"><button class="tm-button secondary" data-config-system-open="1">查看系统配置</button></div>
       </header>
       <div class="dev-config-overview-stats" aria-label="配置统计">
         <article><span>当前生效配置</span><strong>${activeCount}</strong><small>每个业务配置项保留一个当前版本</small></article>
@@ -2827,7 +3023,7 @@
         <td><span class="dev-config-param-summary">${h(row.parameterSummary)}</span></td>
         <td>${row.scheduled ? `<button class="dev-link-button" data-config-overview-version="${h(row.scheduled.id)}" data-config-overview-version-item="${h(row.id)}">${h(row.scheduled.version)}</button>` : "—"}</td>
         <td>${h(row.scheduledEffectiveTime)}</td>
-        <td>${statusTag(row.status)}</td>
+        <td>${statusTag(row.status)}${row.failedVersions.length ? `<small>${row.failedVersions.length}个历史版本生效失败</small>` : ""}</td>
         <td>${h(row.owner || "-")}<small>${h(row.lastModified)}</small></td>
         <td class="dev-action-col"><div class="dev-config-overview-actions"><button class="tm-button secondary" data-config-overview-item="${h(row.id)}">查看</button><button class="tm-button secondary" data-config-overview-versions="${h(row.id)}">版本列表</button></div></td>
       </tr>`).join("") : `<tr><td colspan="9" class="tm-empty">没有符合条件的业务配置<br><small>请调整筛选条件或重置查询</small></td></tr>`}</tbody></table></div>
@@ -2855,14 +3051,15 @@
     if (!item) return "";
     const current = configItemCurrentVersion(item);
     const related = configItemVersions(item).slice(0,5);
+    const menuItem = configMenuItemForOverview(item);
     return `<div class="tm-overlay" data-close-config-item="1"></div><aside class="tm-drawer dev-drawer-wide" aria-label="业务配置项详情">
       <header><div><strong>${h(String(item.name || "").replace(/Hold/g, "结算中"))}</strong><span>${h(item.category)} · ${h(item.id)}</span></div><button data-close-config-item="1" aria-label="关闭">×</button></header>
       <div>
-        <section class="dev-drawer-section"><h3>当前配置</h3><div class="dev-impact-grid"><article><span>当前使用版本</span><strong>${h(current?.version || "未配置")}</strong></article><article><span>状态</span><strong>${statusTag(current?.status || item.status)}</strong></article><article><span>定时生效版本</span><strong>${h(configItemVersions(item).find(version => version.status === "scheduled")?.version || "—")}</strong></article><article><span>最后修改</span><strong>${h(item.updated)}</strong></article></div><p class="dev-permission-scope">${h(String(item.currentSummary || "").replace(/Hold/g, "结算中"))}</p></section>
-        <section class="dev-drawer-section"><h3>配置参数</h3><div class="dev-check-list">${item.parameters.map(parameter => `<span>${h(parameter)}</span>`).join("")}</div></section>
+        <section class="dev-drawer-section"><h3>当前配置</h3><div class="dev-impact-grid"><article><span>当前使用版本</span><strong>${h(current?.version || "未配置")}</strong></article><article><span>状态</span><strong>${statusTag(current?.status || "draft")}</strong></article><article><span>定时生效版本</span><strong>${h(configItemVersions(item).find(version => version.status === "scheduled")?.version || "—")}</strong></article><article><span>最后修改</span><strong>${h(current?.updated || "-")}</strong></article></div><p class="dev-permission-scope">${h(configSnapshotSummary(current?.snapshot))}</p></section>
+        <section class="dev-drawer-section"><h3>配置参数</h3>${current && menuItem ? configSubgroupContent(menuItem,current) : `<p class="dev-help">暂无生效配置</p>`}</section>
         <section class="dev-drawer-section"><h3>关联版本</h3><div class="dev-audit-list">${related.map(version => `<div><span>${h(version.version)} · ${h(version.updated)}</span><strong>${h(version.name)}</strong><small>${statusLabel(version.status)} · ${h(version.changeSummary)}</small></div>`).join("")}</div></section>
       </div>
-      <footer><button class="tm-button secondary" data-close-config-item="1">关闭</button><button class="tm-button secondary" data-config-item-versions="${h(item.id)}">查看版本列表</button><button class="tm-button primary" data-config-item-rollback="${h(item.id)}">创建回退草稿</button></footer>
+      <footer><button class="tm-button secondary" data-close-config-item="1">关闭</button><button class="tm-button secondary" data-config-item-versions="${h(item.id)}">进入配置小组</button></footer>
     </aside>`;
   }
 
@@ -2982,15 +3179,22 @@
     const version = configSubgroupVersionById(versionId);
     if (!version) return showToast("配置版本不存在");
     if (version.locked || version.status !== "draft") return showToast("当前版本已锁定，只能复制为新草稿后修改");
-    version.snapshot = version.snapshot || configSubgroupSnapshot(configMenuItemForVersion(version), "active");
-    document.querySelectorAll("[data-config-edit]").forEach(input => {
+    const inputs = [...document.querySelectorAll("[data-config-edit]")];
+    if (inputs.some(input => typeof input.checkValidity === "function" && !input.checkValidity())) return showToast("请检查数值格式及允许范围");
+    const snapshot = JSON.parse(JSON.stringify(version.snapshot || configSubgroupSnapshot(configMenuItemForVersion(version), "active")));
+    inputs.forEach(input => {
       const type = input.dataset.configEditType;
       const value = type === "checkbox" ? input.checked : type === "number" ? Number(input.value) : input.value.trim();
-      setConfigEditPath(version.snapshot, input.dataset.configEdit, value);
+      setConfigEditPath(snapshot, input.dataset.configEdit, value);
     });
-    version.parameters = "已保存结构化配置快照";
+    const error = configSnapshotError(snapshot);
+    if (error) return showToast(error);
+    version.snapshot = snapshot;
+    version.parameters = configSnapshotSummary(snapshot);
     version.changeSummary = version.changeSummary || "演示环境草稿配置已更新";
-    version.updated = createDate(0);
+    version.updated = configVersionTime();
+    version.lastAction = {action:"save",operator:roleOwnerNames[state.role],time:version.updated};
+    prototype.auditRecords.unshift({id:`audit-config-save-${version.id}-${configVersionNow()}`,time:version.updated,action:"保存配置草稿",object:version.version,operator:roleOwnerNames[state.role],result:"draft",trace_id:version.traceId,self_review:false});
     showToast(`${version.version}配置已保存（演示环境未进入审核）`);
     render();
   }
@@ -2998,11 +3202,7 @@
   function configScopedVersionDrawer() {
     const configItem = businessConfigMenuItem(state.configScopedItem);
     if (!configItem) return "";
-    const versions = configItemVersions(configOverviewItems().find(item => item.id === configItem.id) || {
-      id: configItem.id,
-      name: configItem.label,
-      versionDomains: [configItem.label]
-    });
+    const versions = configSubgroupVersions(configItem);
     const section = activeBusinessConfigSection();
     return `<div class="tm-overlay" data-close-config-scoped="1"></div><aside class="tm-drawer dev-drawer-wide dev-config-scoped-drawer" aria-label="${h(configItem.label)}版本列表">
       <header>
@@ -3067,7 +3267,6 @@
         <label><span>版本名称</span><input data-config-version-field="name" value="${h(values.name)}"></label>
         <label><span>责任角色</span><input data-config-version-field="owner" value="${h(values.owner)}"></label>
         <label><span>配置域</span><input data-config-version-field="domains" value="${h(values.domains)}" placeholder="用顿号分隔"></label>
-        <label><span>计划生效时间</span><input data-config-version-field="effectiveTime" value="${h(values.effectiveTime)}"></label>
         <label><span>通知类型</span><select data-config-version-field="notificationType">${["重要","一般","不发送通知"].map(value => `<option value="${h(value)}" ${value===values.notificationType?"selected":""}>${h(value)}</option>`).join("")}</select></label>
         <label><span>发布方式</span><select data-config-version-field="publishMode">${["即时生效","定时生效","待设置"].map(value => `<option value="${h(value)}" ${value===values.publishMode?"selected":""}>${h(value)}</option>`).join("")}</select></label>
         <label><span>影响范围</span><input data-config-version-field="impact" value="${h(values.impact)}"></label>
@@ -3156,7 +3355,7 @@
     const action = info.action;
     return `<div class="tm-overlay" data-close-config-action="1"></div><section class="dev-modal" role="dialog" aria-modal="true">
       <header><div><strong>${labels[action] || "配置版本操作"}</strong><span>${h(item.version)} · ${h(item.name)}</span></div><button data-close-config-action="1" aria-label="关闭">×</button></header>
-      <div><section><h3>操作确认</h3><p class="dev-help">${action === "activate" ? "立即生效前会检查唯一生效/待生效版本和配置校验；当前演示环境不进入审核流程。" : action === "schedule" ? "定时生效会直接写入计划时间；当前演示环境不进入审核流程，并在执行前保留当前生效版本。" : "该操作不会删除历史记录，必须填写原因并写入配置审计。"}</p><div class="dev-action-fields">${action === "schedule" ? `<label class="full"><span>计划生效时间</span><input id="config-action-effective-time" value="2026-11-09 02:00"></label>` : ""}<label class="full"><span>操作原因</span><textarea id="config-action-reason" placeholder="请输入原因（至少10个字）"></textarea></label></div></section></div>
+      <div><section><h3>操作确认</h3><p class="dev-help">${action === "activate" ? "立即生效后替换当前版本并自动锁定；当前业务配置版本不进入审核流程。" : action === "schedule" ? "到达计划时间后自动替换当前版本，执行前保留当前生效版本。" : "该操作不会删除历史记录，必须填写原因并写入配置审计。"}</p><div class="dev-action-fields">${action === "schedule" ? `<label class="full"><span>计划生效时间（UTC+08:00）</span><input type="datetime-local" step="1" id="config-action-effective-time" min="${configVersionTime().replace(" ","T")}" value="${configVersionTime(configVersionNow()+60*60*1000).replace(" ","T")}"></label>` : ""}<label class="full"><span>操作原因</span><textarea id="config-action-reason" placeholder="请输入原因（至少10个字）"></textarea></label></div></section></div>
       <footer><button class="tm-button secondary" data-close-config-action="1">取消</button><button class="tm-button primary" data-submit-config-action="${h(action)}">确认${labels[action] || "操作"}</button></footer>
     </section>`;
   }
@@ -3171,14 +3370,15 @@
     if (info.id && !sourceItem) return showToast("版本不存在");
     const sourceConfigItem = configMenuItemForVersion(sourceItem);
     const targetConfigItem = info.configItemId ? businessConfigMenuItem(info.configItemId) : sourceConfigItem;
-    const targetVersions = targetConfigItem ? configSubgroupVersions(targetConfigItem) : configVersionItems();
+    if (!targetConfigItem) return showToast("请先进入具体配置小组创建版本");
+    const targetVersions = configSubgroupVersions(targetConfigItem);
     if (info.mode === "edit" && sourceItem) {
       if (sourceItem.locked || sourceItem.status !== "draft") return showToast("版本已锁定或不是草稿，请复制为新版本后修改");
       Object.assign(sourceItem,{
-        name:values.name,owner:values.owner,domains,effectiveTime:values.effectiveTime,
+        name:values.name,owner:values.owner,domains,effectiveTime:"-",
         notificationType:values.notificationType,publishMode:values.publishMode,
         changeSummary:values.changeSummary,impact:values.impact || "待试算",
-        parameters:values.parameters || "待填写",updated:createDate(0)
+        parameters:values.parameters || "待填写",updated:configVersionTime()
       });
       showToast(`${sourceItem.version}已更新草稿`);
       state.configVersionModal = null;
@@ -3189,11 +3389,11 @@
     const id = `${targetConfigItem ? "subcfg" : "cfg"}-${values.version.replace(/[^a-zA-Z0-9.-]/g,"").toLowerCase()}-${Date.now().toString().slice(-4)}`;
     targetVersions.unshift({
       id,configItemId:targetConfigItem?.id,version:values.version,name:values.name,owner:values.owner,createdBy:values.owner,domains,status:"draft",locked:false,
-      created:createDate(0),publishedAt:"-",effectiveTime:values.effectiveTime || "-",previousVersion:sourceItem?.version || "-",
+      created:configVersionTime(),publishedAt:"-",effectiveTime:"-",previousVersion:sourceItem?.version || "-",
       basedOn:sourceItem?.version || "-",notificationType:values.notificationType,publishMode:values.publishMode,
       changeSummary:values.changeSummary,impact:values.impact || "待试算",parameters:values.parameters || "待填写",
       scheduledEffectiveTime:"-",snapshot:JSON.parse(JSON.stringify(sourceItem?.snapshot || (targetConfigItem ? configSubgroupSnapshot(targetConfigItem, "active") : null))),
-      traceId:`trace-config-${Date.now().toString().slice(-6)}`,updated:createDate(0)
+      traceId:`trace-config-${Date.now().toString().slice(-6)}`,updated:configVersionTime()
     });
     if (targetConfigItem) state.configSubgroupVersionId = id;
     showToast(`${values.version}已创建，可直接设置生效或定时生效（演示环境已关闭审核）`);
@@ -3277,28 +3477,36 @@
     const reason = document.querySelector("#config-action-reason")?.value.trim() || "";
     if (!item) return showToast("版本不存在");
     if (reason.length < 10) return showToast("操作原因至少填写10个字");
-    if (info.action === "withdraw") item.status = "voided";
-    if (info.action === "void") item.status = "voided";
-    if (info.action === "activate") {
-      if (item.status !== "draft") return showToast("只有草稿版本可以设置生效");
-      item.status = "active";
+    if (!configVersionActions(item).some(([action]) => action === info.action)) return showToast("当前版本状态不允许此操作");
+    if (info.action === "withdraw" || info.action === "void") {
+      item.status = "voided";
       item.locked = true;
-      item.lockTime = createDate(0);
-      item.publishedAt = item.lockTime;
-      item.effectiveTime = item.lockTime;
-      item.lockReason = "立即生效完成";
+      item.effectiveTime = "-";
+      item.scheduledEffectiveTime = "-";
+    }
+    if (info.action === "activate") {
+      if (item.status !== "draft" || item.locked) return showToast("只有未锁定草稿可以设置生效");
+      const error = configSnapshotError(item.snapshot);
+      if (error) return showToast(error);
+      activateConfigVersion(item,configVersionCollection(item),configVersionNow(),roleOwnerNames[state.role]);
     }
     if (info.action === "schedule") {
       if (item.status !== "draft") return showToast("只有草稿版本可以设置定时生效");
       if (configVersionCollection(item).some(row => row.status === "scheduled" && row.id !== item.id)) return showToast("当前小分组已有待生效版本，请先处理现有版本");
       const effectiveTime = document.querySelector("#config-action-effective-time")?.value.trim() || "";
       if (!effectiveTime) return showToast("请填写计划生效时间");
+      const scheduledAt = configScheduledTime(effectiveTime);
+      if (!Number.isFinite(scheduledAt)) return showToast("计划生效时间格式不正确");
+      if (scheduledAt <= configVersionNow()) return showToast("计划生效时间必须晚于当前服务器时间");
+      const error = configSnapshotError(item.snapshot);
+      if (error) return showToast(error);
       item.status = "scheduled";
+      item.locked = true;
       item.effectiveTime = "-";
-      item.scheduledEffectiveTime = effectiveTime;
+      item.scheduledEffectiveTime = configVersionTime(scheduledAt);
       item.publishMode = "定时生效";
     }
-    item.updated = createDate(0);
+    item.updated = configVersionTime();
     item.lastAction = {action:info.action,reason,operator:roleOwnerNames[state.role],time:item.updated};
     const actionLabel = info.action === "withdraw" ? "撤回" : info.action === "void" ? "作废" : info.action === "schedule" ? "设置定时生效" : "立即生效";
     prototype.auditRecords.unshift({id:`audit-config-${Date.now().toString().slice(-6)}`,time:item.updated,action:`配置版本${actionLabel}`,object:item.version,operator:roleOwnerNames[state.role],result:item.status,trace_id:item.traceId,self_review:false});
@@ -3347,7 +3555,7 @@
         });
       });
     });
-    prototype.riskCases.forEach(item=>result.push({type:"风险案件",title:item.name,subtitle:`${item.id} · ${statusLabel(item.status)}`,keywords:[item.id,item.name,item.partner,item.features.join(" "),item.riskLevel].join(" ").toLowerCase(),action:()=>{state.riskCaseId=item.id;navigate("admin-review/risk-review");}}));
+    prototype.riskCases.forEach(item=>result.push({type:"风险案件",title:item.name,subtitle:`${item.id} · ${statusLabel(item.status)}`,keywords:[item.id,item.name,item.partner,item.features.join(" "),item.riskLevel].join(" ").toLowerCase(),action:()=>{state.riskCaseId=item.id;render();}}));
     prototype.reportPackets.forEach(packet=>packet.dimensions.forEach(item=>result.push({type:"报表维度",title:item.label,subtitle:`${packet.title} · ${item.id}`,keywords:[item.id,item.label,item.recommendation,...item.clients,...item.commissions,item.riskCase].join(" ").toLowerCase(),action:()=>{state.reportDimensionId=item.id;navigate(`admin-performance/${packet.tab}`);}})));
     prototype.integrationHealth.systems.forEach(item=>result.push({type:"集成系统",title:item.name,subtitle:`${statusLabel(item.status)} · ${item.backlog}积压`,keywords:[item.id,item.name,item.status,item.dependencies.join(" ")].join(" ").toLowerCase(),action:()=>{state.integrationSystemId=item.id;navigate("admin-review/integration");}}));
     prototype.integrationHealth.eventGaps.forEach(item=>result.push({type:"事件缺口",title:`${item.source} ${item.stage}`,subtitle:`${item.id} · ${item.gap}条缺口`,keywords:[item.id,item.source,item.stage,item.idempotencyKey,...item.blockedCommissions].join(" ").toLowerCase(),action:()=>navigate("admin-review/integration")}));
@@ -3827,6 +4035,7 @@
   }
 
   function modulePrimaryAction() {
+    if(state.tabId==="config-permission")return "refresh";
     return modulePrimaryActions[state.tabId] || "claim";
   }
 
@@ -3835,6 +4044,8 @@
   }
 
   function actionDisplayLabel(actionId) {
+    if (demoSkipsApproval() && actionId === "submit") return "提交处理";
+    if (demoSkipsApproval() && actionId === "approve") return "确认处理";
     return state.routeId === "admin-modules" ? moduleActionLabel(actionId) : actionCatalog[actionId].label;
   }
 
@@ -3878,7 +4089,7 @@
         {key:"rows",label:"行数",type:"number",value:() => Math.max(1,filteredRows().length)}
       ]
     };
-    return definitions[actionId] || [];
+    return (definitions[actionId] || []).filter(field => !demoSkipsApproval() || field.key !== "approver");
   }
 
   function moduleWorkflowSteps(schema) {
@@ -3986,6 +4197,7 @@
     widths:{}, hidden:new Set(), order:[], focusTarget:null, pollTimer:null, detailError:null, requestKeys:{}
   };
   const tqTypes = {
+    partner_followup:["合作方跟进","Partner Follow-up"],
     risk_review:["风险复核","Risk Review"], settlement_overdue:["结算超时复核","Overdue Settlement"],
     appeal:["申诉复核","Appeal Review"], hold_extend:["结算延长复核","Settlement Extension"],
     guarantee_offset:["保证金抵扣","Reserve Offset"], chargeback:["冲正追回","Reversal & Recovery"],
@@ -3996,17 +4208,19 @@
   };
   const tqStates = {
     open:["待认领","Unclaimed"], processing:["处理中","Processing"], waiting_material:["待补件","Awaiting Materials"],
-    pending_approval:["待审批","Pending Approval"], returned:["退回补充","Returned"],
+    pending_approval:demoSkipsApproval() ? ["待接续","Pending Continuation"] : ["待审批","Pending Approval"], returned:["退回补充","Returned"],
     pending_execution:["待执行","Pending Execution"], executing:["执行中","Executing"],
     execution_failed:["执行失败","Execution Failed"], done:["已完成","Completed"], closed:["已关闭","Closed"]
   };
   const tqPurposes = {
+    general:"资料核对","crm-sync":"CRM同步核对",finance:"资金核对",risk:"风险跟进",
     risk_investigation:"风险调查", signal_review:"超时信号复核", settlement_recheck:"结算解除重检",
     cluster_determination:"集群认定", cluster_member_correction:"集群成员纠错",
     blacklist_add:"加入本地名单", blacklist_remove:"移出本地名单",
     manual_credit_override:"普通信用调级", risk_credit_propagation:"风险信用传导"
   };
   const tqConclusions = {
+    recorded:"已核对并记录",referred:"已转交专业处理",complete_followup:"完成跟进",
     clear:"风险排除",confirm:"风险成立",observe:"继续观察",change_request:"变更申请",
     signal_confirm:"确认信号",signal_reject:"驳回信号",uphold:"维持原决定",amend:"改判",
     extend:"延长结算",extend_settlement:"延长结算",maintain:"维持保护",adjust:"调整保护",release:"解除熔断",
@@ -4025,6 +4239,7 @@
     approval_return:"退回补充",evidence_access:"查看证据",coordinator_complete:"领域执行回执"
   };
   const tqFieldLabels = {
+    responsible_role:"责任岗位",request_kind:"跟进类别",request_reason:"任务说明",
     primary_object:"主对象",event_ids:"关联事件",risk_band:"风险档",rules:"命中规则",aggregation:"合作方风险聚合",
     numerator:"风险客户数",denominator:"统计客户数",ratio:"风险客户占比",window_start:"窗口起始",window_end:"窗口结束",
     threshold:"阈值",current_determination:"当前认定",signal_id:"信号编号",case_ref:"当前案件",case_refs:"关联案件",
@@ -4076,7 +4291,8 @@
     release_recheck_source:"独立解除重检来源",expected_source_version:"案件版本",source_path:"来源位置",
     status_group:"状态分组",source_types:"任务类型",workflow_states:"任务状态",q:"关键词",
     sort_by:"排序字段",field:"字段",direction:"排序方向",page:"页码",page_size:"每页条数",
-    user_id:"员工编号",display_name:"显示名",role_code:"职责编码"
+    user_id:"员工编号",display_name:"显示名",role_code:"职责编码",business_ref:"关联业务单据",
+    elapsed_days_at_trigger:"触发时累计天数",current_elapsed_days:"当前累计天数"
   };
   const tqColumns = [
     {key:"select",zh:"选择",en:"Select",width:44,min:44,fixed:true},
@@ -4102,7 +4318,7 @@
   function tqT(zh,en) { return tq.locale === "en" ? en || zh : zh; }
   function tqLabel(map,key) { const value=map[key]; return Array.isArray(value) ? value[tq.locale==="en"?1:0] : value || key || "—"; }
   function tqService() { return prototype.taskQueue; }
-  function tqContext(extra={}) { return {role:state.role,scenario:state.scenario,...extra}; }
+  function tqContext(extra={}) { return {role:state.role,scenario:state.scenario,exclude_boundary:state.scenario!=="boundary",...extra}; }
   function tqId(prefix="tq") { return `${prefix}-${globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`}`; }
   function tqClone(value) { return JSON.parse(JSON.stringify(value)); }
   function tqDate(value,short=false) {
@@ -4164,7 +4380,7 @@
   function taskQueueResetForRole() {
     tq.role=null; tq.query=null; tq.result=null; tq.detail=null; tq.taskId=null; tq.form=null; tq.dirty=false;
     tq.preview=null; tq.selected.clear(); tq.dialog=null; tq.requestKeys={}; tq.hashSeen=null; tq.error=null;
-    tq.notice=null;tq.detailError=null;tq.metric=null;tq.lastRead=0;tq.lastDetailRead=0;
+    tq.notice=null;tq.detailError=null;tq.metric=null;tq.lastRead=0;tq.lastDetailRead=0;tq.inspection=null;
   }
   function tqEnsure() {
     if (!tqService()) return false;
@@ -4272,7 +4488,7 @@
       case "task":return `<button class="tq-task-link" data-tq-open="${h(row.task_id)}">${h(row.task_id)}</button><span class="tq-task-title" title="${h(row.title)}">${h(row.title)}</span>`;
       case "type":return h(tqLabel(tqTypes,row.source_type));
       case "source":return `<span class="tq-ellipsis" title="${h(row.object_summary || row.object_id || "")}">${h(row.object_summary || row.object_id || tqT("未关联","Not linked"))}</span><small>${h(row.source_ref?.id || row.source_ref || "—")}</small>`;
-      case "priority":return `<span class="tq-priority ${h(row.priority)}"><i></i>${h(tqT(({high:"高",medium:"中",low:"低"})[row.priority],({high:"High",medium:"Medium",low:"Low"})[row.priority]))}</span>`;
+      case "priority":return `<span class="tq-priority ${h(row.priority)}"><i></i>${h(tqT(({urgent:"紧急",high:"高",medium:"中",normal:"普通",low:"低"})[row.priority],({urgent:"Urgent",high:"High",medium:"Medium",normal:"Normal",low:"Low"})[row.priority]))}</span>`;
       case "status":return tqBadge(row.workflow_state);
       case "sla":return tqSLA(row);
       case "team":return h(row.team?.name || tqT("待分配","Unassigned"));
@@ -4343,12 +4559,12 @@
   }
   function tqPagination() {
     const meta=tq.result?.meta || {page:1,page_size:tq.query.page_size,total:0,pages:0};
-    return `<footer class="tq-pagination"><div><label>${h(tqT("每页","Per Page"))}<select data-tq-page-size aria-label="${h(tqT("每页条数","Rows per page"))}">${[10,20,50].map(size=>`<option ${meta.page_size===size?"selected":""}>${size}</option>`).join("")}</select></label><span>${h(tqT(`共${meta.total}条`,`${meta.total} total`))}</span><small>${h(tqT("最后刷新","Last Refresh"))} ${h(tqDate(meta.snapshot_at || meta.as_of))}</small></div><div class="tq-page-controls">${tqIconButton("previous","left",tqT("上一页","Previous Page"),meta.page<=1?"disabled":"")}<span>${h(tqT(`第${meta.page}页`, `Page ${meta.page}`))}${meta.pages?` / ${meta.pages}`:""}</span>${tqIconButton("next","right",tqT("下一页","Next Page"),meta.page>=meta.pages?"disabled":"")}<label>${h(tqT("跳至","Go To"))}<input type="number" min="1" max="${Math.max(meta.pages,1)}" value="${meta.page}" data-tq-page-jump aria-label="${h(tqT("跳转页码","Page number"))}"></label>${tqButton("jump",h(tqT("确定","Go")))}</div></footer>`;
+    return `<footer class="tq-pagination"><div><label>${h(tqT("每页","Per Page"))}<select data-tq-page-size aria-label="${h(tqT("每页条数","Rows per page"))}">${[10,20,50].map(size=>`<option ${meta.page_size===size?"selected":""}>${size}</option>`).join("")}</select></label><span>${h(tqT(`共${meta.total}条`,`${meta.total} total`))}</span><small>${h(tqT("来源快照","Source Snapshot"))} ${h(tqDate(meta.snapshot_at || meta.as_of))}</small></div><div class="tq-page-controls">${tqIconButton("previous","left",tqT("上一页","Previous Page"),meta.page<=1?"disabled":"")}<span>${h(tqT(`第${meta.page}页`, `Page ${meta.page}`))}${meta.pages?` / ${meta.pages}`:""}</span>${tqIconButton("next","right",tqT("下一页","Next Page"),meta.page>=meta.pages?"disabled":"")}<label>${h(tqT("跳至","Go To"))}<input type="number" min="1" max="${Math.max(meta.pages,1)}" value="${meta.page}" data-tq-page-jump aria-label="${h(tqT("跳转页码","Page number"))}"></label>${tqButton("jump",h(tqT("确定","Go")))}</div></footer>`;
   }
   function taskQueuePage() {
     if (!tqEnsure()) return `<section class="tq-page"><h1>${h(tqT("任务队列","Task Queue"))}</h1><div class="tq-error">AFF-50301 · ${h(tqT("任务服务尚未就绪","Task service is unavailable"))}</div></section>`;
     const scopes={mine:tqT("我的待办","My Tasks"),claimable:tqT("待认领","Unclaimed"),team:tqT("团队任务","Team Tasks"),authorized:tqT("全部可见","All Visible")};
-    return `<section class="tq-page" aria-label="${h(tqT("任务队列","Task Queue"))}"><header class="tq-page-head"><h1>${h(tqT("任务队列","Task Queue"))}</h1></header>
+    return `<section class="tq-page" aria-label="${h(tqT("任务队列","Task Queue"))}"><header class="tq-page-head"><h1>${h(tqT("任务队列","Task Queue"))}</h1><small>存量任务时限按业务快照 ${h(tqDate(tq.result?.meta?.snapshot_at || tq.result?.meta?.as_of || prototype.taskQueue.clock))}（UTC+8）计算</small></header>
       ${tq.notice?`<div class="tq-notice" role="status"><span>${h(tq.notice)}</span>${tqIconButton("dismiss_notice","close",tqT("关闭提示","Dismiss"))}</div>`:""}
       ${!navigator.onLine?`<div class="tq-error" role="alert">${h(tqT("连接异常，所有写操作已暂停","Connection unavailable. Write operations are paused."))}</div>`:""}
       ${["partial","missing","stale"].includes(tq.result?.data_quality?.status)?`<div class="tq-inline-warning" role="status">${h(tqT(({partial:"部分来源数据暂不可用",missing:"存在待补充的关键数据",stale:"来源数据已超过更新时限"})[tq.result.data_quality.status],({partial:"Some source data is unavailable",missing:"Required source data is missing",stale:"Source data is out of date"})[tq.result.data_quality.status]))}${tq.result.data_quality.missing_fields?.length?` · ${h(tq.result.data_quality.missing_fields.map(key=>tqFieldLabels[key] || key).join(" / "))}`:""}</div>`:""}
@@ -4388,6 +4604,8 @@
     if (value===null || value===undefined || value==="") return "—";
     if (typeof value==="boolean") return h(value?tqT("是","Yes"):tqT("否","No"));
     if (typeof value!=="object") {
+      if(key==="responsible_role")return h(roleOwnerNames[value] || value);
+      if(key==="request_kind")return h(tqPurposes[value] || value);
       if (key==="signal_status" && value==="rejected") return h(tqT("信号已驳回","Signal Rejected"));
       if (key==="task_result" && value==="rejected") return h(tqT("处置被否决","Disposition Rejected"));
       if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(String(value)) || /(?:_at|_until|_start|_end)$/.test(key) && /^\d{4}-/.test(String(value))) return `<time datetime="${h(value)}" title="${h(`${value} · ${tq.options?.timezone || "Asia/Shanghai"}`)}">${h(tqDate(value))}</time>`;
@@ -4401,10 +4619,129 @@
   function tqFacts(values) {
     return `<dl class="tq-facts">${Object.entries(values).map(([key,value])=>`<div><dt>${h(tqFieldLabels[key] || key)}</dt><dd>${tqValue(value,key)}</dd></div>`).join("")}</dl>`;
   }
+  function tqObjectButton(type,id,label,taskId,tab="overview") {
+    return `<button class="tq-task-link" data-tq-object="${h(type)}" data-object-id="${h(id)}" data-object-task="${h(taskId)}" data-object-tab="${h(tab)}">${h(label || id)}</button>`;
+  }
+  function tqAffectedObjects(taskId) {
+    try {
+      const result=tqService().affectedObjects(taskId,tqContext());
+      return `<section class="tq-detail-section tq-affected"><h3>受影响对象 <small>${result.items.filter(i=>i.type==="customer").length} 位客户 · ${result.items.filter(i=>i.type==="partner").length} 位合作者</small></h3>${result.items.map(item=>`<article><div><span class="tq-muted">${item.type==="customer"?"客户":"合作者"}</span><strong>${h(item.name)}</strong><small>${h(item.id)} · ${h(item.relations.join(" / "))}</small></div>${item.available?tqObjectButton(item.type,item.id,"查看详情",taskId):`<span class="tq-muted">${h(item.disabled_reason)}</span>`}</article>`).join("") || `<p class="tq-muted">当前任务未关联客户或合作者</p>`}</section>`;
+    } catch(error) { return `<section class="tq-detail-section"><h3>受影响对象</h3><p class="tq-muted">${h(error.message || "关联对象暂不可用")}</p></section>`; }
+  }
+  function tqInspectionRoute(hash) {
+    const path=String(hash || "").split("?")[0],params=new URLSearchParams(String(hash || "").split("?")[1] || "");
+    return /^#\/(?:customer|partner)-360\/[^/]+$/.test(path)&&params.get("task_id")===tq.inspection?.taskId&&tq.inspection?.role===state.role;
+  }
+  function tqOpenObject(type,id,taskId,tab="overview") {
+    try {
+      tqService().reviewObject(taskId,type,id,tqContext());
+      if(!tq.inspection || tq.inspection.taskId!==taskId || tq.inspection.role!==state.role){
+        const source=taskObjectPageActive()?new URLSearchParams(location.hash.split("?")[1] || "").get("return_to"):location.hash;
+        const returnHash=typeof source==="string"&&/^#\/(?:tasks|workbench)(?:\?|$)/.test(source)?source:`#/tasks?task_id=${encodeURIComponent(taskId)}`;
+        tq.inspection={taskId,role:state.role,returnHash,drawerScroll:document.querySelector(".tq-drawer-body")?.scrollTop || 0,pageScroll:window.scrollY || 0};
+      }
+      tq.dialog=null;
+      const params=new URLSearchParams({task_id:taskId,tab,return_to:tq.inspection.returnHash});
+      location.hash=`#/${type==="customer"?"customer":"partner"}-360/${encodeURIComponent(id)}?${params}`;
+    } catch(error) {tq.notice=error.message || "关联资料无法查看";render();}
+  }
+  function tqReturnFromObject() {
+    const params=new URLSearchParams(location.hash.split("?")[1] || ""),memo=tq.inspection;
+    const fallback=`#/tasks?task_id=${encodeURIComponent(params.get("task_id") || "")}`;
+    const back=memo?.role===state.role?memo.returnHash:params.get("return_to");
+    const safe=typeof back==="string"&&/^#\/(?:tasks|workbench)(?:\?|$)/.test(back)?back:fallback;
+    tq.dialog=null;
+    if(tq.taskId)tqReadDetail();
+    location.hash=safe;
+  }
+  function tqRestoreInspection() {
+    const memo=tq.inspection;
+    if(!memo || memo.role!==state.role || location.hash!==memo.returnHash)return;
+    tq.inspection=null;
+    requestAnimationFrame(()=>{window.scrollTo(0,memo.pageScroll);const body=document.querySelector(".tq-drawer-body");if(body)body.scrollTop=memo.drawerScroll;});
+  }
+  function taskObjectPageActive() {
+    return state.routeId==="customer-360" || state.routeId==="partner-360"&&new URLSearchParams(location.hash.split("?")[1] || "").has("task_id");
+  }
+  function taskObjectPage() {
+    const params=new URLSearchParams(location.hash.split("?")[1] || ""),taskId=params.get("task_id");
+    const type=state.routeId==="customer-360"?"customer":"partner",partner=type==="partner";
+    const back=`<button class="tm-button secondary" data-tq-object-back>← 返回原任务</button>`;
+    let d;
+    try {
+      if(tq.role && tq.role!==state.role)taskQueueResetForRole();
+      d=tqService().reviewObject(taskId,type,state.detailId,tqContext());
+    } catch(error) {
+      return `<section class="tq-object-page"><header class="tq-object-head"><h1>关联资料无法查看</h1>${back}</header><div class="tq-error" role="alert">${h(error.code || "AFF-50301")} · ${h(error.message || "请稍后重试")}</div></section>`;
+    }
+    const p=d.profile,missing="来源未提供";
+    const objectLabels={active:"正常",verified:"已认证",pending:"待处理",valid_ftd:"有效FTD",ftd:"FTD",registered:"已注册",churned:"已流失",not_required:"无需认证",sync_failed:"同步失败"};
+    const objectValue=value=>typeof value==="string"&&objectLabels[value]?objectLabels[value]:value;
+    const facts=values=>tqFacts(Object.fromEntries(Object.entries(values).map(([key,value])=>[key,objectValue(value)??missing])));
+    const table=(columns,rows,empty="暂无关联记录")=>rows.length?`<div class="tq-evidence-table"><table><thead><tr>${columns.map(c=>`<th scope="col">${h(c[1])}</th>`).join("")}</tr></thead><tbody>${rows.map(row=>`<tr>${columns.map(c=>`<td>${c[2]?c[2](row):tqValue(row[c[0]],c[0])}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:`<p class="tq-muted">${h(empty)}</p>`;
+    const section=(title,body)=>`<section class="tq-object-section"><h2>${h(title)}</h2>${body}</section>`;
+    const objectLink=(kind,id,label,tab="overview")=>id?tqObjectButton(kind,id,label,taskId,tab):missing;
+    const caseFacts=r=>facts({"客户编号":r.customer_id,"合作者编号":r.partner_id,"佣金案件":r.commission_case_id,"结算案件":r.settlement_case_id,"结算批次（仅聚合）":r.settlement_batch_id,"佣金金额":r.amount===null?null:{amount:r.amount,currency:"USD"},"冻结金额":r.frozen_amount===null?null:{amount:r.frozen_amount,currency:"USD"},"结算状态":r.status,"原因":r.reason,"来源版本":r.source_version,"限制引用":r.release_targets});
+    const selectedCase=d.cases.find(r=>r.settlement_case_id===params.get("settlement_case_id"));
+    const cases=table([
+      ["customer_id","客户",r=>objectLink("customer",r.customer_id,r.customer_id)],
+      ["commission_case_id","佣金案件"],["settlement_case_id","结算案件"],
+      ["amount","佣金金额",r=>r.amount===null?missing:tqMoney({amount:r.amount,currency:"USD"})],
+      ["status","结算状态",r=>tqBadge(r.status)],
+      ["in_task_scope","任务范围",r=>r.in_task_scope?"本任务涉及":"其他关联案件"],
+      ["detail","详情",r=>`<button class="tq-task-link" data-tq-object-case="${h(r.settlement_case_id)}" aria-expanded="${selectedCase?.settlement_case_id===r.settlement_case_id}">查看案件</button>`]
+    ],d.cases,"暂无佣金或结算案件")+(selectedCase?`<div class="tq-object-case-panel" tabindex="-1"><h3>案件详情 · ${h(selectedCase.settlement_case_id)}</h3>${caseFacts(selectedCase)}</div>`:"");
+    const tasks=table([["task_id","任务",r=>`<button class="tq-task-link" data-tq-linked-task="${h(r.task_id)}">${h(r.task_id)}</button>`],["title","内容"],["status","状态",r=>tqBadge(r.status)],["owner","处理人"],["updated_at","更新时间"]],d.tasks);
+    const basic=facts({"编号":p.id,"名称":p.name,"国家":p.country,"CRM编号":p.crm_id,"CRM账户状态":p.crm_status,"邮箱":p.email_masked,"手机号":p.phone_masked,"注册时间":p.registered_at,"KYC状态":p.kyc_status,...(partner?{"主体类型":p.type==="institution"?"机构":p.type==="individual"?"个人":null,"KYB状态":p.kyb_status,"信用等级":p.credit_level}:{"转化阶段":p.lifecycle}),"风险档":p.risk_band,"数据截至":d.as_of});
+    const clients=table([["id","客户",r=>objectLink("customer",r.id,r.name)],["id","客户编号"],["country","国家"],["lifecycle","转化阶段",r=>h(objectValue(r.lifecycle) || missing)],["risk_band","风险档"]],d.customers);
+    const account=p.account_facts;
+    const accountFacts=account?facts({"统计范围":account.period,"累计入金":{amount:account.deposit,currency:account.currency},"累计出金":{amount:account.withdrawal,currency:account.currency},"净入金":{amount:account.net_deposit,currency:account.currency},"交易活跃天数":account.active_days,"标准交易手数":account.standard_lots}):`<p class="tq-muted">来源未提供入出金、交易汇总，不能用任务影响金额替代。</p>`;
+    const events=table([["id","风险事件"],["type","事件类型"],["reason","原因"],["determination","认定状态",r=>tqBadge(r.determination)],["rule","规则"],["rule_version","规则版本"],["occurred","发生时间"]],d.events,"暂无关联风险事件");
+    const tabsForObject=partner?[["overview","概览"],["promotion","客户与推广"],["compliance","合规与资料"],["finance","财务与结算"],["risk","风险与信用"],["follow-up","跟进与审计"]]:[["overview","概览"],["attribution","归属与转化"],["finance","佣金与结算"],["risk","风险与关联"],["events","事件时间线"]];
+    let body="";
+    if(state.tabId==="overview"){
+      body=section(partner?"合作者资料":"客户资料",basic)+section(partner?"关联客户":"归属合作者",partner?clients:objectLink("partner",p.partner_id,d.partner?.name || p.partner_id))+section("关联案件",cases);
+    } else if(state.tabId==="compliance"){
+      body=section("CRM资料与认证",basic)+section("收款与税务资料",facts({"收款主体":null,"受益所有人":null,"收款账户核验":null,"税务资料核验":null}));
+    } else if(state.tabId==="promotion"){
+      body=section("关联客户",clients)+section("推广资料",facts({"活动配置":null,"回传配置":null}));
+    } else if(state.tabId==="attribution"){
+      const attr=p.attribution || {};
+      body=section("归属资料",objectLink("partner",p.partner_id,d.partner?.name || p.partner_id)+facts({"渠道":attr.channel,"推广链接":attr.link_id || attr.linkId,"Sub ID":attr.sub_id || attr.subId,"归属规则":attr.rule,"锁定时间":attr.locked_at || attr.attributedAt}))+section("转化阶段",table([["stage","阶段"],["at","达成时间"]],p.milestones || [],"来源未提供阶段达成时间"))+section("入出金与交易汇总",accountFacts);
+    } else if(state.tabId==="finance"){
+      body=(!partner?section("入出金与交易汇总",accountFacts):"")+section("佣金与结算案件",cases);
+      if(partner)for(const [key,title] of [["commissions","其他佣金记录"],["statements","结算单"],["withdrawals","提现记录"],["taxRecords","税务记录"],["reversals","冲正与追回"]]){
+        body+=section(title,table([["id","编号"],["name","内容"],["amount","金额 / 净额",r=>r.amount??r.net??r.withheld??missing],["status","状态",r=>tqBadge(r.status)]],d.funds[key] || [],"当前来源未提供该合作者的关联记录"));
+      }
+    } else if(state.tabId==="risk"){
+      body=section("风险快照",facts({"风险档":p.risk_band,...(partner?{"信用等级":p.credit_level}:{}),"当前任务":taskId}))+section("风险事件",events)+section("关联处理任务",tasks);
+    } else {
+      body=section(partner?"跟进任务":"转化时间线",partner?tasks:table([["stage","阶段"],["at","达成时间"]],p.milestones || []))+section("风险事件",events)+section("处理历史",d.history.length?d.history.map(entry=>`<article class="tq-object-history">${facts({"任务":entry.task_id,"时间":entry.created_at || entry.at || entry.time,"动作":entry.action || entry.type,"说明":entry.summary || entry.reason || entry.message})}</article>`).join(""):`<p class="tq-muted">暂无处理记录</p>`);
+    }
+    return `<div class="tq-object-page"><header class="tq-object-head"><div><small>${partner?"合作者360":"客户360"} · ${h(p.id)}</small><h1>${h(p.name)}</h1><span>${h(p.country || missing)} · ${h(p.risk_band || missing)}${partner?` · ${h(p.credit_level || missing)}`:""}</span></div>${back}</header><div class="tq-object-context"><span>来源任务 ${h(taskId)}</span><span>数据截至 ${h(tqDate(d.as_of))}</span></div><nav class="p360-tabs" aria-label="关联资料页签">${tabsForObject.map(([key,label])=>`<button class="${state.tabId===key?"active":""}" data-tq-object-tab="${key}" aria-current="${state.tabId===key?"page":"false"}">${h(label)}</button>`).join("")}</nav>${body}<footer class="tq-object-footer">${back}</footer></div>`;
+  }
+  function tqEvidenceItems(task) {
+    return task?.evidence_refs?.length?task.evidence_refs:task?.sections?.evidence?.items || [];
+  }
+  function tqEvidenceBody(item) {
+    const detail=item?.detail;
+    const metadata=tqFacts({
+      "证据编号":item?.evidence_id,"所属任务":item?.task_id || tq.taskId,
+      "名称":item?.name,"类型":item?.kind==="source_record"?tqT("来源核验记录","Source Record"):item?.kind,"来源系统":item?.source_system || item?.source,
+      "来源对象":item?.source_ref?.id,"来源版本":item?.source_version,
+      "任务快照版本":item?.snapshot_version,"采集时间":item?.collected_at,
+      "摘要校验":item?.hash || tqT("来源未提供","Not provided by source"),
+      "核验状态":item?.scan_status || item?.status
+    });
+    if(!detail)return `${metadata}<pre class="tq-evidence-text">${h(item?.content || item?.summary || tqT("暂无可预览内容","Preview content is unavailable"))}</pre>`;
+    return `${metadata}${tqAffectedObjects(item.task_id || tq.taskId)}<section class="tq-evidence-section"><h3>${h(tqT("核验摘要","Evidence Summary"))}</h3><p>${h(detail.summary)}</p><dl class="tq-facts">${(detail.facts || []).map(fact=>`<div><dt>${h(fact.label)}</dt><dd>${tqValue(fact.value,fact.key)}</dd></div>`).join("")}</dl></section>
+      ${(detail.records || []).map(group=>`<section class="tq-evidence-section"><h3>${h(group.title)}</h3>${group.rows?.length?`<div class="tq-evidence-table"><table><thead><tr>${group.columns.map(col=>`<th scope="col">${h(col.label)}</th>`).join("")}</tr></thead><tbody>${group.rows.map(row=>`<tr>${group.columns.map(col=>`<td>${tqValue(row[col.key],col.key)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:`<p class="tq-muted">${h(tqT("暂无关联明细","No related records"))}</p>`}</section>`).join("")}
+      ${detail.business_facts?`<section class="tq-evidence-section"><h3>${h(tqT("业务依据","Business Facts"))}</h3>${tqFacts(detail.business_facts)}</section>`:""}`;
+  }
   function tqSummary(task) {
     const fields={...(task.sections?.processing?.fields || {})};
     fields.settlement_status ||= task.funds_status;
-    return `<section class="tq-detail-section"><h3>${h(tqT("任务概况","Task Overview"))}</h3>${tqFacts({
+    return `${tqAffectedObjects(task.task_id)}<section class="tq-detail-section"><h3>${h(tqT("任务概况","Task Overview"))}</h3>${tqFacts({
       [tqT("任务类型","Task Type")]:tqLabel(tqTypes,task.source_type),[tqT("任务目的","Purpose")]:tqPurposes[task.task_purpose] || task.task_purpose,
       [tqT("责任团队","Team")]:task.team?.name,[tqT("处理人","Owner")]:task.owner?.display_name || tqT("未认领","Unclaimed"),
       [tqT("优先级","Priority")]:({high:"高",medium:"中",low:"低"})[task.priority],[tqT("影响金额","Impact")]:task.impact,
@@ -4444,8 +4781,8 @@
       special+=select("proposed_owner_ref",tqT("建议归属","Proposed Attribution"),[["","请选择"],...candidates]);
     }
     if (task.source_type==="data_backfill") special+=`<fieldset><legend>${h(tqT("本次补数事件","Events to Backfill"))}</legend>${(fields.missing_event_ids || []).map(id=>`<label class="tq-checkbox-line"><input type="checkbox" data-tq-backfill="${h(id)}" ${tq.form.missing_event_ids.includes(id)?"checked":""} ${disabled?"disabled":""}>${h(id)}</label>`).join("")}</fieldset>`;
-    const evidence=(task.evidence_refs || task.sections?.evidence?.items || []).map(item=>({...item,scan_status:item.scan_status || item.status,collected_at:item.collected_at || item.created_at}));
-    return `<section class="tq-detail-section"><h3>${h(tqT("证据与材料","Evidence & Materials"))}</h3><div class="tq-evidence-list">${evidence.length?evidence.map(item=>`<article><label><input type="checkbox" data-tq-evidence="${h(item.evidence_id)}" ${tq.form.evidence_ids.includes(item.evidence_id)?"checked":""} ${disabled||item.invalidated||item.scan_status!=="clean"?"disabled":""}><span><strong>${h(item.name || item.summary || item.evidence_id)}</strong><small>${h(item.source_system || item.source || "")} · ${h(item.source_version || item.version || "—")} · ${h(tqDate(item.collected_at))}</small></span></label><div>${tqBadge(item.invalidated?"failed":item.scan_status)}<button class="tq-task-link" data-tq-evidence-view="${h(item.evidence_id)}">${h(tqT("预览","Preview"))}</button></div></article>`).join(""):`<p class="tq-muted">${h(tqT("暂无可引用证据","No evidence is available"))}</p>`}</div></section>
+    const evidence=tqEvidenceItems(task).map(item=>({...item,scan_status:item.scan_status || item.status,collected_at:item.collected_at || item.created_at}));
+    return `${tqAffectedObjects(task.task_id)}<section class="tq-detail-section"><h3>${h(tqT("证据与材料","Evidence & Materials"))}</h3><div class="tq-evidence-list">${evidence.length?evidence.map(item=>`<article><label><input type="checkbox" data-tq-evidence="${h(item.evidence_id)}" ${tq.form.evidence_ids.includes(item.evidence_id)?"checked":""} ${disabled||item.invalidated||item.scan_status!=="clean"?"disabled":""}><span><strong>${h(item.name || item.summary || item.evidence_id)}</strong><small>${h(item.source_system || item.source || "")} · ${h(item.source_version || item.version || "—")} · ${h(tqDate(item.collected_at))}</small></span></label><div>${tqBadge(item.invalidated?"failed":item.scan_status)}<button class="tq-task-link" data-tq-evidence-view="${h(item.evidence_id)}">${h(tqT("预览","Preview"))}</button></div></article>`).join(""):`<p class="tq-muted">${h(tqT("暂无可引用证据","No evidence is available"))}</p>`}</div></section>
       <section class="tq-detail-section"><h3>${h(tqPurposes[task.task_purpose] || tqLabel(tqTypes,task.source_type))}</h3><details class="tq-source-facts"><summary>${h(tqT("业务依据与源版本","Business Facts & Source Versions"))}</summary>${tqFacts(fields)}</details>
       ${packet.blocking_reasons?.length?`<div class="tq-inline-warning">${packet.blocking_reasons.map(reason=>`<p>${h(typeof reason==="string"?reason:reason.message || reason.reason)}</p>`).join("")}</div>`:""}
       ${task.source_type==="offboarding_step"?`<div>${tqFacts({offboarding_id:fields.offboarding_id,step_key:fields.step_key,predecessor_receipts:fields.predecessor_receipts})}${task.business_jump_url?tqButton("source",h(tqT("进入清退步骤","Open Offboarding Step"))):""}</div>`:task.source_type==="integration"?`<div class="tq-integration-actions">${tqFacts({integration_version:fields.integration_version,external_ref:fields.external_ref,last_status:fields.last_status,status_check:fields.status_check,attempt:fields.attempt,max_attempts:fields.max_attempts})}${tqWriteButton(task,"status_check",tqT("查询外部状态","Check External Status"))}${tqWriteButton(task,"retry_integration",tqT("受控重试","Controlled Retry"))}</div>`:`<div class="tq-form-grid">${conclusionOptions.length?select("conclusion",tqT("处理结论","Conclusion"),conclusionOptions):""}${special}${input("reason",tqT("结论说明 / 原因（10-1000字）","Reason (10–1000 characters)"),"textarea")}${input("internal_note",tqT("内部备注","Internal Note"),"textarea")}</div>`}
@@ -4458,6 +4795,7 @@
     return `<section class="tq-detail-section"><h3>${h(tqT("审批记录","Approval History"))}</h3>${approvals.length?approvals.map(approval=>`<article class="tq-approval-card"><header><strong>${h(approval.approval_id || approval.id)}</strong>${tqBadge(approval.status || approval.approval_status)}</header>${tqFacts({[tqT("申请人","Applicant")]:approval.applicant,[tqT("提交时间","Submitted")]:approval.submitted_at || approval.created_at})}${tqApprovalChain(approval)}${tqButton("approval_link",h(tqT("查看审批","View Approval")),`data-tq-approval-id="${h(approval.approval_id || approval.id)}"`)}</article>`).join(""):`<p class="tq-muted">${h(tqT("暂无审批申请","No approval requests"))}</p>`}</section><section class="tq-detail-section"><h3>${h(tqT("执行结果","Execution Results"))}</h3>${executions.length?executions.map(execution=>`<article class="tq-approval-card"><header><strong>${h(execution.execution_id || execution.id)}</strong>${tqBadge(execution.status)}</header>${(execution.items || []).map(item=>`<div class="tq-execution-item"><span>${h(item.item_id)}</span>${tqBadge(item.status)}<small>${h(item.error_code || item.result_ref?.id || "—")}</small></div>`).join("")}${tqFacts({[tqT("结算检查","Settlement Checks")]:execution.settlement_checks})}${execution.status==="failed" || execution.status==="partial"?tqWriteButton(task,"retry_execution",tqT("重试失败项","Retry Failed Items"),`data-tq-execution-id="${h(execution.execution_id || execution.id)}"`):""}</article>`).join(""):`<p class="tq-muted">${h(tqT("暂无执行记录","No execution records"))}</p>`}</section>`;
   }
   function tqApprovalChain(approval) {
+    if (demoSkipsApproval()) return `<p class="tq-muted">${h(tqT("历史审批记录","Historical Approval Record"))}</p>`;
     const chain=tqApprovalChainData(approval);
     return chain?.nodes?.length?`<ol class="tq-approval-chain">${chain.nodes.map(node=>`<li class="${node.node_id===chain.current_node_id?"current":""}"><div><strong>${h(prototype.roles[node.required_role] || node.required_role)}</strong>${tqBadge(node.status)}</div><small>${h(node.approver?.display_name || tqT("待分配","Unassigned"))}${node.decided_at?` · ${h(tqDate(node.decided_at))}`:""}</small>${node.reason?`<p>${h(node.reason)}</p>`:""}</li>`).join("")}</ol>`:`<p class="tq-muted">${h(tqT("审批链待分配","Approval routing pending"))}</p>`;
   }
@@ -4470,7 +4808,10 @@
     return `<section class="tq-detail-section"><h3>${h(tqT("操作记录","Activity"))}</h3>${items.length?`<ol class="tq-timeline">${items.map(item=>`<li><time>${h(tqDate(item.server_time || item.created_at || item.time))}</time><div><strong>${h(item.action_label || tqLabel(tqConclusions,item.action))}</strong><span>${h(item.actor?.display_name || item.actor || "—")}</span>${item.reason?`<p>${h(item.reason)}</p>`:""}<small>${h(item.trace_id || item.traceId || "")}</small></div></li>`).join("")}</ol>`:`<p class="tq-muted">${h(tqT("暂无操作记录","No activity"))}</p>`}</section>`;
   }
   function tqDetailFooter(task) {
-    return `<footer class="tq-drawer-footer"><div>${tq.dirty?`<span class="tq-unsaved">${h(tqT("有未保存修改","Unsaved Changes"))}</span>`:`<span class="tq-muted">${h(tqT("版本","Version"))} ${h(task.version)}</span>`}</div><div>${tqWriteButton(task,"claim",tqT("认领任务","Claim Task"))}${tqWriteButton(task,"assign",tqT("转办","Assign"))}${tqWriteButton(task,"request_material",tqT("要求补件","Request Materials"))}${tq.detailTab==="processing" && !["integration","offboarding_step"].includes(task.source_type)?`${tqWriteButton(task,"save_draft",tqT("保存草稿","Save Draft"))}${tqWriteButton(task,"preview",tqT("影响预览","Preview Impact"))}${tqWriteButton(task,"submit_review",tqT("提交处置","Submit for Approval"),tq.preview&&!tq.dirty?"":`disabled title="${h(tqT("请先保存并生成有效影响预览","Save the draft and generate a valid preview first"))}"`)}`:""}${tqWriteButton(task,"close",tqT("关闭任务","Close Task"))}</div></footer>`;
+    if (demoSkipsApproval() && task.workflow_state==="pending_approval") {
+      return `<footer class="tq-drawer-footer"><span class="tq-muted">${h(tqT("历史待审任务","Historical Pending Task"))}</span><div>${tqWriteButton(task,"resume_without_review",tqT("继续执行","Continue Execution"))}</div></footer>`;
+    }
+    return `<footer class="tq-drawer-footer"><div>${tq.dirty?`<span class="tq-unsaved">${h(tqT("有未保存修改","Unsaved Changes"))}</span>`:`<span class="tq-muted">${h(tqT("版本","Version"))} ${h(task.version)}</span>`}</div><div>${tqWriteButton(task,"claim",tqT("认领任务","Claim Task"))}${tqWriteButton(task,"assign",tqT("转办","Assign"))}${tqWriteButton(task,"request_material",tqT("要求补件","Request Materials"))}${tq.detailTab==="processing" && !["integration","offboarding_step"].includes(task.source_type)?`${tqWriteButton(task,"save_draft",tqT("保存草稿","Save Draft"))}${task.source_type==="partner_followup"?tqWriteButton(task,"complete_followup","完成跟进"):tqWriteButton(task,"preview",tqT("影响预览","Preview Impact"))+tqWriteButton(task,"submit_review",tqT("提交处置","Submit for Approval"),tq.preview&&!tq.dirty?"":`disabled title="${h(tqT("请先保存并生成有效影响预览","Save the draft and generate a valid preview first"))}"`)}`:""}${tqWriteButton(task,"close",tqT("关闭任务","Close Task"))}</div></footer>`;
   }
   function taskQueueOverlay() {
     if (!location.hash.startsWith("#/tasks") && !location.hash.startsWith("#/workbench")) return "";
@@ -4501,6 +4842,10 @@
       body=`<div class="tq-form-grid"><label class="tq-field"><span>${h(tqT("目标团队","Target Team"))}</span><select data-tq-dialog-field="team_id"><option value="">${h(tqT("请选择","Choose"))}</option>${(candidate.teams || []).map(team=>`<option value="${h(team.id)}" ${form.team_id===team.id?"selected":""}>${h(team.name)}</option>`).join("")}</select></label><label class="tq-field"><span>${h(tqT("目标人员","Target Owner"))}</span><select data-tq-dialog-field="user_id"><option value="">${h(tqT("仅分配责任池","Assign to Pool"))}</option>${(candidate.users || []).filter(user=>!form.team_id||!user.team_id||user.team_id===form.team_id).map(user=>`<option value="${h(user.user_id)}" ${form.user_id===user.user_id?"selected":""}>${h(user.display_name)}</option>`).join("")}</select></label>${canPool?`<label class="tq-checkbox-line"><input type="checkbox" data-tq-dialog-field="return_pool" ${form.return_pool?"checked":""}>${h(tqT("退回当前责任池","Return to Current Pool"))}</label>`:""}</div>${tqModalInput("reason",tqT("转办原因（10-1000字）","Reason (10–1000 characters)"),"textarea",form.reason || "",'maxlength="1000"')}`;footer=cancel+confirm();
     } else if (dialog.kind==="request_material") {
       title=tqT("要求补件","Request Materials");body=`${tqModalInput("material_keys",tqT("材料清单（每行一项）","Material List (One Per Line)"),"textarea",form.material_keys || "")}<label class="tq-field"><span>${h(tqT("接收方","Recipient"))}</span><select data-tq-dialog-field="recipient"><option value="partner">${h(tqT("来源合作方","Source Partner"))}</option><option value="internal">${h(tqT("内部责任方","Internal Owner"))}</option><option value="crm">CRM</option></select></label>${tqModalInput("due_at",tqT("材料截止时间","Due At"),"datetime-local",form.due_at || "")}${tqModalInput("public_message",tqT("对外说明（接收方可见）","Message Visible to Recipient"),"textarea",form.public_message || "")}${tqModalInput("reason",tqT("内部原因","Internal Reason"),"textarea",form.reason || "")}`;footer=cancel+confirm(tqT("发送补件要求","Request Materials"));
+    } else if (dialog.kind==="resume_without_review" || (demoSkipsApproval() && dialog.kind==="submit_review")) {
+      title=tqT("确认提交处置","Confirm Disposition");
+      body=`${tqFacts({[tqT("任务","Task")]:task?.task_id,[tqT("处理结论","Conclusion")]:tqConclusions[tq.form?.conclusion] || tq.form?.conclusion,[tqT("影响金额","Impact")]:tq.preview?.amount || tq.preview?.deduplicated_amount || task?.impact})}${dialog.kind==="resume_without_review"?tqModalInput("reason",tqT("继续处理原因（10-1000字）","Reason (10–1000 characters)"),"textarea",form.reason || ""):""}<label class="tq-checkbox-line"><input type="checkbox" data-tq-dialog-field="confirmed" ${form.confirmed?"checked":""}>${h(tqT("我已核对处理范围、金额和证据","I have checked the scope, amount and evidence"))}</label>`;
+      footer=cancel+confirm(tqT("提交执行","Submit for Execution"));
     } else if (dialog.kind==="submit_review") {
       title=tqT("提交处置申请","Submit Disposition");body=`<p>${h(tqT("本申请将按冻结的证据与影响预览进入审批，批准前不会执行业务动作。","The evidence and impact preview are frozen for approval. No business action runs before approval."))}</p>${tqFacts({[tqT("任务","Task")]:task?.task_id,[tqT("处理结论","Conclusion")]:tqConclusions[tq.form?.conclusion] || tq.form?.conclusion,[tqT("影响金额","Impact")]:tq.preview?.amount || tq.preview?.deduplicated_amount,[tqT("审批角色","Required Roles")]:tq.preview?.required_approver_roles})}<label class="tq-checkbox-line"><input type="checkbox" data-tq-dialog-field="confirmed" ${form.confirmed?"checked":""}>${h(tqT("我已核对处理范围、金额、证据及审批路径","I have reviewed the scope, amount, evidence, and approval routing"))}</label>`;footer=cancel+confirm(tqT("提交审批","Submit for Approval"));
     } else if (dialog.kind==="close") {
@@ -4514,20 +4859,20 @@
       body=`${tqFacts({[tqT("原延长任务","Extension Task")]:task?.task_id,[tqT("结算案件","Settlement Case")]:source?.case_ref,[tqT("来源版本","Source Version")]:source?.expected_source_version,[tqT("拟解除限制及版本","Release Targets & Versions")]:source?.release_targets})}<p>${h(tqT("此处发起独立解除重检任务。原延长任务与冻结状态保持，解除须另行预览、审批并执行。","This creates an independent settlement recheck. The extension task and restrictions remain until separate review, approval and execution."))}</p>${tqModalInput("reason",tqT("重检申请原因（10-1000字）","Recheck Reason (10–1000 characters)"),"textarea",form.reason || "")}`;
       footer=cancel+confirm(tqT("发起 / 打开独立解除重检","Create / Open Independent Recheck"));
     } else if (dialog.kind==="export") {
-      title=tqT("申请敏感任务导出","Request Task Export");body=`${tqFacts({[tqT("导出范围","Export Scope")]:tqT(`当前查询全部${tq.result?.meta?.total || 0}条`,`All ${tq.result?.meta?.total || 0} matching tasks`),[tqT("导出字段","Columns")]:tqActiveColumns().filter(col=>!["select","actions"].includes(col.key)).map(col=>tqT(col.zh,col.en))})}${tqModalInput("reason",tqT("导出用途（10-1000字）","Export Purpose (10–1000 characters)"),"textarea",form.reason || "")}`;footer=cancel+confirm(tqT("提交导出审批","Submit Export Request"));
+      title=tqT("导出任务数据","Export Tasks");body=`${tqFacts({[tqT("导出范围","Export Scope")]:tqT(`当前查询全部${tq.result?.meta?.total || 0}条`,`All ${tq.result?.meta?.total || 0} matching tasks`),[tqT("导出字段","Columns")]:tqActiveColumns().filter(col=>!["select","actions"].includes(col.key)).map(col=>tqT(col.zh,col.en))})}${tqModalInput("reason",tqT("导出用途（10-1000字）","Export Purpose (10–1000 characters)"),"textarea",form.reason || "")}`;footer=cancel+confirm(demoSkipsApproval()?tqT("生成导出文件","Generate Export"):tqT("提交导出审批","Submit Export Request"));
     } else if (dialog.kind==="batch_result") {
       title=tqT("批量处理结果","Batch Results");const results=dialog.results || [];
       body=`<p>${h(tqT(`成功${results.filter(item=>item.success).length}项，失败${results.filter(item=>!item.success).length}项`,`${results.filter(item=>item.success).length} succeeded, ${results.filter(item=>!item.success).length} failed`))}</p><ul class="tq-batch-results">${results.map(item=>`<li><strong>${h(item.id)}</strong><span class="${item.success?"tq-text-success":"tq-text-error"}">${h(item.success?tqT("成功","Succeeded"):item.error?.message || item.error?.display_message || item.error?.code)}</span></li>`).join("")}</ul>`;footer=tqButton("dialog_cancel",h(tqT("关闭","Close")))+(results.some(item=>!item.success&&item.payload&&["AFF-50301","NETWORK_ERROR","TIMEOUT"].includes(item.error?.code))?tqButton("batch_retry",h(tqT("重试失败项","Retry Failed Items"))):"");
     } else if (dialog.kind==="evidence") {
       title=tqT("证据预览","Evidence Preview");const item=dialog.evidence;
-      body=`${tqFacts({[tqT("证据编号","Evidence ID")]:item?.evidence_id,[tqT("名称","Name")]:item?.name || item?.summary,[tqT("来源","Source")]:item?.source_system || item?.source,[tqT("版本","Version")]:item?.source_version,[tqT("摘要校验","Hash")]:item?.hash,[tqT("核验状态","Verification")]:item?.scan_status || item?.status})}<p class="tq-evidence-summary">${h(item?.content || item?.summary || tqT("暂无可预览内容","Preview content is unavailable"))}</p>`;footer=tqButton("dialog_cancel",h(tqT("关闭","Close")))+(item?.content?tqButton("download_evidence",h(tqT("下载证据","Download Evidence"))):"");
+      body=tqEvidenceBody(item);footer=tqButton("dialog_cancel",h(tqT("关闭","Close")))+(item?.content&&item?.access?.download?tqButton("download_evidence",h(tqT("下载证据","Download Evidence"))):"");
     } else if (dialog.kind==="approval_decision") {
       title=tqT(({approve:"审批通过",reject:"驳回申请",return:"退回补充"})[dialog.decision],({approve:"Approve",reject:"Reject",return:"Return for Revision"})[dialog.decision]);
       body=`${tqFacts({[tqT("申请号","Approval")]:dialog.approval?.approval_id,[tqT("申请人","Applicant")]:dialog.approval?.applicant,[tqT("当前节点","Current Node")]:dialog.node?.required_role})}${tqModalInput("reason",tqT("审批意见（10-1000字）","Decision Reason (10–1000 characters)"),"textarea",form.reason || "")}<label class="tq-checkbox-line"><input type="checkbox" data-tq-dialog-field="confirmed" ${form.confirmed?"checked":""}>${h(tqT("已核对证据、金额及处置范围","I reviewed the evidence, amount and disposition scope"))}</label>`;footer=cancel+confirm();
     } else if (dialog.kind==="export_result") {
-      title=tqT("导出申请已提交","Export Request Submitted");body=`<p>${h(dialog.exportId || "")}</p><p>${h(tqT("审批完成后可在导出中心下载文件。","The file becomes available in the export center after approval."))}</p>`;footer=tqButton("dialog_cancel",h(tqT("关闭","Close")))+tqButton("exports_link",h(tqT("查看导出记录","View Exports")),"","primary");
+      title=demoSkipsApproval()?tqT("导出文件已生成","Export Ready"):tqT("导出申请已提交","Export Request Submitted");body=`<p>${h(dialog.exportId || "")}</p><p>${h(demoSkipsApproval()?tqT("可在导出中心下载文件。","Download the file in the export center."):tqT("审批完成后可在导出中心下载文件。","The file becomes available in the export center after approval."))}</p>`;footer=tqButton("dialog_cancel",h(tqT("关闭","Close")))+tqButton("exports_link",h(tqT("查看导出记录","View Exports")),"","primary");
     }
-    return `<div class="tq-modal-backdrop"></div><section class="tq-modal ${dialog.kind==="evidence"?"tq-modal-wide":""}" role="dialog" aria-modal="true" aria-labelledby="tq-modal-title" tabindex="-1"><header><h2 id="tq-modal-title">${h(title)}</h2>${tqIconButton(dialog.kind==="unsaved"?"unsaved_keep":"dialog_cancel","close",tqT("关闭","Close"))}</header><div class="tq-modal-body">${body}${dialog.error?`<div class="tq-error" role="alert">${h(dialog.error.code || "AFF-42201")} · ${h(dialog.error.message || dialog.error.display_message || dialog.error)}</div>`:""}</div><footer>${footer}</footer></section>`;
+    return `<div class="tq-modal-backdrop"></div><section class="tq-modal ${dialog.kind==="evidence"?"tq-modal-wide":""}" role="dialog" aria-modal="true" aria-labelledby="tq-modal-title" tabindex="-1"><header><h2 id="tq-modal-title">${h(title)}</h2>${tqIconButton(dialog.kind==="unsaved"?"unsaved_keep":"dialog_cancel","close",tqT("关闭","Close"))}</header><div class="tq-modal-body" ${dialog.kind==="evidence"?`tabindex="0" aria-label="${h(tqT("证据详情内容","Evidence details"))}"`:""}>${body}${dialog.error?`<div class="tq-error" role="alert">${h(dialog.error.code || "AFF-42201")} · ${h(dialog.error.message || dialog.error.display_message || dialog.error)}</div>`:""}</div><footer>${footer}</footer></section>`;
   }
   function tqOpenTask(id,processing=false) {
     const open=()=>{tq.taskId=id;tq.detail=null;tq.form=null;tq.dirty=false;tq.preview=null;tq.detailTab=processing?"processing":"overview";tq.focusTarget=document.activeElement?.getAttribute("data-tq-open");tqReadDetail();tqSyncURL(true);render();};
@@ -4540,8 +4885,7 @@
   function taskQueueBeforeLeave(nextHash) {
     if (!tq.dirty || !tq.taskId) return true;
     const normalized=String(nextHash || "");const sameTask=normalized.startsWith("#/tasks")&&new URLSearchParams(normalized.split("?")[1] || "").get("task_id")===tq.taskId;
-    if (sameTask) return true;
-    if (tq.hashSeen && location.hash!==tq.hashSeen) history.replaceState(null,"",tq.hashSeen);
+    if (sameTask || tqInspectionRoute(normalized) || tq.inspection?.role===state.role&&normalized===tq.inspection.returnHash) return true;
     tq.dialog={kind:"unsaved",after:()=>{location.hash=normalized.startsWith("#")?normalized:`#/${normalized.replace(/^\//,"")}`;}};render();return false;
   }
   function tqPayload(task,extra={}) {
@@ -4567,7 +4911,8 @@
     const form=tqClone(tq.form);const normalizeDate=value=>value&&!/[zZ]|[+-]\d\d:\d\d$/.test(value)?tqDayTimeUTC(value):value || null;
     form.next_review_at=normalizeDate(form.next_review_at);form.effective_at=normalizeDate(form.effective_at);form.expires_at=normalizeDate(form.expires_at);
     if(form.proposed_amount && /^\d+(?:\.\d{0,2})?$/.test(String(form.proposed_amount))) {const [whole,fraction=""]=String(form.proposed_amount).split(".");form.proposed_amount=`${whole}.${fraction.padEnd(2,"0")}`;}
-    const payload=tqPayload(task,{expected_draft_version:task.draft_version,conclusion:form.conclusion,reason_code:task.draft?.reason_code || "manual_review",reason:form.reason,internal_note:form.internal_note || null,evidence_ids:form.evidence_ids,next_review_at:form.next_review_at,checklist:form.checklist || [],form_values:form});
+    const formValues=task.source_type==="partner_followup"?{conclusion:form.conclusion}:form;
+    const payload=tqPayload(task,{expected_draft_version:task.draft_version,conclusion:form.conclusion,reason_code:task.draft?.reason_code || "manual_review",reason:form.reason,internal_note:form.internal_note || null,evidence_ids:form.evidence_ids,next_review_at:form.next_review_at,checklist:form.checklist || [],form_values:formValues});
     const result=tqWrite("save_draft",task.task_id,payload);
     tq.dirty=false;tq.preview=null;if (showNotice)tq.notice=tqT("草稿已保存","Draft saved");
     if (!result.task) tqReadDetail();
@@ -4615,8 +4960,12 @@
       let action=dialog.kind;let id=task?.task_id;let payload=tqPayload(task);
       if (action==="request_material") Object.assign(payload,{material_keys:String(form.material_keys || "").split("\n").map(item=>item.trim()).filter(Boolean),recipient:{type:form.recipient || "partner",ref:form.recipient==="internal"?task.owner?.user_id:form.recipient==="crm"?"CRM":task.partner_id},due_at:tqDayTimeUTC(form.due_at),public_message:form.public_message || "",reason:form.reason || ""});
       if (action==="submit_review") {
-        if (!form.confirmed) throw {code:"AFF-42201",message:tqT("请确认影响范围和审批路径","Confirm the impact and approval routing")};
+        if (!form.confirmed) throw {code:"AFF-42201",message:demoSkipsApproval()?tqT("请确认处理范围、金额和证据","Confirm scope, amount and evidence"):tqT("请确认影响范围和审批路径","Confirm the impact and approval routing")};
         Object.assign(payload,{draft_version:task.draft_version,preview_id:tq.preview?.preview_id,preview_hash:tq.preview?.preview_hash,self_review:false,impact_confirmation:true});
+      }
+      if (action==="resume_without_review") {
+        if (!demoSkipsApproval() || !form.confirmed) throw {code:"AFF-42201",message:tqT("请确认处理范围、金额和证据","Confirm scope, amount and evidence")};
+        Object.assign(payload,{reason:form.reason || "",impact_confirmation:true});
       }
       if (action==="close") Object.assign(payload,{reason_code:form.reason_code || "duplicate",reason:form.reason || "",replaced_by_task_id:form.replaced_by_task_id || null,source_receipt_ref:form.source_receipt_ref || null});
       if (["status_check","retry_integration"].includes(action)) {
@@ -4638,7 +4987,7 @@
       }
       const response=tqWrite(action,id,payload,context);
       tq.dialog=action==="export"?{kind:"export_result",exportId:response.export_id || response.result?.export_id || response.receipt?.result_ref?.id || response.export?.export_id}:null;
-      tq.notice=action==="submit_review"?tqT("处置申请已提交，等待审批","Disposition submitted for approval"):action==="status_check"?tqT("已查询原外部单号，请核对查证结果","External reference checked. Review the result."):tqT("操作已记录","Operation recorded");
+      tq.notice=["submit_review","resume_without_review"].includes(action)?(demoSkipsApproval()?tqT("处置已提交，请查看任务状态及执行记录","Disposition submitted. Check task status and execution records."):tqT("处置申请已提交，等待审批","Disposition submitted for approval")):action==="status_check"?tqT("已查询原外部单号，请核对查证结果","External reference checked. Review the result."):tqT("操作已记录","Operation recorded");
       tq.dirty=false;tq.preview=null;tqRead();if(tq.taskId)tqReadDetail();render();
     } catch(error) {dialog.error=error;tq.dialog=dialog;render();}
   }
@@ -4679,7 +5028,7 @@
       customer_ids:approval.source_scope.customer_ids || [],
       case_refs:approval.source_scope.case_refs || []
     } : null;
-    return `${common}<section class="tq-detail-section" data-tq-approval-scope="task"><h3>${h(tqT("冻结处置方案","Frozen Disposition"))}</h3>${tqFacts({[tqT("任务与来源","Task & Source")]:snapshot?{task_id:snapshot.task_id,task_purpose:snapshot.task_purpose,source_kind:(approval.source_ref || snapshot.source_ref)?.kind,source_id:(approval.source_ref || snapshot.source_ref)?.id,source_versions:approval.source_versions,config_versions:approval.config_versions,funds_status:approval.funds_status}:null,[tqT("处理结论","Conclusion")]:tqConclusions[approval.draft?.conclusion] || approval.draft?.conclusion,[tqT("申请原因","Reason")]:approval.draft?.reason || approval.reason,[tqT("动作计划","Action Plan")]:planItems,[tqT("证据","Evidence")]:evidence,[tqT("来源范围","Source Scope")]:sourceScope,[tqT("影响预览","Impact Preview")]:preview})}</section>`;
+    return `${common}${approval.task_id?tqAffectedObjects(approval.task_id):""}<section class="tq-detail-section" data-tq-approval-scope="task"><h3>${h(tqT("冻结处置方案","Frozen Disposition"))}</h3>${tqFacts({[tqT("任务与来源","Task & Source")]:snapshot?{task_id:snapshot.task_id,task_purpose:snapshot.task_purpose,source_kind:(approval.source_ref || snapshot.source_ref)?.kind,source_id:(approval.source_ref || snapshot.source_ref)?.id,source_versions:approval.source_versions,config_versions:approval.config_versions,funds_status:approval.funds_status}:null,[tqT("处理结论","Conclusion")]:tqConclusions[approval.draft?.conclusion] || approval.draft?.conclusion,[tqT("申请原因","Reason")]:approval.draft?.reason || approval.reason,[tqT("动作计划","Action Plan")]:planItems,[tqT("证据","Evidence")]:evidence,[tqT("来源范围","Source Scope")]:sourceScope,[tqT("影响预览","Impact Preview")]:preview})}</section>`;
   }
   function taskQueueApprovalPage() {
     if (!tqEnsure()) return `<div class="tq-error">AFF-50301</div>`;
@@ -4687,6 +5036,7 @@
     let approvals=[];let error=null;
     try {approvals=tqService().approvals(tqContext());if(!Array.isArray(approvals))approvals=approvals.items || [];} catch(caught){error=caught;}
     if (target) approvals=approvals.filter(item=>(item.approval_id || item.id)===target);
+    if (demoSkipsApproval()) return `<section class="tq-page tq-approval-page"><header class="tq-page-head"><h1>${h(tqT("历史审批记录","Approval History"))}</h1><div>${tqButton("tasks_link",h(tqT("任务队列","Task Queue")))}</div></header>${error?`<div class="tq-error">${h(error.message || error.code)}</div>`:""}<div class="tq-approval-list">${approvals.length?approvals.map(approval=>`<article class="tq-approval-card"><header><strong>${h(approval.approval_id || approval.id)}</strong>${tqBadge(approval.status || approval.approval_status)}</header>${tqApprovalScope(approval)}<footer>${approval.task_id?`<button class="tq-button secondary" data-tq-linked-task="${h(approval.task_id)}">${h(tqT("查看任务与执行","View Task & Execution"))}</button>`:`<span class="tq-muted">${h(tqT("历史记录","Historical Record"))}</span>`}</footer></article>`).join(""):`<div class="tq-empty">${h(tqT("暂无历史审批记录","No approval history"))}</div>`}</div></section>`;
     return `<section class="tq-page tq-approval-page"><header class="tq-page-head"><h1>${h(tqT("审批队列","Approval Queue"))}</h1><div>${target?tqButton("all_approvals",h(tqT("全部审批","All Approvals"))):""}${tqButton("tasks_link",h(tqT("任务队列","Task Queue")))}</div></header>${tq.notice?`<div class="tq-notice" role="status">${h(tq.notice)}${tqIconButton("dismiss_notice","close",tqT("关闭","Dismiss"))}</div>`:""}${error?`<div class="tq-error">${h(error.message || error.code)}</div>`:""}<div class="tq-approval-list">${approvals.length?approvals.map(approval=>{
       const chain=tqApprovalChainData(approval);const node=chain?.nodes?.find(item=>item.node_id===chain.current_node_id);const self=approval.applicant?.user_id===tq.options.current_user?.user_id;
       const canApprove=navigator.onLine!==false&&!["error","forbidden","offline"].includes(state.scenario)&&!self&&node?.status==="pending"&&(node.required_role===state.role || (node.required_role==="risk_manager"&&state.role==="risk_supervisor"));
@@ -4704,7 +5054,7 @@
     const dialog=document.querySelector(".tq-modal") || document.querySelector(".tq-drawer");
     if (dialog && !dialog.contains(document.activeElement)) requestAnimationFrame(()=>dialog.querySelector("button,input,select,textarea")?.focus({preventScroll:true}));
     if (!tq.pollTimer) tq.pollTimer=setInterval(()=>{
-      if (document.hidden || !document.querySelector(".tq-page")) return;
+      if (document.hidden || !document.querySelector(".tq-page") || tq.dialog?.kind==="evidence") return;
       const now=Date.now();
       if (tq.dirty) {
         if (tq.taskId && now-tq.lastDetailRead>=30000) {
@@ -4726,9 +5076,20 @@
   window.addEventListener("online",()=>{if(document.querySelector(".tq-page")){tqRead();render();}});
   document.addEventListener("click",event=>{
     if (document.querySelector(".tq-page")&&event.target.closest('[aria-label="语言"]')) {event.preventDefault();event.stopImmediatePropagation();tq.locale=tq.locale==="zh"?"en":"zh";return render();}
-    const target=event.target.closest("[data-tq-action],[data-tq-open],[data-tq-row-action],[data-tq-scope],[data-tq-metric],[data-tq-sort],[data-tq-remove-filter],[data-tq-detail-tab],[data-tq-evidence-view],[data-tq-linked-task]");
+    const target=event.target.closest("[data-tq-action],[data-tq-open],[data-tq-row-action],[data-tq-scope],[data-tq-metric],[data-tq-sort],[data-tq-remove-filter],[data-tq-detail-tab],[data-tq-evidence-view],[data-tq-linked-task],[data-tq-object],[data-tq-object-back],[data-tq-object-tab],[data-tq-object-case]");
     if (!target) return;event.stopImmediatePropagation();
     if (target.disabled) return;
+    if(target.hasAttribute("data-tq-object"))return tqOpenObject(target.dataset.tqObject,target.dataset.objectId,target.dataset.objectTask,target.dataset.objectTab);
+    if(target.hasAttribute("data-tq-object-back"))return tqReturnFromObject();
+    if(target.hasAttribute("data-tq-object-case")){
+      const params=new URLSearchParams(location.hash.split("?")[1] || "");params.set("settlement_case_id",target.dataset.tqObjectCase);
+      location.hash=`${location.hash.split("?")[0]}?${params}`;
+      requestAnimationFrame(()=>document.querySelector(".tq-object-case-panel")?.focus());return;
+    }
+    if(target.hasAttribute("data-tq-object-tab")){
+      const params=new URLSearchParams(location.hash.split("?")[1] || "");params.set("tab",target.dataset.tqObjectTab);
+      location.hash=`${location.hash.split("?")[0]}?${params}`;return;
+    }
     if (target.hasAttribute("data-tq-open"))return tqOpenTask(target.dataset.tqOpen,Boolean(target.dataset.tqProcess));
     if (target.hasAttribute("data-tq-linked-task"))return tqNavigate(`#/tasks?task_id=${encodeURIComponent(target.dataset.tqLinkedTask)}`);
     if (target.hasAttribute("data-tq-row-action"))return tqStartDialog(target.dataset.tqRowAction,[target.dataset.tqId]);
@@ -4759,8 +5120,12 @@
       return tqApply(query);
     }
     if (target.hasAttribute("data-tq-evidence-view")) {
-      const evidence=(tq.detail?.evidence_refs || tq.detail?.sections?.evidence?.items || []).find(item=>item.evidence_id===target.dataset.tqEvidenceView);
-      try {const response=tqService().write("access_evidence",tq.taskId,tqPayload(tq.detail,{evidence_id:evidence.evidence_id,purpose:"preview"}),tqContext());tq.dialog={kind:"evidence",evidence:{...evidence,...response.evidence}};} catch(error){tq.notice=error.message || error.code;}
+      const evidence=tqEvidenceItems(tq.detail).find(item=>item.evidence_id===target.dataset.tqEvidenceView);
+      try {
+        if(!evidence)throw {message:tqT("证据已变化，请重新打开任务","Evidence changed. Reopen the task.")};
+        const response=tqService().write("access_evidence",tq.taskId,tqPayload(tq.detail,{evidence_id:evidence.evidence_id,purpose:"preview"}),tqContext());
+        tq.dialog={kind:"evidence",evidence:{...evidence,...response.evidence}};
+      } catch(error){tq.dialog={kind:"evidence",evidence:{...evidence,task_id:tq.taskId},error};}
       return render();
     }
     const action=target.dataset.tqAction;
@@ -4793,7 +5158,7 @@
         const evidence=tq.dialog?.evidence;
         const response=tqService().write("access_evidence",tq.taskId,tqPayload(tq.detail,{evidence_id:evidence?.evidence_id,purpose:"download"}),tqContext());
         const file=response.evidence;if(typeof file?.content!=="string")throw {message:tqT("文件暂不可用","File is unavailable")};
-        const url=URL.createObjectURL(new Blob([file.content],{type:file.content_type || "text/plain;charset=utf-8"}));const link=document.createElement("a");link.href=url;link.download=file.name || `${evidence.evidence_id}.txt`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+        const url=URL.createObjectURL(new Blob([file.content],{type:file.content_type || "text/plain;charset=utf-8"}));const link=document.createElement("a");link.href=url;link.download=`${evidence.evidence_id}.txt`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
       }catch(error){tq.dialog.error=error;render();}return;
     }
     if(action==="batch_retry"){
@@ -4807,11 +5172,19 @@
     if(action==="unsaved_discard"){const next=tq.dialog.after;tq.dialog=null;tq.dirty=false;tq.form=tq.detail?tqFormFromTask(tq.detail):null;next();return;}
     if(action==="unsaved_save"){try{tqSaveDraft();const next=tq.dialog.after;tq.dialog=null;next();}catch(error){tq.dialog.error=error;render();}return;}
     if(action==="save_draft"){try{tqSaveDraft();}catch(error){tq.notice=`${error.code || ""} · ${error.message || error.display_message}`;}return render();}
+    if(action==="complete_followup"){
+      try{
+        if(tq.dirty)tqSaveDraft(false);
+        tqWrite("complete_followup",tq.taskId,tqPayload(tq.detail));
+        tq.dirty=false;tq.notice="跟进已完成；未修改资金或风险结论";tqRead();tqReadDetail();
+      }catch(error){tq.notice=error.message || "跟进未完成，请检查结论";}
+      return render();
+    }
     if(action==="preview"){
       try{if(tq.dirty)tqSaveDraft(false);const response=tqWrite("preview",tq.taskId,tqPayload(tq.detail,{draft_version:tq.detail.draft_version}));tq.preview=response.preview;tq.notice=tqT("影响预览已更新","Impact preview updated");}
       catch(error){tq.notice=`${error.code || ""} · ${error.message || error.display_message}`;}return render();
     }
-    if(["claim","assign","request_material","submit_review","close","status_check","retry_integration","retry_execution"].includes(action))return tqStartDialog(action,[tq.taskId],{executionId:target.dataset.tqExecutionId});
+    if(["claim","assign","request_material","submit_review","resume_without_review","close","status_check","retry_integration","retry_execution"].includes(action))return tqStartDialog(action,[tq.taskId],{executionId:target.dataset.tqExecutionId});
     if(action==="batch_claim"||action==="batch_assign")return tqStartDialog(action,[...tq.selected]);
     if(action==="export")return tqStartDialog(action,[]);
     if(action==="approval_link")return tqNavigate(`#/workbench?tab=approvals&approval_id=${encodeURIComponent(target.dataset.tqApprovalId)}&return_to=tasks`);
@@ -4954,10 +5327,8 @@
     const notes = noteTemplates.length ? noteTemplates : [
       {id:`note-${partner.id}-001`,time:partner.updated,author:partner.owner,type:"同步",content:"已完成合作方主档与CRM账户状态核对。",nextFollowUp:"—"}
     ];
-    const tasks = [];
-    blockers.forEach((item,index) => tasks.push({id:`task-${partner.id.slice(-4)}-${String(index+1).padStart(2,"0")}`,type:item.code === "CRM_SYNC" ? "CRM同步异常" : item.code === "RISK_R3" ? "风险复核" : "状态核对",status:item.severity === "blocking" ? "open" : "processing",assignee:item.source === "Risk" ? "风控/Risk" : item.source === "Finance" ? "财务/Finance" : partner.owner,due:createDate(index+1),sla:item.severity === "blocking" ? "需处理" : "观察中"}));
-    const extraTasks = prototype.partner360PageTasks?.[partner.id] || [];
-    tasks.push(...extraTasks);
+    const queueTasks = (prototype.taskQueue?.toLegacyRows(state.role) || []).filter(item=>item.partnerId===partner.id);
+    const tasks = queueTasks.map(item=>({id:item.id,type:item.type,status:item.status,assignee:item.owner,due:item.sla,sla:statusLabel(item.status)}));
     const kycStatus = partner.kyc?.status || "pending";
     const kybStatus = partner.kyb?.status || "not_required";
     return {
@@ -5007,8 +5378,8 @@
   }
 
   function partner360PageTag(value, tone) {
-    const toneClass = tone || (["R3","C0","blocked","frozen","failed","terminated","archived","offboarding"].includes(value) ? "danger" : ["R2","warning","observing","processing","pending","restricted","watching"].includes(value) ? "warning" : ["R0","C2","C3","active","healthy","clear","ready","verified"].includes(value) ? "success" : "info");
-    return `<span class="p360-tag ${toneClass}">${h(statusLabel(value))}</span>`;
+    const toneClass = tone || (["R3","C0","blocked","frozen","failed","terminated","archived","offboarding"].includes(value) ? "danger" : ["R2","warning","observing","processing","pending","restricted","watching"].includes(value) ? "warning" : ["R0","C2","C3","active","healthy","clear","verified"].includes(value) ? "success" : "info");
+    return `<span class="p360-tag ${toneClass}">${h(value==="ready" ? "待核验" : statusLabel(value))}</span>`;
   }
 
   function partner360PageMetric(label, value, note, action) {
@@ -5036,8 +5407,9 @@
   }
 
   function partner360PageAside(data) {
+    const openTasks=data.tasks.filter(task=>!["done","closed","cancelled","completed"].includes(task.status));
     return `<aside class="p360-aside">
-      <section class="p360-panel"><header><div><h2>待办与审批</h2><p>只显示当前合作方关联事项</p></div><button class="p360-link" data-p360-tab-link="follow-up">查看全部</button></header>${data.tasks.length ? `<div class="p360-task-list">${data.tasks.slice(0,4).map(task => `<button class="p360-task" data-p360-task="${h(task.id)}"><span>${h(task.type)}</span><strong>${h(task.id)}</strong><small>${h(task.assignee)} · ${h(task.due)} · ${partner360PageTag(task.status)}</small></button>`).join("")}</div>` : `<div class="p360-empty-inline">暂无开放任务</div>`}</section>
+      <section class="p360-panel"><header><div><h2>待办与审批</h2><p>只显示当前合作方未完成事项</p></div><button class="p360-link" data-p360-tab-link="follow-up">查看全部</button></header>${openTasks.length ? `<div class="p360-task-list">${openTasks.slice(0,4).map(task => `<button class="p360-task" data-p360-task="${h(task.id)}"><span>${h(task.type)}</span><strong>${h(task.id)}</strong><small>${h(task.assignee)} · ${h(task.due)} · ${partner360PageTag(task.status)}</small></button>`).join("")}</div>` : `<div class="p360-empty-inline">暂无开放任务</div>`}</section>
       <section class="p360-panel"><header><div><h2>风险摘要</h2><p>R档与当前阻断单独展示</p></div><button class="p360-link" data-p360-tab-link="risk">打开风险</button></header><div class="p360-side-stat"><span>风险分</span><strong>${h(data.risk.snapshot.score)}</strong>${partner360PageTag(data.riskBand)}</div><div class="p360-side-stat"><span>信用积分</span><strong>${h(data.risk.credit.score)}</strong>${partner360PageTag(data.creditLevel)}</div><p class="p360-muted">${h(data.risk.snapshot.status === "clear" ? "当前没有直接风险事件。" : `当前有 ${data.risk.snapshot.events} 个风险事件，详情见风险与信用。`)}</p></section>
       <section class="p360-panel"><header><div><h2>最近跟进</h2><p>内部备注只读历史</p></div><button class="p360-link" data-p360-tab-link="follow-up">新增备注</button></header>${data.notes.slice(0,3).map(note => `<article class="p360-note-mini"><span>${h(note.time)} · ${h(note.author)}</span><p>${h(note.content)}</p></article>`).join("")}</section>
     </aside>`;
@@ -5045,11 +5417,12 @@
 
   function partner360PageOverview(data) {
     const p = data.partner;
+    const openTaskCount=data.tasks.filter(task=>!["done","closed","cancelled","completed"].includes(task.status)).length;
     return `<div class="p360-tab-content">
       <section class="p360-panel"><header><div><h2>身份与联系摘要</h2><p>CRM为账户、资料和认证事实源，本页只读引用。</p></div></header><div class="p360-grid p360-grid-4">${[
         ["合作方编号",p.id],["合作方类型",p.type],["国家 / 主体",`${p.country} · ${p.country} Legal Entity`],["CRM主体ID",p.crmId],["联系邮箱","m••••••@example.com"],["联系电话","+66 •••• 4821"],["业务状态",partner360PageTag(p.stage)],["CRM账户状态",partner360PageTag(data.crmStatus)]
       ].map(([label,value])=>`<div class="p360-field"><span>${h(label)}</span><strong>${typeof value === "string" && value.startsWith("<") ? value : h(value)}</strong></div>`).join("")}</div></section>
-      <section class="p360-panel"><header><div><h2>状态与阻断</h2><p>资金、风险、合规状态分别计算并保留来源。</p></div><button class="p360-link" data-p360-tab-link="finance">查看财务</button></header><div class="p360-summary-grid"><div><span>结算资格</span><strong>${partner360PageTag(data.riskBand === "R3" || data.creditLevel === "C0" ? "blocked" : "ready")}</strong></div><div><span>提现资格</span><strong>${partner360PageTag(data.partner.stage === "archived" ? "disabled" : "ready")}</strong></div><div><span>开放任务</span><strong>${data.tasks.length} 项</strong></div><div><span>阻断数量</span><strong>${data.blockers.length} 项</strong></div></div></section>
+      <section class="p360-panel"><header><div><h2>状态与阻断</h2><p>资金、风险、合规状态分别计算并保留来源。</p></div><button class="p360-link" data-p360-tab-link="finance">查看财务</button></header><div class="p360-summary-grid"><div><span>结算资格</span><strong>${partner360PageTag(data.riskBand === "R3" || data.creditLevel === "C0" ? "blocked" : "ready")}</strong></div><div><span>提现资格</span><strong>${partner360PageTag(data.partner.stage === "archived" ? "disabled" : "ready")}</strong></div><div><span>开放任务</span><strong>${openTaskCount} 项</strong></div><div><span>阻断数量</span><strong>${data.blockers.length} 项</strong></div></div></section>
       <section class="p360-panel"><header><div><h2>业务健康摘要</h2><p>近30日摘要，不替代报表和佣金底账。</p></div><button class="p360-link" data-p360-tab-link="promotion">查看推广</button></header><div class="p360-health"><div><span>客户数</span><strong>${h(data.stats.registrations)}</strong></div><div><span>有效FTD率</span><strong>${data.stats.ftd ? percent(data.stats.validFtd/data.stats.ftd*100) : "待同步"}</strong></div><div><span>当前佣金</span><strong>${money(data.stats.commission)}</strong></div><div><span>待结算</span><strong>${money(data.stats.pendingSettlement)}</strong></div></div></section>
     </div>`;
   }
@@ -5076,7 +5449,8 @@
   }
 
   function partner360PageFollowUp(data) {
-    return `<div class="p360-tab-content"><section class="p360-panel"><header><div><h2>跟进备注</h2><p>历史正文不可编辑；软删除保留审计。</p></div><div class="p360-title-actions"><button class="tm-button secondary compact" data-p360-task-new="risk">发起风险复核</button><button class="tm-button primary compact" data-p360-note-new>新增备注</button></div></header><div class="p360-note-list">${data.notes.map(note=>`<article><header><strong>${h(note.author)}</strong><span>${h(note.type)} · ${h(note.time)}</span></header><p>${h(note.content)}</p><small>下次跟进：${h(note.nextFollowUp || "—")} · 记录编号 ${h(note.id)}</small></article>`).join("")}</div></section><section class="p360-panel"><header><div><h2>任务与审批时间线</h2><p>任务入口统一回到任务队列，资金/风险事项不得自审。</p></div></header><div class="p360-timeline">${data.tasks.concat([{id:"approval-"+data.partner.id.slice(-4),type:"合作方资料核对",status:"approved",assignee:"合规/Compliance",due:"2026-11-08",sla:"已完成"}]).map(item=>`<article><span class="p360-timeline-dot"></span><div><header><strong>${h(item.id)} · ${h(item.type)}</strong>${partner360PageTag(item.status)}</header><p>负责人 ${h(item.assignee)} · SLA ${h(item.sla)} · ${h(item.due)}</p><button class="p360-inline-link" data-p360-task="${h(item.id)}">打开任务上下文</button></div></article>`).join("")}</div></section><section class="p360-panel"><header><div><h2>审计摘要</h2><p>完整记录进入统一审计页。</p></div><button class="p360-link" data-open-audit>打开全局审计</button></header><div class="p360-audit-list">${data.audit.map(item=>`<div><span>${h(item.time)} · ${h(item.actor)}</span><strong>${h(item.action)}</strong><small>${h(statusLabel(item.result))} · partner_id ${h(data.partner.id)}</small></div>`).join("")}</div></section></div>`;
+    const timeline=data.tasks.length?data.tasks.map(item=>`<article><span class="p360-timeline-dot"></span><div><header><strong>${h(item.id)} · ${h(item.type)}</strong>${partner360PageTag(item.status)}</header><p>负责人 ${h(item.assignee)} · ${h(item.sla)}</p><button class="p360-inline-link" data-p360-task="${h(item.id)}">打开任务上下文</button></div></article>`).join(""):`<p>暂无关联任务或审批记录。</p>`;
+    return `<div class="p360-tab-content"><section class="p360-panel"><header><div><h2>跟进备注</h2><p>历史正文不可编辑；软删除保留审计。</p></div><div class="p360-title-actions"><button class="tm-button secondary compact" data-p360-task-new="risk">发起风险复核</button><button class="tm-button primary compact" data-p360-note-new>新增备注</button></div></header><div class="p360-note-list">${data.notes.map(note=>`<article><header><strong>${h(note.author)}</strong><span>${h(note.type)} · ${h(note.time)}</span></header><p>${h(note.content)}</p><small>下次跟进：${h(note.nextFollowUp || "—")} · 记录编号 ${h(note.id)}</small></article>`).join("")}</div></section><section class="p360-panel"><header><div><h2>任务与审批时间线</h2><p>查看关联任务及其处理结果。</p></div></header><div class="p360-timeline">${timeline}</div></section><section class="p360-panel"><header><div><h2>审计摘要</h2><p>完整记录进入统一审计页。</p></div><button class="p360-link" data-open-audit>打开全局审计</button></header><div class="p360-audit-list">${data.audit.map(item=>`<div><span>${h(item.time)} · ${h(item.actor)}</span><strong>${h(item.action)}</strong><small>${h(statusLabel(item.result))} · partner_id ${h(data.partner.id)}</small></div>`).join("")}</div></section></div>`;
   }
 
   function partner360PageBody(data) {
@@ -5105,10 +5479,12 @@
     const data = partner360PageFixture();
     if (modal.kind === "note") return `<div class="p360-modal-backdrop"><section class="p360-modal" role="dialog" aria-modal="true"><header><div><h2>新增跟进备注</h2><p>${h(data?.partner.name || "")} · 备注会写入跟进与审计。</p></div><button class="tm-icon-button" data-p360-modal-close aria-label="关闭">×</button></header><label>备注内容<textarea data-p360-note-field="content" placeholder="记录沟通结论、风险说明或下一步动作"></textarea></label><label>下次跟进时间<input data-p360-note-field="followUp" type="date"></label><footer><button class="tm-button secondary" data-p360-modal-close>取消</button><button class="tm-button primary" data-p360-modal-submit>保存备注</button></footer></section></div>`;
     if (modal.kind === "owner") return `<div class="p360-modal-backdrop"><section class="p360-modal" role="dialog" aria-modal="true"><header><div><h2>分配责任人</h2><p>变更会刷新头部和跟进时间线，并写入审计。</p></div><button class="tm-icon-button" data-p360-modal-close aria-label="关闭">×</button></header><label>目标责任人<select data-p360-owner-field><option>运营/Ops</option><option>风控/Risk</option><option>财务/Finance</option><option>合规/Compliance</option><option>系统/Tech</option></select></label><label>变更原因<textarea data-p360-owner-reason placeholder="请填写责任边界或交接原因"></textarea></label><footer><button class="tm-button secondary" data-p360-modal-close>取消</button><button class="tm-button primary" data-p360-modal-submit>确认分配</button></footer></section></div>`;
-    return `<div class="p360-modal-backdrop"><section class="p360-modal" role="dialog" aria-modal="true"><header><div><h2>发起处理任务</h2><p>任务进入统一任务队列，页面不直接执行资金或风险动作。</p></div><button class="tm-icon-button" data-p360-modal-close aria-label="关闭">×</button></header><label>任务类型<select data-p360-task-type><option value="general">合作方资料核对</option><option value="crm-sync">CRM同步异常</option><option value="finance">资金核对</option><option value="risk">风险复核</option></select></label><label>优先级<select data-p360-task-priority><option>普通</option><option>高</option><option>紧急</option></select></label><label>任务说明<textarea data-p360-task-reason placeholder="请填写处理范围、影响摘要和下一步"></textarea></label><footer><button class="tm-button secondary" data-p360-modal-close>取消</button><button class="tm-button primary" data-p360-modal-submit>创建任务</button></footer></section></div>`;
+    const taskOptions=Object.entries({general:"合作方资料核对","crm-sync":"CRM同步异常",finance:"资金核对",risk:"风险复核"}).map(([value,label])=>`<option value="${value}" ${modal.taskType===value?"selected":""}>${label}</option>`).join("");
+    return `<div class="p360-modal-backdrop"><section class="p360-modal" role="dialog" aria-modal="true"><header><div><h2>发起处理任务</h2><p>任务进入统一任务队列，页面不直接执行资金或风险动作。</p></div><button class="tm-icon-button" data-p360-modal-close aria-label="关闭">×</button></header><label>任务类型<select data-p360-task-type>${taskOptions}</select></label><label>优先级<select data-p360-task-priority><option>普通</option><option>高</option><option>紧急</option></select></label><label>任务说明<textarea data-p360-task-reason placeholder="请填写处理范围、影响摘要和下一步"></textarea></label><footer><button class="tm-button secondary" data-p360-modal-close>取消</button><button class="tm-button primary" data-p360-modal-submit>创建任务</button></footer></section></div>`;
   }
 
   function pageMain() {
+    if(taskObjectPageActive())return `${taskObjectPage()}${tqDialog()}`;
     if (state.routeId === "tickets") return supportUI.page();
     if (state.routeId === "admin-config") return businessConfigWorkspace();
     return pageMainContent();
@@ -5961,6 +6337,7 @@
 
   function riskWorkbenchExportRequest(reason) {
     const store = riskWorkbenchStore();
+    const skipApproval = demoSkipsApproval();
     const requestedSnapshotId = state.riskWorkbenchSnapshotId;
     const requestedSnapshot = Object.values(state.riskWorkbenchListSnapshots).find(item => item.snapshot_id === requestedSnapshotId);
     const serverTime = Date.parse(String(store.serverNow || "").replace(" ","T"));
@@ -5991,7 +6368,7 @@
       export_id:`RWB-EXPORT-${Date.now()}`,
       source_page:"risk-workbench",
       tab:state.tabId,
-      status:"pending_approval",
+      status:skipApproval ? "ready" : "pending_approval",
       reason,
       scope:"risk_global",
       global_scope:"risk_global",
@@ -6005,15 +6382,15 @@
       rows:tqClone(rows),
       snapshot_created_at:snapshot.created_at,
       snapshot_expires_at:snapshot.expires_at,
-      expires_at:null,
+      expires_at:skipApproval ? new Date(window.AFF_ADMIN_CLOCK.now()+24*60*60*1000).toISOString() : null,
       applicant:{...((prototype.taskQueue?.options?.(state.role) || {}).current_user || {user_id:state.role,display_name:roleOwnerNames[state.role] || state.role})},
       download_roles:["risk","risk_supervisor","compliance","system_admin","audit"],
       created_at:store.serverNow,
       server_now:store.serverNow,
       data_source:"risk_workbench_projection"
     };
-    record.approval_id=`RWB-APPROVAL-${record.export_id}`;
-    record.approval_status="pending_approval";
+    record.approval_id=skipApproval ? null : `RWB-APPROVAL-${record.export_id}`;
+    record.approval_status=skipApproval ? "not_required" : "pending_approval";
     prototype.riskWorkbenchExports ||= [];
     prototype.riskWorkbenchExports.push(record);
     const centerTask = {
@@ -6021,12 +6398,12 @@
       name:`风险工作台 · ${state.tabId} · 当前筛选`,
       scope:`${record.scope} · ${record.row_count}行`,
       rows:record.row_count,
-      status:"processing",
-      approvalStatus:"pending_approval",
+      status:skipApproval ? "ready" : "processing",
+      approvalStatus:record.approval_status,
       approvalId:record.approval_id,
       masked:true,
       dataLevel:"sensitive",
-      expiresAt:record.snapshot_expires_at,
+      expiresAt:record.expires_at || record.snapshot_expires_at,
       createdBy:roleOwnerNames[state.role],
       applicant:record.applicant,
       applicantId:record.applicant?.user_id || null,
@@ -6034,6 +6411,7 @@
       riskExportId:record.export_id
     };
     prototype.exportTasks.unshift(centerTask);
+    if (skipApproval) integrationAudit("生成风险工作台导出",`${record.export_id} / ${record.row_count}行`,"ready",`trace-${record.export_id}`,{approval_required:false,self_review:false});
     return record;
   }
 
@@ -6215,6 +6593,9 @@
     const notice = action.notice ? `<div class="rwb-action-notice" role="status">${h(action.notice)}</div>` : "";
     const evidenceMarkup = `<fieldset class="rwb-action-fieldset"><legend>可引用证据</legend>${evidence.length ? evidence.map(item => `<label><input type="checkbox" data-risk-action-evidence="${h(item.evidence_id)}" ${form.evidence_ids?.includes(item.evidence_id)?"checked":""} ${item.invalidated || item.scan_status!=="clean"?"disabled":""}><span>${h(item.name || item.evidence_id)}<small>${h(item.scan_status || "待核验")} · ${h(item.source_system || item.source || "来源未标注")}</small></span></label>`).join("") : "<p class='rwb-muted'>暂无可引用证据</p>"}</fieldset>`;
     const checklistMarkup = `<fieldset class="rwb-action-fieldset"><legend>处理检查单</legend>${checks.map(item => `<label><input type="checkbox" data-risk-action-checklist="${h(item.key)}" ${form.checklist?.some(entry => entry.key===item.key && entry.checked)?"checked":""}><span>${h(item.label || item.key)}${item.required?"<small>必填</small>":""}</span></label>`).join("")}</fieldset>`;
+    if (demoSkipsApproval() && !editable && action.kind==="submit") {
+      return `<section class="rwb-action-panel"><header><div><h3>提交处置前核对</h3><p>确认后进入执行队列；实际结果以执行回执为准。</p></div><button class="tm-icon-button" data-risk-action-cancel aria-label="关闭处理表单">×</button></header>${error}${notice}<dl class="rwb-action-facts"><div><dt>处理结论</dt><dd>${h(tqConclusions[form.conclusion] || form.conclusion || "未填写")}</dd></div><div><dt>原因说明</dt><dd>${h(form.reason || "未填写")}</dd></div><div><dt>影响预览</dt><dd>${h(preview?.preview_id || "尚未生成")}</dd></div></dl><label class="rwb-action-confirm"><input type="checkbox" data-risk-action-field="confirmed" ${form.confirmed?"checked":""}>我已核对案件范围、金额和证据</label><footer><button class="tm-button secondary compact" data-risk-action-cancel>取消</button><button class="tm-button primary compact" data-risk-action-submit ${preview && form.confirmed?"":"disabled"}>提交执行</button></footer></section>`;
+    }
     if (!editable && action.kind === "submit") {
       return `<section class="rwb-action-panel"><header><div><h3>提交审批前核对</h3><p>提交会冻结当前草稿与影响预览，审批通过前不执行资金或风险状态变更。</p></div><button class="tm-icon-button" data-risk-action-cancel aria-label="关闭处理表单">×</button></header>${error}${notice}<dl class="rwb-action-facts"><div><dt>处理结论</dt><dd>${h(tqConclusions[form.conclusion] || form.conclusion || "未填写")}</dd></div><div><dt>原因说明</dt><dd>${h(form.reason || "未填写")}</dd></div><div><dt>影响预览</dt><dd>${preview ? `${h(preview.preview_id)} · USD ${h(preview.deduplicated_amount?.amount || preview.amount?.amount || "0.00")}` : "尚未生成"}</dd></div></dl>${preview ? `<div class="rwb-preview-card"><strong>预览有效至 ${h(preview.expires_at || "—")}</strong>${(preview.before_after_items || []).map(item => `<p>${h(item.item_id)} · ${h(item.after?.requested_action || "待执行")} · 需审批</p>`).join("")}</div>` : `<div class="rwb-action-warning">提交前必须先保存草稿并生成未过期的影响预览。</div>`}<label class="rwb-action-confirm"><input type="checkbox" data-risk-action-field="confirmed" ${form.confirmed?"checked":""}>我已核对案件范围、金额、证据和审批路径</label><footer><button class="tm-button secondary compact" data-risk-action-cancel>取消</button><button class="tm-button primary compact" data-risk-action-submit ${preview && form.confirmed?"":"disabled"}>提交审批</button></footer></section>`;
     }
@@ -6240,12 +6621,12 @@
     const fail = message => {action.error={code:"AFF-42201",message};return render();};
     try {
       if (action.kind === "submit") {
-        if (!form.confirmed) return fail("请确认已核对案件范围、金额、证据和审批路径");
+        if (!form.confirmed) return fail(demoSkipsApproval() ? "请确认已核对案件范围、金额和证据" : "请确认已核对案件范围、金额、证据和审批路径");
         if (!action.preview) return fail("请先生成有效影响预览");
         const response = prototype.taskQueue.write("submit_review",task.task_id,tqPayload(task,{draft_version:task.draft_version,preview_id:action.preview.preview_id,preview_hash:action.preview.preview_hash,self_review:false,impact_confirmation:true}),{role:state.role});
         const next = prototype.taskQueue.detail(task.task_id,{role:state.role});
         invalidateRiskWorkbenchSnapshots();
-        action.detail=next;action.form=tqFormFromTask(next);action.notice=`处置申请已提交，审批号 ${response.approval?.approval_id || "待生成"}`;action.error=null;state.riskWorkbenchAction=action;return render();
+        action.detail=next;action.form=tqFormFromTask(next);action.notice=demoSkipsApproval() ? "处置已提交，结果以任务执行回执为准" : `处置申请已提交，审批号 ${response.approval?.approval_id || "待生成"}`;action.error=null;state.riskWorkbenchAction=action;return render();
       }
       if (action.kind === "evidence" && !(form.evidence_ids || []).length) return fail("至少选择一条已核验证据");
       const draftResponse = prototype.taskQueue.write("save_draft",task.task_id,tqPayload(task,{
@@ -6315,6 +6696,7 @@
   }
 
   function riskApprovalPanel(approval) {
+    if (demoSkipsApproval()) return `<div class="rwb-drawer-grid"><div><span>历史记录</span><strong>${h(approval?.approval_id || approval?.id || "—")}</strong></div><div><span>记录状态</span><strong>${statusLabel(approval?.status || "unknown")}</strong></div></div><h3>处置摘要</h3><p>${h(approval?.draft?.reason || approval?.reason || "暂无说明")}</p>${approval?.task_id?`<button class="tm-button primary compact" data-tq-linked-task="${h(approval.task_id)}">查看任务与执行</button>`:"<p class='rwb-muted'>保留历史记录，不执行审批节点。</p>"}`;
     const action = state.riskWorkbenchAction?.kind === "approval" && state.riskWorkbenchAction.approvalId === (approval?.approval_id || approval?.id)
       ? state.riskWorkbenchAction
       : null;
@@ -6343,8 +6725,8 @@
     if (drawer.kind === "approval") {
       const approval = riskApprovalRecord(drawer.id);
       if (!approval) return "";
-      title = `${approval.approval_id || approval.id} · 审批节点`;
-      subtitle = "风险工作台内审批上下文 · 只显示必要业务信息";
+      title = `${approval.approval_id || approval.id} · ${demoSkipsApproval() ? "历史记录" : "审批节点"}`;
+      subtitle = demoSkipsApproval() ? "处置申请与执行记录" : "风险工作台内审批上下文 · 只显示必要业务信息";
       sections = riskApprovalPanel(approval);
     } else if (drawer.kind === "task-list") {
       const row = store.objects.find(item => item.id === drawer.id);
@@ -6381,9 +6763,9 @@
       sections = `${restricted ? `<div class="rwb-alert danger"><strong>当前角色无权读取任务详情</strong><span>${h(taskReadError?.source_error?.message || "统一任务服务拒绝当前角色读取完整事实")}。页面已锁定编辑入口，不使用旧演示责任人或旧版本覆盖当前状态。</span></div>` : ""}<div class="rwb-drawer-grid"><div><span>任务状态</span><strong>${statusLabel(workflowState || "unknown")}</strong></div><div><span>负责人</span><strong>${restricted ? "按权限不可见" : h(shared?.owner?.display_name || "未分配")}</strong></div><div><span>任务版本</span><strong>${restricted ? "按权限不可见" : h(shared?.version || "待核验")}</strong></div><div><span>SLA截止</span><strong>${h(riskSla)}</strong></div><div><span>服务端时间</span><strong>${h(store.serverNow)}</strong></div></div>
         <h3>任务事实</h3><p class="rwb-muted">${h(task.reason)}。来源 ${h(task.source)}；任务目的 ${h(task.purpose)}。当前时间口径：北京时间 UTC+8。</p>
         <h3>案件范围</h3><div class="rwb-case-list">${task.cases.length ? task.cases.map(item => `<article><strong>${h(item)}</strong><small>仅处理本次申请列出的三元组，其他案件不连带。</small></article>`).join("") : "<p class='rwb-muted'>当前任务尚未绑定具体案件</p>"}</div>
-        ${approval ? `<h3>审批与执行状态</h3><div class="rwb-approval"><p>${h(approval.applicant)} · ${statusTag(approvalFull?.status || approval.status)} · 执行：${h(execution ? `${execution.execution_id} · ${statusLabel(execution.status)}` : approval.execution)}</p><div class="rwb-inline-actions">${(approvalFull?.status || approval.status)==="pending_approval" && !restricted ? `<button class="tm-button primary compact" data-risk-approve="${h(approval.id)}">打开审批节点</button>` : ""}${approvalFull ? `<button class="tm-button secondary compact" data-risk-open-approval="${h(approval.id)}">查看审批记录</button>` : ""}</div></div>`:""}
+        ${approval ? `<h3>${demoSkipsApproval() ? "处置与执行状态" : "审批与执行状态"}</h3><div class="rwb-approval"><p>${h(approval.applicant)} · ${statusTag(approvalFull?.status || approval.status)} · 执行：${h(execution ? `${execution.execution_id} · ${statusLabel(execution.status)}` : approval.execution)}</p><div class="rwb-inline-actions">${!demoSkipsApproval() && (approvalFull?.status || approval.status)==="pending_approval" && !restricted ? `<button class="tm-button primary compact" data-risk-approve="${h(approval.id)}">打开审批节点</button>` : ""}${approvalFull ? `<button class="tm-button secondary compact" data-risk-open-approval="${h(approval.id)}">${demoSkipsApproval() ? "查看历史记录" : "查看审批记录"}</button>` : ""}</div></div>`:""}
         ${riskTaskNotificationMarkup(task.id)}
-        ${restricted ? `<p class="rwb-muted">当前角色仅可查看审批与执行摘要，不能认领、修改草稿或提交新的处置方案。</p>` : riskTaskStatus(shared || task) === "open" ? `<div class="rwb-inline-actions"><button class="tm-button primary compact" data-risk-claim="${h(task.id)}">认领任务</button></div>` : !canEditTask ? `<p class="rwb-muted">${workflowState === "pending_approval" ? "处置申请已提交，当前等待审批节点处理，表单已锁定。" : workflowState === "pending_execution" ? "审批已通过，当前等待领域执行回执，表单已锁定。" : "当前任务已结束或当前角色无可用编辑动作。"}</p>` : `<h3>处理动作</h3><div class="rwb-inline-actions"><button class="tm-button secondary compact" data-risk-task-action="evidence" data-risk-task-id="${h(task.id)}">补充证据</button><button class="tm-button secondary compact" data-risk-task-action="draft" data-risk-task-id="${h(task.id)}">保存调查结论</button><button class="tm-button secondary compact" data-risk-task-action="preview" data-risk-task-id="${h(task.id)}">生成影响预览</button><button class="tm-button primary compact" data-risk-task-action="submit" data-risk-task-id="${h(task.id)}">提交审批</button></div>`}
+        ${restricted ? `<p class="rwb-muted">当前角色仅可查看处置与执行摘要，不能认领、修改草稿或提交新的处置方案。</p>` : riskTaskStatus(shared || task) === "open" ? `<div class="rwb-inline-actions"><button class="tm-button primary compact" data-risk-claim="${h(task.id)}">认领任务</button></div>` : !canEditTask ? `<p class="rwb-muted">${workflowState === "pending_approval" ? (demoSkipsApproval() ? "历史待审任务，可核对后继续执行。" : "处置申请已提交，当前等待审批节点处理，表单已锁定。") : workflowState === "pending_execution" ? "当前等待领域执行回执，表单已锁定。" : "当前任务已结束或当前角色无可用编辑动作。"}</p>${demoSkipsApproval() && workflowState==="pending_approval" ? `<button class="tm-button primary compact" data-tq-linked-task="${h(task.id)}">继续处理</button>` : ""}` : `<h3>处理动作</h3><div class="rwb-inline-actions"><button class="tm-button secondary compact" data-risk-task-action="evidence" data-risk-task-id="${h(task.id)}">补充证据</button><button class="tm-button secondary compact" data-risk-task-action="draft" data-risk-task-id="${h(task.id)}">保存调查结论</button><button class="tm-button secondary compact" data-risk-task-action="preview" data-risk-task-id="${h(task.id)}">生成影响预览</button><button class="tm-button primary compact" data-risk-task-action="submit" data-risk-task-id="${h(task.id)}">${demoSkipsApproval() ? "提交处置" : "提交审批"}</button></div>`}
         ${riskTaskActionPanel(task,restricted ? null : shared)}`;
     } else if (drawer.kind === "object") {
       const row = store.objects.find(item => item.id === drawer.id); if (!row) return "";
@@ -6418,7 +6800,9 @@
       const sharedEventApproval = approval ? riskApprovalRecord(approval.id) : null;
       const currentEventNode = riskApprovalNode(sharedEventApproval);
       const eventCanDecide = Boolean(sharedEventApproval && currentEventNode && sharedEventApproval.status === "pending_approval" && currentEventNode.status === "pending" && currentEventNode.required_role === state.role && sharedEventApproval.applicant?.user_id !== prototype.taskQueue?.options?.(state.role)?.current_user?.user_id);
-      if (approval) sections += `<h3>审批链</h3><div class="rwb-approval"><p>${h(approval.applicant)} 提交 · ${statusTag(approval.status)} · 执行：${h(approval.execution)}</p><ol>${approval.chain.map(node => `<li>${h(node)}</li>`).join("")}</ol>${eventCanDecide ? `<div class="rwb-inline-actions"><button class="tm-button primary compact" data-risk-approve="${h(approval.id)}">打开审批节点</button><button class="tm-button danger compact" data-risk-reject="${h(approval.id)}">驳回</button></div>` : `<small>${sharedEventApproval ? `当前节点：${h(currentEventNode?.required_role || "待分配")} · 当前角色不可审批` : "统一审批记录尚未同步"}</small>`}</div>`;
+      if (approval) sections += demoSkipsApproval()
+        ? `<h3>处置记录</h3><div class="rwb-approval"><p>${h(approval.applicant)} 提交 · ${statusTag(sharedEventApproval?.status || approval.status)} · 执行：${h(approval.execution)}</p>${sharedEventApproval?.task_id?`<button class="tm-button secondary compact" data-tq-linked-task="${h(sharedEventApproval.task_id)}">查看任务与执行</button>`:""}</div>`
+        : `<h3>审批链</h3><div class="rwb-approval"><p>${h(approval.applicant)} 提交 · ${statusTag(approval.status)} · 执行：${h(approval.execution)}</p><ol>${approval.chain.map(node => `<li>${h(node)}</li>`).join("")}</ol>${eventCanDecide ? `<div class="rwb-inline-actions"><button class="tm-button primary compact" data-risk-approve="${h(approval.id)}">打开审批节点</button><button class="tm-button danger compact" data-risk-reject="${h(approval.id)}">驳回</button></div>` : `<small>${sharedEventApproval ? `当前节点：${h(currentEventNode?.required_role || "待分配")} · 当前角色不可审批` : "统一审批记录尚未同步"}</small>`}</div>`;
       const eventPurposes = row.type === "settlement_overdue"
         ? `<button class="tm-button secondary compact" data-risk-new-task="${h(row.id)}" data-risk-purpose="signal_review">发起信号复核</button>`
         : row.type === "cluster_detected"
@@ -6476,7 +6860,9 @@
     if (state.routeId === "risk-workbench") return riskWorkbenchPage();
     const gridMode = state.routeId === "admin-modules" && state.tabId === "material-list" && state.materialGrid;
     const viewControls = link360ViewSwitcher() || materialViewToggle();
-    return `${eventTraceSearchBar()}${riskCasePanel()}${reportPanel()}${integrationPanel()}${dataGovernancePanel()}${batchBar()}${filterBar()}${viewControls ? `<div class="dev-list-view-controls">${viewControls}</div>` : ""}${gridMode ? materialGrid() : table(rows)}`;
+    const permissionNotice=state.routeId==="admin-modules"&&state.tabId==="config-permission"
+      ? `<p class="dev-permission-scope">当前权限矩阵只读。角色、操作与数据范围的授权方案确认后开放编辑。</p>` : "";
+    return `${permissionNotice}${eventTraceSearchBar()}${riskCasePanel()}${reportPanel()}${integrationPanel()}${dataGovernancePanel()}${batchBar()}${filterBar()}${dashboardDrillNotice()}${viewControls ? `<div class="dev-list-view-controls">${viewControls}</div>` : ""}${gridMode ? materialGrid() : table(rows)}`;
   }
 
   function detailData() { return seedRows().find(row => row.id === state.detailId) || null; }
@@ -6562,18 +6948,18 @@
         ${partner.watchReason ? `<p class="dev-block-reason">观察原因：${h(partner.watchReason)}</p>` : ""}
         ${stageMeta ? `<p class="dev-permission-scope">阶段说明：${h(stageMeta.hint)}。入驻审核、认证、清退均在此抽屉完成，不再有独立页面。</p>` : ""}`,
       onboarding:(partner.onboard ? `
-        <div class="dev-check-list"><span>提交时间：${h(partner.onboard.submittedAt)}</span><span>自动审核条件：${partner.onboard.autoReviewEligible ? "命中（申请人具备审批权限时可自审）" : "未命中"}</span></div>
+        <div class="dev-check-list"><span>提交时间：${h(partner.onboard.submittedAt)}</span>${demoSkipsApproval() ? "" : `<span>自动审核条件：${partner.onboard.autoReviewEligible ? "命中（申请人具备审批权限时可自审）" : "未命中"}</span>`}</div>
         <p class="dev-help">${h(partner.onboard.note || "")}</p>
         <h4 class="dev-materials-title">申请材料清单</h4>
         <div class="dev-materials-list">${partner.onboard.materials.map(material =>
           `<span class="dev-chip ${material.state === "submitted" ? "active" : material.state === "returned" ? "forbidden" : ""}">${h(material.name)} · ${h(materialStateLabel[material.state])}</span>`).join("")}</div>
         ${reviewStates.includes(partner.stage) ? `
         <div class="dev-review-actions">
-          <button class="tm-button primary" data-partner-review="approve" data-partner-target="${h(partner.id)}">审核通过</button>
+          <button class="tm-button primary" data-partner-review="approve" data-partner-target="${h(partner.id)}">${demoSkipsApproval() ? "确认入驻" : "审核通过"}</button>
           <button class="tm-button secondary" data-partner-review="reject" data-partner-target="${h(partner.id)}">驳回</button>
           <button class="tm-button secondary" data-partner-review="supplement" data-partner-target="${h(partner.id)}">要求补件</button>
         </div>
-        <p class="dev-help">三键均强制填写原因并写入全局审计；申请人具备审批权限时提示自动审核（self_review=true 双审计）。</p>` : `<p class="dev-help">该合作方已度过入驻阶段；历史审核记录见审计。</p>`}
+        <p class="dev-help">${demoSkipsApproval() ? "填写原因后直接更新入驻处理结果，并保留操作记录。" : "三键均强制填写原因并写入全局审计；申请人具备审批权限时提示自动审核（self_review=true 双审计）。"}</p>` : `<p class="dev-help">该合作方已度过入驻阶段；历史审核记录见审计。</p>`}
       ` : "<p class='dev-help'>无入驻申请记录。</p>"),
       certs:`
         <div class="dev-cert-grid">
@@ -6667,7 +7053,7 @@
           <div><span>结论摘要</span><strong>${h(client.riskProfile.conclusion)}</strong></div>
         </div>
         <h4 class="dev-materials-title">风险事件引用</h4>
-        <div class="dev-materials-list">${client.riskProfile.riskEvents.map(evt => `<span class="dev-chip ${["R3","R4"].includes(client.rGrade)?"forbidden":""}">${h(evt)}</span>`).join("") || "<span class='dev-chip'>无</span>"}</div>
+        <div class="dev-materials-list">${client.riskProfile.riskEvents.map(evt => `<span class="dev-chip ${["R3"].includes(client.rGrade)?"forbidden":""}">${h(evt)}</span>`).join("") || "<span class='dev-chip'>无</span>"}</div>
         <h4 class="dev-materials-title">关联特征</h4>
         <div class="dev-risk-feature-list">
           <div><span>设备关联</span><strong>${client.riskProfile.devices.map(h).join("；")}</strong></div>
@@ -6741,14 +7127,40 @@
     </aside>`;
   }
 
+  function withdrawalDrawer(row) {
+    const w=prototype.funds360.withdrawals.find(item=>item.id===row.id);
+    if(!w)return "";
+    const partner=prototype.partner360.partners.find(item=>item.id===w.partner);
+    const facts=[
+      ["申请金额",money(w.amount)],["手续费",money(w.fee)],["预计到账",money(w.amount-w.fee)],
+      ["合作方",partner?.name || w.partner],["支付订单",w.paymentOrderId || "尚未同步订单编号"],
+      ["支付方式",w.channel || (w.name.includes("银行")?"银行转账":w.name.includes("钱包")?"电子钱包":"待核对")],
+      ["收款账户",w.maskedAccount || "账户信息由CRM提供，当前仅展示状态"],
+      ["CRM认证",`KYC：${statusLabel(partner?.kyc?.status)} / KYB：${statusLabel(partner?.kyb?.status)}`],
+      ["余额处理",w.balanceState || "未同步余额处理依据，请核查流水"],
+      ["支付回执",w.receiptId || "尚无最终到账回执"],
+      ["对账结果",w.reconciliationState || "尚未同步对账结论"],
+      ["尝试次数",w.attempts==null?"见支付时间线":`${w.attempts} / ${w.maxAttempts}`]
+    ];
+    return `<div class="tm-overlay" data-close-detail="1"></div><aside class="tm-drawer dev-drawer-wide" aria-label="提现详情">
+      <header><div><strong>${h(w.name)}</strong><span>${h(w.id)} · ${h(row.traceId)}</span></div><button data-close-detail="1" aria-label="关闭">×</button></header><div>
+      <section class="dev-drawer-section"><h3>当前处理结果</h3>${statusTag(w.status)}${w.failureReason?`<p class="dev-block-reason">${h(w.failureReason)}（${h(w.failureCode)}）</p>`:""}${w.externalResult==="unknown"?`<p class="dev-permission-scope">先查证原支付单结果，避免重复出款；核对任务不会自动重新支付。</p>`:""}</section>
+      <section class="dev-drawer-section"><h3>金额与支付依据</h3><div class="dev-detail-grid">${facts.map(([label,value])=>`<div><span>${h(label)}</span><strong>${h(value)}</strong></div>`).join("")}</div></section>
+      <section class="dev-drawer-section"><h3>申请与支付时间线</h3><div class="dev-audit-list">${w.steps.map(item=>`<div><span>${h(item.t || "尚未发生")}</span><strong>${h(item.s)}</strong><small>${h(item.d)}</small></div>`).join("")}</div></section>
+      <section class="dev-drawer-section"><h3>关联处理任务</h3>${(prototype.taskQueue?.toLegacyRows(state.role)||[]).filter(item=>item.partnerId===w.partner&&item.source_type==="partner_followup"&&item.fields.business_ref===w.id).map(item=>`<button class="dev-link-button" data-route="tasks?task_id=${h(item.id)}">${h(item.id)} · ${statusLabel(item.status)}</button>`).join("")||"<p>暂无核对任务</p>"}</section>
+      </div><footer><button class="tm-button secondary" data-close-detail="1">关闭</button><button class="tm-button secondary" data-route="partner-360/${h(w.partner)}?tab=finance">查看合作方财务</button>${w.status!=="success"&&["finance","finance_reviewer","operations","risk_supervisor"].includes(state.role)?`<button class="tm-button primary" data-fund-followup="${h(w.id)}">创建／查看财务核对任务</button>`:""}</footer></aside>`;
+  }
+
   function drawer() {
+    if(taskObjectPageActive())return "";
     if (state.routeId === "tickets") return supportUI.drawer();
     if (["tasks","workbench"].includes(state.routeId)) return taskQueueOverlay();
     if (state.routeId === "admin-config" && state.tabId === "overview" && state.detailId) return configOverviewSearchDrawer();
     const row = detailData();
-    if (!row) return "";
+    if (!row) return state.detailId ? `<div class="tm-overlay" data-close-detail="1"></div><aside class="tm-drawer" aria-label="记录不存在"><header><strong>未找到此记录</strong><button data-close-detail="1" aria-label="关闭">×</button></header><p>编号 ${h(state.detailId)} 不存在或当前员工无权查看，请返回列表重新选择。</p><footer><button class="tm-button secondary" data-close-detail="1">返回列表</button></footer></aside>` : "";
+    if(state.routeId==="admin-modules"&&state.tabId==="withdrawal-list")return withdrawalDrawer(row);
     const currentTab = tab();
-    const actions = allowedActions(routeActions[state.routeId]);
+    const actions = allowedActions(routeActions[state.routeId]).filter(([id])=>legacyActionAllowed(id,row));
     const fields = currentTab.columns.map(column => [column.label,formatPlain(row,column.key)]);
     const isPartner360 = currentTab.profile === "module" && state.tabId === "partner-list" && row.partnerRef;
     const isClient360 = currentTab.profile === "module" && state.tabId === "client-list" && row.clientRef;
@@ -6838,19 +7250,18 @@
   function riskCaseDrawer() {
     const item = riskCase();
     if (!item) return "";
-    const actions = availableRiskActions(item);
     return `<div class="tm-overlay" data-close-risk-case="1"></div><aside class="tm-drawer dev-drawer-wide" aria-label="风险案件闭环详情">
       <header><div><strong>${h(item.name)}</strong><span>${h(item.id)} · ${h(item.partner)} · 置信度 ${(item.confidence*100).toFixed(0)}%</span></div><button data-close-risk-case="1" aria-label="关闭">×</button></header>
       <div>
         <section class="dev-drawer-section"><h3>案件状态</h3><div class="dev-impact-grid"><article><span>案件状态</span><strong>${statusTag(item.status)}</strong></article><article><span>风险等级</span><strong>${statusTag(item.riskLevel)}</strong></article><article><span>组结论</span><strong>${statusTag(item.groupConclusion)}</strong></article><article><span>误合并候选</span><strong>${h(item.splitCandidate || "无")}</strong></article></div></section>
         <section class="dev-drawer-section"><h3>风险关系图</h3>${riskGraph(item)}<div class="dev-chip-row static">${item.features.map(feature=>`<span class="dev-chip">${h(feature)}</span>`).join("")}</div></section>
         <section class="dev-drawer-section"><h3>成员与逐案资金</h3><p class="dev-help">组结论不自动继承到成员资金；每笔佣金必须独立处理。</p><div class="dev-member-table"><div><span>客户</span><span>设备/IP/支付</span><span>佣金</span><span>资金状态</span><span>操作</span></div>${item.members.map(member=>`
-          <div><span>${h(member.clientId)}${member.memberStatus === "mis_merged" ? " · 误合并" : ""}</span><span>${h(member.device)}<small>${h(member.ip)} · ${h(member.payment)}</small></span><span>${h(member.commissionId)}<small>${money(member.amount)}</small></span><span>${statusTag(member.commissionStatus)}</span><span><button class="tm-button secondary" data-commission-action="release" data-commission-id="${h(member.commissionId)}">放行</button><button class="tm-button secondary" data-commission-action="hold" data-commission-id="${h(member.commissionId)}">结算中</button></span></div>`).join("")}</div></section>
+          <div><span>${h(member.clientId)}${member.memberStatus === "mis_merged" ? " · 误合并" : ""}</span><span>${h(member.device)}<small>${h(member.ip)} · ${h(member.payment)}</small></span><span>${h(member.commissionId)}<small>${money(member.amount)}</small></span><span>${statusTag(member.commissionStatus)}</span><span>历史记录，只读</span></div>`).join("")}</div></section>
         <section class="dev-drawer-section"><h3>调查SLA</h3><div class="dev-check-list"><span>状态：${h(statusLabel(item.investigation.status))}</span><span>响应SLA：${item.investigation.responseSlaHours}小时</span><span>提醒节点：${item.investigation.reminderHours.join(" / ")}小时</span><span>最长时长：${item.investigation.maxDurationDays}自然日</span><span>链接限制：${item.investigation.linkRestriction === "all_links" ? "新增+已有链接" : item.investigation.linkRestriction === "new_links" ? "新增链接" : "无限制"}</span><span>待材料：${item.investigation.materials.join("、")}</span></div></section>
         <section class="dev-drawer-section"><h3>统一隔离队列</h3><div class="dev-impact-grid"><article><span>状态</span><strong>${statusTag(item.quarantine.status)}</strong></article><article><span>来源</span><strong>${h(item.quarantine.sourceType)} / ${h(item.quarantine.sourceRef)}</strong></article><article><span>等待天数</span><strong>${item.quarantine.waitingDays}天</strong></article><article><span>阻塞金额</span><strong>${money(item.quarantine.amount)}</strong></article></div><p class="dev-permission-scope">解除隔离后必须重跑结算前检查；不会直接付款，也不会自动修改逐案佣金状态。</p></section>
         <section class="dev-drawer-section"><h3>处理时间线</h3><div class="dev-audit-list">${item.timeline.map(record=>`<div><span>${h(record.time)} · ${h(record.actor)}</span><strong>${h(record.action)}</strong><small>${h(statusLabel(record.result))}</small></div>`).join("")}</div></section>
       </div>
-      <footer><button class="tm-button secondary" data-close-risk-case="1">关闭</button>${actions.map(([id,action])=>`<button class="tm-button ${id==="conclude"?"primary":"secondary"}" data-risk-case-action="${h(id)}">${h(action.label)}</button>`).join("")}</footer>
+      <footer><button class="tm-button secondary" data-close-risk-case="1">关闭</button><button class="tm-button primary" data-route="risk-workbench?tab=events">进入风险工作台</button></footer>
     </aside>`;
   }
 
@@ -6881,19 +7292,19 @@
   function reportExportDrawer() {
     if (!state.reportExportOpen) return "";
     const taskExports = prototype.taskQueue?.exports({role:state.role}) || [];
-    const taskExportRows = taskExports.map(item => `<div><span>任务队列导出<small>${h(item.export_id)}</small></span><span>已应用任务筛选<small>${h(item.row_count)}行 · 敏感 · 已脱敏</small></span><span>${statusTag(item.status)}</span><span>${statusTag(item.status === "ready" ? "approved" : item.status)}</span><span>${h(item.expires_at || "按导出策略")}</span><span><button class="tm-button secondary" data-task-export-approval="${h(item.approval_id)}">查看审批</button><button class="tm-button secondary" data-tq-action="download_export" data-tq-export-id="${h(item.export_id)}" ${item.status !== "ready" ? "disabled" : ""}>下载</button></span></div>`).join("");
+    const taskExportRows = taskExports.map(item => `<div><span>任务队列导出<small>${h(item.export_id)}</small></span><span>已应用任务筛选<small>${h(item.row_count)}行 · 敏感 · 已脱敏</small></span><span>${statusTag(item.status)}</span><span>${statusTag(item.approval_status || (item.status === "ready" ? (demoSkipsApproval() ? "not_required" : "approved") : item.status))}</span><span>${h(item.expires_at || "按导出策略")}</span><span>${item.approval_id ? `<button class="tm-button secondary" data-task-export-approval="${h(item.approval_id)}">查看记录</button>` : ""}<button class="tm-button secondary" data-tq-action="download_export" data-tq-export-id="${h(item.export_id)}" ${item.status !== "ready" ? "disabled" : ""}>下载</button></span></div>`).join("");
     const riskExports = (prototype.riskWorkbenchExports || []).map(record => {
       const centerTask = prototype.exportTasks.find(item => item.riskExportId === record.export_id);
       const targetId = centerTask?.id || record.export_id;
       const status = record.status || "pending_approval";
       const approvalStatus = record.approval_status || status;
       const expiresAt = record.expires_at || centerTask?.expiresAt || "审批后24小时";
-      return `<div><span>风险工作台导出<small>${h(record.export_id)}</small></span><span>${h(record.tab)} · ${h(record.row_count)}行 · 脱敏</span><span>${statusTag(status)}</span><span>${statusTag(approvalStatus)}</span><span>${h(expiresAt)}</span><span>${status === "pending_approval" ? `<button class="tm-button secondary" data-governance-action="approve_export" data-governance-target="${h(targetId)}">审批</button>` : ""}<button class="tm-button secondary" data-risk-export-download="${h(record.export_id)}" ${status !== "ready" ? "disabled" : ""}>下载</button></span></div>`;
+      return `<div><span>风险工作台导出<small>${h(record.export_id)}</small></span><span>${h(record.tab)} · ${h(record.row_count)}行 · 脱敏</span><span>${statusTag(status)}</span><span>${statusTag(approvalStatus)}</span><span>${h(expiresAt)}</span><span>${status === "pending_approval" ? `<button class="tm-button secondary" data-governance-action="approve_export" data-governance-target="${h(targetId)}">${demoSkipsApproval() ? "生成文件" : "审批"}</button>` : ""}<button class="tm-button secondary" data-risk-export-download="${h(record.export_id)}" ${status !== "ready" ? "disabled" : ""}>下载</button></span></div>`;
     }).join("");
     return `<div class="tm-overlay" data-close-report-export="1"></div><aside class="tm-drawer dev-drawer-wide" aria-label="异步导出中心">
-      <header><div><strong>导出中心</strong><span>审批、脱敏、下载与操作记录</span></div><button data-close-report-export="1" aria-label="关闭">×</button></header>
+      <header><div><strong>导出中心</strong><span>${demoSkipsApproval() ? "脱敏、下载与操作记录" : "审批、脱敏、下载与操作记录"}</span></div><button data-close-report-export="1" aria-label="关闭">×</button></header>
       <div><section class="dev-drawer-section"><h3>导出任务</h3><div class="dev-member-table dev-export-table"><div><span>任务</span><span>范围</span><span>状态</span><span>审批</span><span>过期时间</span><span>操作</span></div>${taskExportRows}${riskExports}${prototype.exportTasks.filter(task => !task.riskExportId).map(task=>`
-        <div><span>${h(task.name)}<small>${h(task.traceId)}</small></span><span>${h(task.scope)}<small>${task.rows}行 · ${h(statusLabel(task.dataLevel))} · ${task.masked ? "已脱敏" : "未脱敏"}</small></span><span>${statusTag(task.status)}</span><span>${statusTag(task.approvalStatus)}</span><span>${h(task.expiresAt)}</span><span>${task.approvalStatus === "pending_approval" ? `<button class="tm-button secondary" data-governance-action="approve_export" data-governance-target="${h(task.id)}">审批</button>` : ""}<button class="tm-button secondary" data-report-export-download="${h(task.id)}" ${task.status !== "ready" ? "disabled" : ""}>下载</button><button class="tm-button secondary" data-report-export-cancel="${h(task.id)}" ${["expired","cancelled"].includes(task.status) ? "disabled" : ""}>取消</button></span></div>`).join("")}</div></section></div>
+        <div><span>${h(task.name)}<small>${h(task.traceId)}</small></span><span>${h(task.scope)}<small>${task.rows}行 · ${h(statusLabel(task.dataLevel))} · ${task.masked ? "已脱敏" : "未脱敏"}</small></span><span>${statusTag(task.status)}</span><span>${statusTag(task.approvalStatus)}</span><span>${h(task.expiresAt)}</span><span>${task.approvalStatus === "pending_approval" ? `<button class="tm-button secondary" data-governance-action="approve_export" data-governance-target="${h(task.id)}">${demoSkipsApproval() ? "生成文件" : "审批"}</button>` : ""}<button class="tm-button secondary" data-report-export-download="${h(task.id)}" ${task.status !== "ready" ? "disabled" : ""}>下载</button><button class="tm-button secondary" data-report-export-cancel="${h(task.id)}" ${["expired","cancelled"].includes(task.status) ? "disabled" : ""}>取消</button></span></div>`).join("")}</div></section></div>
       <footer><button class="tm-button secondary" data-close-report-export="1">关闭</button><button class="tm-button primary" data-create-report-export="1">创建当前筛选导出</button></footer>
     </aside>`;
   }
@@ -6934,7 +7345,7 @@
         return `<label><span>${h(field.label)}</span>${control}</label>`;
       }).join("")}</div></section>` : ""}
       ${action.reason ? `<section><h3>原因</h3><textarea id="action-reason" placeholder="请输入操作原因"></textarea></section>` : ""}
-      ${action.selfReview ? `<section><h3>自动审核</h3><label class="dev-check"><input type="checkbox" id="action-self-review">申请人具备审批权限时使用自动审核</label><p class="dev-help">自审将在同一事务生成提交与审批两条审计，并标记 self_review=true。</p></section>` : ""}
+      ${action.selfReview && !demoSkipsApproval() ? `<section><h3>自动审核</h3><label class="dev-check"><input type="checkbox" id="action-self-review">申请人具备审批权限时使用自动审核</label><p class="dev-help">自审将在同一事务生成提交与审批两条审计，并标记 self_review=true。</p></section>` : ""}
       </div><footer><button class="tm-button secondary" data-close-modal="1">取消</button><button class="tm-button primary" data-submit-action="1">确认${h(actionLabel)}</button></footer></section>`;
   }
 
@@ -7018,27 +7429,7 @@
   }
 
   function submitRiskCaseAction() {
-    const item = riskCase();
-    const info = state.riskCaseModal;
-    const action = item ? riskCaseActions[info.action] : null;
-    if (!item || !action || !action.roles.includes(state.role)) return showToast("当前角色无权执行风险案件动作");
-    const reason = document.querySelector("#risk-case-reason")?.value.trim();
-    if (action.reason && !reason) return showToast("风险处理原因必填");
-    const actionTarget = targetLabel(item,info.action);
-    let result = item.status;
-    if (info.action === "split") {
-      const member = item.members.find(row => row.clientId === item.splitCandidate);
-      if (member) {member.memberStatus = "split";member.commissionStatus = "manual_review";}
-      item.splitCandidate = null;
-      result = "split";
-    }
-    if (info.action === "conclude") {item.groupConclusion = "confirmed";item.status = "group_confirmed";result = "group_confirmed";}
-    if (info.action === "escalate") {item.investigation.status = "escalated";item.investigation.linkRestriction = "all_links";result = "escalated";}
-    if (info.action === "release") {item.quarantine.status = "released";item.quarantine.waitingDays = 0;item.quarantine.recheck = "passed";result = "released";}
-    item.timeline.push({time:createDate(0),action:action.label,actor:roleOwnerNames[state.role],result});
-    prototype.auditRecords.unshift({id:`audit-${Date.now().toString().slice(-6)}`,time:createDate(0),action:`风险案件${action.label}`,object:`${item.name} / ${actionTarget}`,operator:roleOwnerNames[state.role],result,trace_id:`trace-${item.id}`,self_review:false});
-    state.riskCaseModal = null;
-    showToast(`${action.label}已提交 · 案件时间线和审计已更新`);
+    return openUnifiedTasks("risk_review");
   }
 
   function targetLabel(item,action) {
@@ -7065,14 +7456,8 @@
   function createReportExport() {
     const packet = reportPacket();
     if (!packet) return showToast("当前页签没有报表包");
-    const task = {
-      id:`export-${Date.now().toString().slice(-4)}`,name:`${tab().title}当前筛选导出`,
-      scope:`当前筛选；${filteredRows().length}行源数据`,rows:filteredRows().length,status:"processing",approvalStatus:"pending_approval",masked:true,dataLevel:"sensitive",
-      expiresAt:createDate(-1),createdBy:roleOwnerNames[state.role],traceId:`trace-export-${Date.now().toString().slice(-5)}`
-    };
-    prototype.exportTasks.unshift(task);
-    prototype.auditRecords.unshift({id:`audit-${Date.now().toString().slice(-6)}`,time:createDate(0),action:"创建异步导出",object:task.name,operator:task.createdBy,result:"processing",trace_id:task.traceId,self_review:false});
-    return showToast("异步导出已创建 · 文件24小时后过期");
+    const task=createMaskedListExport(filteredRows(),"当前筛选列表摘要");
+    return showToast(`导出已创建 · ${task.id} · ${demoSkipsApproval() ? "可直接下载" : "审批通过后可下载"}`);
   }
 
   const partnerReviewActions = {
@@ -7081,20 +7466,24 @@
     supplement:{label:"要求补件",roles:["operations","compliance","risk_supervisor"],nextStage:"reviewing",result:"supplementing"}
   };
 
+  function partnerReviewLabel(actionId) {
+    return demoSkipsApproval() && actionId === "approve" ? "确认入驻" : partnerReviewActions[actionId]?.label || actionId;
+  }
+
   function partnerReviewModal() {
     if (!state.partnerReview) return "";
     const partner = prototype.partner360.partners.find(item => item.id === state.partnerReview.target);
     const action = partnerReviewActions[state.partnerReview.action];
     if (!partner || !action) return "";
-    const selfReview = partner.onboard?.autoReviewEligible && action.roles.includes(state.role);
+    const selfReview = !demoSkipsApproval() && partner.onboard?.autoReviewEligible && action.roles.includes(state.role);
     return `<div class="tm-overlay" data-close-partner-review="1"></div><section class="dev-modal" role="dialog" aria-modal="true">
-      <header><div><strong>${h(action.label)}</strong><span>${h(partner.name)} · ${h(partner.id)} · 当前阶段 ${h(prototype.partner360.stages.find(stage => stage.id === partner.stage)?.label)}</span></div><button data-close-partner-review="1" aria-label="关闭">×</button></header>
+      <header><div><strong>${h(partnerReviewLabel(state.partnerReview.action))}</strong><span>${h(partner.name)} · ${h(partner.id)} · 当前阶段 ${h(prototype.partner360.stages.find(stage => stage.id === partner.stage)?.label)}</span></div><button data-close-partner-review="1" aria-label="关闭">×</button></header>
       <div>
         <section><h3>影响预览</h3><div class="dev-impact-grid"><article><span>目标阶段</span><strong>${h(prototype.partner360.stages.find(stage => stage.id === action.nextStage)?.label)}</strong></article><article><span>申请材料</span><strong>${partner.onboard?.materials.length || 0}项</strong></article><article><span>KYC/KYB</span><strong>KYC ${h(prototype.partner360.kycStatusLabels[partner.kyc.status])} · KYB ${h(prototype.partner360.kycStatusLabels[partner.kyb.status])}</strong></article><article><span>审计</span><strong>提交后写入全局审计</strong></article></div></section>
         <section><h3>原因（必填）</h3><textarea id="partner-review-reason" placeholder="${state.partnerReview.action === "approve" ? "例如：材料齐全且CRM资料一致" : state.partnerReview.action === "reject" ? "例如：KYB企业注册号无法核实" : "例如：地址证明缺失，限48小时补件"}"></textarea></section>
         ${selfReview ? `<section><h3>自动审核</h3><label class="dev-check"><input type="checkbox" id="partner-self-review">申请人具备审批权限时使用自动审核</label><p class="dev-help">自审将在同一事务生成提交与审批两条审计，并标记 self_review=true。</p></section>` : ""}
       </div>
-      <footer><button class="tm-button secondary" data-close-partner-review="1">取消</button><button class="tm-button primary" data-submit-partner-review="1">确认${h(action.label)}</button></footer>
+      <footer><button class="tm-button secondary" data-close-partner-review="1">取消</button><button class="tm-button primary" data-submit-partner-review="1">${state.partnerReview.action === "approve" && demoSkipsApproval() ? "确认入驻" : `确认${h(action.label)}`}</button></footer>
     </section>`;
   }
 
@@ -7106,16 +7495,17 @@
     if (!action.roles.includes(state.role)) return showToast("当前角色无权执行入驻审核");
     const reason = document.querySelector("#partner-review-reason")?.value.trim();
     if (!reason) return showToast("审核原因必填");
-    const selfReview = Boolean(document.querySelector("#partner-self-review")?.checked);
+    const selfReview = !demoSkipsApproval() && Boolean(document.querySelector("#partner-self-review")?.checked);
     partner.stage = action.nextStage;
     partner.status = action.result;
     partner.updated = createDate(0);
     if (info.action === "approve") partner.performance = {clicks:0,validFtd:0,commission:0,qualityGrade:"-",roi:"-"};
-    prototype.partner360.noteTemplates.unshift({id:`note-${Date.now().toString(36)}`,partnerId:partner.id,time:createDate(0),author:roleOwnerNames[state.role],type:"沟通",content:`入驻审核${action.label}：${reason}`,nextFollowUp:"-"});
-    prototype.auditRecords.unshift({id:`audit-${Date.now().toString().slice(-6)}`,time:createDate(0),action:`入驻审核${action.label}`,object:`${partner.name} / ${partner.id}`,operator:roleOwnerNames[state.role],result:action.result,trace_id:`trace-${partner.id}`,self_review:selfReview});
+    const actionLabel = partnerReviewLabel(info.action);
+    prototype.partner360.noteTemplates.unshift({id:`note-${Date.now().toString(36)}`,partnerId:partner.id,time:createDate(0),author:roleOwnerNames[state.role],type:"沟通",content:`${demoSkipsApproval() ? "入驻处理" : "入驻审核"}${actionLabel}：${reason}`,nextFollowUp:"-"});
+    prototype.auditRecords.unshift({id:`audit-${Date.now().toString().slice(-6)}`,time:createDate(0),action:`${demoSkipsApproval() ? "入驻处理" : "入驻审核"}${actionLabel}`,object:`${partner.name} / ${partner.id}`,operator:roleOwnerNames[state.role],result:action.result,trace_id:`trace-${partner.id}`,self_review:selfReview,approval_required:!demoSkipsApproval()});
     state.partnerReview = null;
     dataStore["admin-modules:partner-list"] = null;
-    showToast(`${action.label}已提交 · 生命周期已更新 · 审计已记录${selfReview ? " · self_review=true" : ""}`);
+    showToast(`${actionLabel}已${demoSkipsApproval() ? "执行" : "提交"} · 生命周期已更新 · 审计已记录${selfReview ? " · self_review=true" : ""}`);
   }
 
   function partnerOffboardModal() {
@@ -7262,6 +7652,11 @@
     notify_breach:{label:"记录Breach通知",roles:["compliance","system_admin"],reason:true}
   };
 
+  function governanceActionLabel(actionId) {
+    const demoLabels = {authorize_field:"设置字段授权",approve_export:"生成导出文件",approve_deletion:"执行删除或匿名化"};
+    return (demoSkipsApproval() && demoLabels[actionId]) || governanceActions[actionId]?.label || actionId;
+  }
+
   function governanceTarget(action,targetId) {
     if (action === "approve_export" || action === "expire_export") {
       const task = prototype.exportTasks.find(item=>item.id===targetId);
@@ -7289,16 +7684,16 @@
     if (!action || !target) return "";
     const currentUser = prototype.taskQueue?.options?.(state.role)?.current_user || {user_id:state.role,display_name:roleOwnerNames[state.role] || state.role};
     const applicant = target.item.applicant || (target.type === "export" ? {user_id:target.item.applicantId || null,display_name:target.item.createdBy || "系统"} : null);
-    const selfReviewEligible = Boolean(applicant?.user_id && applicant.user_id === currentUser.user_id);
+    const selfReviewEligible = !demoSkipsApproval() && Boolean(applicant?.user_id && applicant.user_id === currentUser.user_id);
     return `<div class="tm-overlay" data-close-governance-modal="1"></div><section class="dev-modal" role="dialog" aria-modal="true">
-      <header><div><strong>${h(action.label)}</strong><span>${h(target.item.name || target.item.field || target.item.dataType || target.item.id)}</span></div><button data-close-governance-modal="1" aria-label="关闭">×</button></header>
+      <header><div><strong>${h(governanceActionLabel(state.governanceModal.action))}</strong><span>${h(target.item.name || target.item.field || target.item.dataType || target.item.id)}</span></div><button data-close-governance-modal="1" aria-label="关闭">×</button></header>
       <div>
         <section><h3>治理边界</h3><div class="dev-check-list"><span>只更新当前工作区状态，不删除业务数据。</span><span>敏感字段默认脱敏。</span><span>受限字段不进入普通导出。</span><span>动作、原因、对象和TraceId写入全局审计。</span></div></section>
-        ${applicant ? `<section><h3>申请身份</h3><div class="dev-impact-grid"><article><span>申请人</span><strong>${h(applicant.display_name || "系统")}</strong></article><article><span>申请人编号</span><strong>${h(applicant.user_id || "待核验")}</strong></article><article><span>当前操作人</span><strong>${h(currentUser.display_name || state.role)}</strong></article><article><span>自审</span><strong>${selfReviewEligible ? "当前操作人即申请人" : "非申请人"}</strong></article></div></section>` : ""}
+        ${applicant ? `<section><h3>申请身份</h3><div class="dev-impact-grid"><article><span>申请人</span><strong>${h(applicant.display_name || "系统")}</strong></article><article><span>申请人编号</span><strong>${h(applicant.user_id || "待核验")}</strong></article><article><span>当前操作人</span><strong>${h(currentUser.display_name || state.role)}</strong></article>${demoSkipsApproval() ? "" : `<article><span>自审</span><strong>${selfReviewEligible ? "当前操作人即申请人" : "非申请人"}</strong></article>`}</div></section>` : ""}
         <section><h3>原因</h3><textarea id="governance-reason" placeholder="请输入数据治理原因"></textarea></section>
         ${selfReviewEligible ? `<section><h3>自动审核</h3><label class="dev-check"><input type="checkbox" id="governance-self-review">申请人具备审批权限，使用自动审核</label><p class="dev-help">勾选后会在同一事务内写入提交与审批两条审计，并标记 self_review=true。</p></section>` : ""}
       </div>
-      <footer><button class="tm-button secondary" data-close-governance-modal="1">取消</button><button class="tm-button primary" data-submit-governance="1">确认${h(action.label)}</button></footer>
+      <footer><button class="tm-button secondary" data-close-governance-modal="1">取消</button><button class="tm-button primary" data-submit-governance="1">确认${h(governanceActionLabel(state.governanceModal.action))}</button></footer>
     </section>`;
   }
 
@@ -7307,42 +7702,46 @@
     const action = governanceActions[info.action];
     const target = governanceTarget(info.action,info.target);
     if (!action || !target) return showToast("治理对象不存在");
-    if (!action.roles.includes(state.role)) return showToast("当前角色无权执行数据治理动作");
+    const demoOwnExport = demoSkipsApproval() && info.action === "approve_export" && target.item.applicant?.user_id === prototype.taskQueue?.options?.(state.role)?.current_user?.user_id;
+    if (!action.roles.includes(state.role) && !demoOwnExport) return showToast("当前角色无权执行数据治理动作");
     const reason = document.querySelector("#governance-reason")?.value.trim();
     if (!reason) return showToast("数据治理原因必填");
     const currentUser = prototype.taskQueue?.options?.(state.role)?.current_user || {user_id:state.role,display_name:roleOwnerNames[state.role] || state.role};
     const applicant = target.item.applicant || (target.type === "export" ? {user_id:target.item.applicantId || null,display_name:target.item.createdBy || "系统"} : null);
-    const selfReview = Boolean(document.querySelector("#governance-self-review")?.checked);
-    if (applicant?.user_id && applicant.user_id === currentUser.user_id && !selfReview) return showToast("申请人审批本人事项必须明确勾选自动审核");
+    const skipApproval = demoSkipsApproval();
+    const selfReview = !skipApproval && Boolean(document.querySelector("#governance-self-review")?.checked);
+    if (!skipApproval && applicant?.user_id && applicant.user_id === currentUser.user_id && !selfReview) return showToast("申请人审批本人事项必须明确勾选自动审核");
     if (selfReview && (!applicant?.user_id || applicant.user_id !== currentUser.user_id)) return showToast("自动审核仅适用于申请人本人且当前角色具备审批权限");
     let result = "approved";
     if (info.action === "revoke_field") {target.item.status = "rejected";target.item.expiresAt = "-";result = "rejected";}
     else if (info.action === "authorize_field") {target.item.status = "approved";target.item.expiresAt = createDate(-1);result = "approved";}
     else if (info.action === "approve_export") {
-      target.item.approvalStatus = "approved";
+      target.item.approvalStatus = skipApproval ? "not_required" : "approved";
       target.item.status = "ready";
       let riskExport = null;
       if (target.item.riskExportId) {
         riskExport = (prototype.riskWorkbenchExports || []).find(item => item.export_id === target.item.riskExportId);
         if (riskExport) {
-          riskExport.approval_status="approved";
+          riskExport.approval_status=skipApproval ? "not_required" : "approved";
           riskExport.status="ready";
-          riskExport.approved_at=prototype.riskWorkbench?.serverNow || createDate(0);
-          riskExport.expires_at = new Date(Date.parse(riskExport.approved_at) + 24 * 60 * 60 * 1000).toISOString();
-          riskExport.approver={...currentUser};
+          const preparedAt = skipApproval ? new Date(window.AFF_ADMIN_CLOCK.now()).toISOString() : prototype.riskWorkbench?.serverNow || createDate(0);
+          if (skipApproval) riskExport.generated_at=preparedAt;
+          else riskExport.approved_at=preparedAt;
+          riskExport.expires_at = new Date(Date.parse(preparedAt) + 24 * 60 * 60 * 1000).toISOString();
+          if (!skipApproval) riskExport.approver={...currentUser};
           riskExport.self_review=selfReview;
         }
       }
-      target.item.approver = {...currentUser};
+      if (!skipApproval) target.item.approver = {...currentUser};
       target.item.selfReview = selfReview;
-      const approvedAt = riskExport?.approved_at || prototype.riskWorkbench?.serverNow || createDate(0);
+      const approvedAt = (skipApproval ? riskExport?.generated_at : riskExport?.approved_at) || new Date(window.AFF_ADMIN_CLOCK.now()).toISOString();
       const approvedExpiry = new Date(Date.parse(approvedAt) + 24 * 60 * 60 * 1000).toISOString();
       target.item.expiresAt = approvedExpiry;
-      const centerTask = prototype.exportTasks.find(item => item.riskExportId === target.item.riskExportId);
+      const centerTask = target.item.riskExportId ? prototype.exportTasks.find(item => item.riskExportId === target.item.riskExportId) : null;
       if (centerTask) {
         centerTask.status = "ready";
-        centerTask.approvalStatus = "approved";
-        centerTask.approver = {...currentUser};
+        centerTask.approvalStatus = skipApproval ? "not_required" : "approved";
+        if (!skipApproval) centerTask.approver = {...currentUser};
         centerTask.selfReview = selfReview;
         centerTask.expiresAt = approvedExpiry;
       }
@@ -7360,17 +7759,18 @@
     const governanceAudit = {
       self_review:selfReview,
       applicant:applicant?.user_id || null,
-      approver:currentUser.user_id,
-      ...(target.type === "export" && prototype.riskWorkbench?.serverNow ? {time:prototype.riskWorkbench.serverNow} : {})
+      approver:skipApproval ? null : currentUser.user_id,
+      approval_required:!skipApproval,
+      time:createDate(0)
     };
     if (selfReview) {
       integrationAudit("提交治理审批",governanceObject,"submitted",`trace-governance-${info.target}-submit`,governanceAudit);
       integrationAudit(action.label,governanceObject,result,`trace-governance-${info.target}-approve`,governanceAudit);
     } else {
-      integrationAudit(action.label,governanceObject,result,`trace-governance-${info.target}`,governanceAudit);
+      integrationAudit(governanceActionLabel(info.action),governanceObject,result,`trace-governance-${info.target}`,governanceAudit);
     }
     state.governanceModal = null;
-    showToast(`${action.label}已提交 · 审计已记录`);
+    showToast(`${governanceActionLabel(info.action)}已${skipApproval ? "执行" : "提交"} · 审计已记录`);
   }
 
   function integrationAudit(action,object,result,traceId,extra={}) {
@@ -7431,7 +7831,7 @@
 
   function toast() {
     if (!state.toast) return "";
-    return `<div class="tm-toast show"><span>${h(state.toast)}</span>${state.toastAction?.kind === "exports" ? `<button class="tm-button secondary compact" data-open-report-export>查看导出记录</button>` : ""}</div>`;
+    return `<div class="tm-toast show"><span>${h(state.toast)}</span>${state.toastAction?.kind === "exports" ? `<button class="tm-button secondary compact" data-open-report-export>查看导出记录</button>` : state.toastAction?.path ? `<button class="tm-button secondary compact" data-route="${h(state.toastAction.path)}">${h(state.toastAction.label || "查看")}</button>` : ""}</div>`;
   }
 
   function auditDrawer() {
@@ -7590,7 +7990,8 @@
       const renderItem = (item, level = 0) => {
         const itemActive = group.id === state.menuActiveGroupId &&
           ((item.routeId === state.routeId && item.tabId === state.tabId) ||
-           (item.id === "nav-partners" && state.routeId === "partner-360"));
+           (item.id === "nav-partners" && state.routeId === "partner-360") ||
+           (item.id === "nav-clients" && state.routeId === "customer-360"));
         const hasChildren = Array.isArray(item.children) && item.children.length > 0;
         return `<div class="dev-menu-node level-${level} ${itemActive ? "active" : ""} ${hasChildren ? "has-children" : ""}">
           <button type="button" class="${itemActive?"active":""} stage-${item.stage.toLowerCase()}" data-menu-item="${h(item.id)}" title="${h(item.summary)}">
@@ -7657,6 +8058,7 @@
   }
 
   function topTabsForRoute(currentRoute) {
+    if(taskObjectPageActive())return [];
     if (["admin-config","admin-system-config","tasks","workbench","tickets","partner-360"].includes(currentRoute.id)) return [];
     if (currentRoute.id === "risk-workbench" && state.legacyRiskRoute) return prototype.routes.find(route => route.id === "admin-risk")?.tabs || currentRoute.tabs;
     return currentRoute.tabs;
@@ -7670,17 +8072,14 @@
     document.body.classList.toggle("risk-active",state.routeId === "risk-workbench");
     document.body.classList.toggle("system-config-active",state.routeId === "admin-system-config");
     if (!["tasks","workbench"].includes(state.routeId)) document.body.classList.remove("tq-has-overlay");
-    const queueClock = ["tasks","workbench","admin-workbench"].includes(state.routeId) && prototype.taskQueue;
-    const sharedOpsNow = prototype.riskWorkbench?.serverNow || prototype.taskQueue?.options?.(state.role)?.server_now || "2026-11-08T12:00:00+08:00";
-    const clockValue = riskDateLabel(sharedOpsNow);
-    const clockText = `<span>服务器时间 ${h(clockValue)} UTC+8</span><span>本地时间 ${h(clockValue)} UTC+8</span>`;
+    const clockText = adminClockMarkup();
     const currentRoute = route(); const currentTab = tab(); const primaryId = state.routeId === "admin-modules" ? modulePrimaryAction() : primaryActions[state.routeId];
     const primaryAction = {roles:[],...actionCatalog[primaryId]};
     if (state.routeId === "admin-modules") primaryAction.label = moduleActionLabel(primaryId);
     const topTabs = topTabsForRoute(currentRoute);
     document.title = state.routeId === "admin-workbench" ? "仪表盘 · Affiliate Ops" : `${currentTab.title} · ${currentRoute.title}`;
     const modalMarkup = `${modal()}${releaseModal()}${configVersionModal()}${configActionModal()}${systemConfigConfirmModal()}${systemConfigPublishConfirmModal()}${riskCaseModal()}${reportSuggestionModal()}${governanceModal()}${partnerReviewModal()}${partnerOffboardModal()}${partnerNoteModal()}${clientRiskReviewModal()}${materialReviewModal()}${postbackTestModal()}${paramDraftModal()}`;
-    const pageHead = ["admin-config","tasks","workbench","partner-360"].includes(state.routeId) ? ""
+    const pageHead = ["admin-config","tasks","workbench","partner-360","customer-360"].includes(state.routeId) ? ""
       : state.routeId === "admin-workbench" ? `<div class="tm-page-head dash-v2-page-head"><div><h1>${state.detailId === "full" ? "完整任务列表" : "仪表盘"}</h1><p>${h(dashboardRoleNames[state.role] || "运营")}视角 · ${state.detailId === "full" ? "集中查看全部可见任务" : "先看业务状态，再处理待办和异常"}</p></div><div class="tm-head-actions">${state.detailId === "full"
         ? `<button class="tm-button secondary" data-dashboard-back="1">返回仪表盘</button>`
         : `<label class="dash-v2-range"><span>统计范围</span><select data-dashboard-range aria-label="统计范围">${Object.entries(dashboardRangeLabels).map(([value,label]) => `<option value="${h(value)}" ${state.dashboardRange===value?"selected":""}>${h(label)}</option>`).join("")}</select></label>`}</div></div>`
@@ -7688,7 +8087,7 @@
       : `<div class="tm-page-head"><div><h1>${h(currentTab.title)}</h1><p>${h(currentTab.description)}</p></div><div class="tm-head-actions">${primaryAction.roles.includes(state.role) && !["export","refresh","save-view","columns"].includes(primaryId) ? `<button class="tm-button primary" data-action-name="${h(primaryId)}">${h(primaryAction.label)}</button>` : ""}</div></div>`;
     document.querySelector("#admin-app").innerHTML = `<aside class="tm-sidebar"><div class="tm-sidebar-brand"><strong>Affiliate Ops</strong><span>TradeMaster风格</span></div><section class="tm-workspace"><span>工作空间</span><strong>Affiliate 运营</strong><small>${h(prototype.dataSource.name)}</small></section><nav aria-label="主导航">${sidebarNavigation()}</nav><footer><small>${h(prototype.version)}</small></footer></aside>
     <main class="tm-main"><header class="tm-topbar"><div class="tm-topbar-title"><button class="tm-nav-button" data-nav aria-label="打开导航">≡</button><nav class="tm-breadcrumb" aria-label="面包屑"><span>Affiliate Ops</span><i>/</i><span>${h(currentRoute.group)}</span><i>/</i><strong>${h(currentRoute.title === currentTab.title ? currentRoute.title : `${currentRoute.title} · ${currentTab.title}`)}</strong></nav></div>
-      <div class="tm-topbar-tools"><button class="tm-icon-button" data-open-search="1" title="全局搜索 Ctrl/Cmd+K" aria-label="全局搜索">${topbarIcon("search")}</button><span class="tm-clock" title="服务器与本地时间">${clockText}</span><span class="tm-delay">延迟 42ms</span>${roleSwitcher()}</div></header>
+      <div class="tm-topbar-tools"><button class="tm-icon-button" data-open-search="1" title="全局搜索 Ctrl/Cmd+K" aria-label="全局搜索">${topbarIcon("search")}</button><span class="tm-clock" title="本地原型时钟；业务快照日期在页面内单独显示">${clockText}</span>${roleSwitcher()}</div></header>
     ${openTabsBar()}
     ${currentRoute.kind === "module" || !topTabs.length ? "" : `<nav class="tm-tabs" aria-label="页签">${topTabs.map(item => { const mapped = currentRoute.id === "risk-workbench" ? (riskLegacyTabMap[item.id] || item.id) : item.id; const active = mapped === state.tabId; return `<button class="${active?"active":""}" data-tab="${h(item.id)}" aria-selected="${active}">${h(item.title)}</button>`; }).join("")}</nav>`}
     <section class="tm-content">${pageHead}${stateBlock()}${pageMain()}</section><footer class="dev-footer">Affiliate Ops · ${h(prototype.dataSource.name)} · 更新于 ${h(prototype.dataSource.updatedAt)}</footer></main>${configVersionMenuPortal()}${demoPanel()}${menuBlueprintDrawer()}${searchDrawer()}${state.eventChainId ? eventChainDrawerBody() : state.trackerSessionId ? trackerPathDrawer() : state.configOverviewVersionId ? configOverviewVersionDrawer() : state.configOverviewItem ? configItemDrawer() : state.configScopedItem ? configScopedVersionDrawer() : state.configVersionId ? configVersionDrawer() : state.releaseId ? releaseDrawer() : state.riskCaseId ? riskCaseDrawer() : state.reportDimensionId ? reportDimensionDrawer() : state.integrationSystemId ? integrationSystemDrawer() : state.routeId === "partner-360" ? "" : drawer()}${auditDrawer()}${notificationDrawer()}${permissionDrawer()}${reportExportDrawer()}${toast()}`;
@@ -7703,6 +8102,10 @@
       }
     }
     if (["tasks","workbench"].includes(state.routeId)) taskQueueMount();
+    if(taskObjectPageActive()&&tq.dialog){
+      document.body.classList.add("tq-has-overlay");
+      requestAnimationFrame(()=>document.querySelector(".tq-modal")?.focus({preventScroll:true}));
+    }
     if (state.routeId === "tickets") supportUI.mount();
     if (state.riskWorkbenchDrawer) {
       requestAnimationFrame(() => {
@@ -7727,10 +8130,25 @@
     clearTimeout(state.toastTimer);
     state.toastTimer = setTimeout(() => {state.toast=null;state.toastAction=null;render();},4200);
   }
+  function adminClockMarkup() {
+    const now=new Date(window.AFF_ADMIN_CLOCK.now());
+    const zone=Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Shanghai";
+    const format=timeZone=>new Intl.DateTimeFormat("sv-SE",{timeZone,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(now);
+    const localOffset=new Intl.DateTimeFormat("en-US",{timeZone:zone,timeZoneName:"shortOffset"}).formatToParts(now).find(item=>item.type==="timeZoneName")?.value.replace("GMT","UTC");
+    return `<span>服务器时间 ${h(format("Asia/Shanghai"))} UTC+8</span><span>本地时间 ${h(format(zone))} ${h(localOffset)}</span>`;
+  }
 
   function openAction(actionId,target) {
     const action = actionCatalog[actionId];
     if (!action || !action.roles.includes(state.role)) return showToast("当前角色无权执行该操作");
+    if(state.routeId==="admin-modules"&&state.tabId==="config-permission")return showToast("权限矩阵目前只读；授权范围及发布权限确认后再开放编辑");
+    if(state.routeId==="admin-review" && legacyTaskTypes[state.tabId])return openUnifiedTasks(legacyTaskTypes[state.tabId]);
+    if(state.routeId==="admin-modules" && ["commission-list","statement-list","withdrawal-list","reversal-list","reconciliation"].includes(state.tabId)) {
+      const row=target?seedRows().find(item=>item.id===target):null;
+      if(row?.fundRef?.partner)return openPartnerFollowup(row.fundRef.partner,"finance",`${row.id}：请核对当前资金记录与支付回执。`,state.tabId==="withdrawal-list"?row.id:null);
+      return openUnifiedTasks("partner_followup");
+    }
+    if(target&&!legacyActionAllowed(actionId,seedRows().find(item=>item.id===target)))return showToast("当前状态不允许此操作，请刷新记录后重试");
     if (actionId === "suggestion" && state.routeId === "admin-performance") {
       const data = reportDimension() || {item:reportPacket()?.dimensions[0]};
       if (!data?.item) return showToast("报表维度不存在");
@@ -7741,17 +8159,73 @@
     state.modal = {action:actionId,target:target || null,batch:!target && state.selected.size > 0}; render();
   }
 
+  async function copyAdminValue(value) {
+    if(!value)return showToast("没有可复制的内容");
+    try {
+      if(!navigator.clipboard?.writeText)throw new Error("clipboard unavailable");
+      await navigator.clipboard.writeText(String(value));
+      return showToast("已复制");
+    }catch{return showToast("复制未成功，请选中文本后复制");}
+  }
+  function downloadAdminFile(name,content,type="text/plain;charset=utf-8") {
+    const url=URL.createObjectURL(new Blob([content],{type}));
+    const link=document.createElement("a");link.href=url;link.download=name;
+    document.body.appendChild(link);link.click();link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  function exportPartnerSummary(partner) {
+    if(!partner)return showToast("合作方不存在");
+    const id=`export-partner-${Date.now().toString(36)}`;
+    const skipApproval=demoSkipsApproval();
+    prototype.exportTasks.unshift({id,name:`${partner.name}摘要`,scope:partner.id,rows:1,status:skipApproval ? "ready" : "pending_approval",approvalStatus:skipApproval ? "not_required" : "pending_approval",masked:true,dataLevel:"internal",expiresAt:skipApproval ? new Date(window.AFF_ADMIN_CLOCK.now()+24*60*60*1000).toISOString() : "审批后24小时",applicant:prototype.taskQueue.options(state.role).current_user,createdBy:roleOwnerNames[state.role],traceId:`trace-${id}`});
+    const summary={id:partner.id,name:partner.name,country:partner.country,stage:statusLabel(partner.stage),updated:partner.updated};
+    prototype.exportTasks[0].content=JSON.stringify(summary,null,2);
+    prototype.auditRecords.unshift({id:`audit-${id}`,time:createDate(0),action:skipApproval ? "生成合作方脱敏摘要" : "申请导出合作方脱敏摘要",object:partner.id,operator:roleOwnerNames[state.role],result:skipApproval ? "ready" : "pending_approval",trace_id:`trace-${id}`,self_review:false,approval_required:!skipApproval});
+    state.reportExportOpen=true;
+    return showToast(`摘要导出已创建 · ${id} · ${skipApproval ? "可直接下载" : "等待导出审批"}`);
+  }
+  function createMaskedListExport(rows,scope) {
+    const id=`export-${Date.now().toString(36)}-${crypto.randomUUID().slice(0,8)}`;
+    const skipApproval=demoSkipsApproval();
+    const records=rows.map(row=>({
+      id:row.id,name:row.name,type:row.type,country:row.country,
+      status:statusLabel(row.status),partner_id:row.partnerId,amount:row.amount,updated_at:row.updated
+    }));
+    const task={
+      id,name:`${tab().title}列表摘要`,scope,rows:records.length,
+      status:skipApproval ? "ready" : "pending_approval",approvalStatus:skipApproval ? "not_required" : "pending_approval",masked:true,dataLevel:"internal",
+      expiresAt:skipApproval ? new Date(window.AFF_ADMIN_CLOCK.now()+24*60*60*1000).toISOString() : "审批后24小时",applicant:prototype.taskQueue.options(state.role).current_user,
+      createdBy:roleOwnerNames[state.role],traceId:`trace-${id}`,
+      content:JSON.stringify({generated_at:createDate(0),scope,filters:{...state.filters},records},null,2)
+    };
+    prototype.exportTasks.unshift(task);
+    prototype.auditRecords.unshift({id:`audit-${id}`,time:createDate(0),action:skipApproval ? "生成列表脱敏摘要" : "申请导出列表脱敏摘要",object:task.name,operator:task.createdBy,result:skipApproval ? "ready" : "pending_approval",trace_id:task.traceId,self_review:false,approval_required:!skipApproval});
+    return task;
+  }
+  function downloadStatement(id) {
+    const statement=prototype.funds360.statements.find(item=>item.id===id);
+    if(!statement)return showToast("结算单不存在");
+    downloadAdminFile(`${id}.json`,JSON.stringify(statement,null,2),"application/json");
+    return showToast(`${id} 已下载`);
+  }
+  function openPartnerFollowup(partnerId,type,reason,businessRef=null) {
+    try {
+      const result=prototype.taskQueue.ensurePartnerTask({partner_id:partnerId,type,reason,business_ref:businessRef,request_id:tqId("request"),idempotency_key:tqId("idem")},{role:state.role});
+      return navigate(`tasks?task_id=${encodeURIComponent(result.task.task_id)}`);
+    }catch(error){return showToast(error.message || "无法打开处理任务");}
+  }
+
   function selectedActionRows() {
     if (state.modal.target) return seedRows().filter(row => row.id === state.modal.target);
     const selected = seedRows().filter(row => state.selected.has(row.id));
     return selected.length ? selected : filteredRows().slice(0,1);
   }
 
-  function resultForAction(actionId) {
+  function resultForAction(actionId,fields = {}) {
     if (actionId === "claim") return "processing";
-    if (actionId === "approve") return "approved";
-    if (actionId === "assign") return "pending";
-    if (actionId === "submit") return "pending_approval";
+    if (actionId === "approve") return ["approved","rejected","returned"].includes(fields.result) ? fields.result : "approved";
+    if (actionId === "assign") return "processing";
+    if (actionId === "submit") return demoSkipsApproval() ? "processing" : "pending_approval";
     if (actionId === "supplement") return "supplementing";
     if (actionId === "create_review") return "pending_review";
     if (actionId === "new_draft") return "draft";
@@ -7780,7 +8254,7 @@
   }
 
   function writeBackTargets(targets,actionId,selfReview,fields = {}) {
-    const result = resultForAction(actionId);
+    const result = resultForAction(actionId,fields);
     targets.forEach(task => {
       task.actionValues = task.actionValues || {};
       Object.entries(fields).forEach(([key,value]) => {
@@ -7791,8 +8265,11 @@
         if (key === "recommendation") task.status = value;
       });
       if (result) task.status = result;
-      task.ownerRole = state.role;
-      task.owner = roleOwnerNames[state.role];
+      if (actionId === "claim") {
+        task.ownerRole = state.role;
+        task.owner = roleOwnerNames[state.role];
+      }
+      if (actionId === "assign" && fields.ownerRole) task.ownerRole = fields.ownerRole;
       task.updated = createDate(0);
       task.timeline = task.timeline || [];
       task.timeline.push({time:createDate(0),action:actionDisplayLabel(actionId),actor:roleOwnerNames[state.role],result});
@@ -7800,7 +8277,8 @@
       const source = seedRows(task.sourceRoute,task.sourceTab).find(row => row.id === task.sourceId);
       if (!source) return;
       source.status = result;
-      source.owner = roleOwnerNames[state.role];
+      source.owner = task.owner;
+      source.ownerRole = task.ownerRole;
       source.updated = createDate(0);
       source.traceId = source.traceId || task.traceId;
     });
@@ -7821,19 +8299,17 @@
     const fields = collectActionFields();
     const reason = document.querySelector("#action-reason")?.value.trim();
     if (action.reason && !reason) {showToast("原因必填");return;}
-    const selfReview = document.querySelector("#action-self-review")?.checked || false;
+    const selfReview = !demoSkipsApproval() && Boolean(document.querySelector("#action-self-review")?.checked);
     let targets = selectedActionRows();
+    if (actionId === "export") {
+      const rows=state.selected.size ? filteredRows().filter(row=>state.selected.has(row.id)) : filteredRows();
+      const task=createMaskedListExport(rows,state.selected.size ? "已选列表摘要" : "当前筛选列表摘要");
+      state.selected=new Set();state.modal=null;state.reportExportOpen=true;
+      return showToast(`导出已创建 · ${task.rows}条 · ${demoSkipsApproval() ? "可直接下载" : "等待审批"}`);
+    }
+    if (!["new_draft","suggestion","export"].includes(actionId) && (!targets.length || targets.some(row=>!legacyActionAllowed(actionId,row)))) return showToast("记录状态已变化，请关闭弹窗后重新查看");
     if (actionId === "new_draft") targets = [createActionDraft(fields)];
     writeBackTargets(targets,actionId,selfReview,fields);
-    if (actionId === "export") {
-      const task = {
-        id:`export-${Date.now().toString().slice(-5)}`,name:`${tab().title}导出`,
-        scope:fields.scope || `${tab().title}当前筛选`,rows:Number(fields.rows || targets.length),status:"processing",
-        approvalStatus:"pending_approval",masked:true,dataLevel:"sensitive",expiresAt:createDate(-1),
-        createdBy:roleOwnerNames[state.role],traceId:targets[0]?.traceId || `trace-export-${Date.now().toString().slice(-5)}`
-      };
-      prototype.exportTasks.unshift(task);
-    }
     if (actionId === "suggestion") {
       prototype.reportSuggestions.unshift({
         id:`suggest-${Date.now().toString(36)}`,dimensionId:state.tabId,dimension:tab().title,
@@ -7849,6 +8325,12 @@
   document.addEventListener("click", event => {
     if (event.target.closest("[data-nav]")) return document.body.classList.toggle("tm-nav-open");
     if (!event.target.closest(".tm-sidebar")) document.body.classList.remove("tm-nav-open");
+    const fundFollowup=event.target.closest("[data-fund-followup]");
+    if(fundFollowup){
+      const w=prototype.funds360.withdrawals.find(item=>item.id===fundFollowup.dataset.fundFollowup);
+      if(!w)return showToast("提现记录不存在");
+      return openPartnerFollowup(w.partner,"finance",`${w.id}：请核对原支付订单、余额占用及到账回执，确认结果后再决定后续处理。`,w.id);
+    }
     if (state.routeId === "partner-360") {
       const p360 = partner360PagePartner();
       const tabButton = event.target.closest("[data-partner360-page-tab]");
@@ -7863,10 +8345,10 @@
         return navigate(`partner-360/${encodeURIComponent(p360.id)}?tab=${encodeURIComponent(targetTab)}&period=${encodeURIComponent(state.partner360Period)}`);
       }
       if (event.target.closest("[data-p360-back]")) return navigate("admin-modules/partner-list");
-      if (event.target.closest("[data-p360-copy-id]")) return showToast(`已复制 ${p360?.id || ""} · 审计已记录`);
+      if (event.target.closest("[data-p360-copy-id]")) return copyAdminValue(p360?.id);
       const copyValue = event.target.closest("[data-p360-copy-value]");
-      if (copyValue) return showToast(`已复制 ${copyValue.dataset.p360CopyValue} · 审计已记录`);
-      if (event.target.closest("[data-p360-export]")) return showToast("360摘要导出任务已创建 · 已进入审批队列");
+      if (copyValue) return copyAdminValue(copyValue.dataset.p360CopyValue);
+      if (event.target.closest("[data-p360-export]")) return exportPartnerSummary(p360);
       if (event.target.closest("[data-p360-owner]")) {state.partner360ActionModal={kind:"owner"};return render();}
       if (event.target.closest("[data-p360-note-new]")) {state.partner360ActionModal={kind:"note"};return render();}
       const newTask = event.target.closest("[data-p360-task-new]");
@@ -7896,11 +8378,11 @@
         const type = String(document.querySelector("[data-p360-task-type]")?.value || modal.taskType || "general");
         const priority = String(document.querySelector("[data-p360-task-priority]")?.value || "普通");
         if (!reason) return showToast("请填写任务说明");
-        const task = {id:`task-${p360.id.slice(-4)}-${Date.now().toString(36).slice(-4)}`,type:type === "crm-sync" ? "CRM同步异常" : type === "finance" ? "资金核对" : type === "risk" ? "风险复核" : "合作方资料核对",status:"open",assignee:roleOwnerNames[state.role] || "运营/Ops",due:createDate(1),sla:`${priority} · 待认领`,reason};
-        prototype.partner360PageTasks = prototype.partner360PageTasks || {};
-        prototype.partner360PageTasks[p360.id] = [...(prototype.partner360PageTasks[p360.id] || []),task];
-        prototype.auditRecords.unshift({id:`audit-${Date.now().toString(36)}`,time:createDate(0),action:"创建合作方处理任务",object:`${p360.name} / ${p360.id}`,operator:roleOwnerNames[state.role] || "系统",result:"success",trace_id:`trace-${p360.id}-task`,self_review:false});
-        state.partner360ActionModal=null;showToast(`任务已创建 · ${task.id}`);return;
+        try {
+          const result=prototype.taskQueue.ensurePartnerTask({partner_id:p360.id,type,reason,priority:({"普通":"normal","高":"high","紧急":"urgent"})[priority]||"normal",request_id:tqId("request"),idempotency_key:tqId("idem")},{role:state.role});
+          state.partner360ActionModal=null;
+          return showToast(`${result.reused?"已有未完成任务":"任务已创建"} · ${result.task.task_id}`,{label:"查看任务",path:`tasks?task_id=${encodeURIComponent(result.task.task_id)}`});
+        }catch(error){return showToast(error.message || "任务创建失败，请重试");}
       }
       const reveal = event.target.closest("[data-p360-reveal]");
       if (reveal) {
@@ -7930,12 +8412,15 @@
         const field = copySensitive.dataset.p360CopySensitive;
         if (!state.partner360SensitiveFields.has(field) || (state.partner360SensitiveExpiry[field] && state.partner360SensitiveExpiry[field] <= Date.now())) return showToast("敏感字段已重新脱敏");
         const value = field === "payout" ? "ACCT-0098-4821-7712" : "";
-        try { navigator.clipboard?.writeText(value); } catch {}
-        prototype.auditRecords.unshift({id:`audit-${Date.now().toString(36)}`,time:createDate(0),action:"复制合作方敏感字段",object:`${p360?.id} / ${field}`,operator:roleOwnerNames[state.role] || "系统",result:"success",trace_id:`trace-${p360?.id}-sensitive-copy`,self_review:false});
-        return showToast("敏感字段已复制 · 审计已记录");
+        if(!navigator.clipboard?.writeText)return showToast("复制不可用，请选中文本后复制");
+        navigator.clipboard.writeText(value).then(()=>{
+          prototype.auditRecords.unshift({id:`audit-${Date.now().toString(36)}`,time:createDate(0),action:"复制合作方敏感字段",object:`${p360?.id} / ${field}`,operator:roleOwnerNames[state.role] || "系统",result:"success",trace_id:`trace-${p360?.id}-sensitive-copy`,self_review:false});
+          showToast("敏感字段已复制 · 审计已记录");
+        }).catch(()=>showToast("复制未成功，请选中文本后复制"));
+        return;
       }
       const p360Task = event.target.closest("[data-p360-task]");
-      if (p360Task) return showToast(`已打开任务上下文 ${p360Task.dataset.p360Task}`);
+      if (p360Task) return navigate(`tasks?task_id=${encodeURIComponent(p360Task.dataset.p360Task)}`);
     }
     if (state.routeId === "risk-workbench") {
       if (event.target.closest("[data-risk-unified-tasks]")) return navigate("tasks?task_id=DEMO-T01");
@@ -8284,7 +8769,7 @@
           try {
             const response = riskWorkbenchExportRequest(reason);
             state.riskWorkbenchModal=null;
-            return showToast(`导出申请已提交 · ${response.export_id} · ${response.row_count} 条风险记录`,{kind:"exports"});
+            return showToast(`${demoSkipsApproval() ? "导出已生成，可直接下载" : "导出申请已提交"} · ${response.export_id} · ${response.row_count} 条风险记录`,{kind:"exports"});
           } catch(error) {return showToast(error.message || error.code || "导出申请失败");}
         }
         if (modal.approval) {
@@ -8403,6 +8888,7 @@
       if (action === "view") {
         if (item?.configItemId) state.configSubgroupVersionId = id;
         else state.configVersionId = id;
+        state.configScopedItem = null;
         return render();
       }
       if (action === "copy") {state.configVersionModal = {mode:"copy",id};state.configVersionId=null;return render();}
@@ -8516,7 +9002,7 @@
       const kind = cockpitSignal.dataset.cockpitKind;
       if (kind === "risk") {
         state.riskCaseId = id;
-        return navigate("admin-review/risk-review");
+        return render();
       }
       if (kind === "integration") {
         state.integrationSystemId = id;
@@ -8566,13 +9052,15 @@
     const configItemVersions = event.target.closest("[data-config-item-versions]");
     if (configItemVersions) {
       const item = configOverviewItems().find(row => row.id === configItemVersions.dataset.configItemVersions);
-      state.configVersionSearch = item?.name || "";
-      state.configVersionDraftSearch = state.configVersionSearch;
+      const menuItem = configMenuItemForOverview(item);
+      if (!menuItem) return showToast("配置小组不存在");
       state.configOverviewItem = null;
-      return render();
+      state.configSubgroupVersionId = null;
+      return navigate(`${menuItem.routeId}/${menuItem.tabId}`);
     }
     const configItemRollback = event.target.closest("[data-config-item-rollback]");
     if (configItemRollback) {
+      if (state.tabId === "overview") return showToast("配置总览仅支持查看，请进入配置小组操作版本");
       const item = configOverviewItems().find(row => row.id === configItemRollback.dataset.configItemRollback);
       const source = configItemCurrentVersion(item);
       if (!source) return showToast("当前版本不存在");
@@ -8599,6 +9087,7 @@
         const item = configVersionById(id);
         if (item?.configItemId) state.configSubgroupVersionId = id;
         else state.configVersionId = id;
+        state.configScopedItem = null;
         return render();
       }
       if (action === "copy") {state.configVersionModal = {mode:"copy",id};state.configVersionId=null;return render();}
@@ -8612,7 +9101,11 @@
       }
       if (["withdraw","void","activate","schedule"].includes(action)) {state.configActionModal = {action,id};state.configVersionId=null;return render();}
     }
-    if (event.target.closest("[data-config-version-new]")) {state.configVersionModal = {mode:"new"};state.configVersionId=null;return render();}
+    if (event.target.closest("[data-config-version-new]")) {
+      const item = businessConfigItemForTab();
+      if (!item) return showToast("请先进入具体配置小组创建版本");
+      state.configVersionModal = {mode:"new",configItemId:item.id};state.configVersionId=null;return render();
+    }
     if (event.target.closest("[data-close-config-overview-version]")) {state.configOverviewVersionId=null;state.configOverviewVersionItemId=null;return render();}
     if (event.target.closest("[data-close-config-item]")) {state.configOverviewItem=null;return render();}
     if (event.target.closest("[data-close-config-scoped]")) {state.configScopedItem=null;state.configVersionMenuId=null;return render();}
@@ -8684,14 +9177,7 @@
     if (event.target.closest("[data-submit-risk-case]")) return submitRiskCaseAction();
     const commissionAction = event.target.closest("[data-commission-action]");
     if (commissionAction) {
-      if (!["risk_supervisor","system_admin"].includes(state.role)) return showToast("仅风控主管可修改逐案资金状态");
-      const item = riskCase();
-      const member = item?.members.find(row => row.commissionId === commissionAction.dataset.commissionId);
-      if (!item || !member) return showToast("佣金成员不存在");
-      const nextStatus = commissionAction.dataset.commissionAction === "release" ? "released" : "holding";
-      member.commissionStatus = nextStatus;
-      item.timeline.push({time:createDate(0),action:`佣金${nextStatus === "released" ? "放行" : "结算中"}`,actor:roleOwnerNames[state.role],result:nextStatus});
-      return render();
+      return openUnifiedTasks("risk_review");
     }
     const reportDrilldown = event.target.closest("[data-report-drilldown]");
     if (reportDrilldown) {state.reportDimensionId=reportDrilldown.dataset.reportDrilldown;return render();}
@@ -8721,14 +9207,19 @@
     const reportDownload = event.target.closest("[data-report-export-download]");
     if (reportDownload) {
       const task = prototype.exportTasks.find(item=>item.id===reportDownload.dataset.reportExportDownload);
-      if (!task || task.status !== "ready") return showToast("导出文件尚未就绪");
-      return showToast("下载已开始 · 审计已记录");
+      if (!task || task.status !== "ready" || !(task.approvalStatus==="approved" || (demoSkipsApproval() && task.approvalStatus==="not_required"))) return showToast(demoSkipsApproval() ? "导出文件尚未生成" : "导出文件尚未完成审批");
+      const currentUser=prototype.taskQueue?.options?.(state.role)?.current_user;
+      if (!task.applicant?.user_id || task.applicant.user_id!==currentUser?.user_id) return showToast("请使用申请此导出的员工身份下载");
+      if(Date.parse(task.expiresAt)<=Date.now())return showToast("导出文件已过期，请重新申请");
+      if(!task.content)return showToast("此历史导出未保留文件内容，请重新生成");
+      downloadAdminFile(`${task.id}.json`,task.content,"application/json");
+      return showToast("下载已开始");
     }
     const riskExportDownload = event.target.closest("[data-risk-export-download]");
     if (riskExportDownload) {
       const record = (prototype.riskWorkbenchExports || []).find(item => item.export_id === riskExportDownload.dataset.riskExportDownload);
       const currentUser = prototype.taskQueue?.options?.(state.role)?.current_user || {user_id:state.role};
-      if (!record || record.status !== "ready" || record.approval_status !== "approved") return showToast("导出文件尚未完成审批");
+      if (!record || record.status !== "ready" || !(record.approval_status === "approved" || (demoSkipsApproval() && record.approval_status === "not_required"))) return showToast(demoSkipsApproval() ? "导出文件尚未生成" : "导出文件尚未完成审批");
       if (record.expires_at && Date.parse(record.expires_at) <= Date.parse(prototype.riskWorkbench?.serverNow || createDate(0))) {
         record.status = "expired";
         return showToast("导出文件已过期，请重新申请");
@@ -8770,8 +9261,11 @@
     if (integrationCancel) return cancelIntegrationTask(integrationCancel.dataset.integrationCancel);
     const governanceButton = event.target.closest("[data-governance-action]");
     if (governanceButton) {
-      const action = governanceActions[governanceButton.dataset.governanceAction];
-      if (!action || !action.roles.includes(state.role)) return showToast("当前角色无权执行数据治理动作");
+      const actionId = governanceButton.dataset.governanceAction;
+      const action = governanceActions[actionId];
+      const target = governanceTarget(actionId,governanceButton.dataset.governanceTarget);
+      const demoOwnExport = demoSkipsApproval() && actionId === "approve_export" && target?.item.applicant?.user_id === prototype.taskQueue?.options?.(state.role)?.current_user?.user_id;
+      if (!action || (!action.roles.includes(state.role) && !demoOwnExport)) return showToast("当前角色无权执行数据治理动作");
       state.governanceModal = {action:governanceButton.dataset.governanceAction,target:governanceButton.dataset.governanceTarget};
       return render();
     }
@@ -8812,14 +9306,17 @@
       return navigate(`${record.route}/${record.tab}`);
     }
     const openTab = event.target.closest("[data-open-tab]");
-    if (openTab) return navigate(`${openTab.dataset.openTab}/${openTab.dataset.openTabId}`);
+    if (openTab) {
+      const saved=state.openTabs.find(item=>item.routeId===openTab.dataset.openTab&&item.tabId===openTab.dataset.openTabId);
+      return navigate(saved?.hash || `${openTab.dataset.openTab}/${openTab.dataset.openTabId}`);
+    }
     const closeTab = event.target.closest("[data-close-tab]");
     if (closeTab) {
       const closedId = closeTab.dataset.closeTab;
       state.openTabs = state.openTabs.filter(item => item.id !== closedId);
       if (closedId === `${state.routeId}:${state.tabId}`) {
         const next = state.openTabs[state.openTabs.length - 1] || {routeId:"admin-workbench",tabId:"tasks"};
-        return navigate(`${next.routeId}/${next.tabId}`);
+        return navigate(next.hash || `${next.routeId}/${next.tabId}`);
       }
       return render();
     }
@@ -8890,7 +9387,7 @@
           return navigate(`partner-360/${encodeURIComponent(target)}?tab=overview`);
         }
         if (state.routeId === "admin-modules" && state.tabId === "client-list") {
-          return window.location.href = `./customer-360.html#/customer-360/${encodeURIComponent(target)}`;
+          return navigate(`admin-modules/client-list/${encodeURIComponent(target)}`);
         }
         if (state.routeId === "admin-modules" && state.tabId === "event-stream") {
           state.eventChainId = target || null;
@@ -8902,7 +9399,8 @@
       if (actionId === "partner_review") {
         const partner = prototype.partner360.partners.find(item => item.id === target);
         if (!partner) return showToast("合作方不存在");
-        return navigate(`partner-360/${encodeURIComponent(target)}?tab=compliance`);
+        state.partner360Tab="onboarding";
+        return navigate(`admin-modules/partner-list/${encodeURIComponent(target)}?drawer_tab=onboarding&review=1`);
       }
       if (actionId === "partner_resume") {
         const partner = prototype.partner360.partners.find(item => item.id === target);
@@ -8967,11 +9465,10 @@
       if (actionId === "tracker_path") {state.trackerSessionId = target;return render();}
       // 组5-9：资金/治理/配置行内动作
       if (actionId === "fund_approve" || actionId === "fund_retry" || actionId === "fund_export") {
-        const fundRoles = ["finance","risk_supervisor","operations"];
-        if (!fundRoles.includes(state.role) && actionId !== "fund_export") return showToast("当前角色无权执行资金操作");
-        const label = {fund_approve:"资金审批",fund_retry:"支付重试",fund_export:"结算单下载"}[actionId];
-        prototype.auditRecords.unshift({id:`audit-${Date.now().toString().slice(-6)}`,time:createDate(0),action:label,object:target,operator:roleOwnerNames[state.role],result:actionId === "fund_retry" ? "processing" : "approved",trace_id:`trace-${target}`,self_review:false});
-        return showToast(`${label}已执行（${target}）· 写入审计`);
+        if(actionId==="fund_export")return downloadStatement(target);
+        const row=seedRows().find(item=>item.id===target);
+        if(!row?.fundRef)return showToast("资金记录不存在，请刷新列表");
+        return openPartnerFollowup(row.fundRef.partner,"finance",`${target}：${actionId==="fund_retry"?"请核验支付结果及重复支付风险，再申请重试":"请核对原始账务与处理条件"}。`,state.tabId==="withdrawal-list"?target:null);
       }
       if (actionId === "bl_review") {
         if (!["risk","risk_supervisor"].includes(state.role)) return showToast("仅风控可发起黑名单复核");
@@ -9128,6 +9625,12 @@
       return navigate(`tasks?${params}`);
     }
     if (event.target.closest("[data-dashboard-back]")) return navigate("admin-workbench");
+    if (event.target.closest("[data-dashboard-clear-drill]")) {
+      const [path,query=""] = location.hash.replace(/^#\/?/,"").split("?");
+      const params = new URLSearchParams(query);
+      ["dashboard_metric","dashboard_from","dashboard_to"].forEach(key=>params.delete(key));
+      return navigate(`${path}${params.size ? `?${params}` : ""}`);
+    }
     const dashboardDrill = event.target.closest("[data-dashboard-drill]");
     if (dashboardDrill) return navigate(dashboardDrill.dataset.dashboardDrill);
     const queueButton = event.target.closest("[data-queue]");
@@ -9372,7 +9875,9 @@
       return;
     }
     if (event.target.matches("[data-role]")) {
-      state.role=event.target.value;
+      if(state.routeId==="tickets"&& !supportUI.beforeLeave("#/admin-workbench")){event.target.value=state.role;return;}
+      state.role=normalizeEmployeeRole(event.target.value);
+      delete window.AFF_SUPPORT_CONTEXT;
       try { sessionStorage.setItem("affiliate:admin:role",state.role); } catch {}
       state.modal=null;state.selected=new Set();state.searchRecent=loadRecentSearches();state.cockpitView=null;
       if (typeof taskQueueResetForRole === "function") taskQueueResetForRole();
@@ -9687,7 +10192,7 @@
     }
     function cell(t,key){
       if(key==="ticket_id")return `<button class="cs-link" data-cs="open" data-cs-id="${h(t.ticket_id)}">${h(t.ticket_id)}</button>${icon("copy","复制工单编号","file",`data-value="${h(t.ticket_id)}"`)}`;
-      if(key==="partner")return `<button class="cs-link" data-cs="object" data-type="partner" data-value="${h(t.partner.partner_id)}">${h(t.partner.partner_id)}</button><small>${h(t.partner.masked_email || "资料未同步")}</small>`;
+      if(key==="partner")return `<button class="cs-link" data-cs="object" data-cs-id="${h(t.ticket_id)}" data-type="partner" data-value="${h(t.partner.partner_id)}">${h(t.partner.partner_id)}</button><small>${h(t.partner.masked_email || "资料未同步")}</small>`;
       if(key==="subject")return `<button class="cs-subject" data-cs="open" data-cs-id="${h(t.ticket_id)}" title="${h(t.subject)}">${t.unread_partner_message_count?`<span class="cs-unread" aria-label="有${Number(t.unread_partner_message_count)}条未读">●</span>`:""}${h(t.subject)}</button>`;
       if(key==="category")return h(labels("categories")[t.category]);
       if(key==="priority")return `<span class="cs-priority cs-priority-${h(t.priority)}">${h(labels("priorities")[t.priority])}</span>`;
@@ -9783,6 +10288,10 @@
       if(action==="discard")content="<p>当前公开回复、内部备注、受众草稿或未发送附件将被丢弃。</p>";
       else if(action==="export")content=`<p>导出当前全部生效条件对应的脱敏工单列表，不含消息正文、附件或内部备注。</p><pre>${h(JSON.stringify({view:s.view,...s.filters},null,2))}</pre><p>提交后生成异步导出任务。</p>`;
       else if(action==="export_ready")content=`<p>导出任务 ${h(s.form.job_id)} 已登记。</p><p>当前统一原型尚未接入该任务的导出中心定位。</p>`;
+      else if(action==="task_notice" && s.form.collaboration){
+        const d=s.form.collaboration,t=d.task;
+        content=`<p class="cs-notice">${h(d.source)} · ${h(d.ticket_id)}</p><dl class="cs-summary-grid"><div><dt>任务编号</dt><dd>${h(t.task_id)}</dd></div><div><dt>专业类型</dt><dd>${h(labels("collaborationKinds")[t.kind]||t.kind)}</dd></div><div><dt>当前状态</dt><dd>${h(taskStates[t.status]||t.status)}</dd></div><div><dt>负责人</dt><dd>${h(d.assignee.display_name)}</dd></div><div><dt>解决限制</dt><dd>${t.blocking?"完成前阻断工单解决":"不阻断工单解决"}</dd></div><div><dt>更新时间</dt><dd>${h(time(t.updated_at))}</dd></div></dl><h3>处理摘要</h3><p>${h(t.public_summary)}</p>${t.object_ref?`<h3>关联业务</h3><p>${h(objectNames[t.object_ref.object_type])} · ${h(t.object_ref.object_id)}</p>${btn("object","查看关联详情",`data-type="${h(t.object_ref.object_type)}" data-value="${h(t.object_ref.object_id)}"`)}`:"<p>本任务未指定业务对象，按当前工单问题进行排查。</p>"}<h3>协作记录</h3>${d.messages.length?d.messages.map(m=>`<article><strong>${h(m.sender_display)}</strong><small> · ${h(time(m.created_at))}</small><p>${h(m.body)}</p></article>`).join(""):"<p>暂无已提交的协作备注。</p>"}`;
+      }
       else if(["object_notice","task_notice"].includes(action))content=`<p>${h(s.form.notice)}</p><p><strong>${h(s.form.object_id)}</strong> ${icon("copy","复制授权编号","file",`data-value="${h(s.form.object_id)}"`)}</p>`;
       else if(action==="notification_notice")content=`<p class="cs-notice">回复已保存，通知投递异常。无需重新发送回复。</p><dl class="cs-triplet">${Object.entries(s.notification||{}).map(([k,v])=>`<div><dt>${h(({ticket_id:"工单",operation_id:"操作",audit_id:"审计",trace_id:"Trace",status:"投递状态"})[k]||k)}</dt><dd>${h(v)}</dd></div>`).join("")}</dl>`;
       else{
@@ -9961,7 +10470,17 @@
         try{const d=await api(name==="search-assignees"?"assignees":"assigneeFilters",{ticket_id:s.ticketId,query:name==="search-assignees"?s.form.assignee_query:s.assigneeQuery});s.assignees=d.items||[];}catch(e){s.formError=e;}return paint();
       }
       if(["object","task"].includes(name)){
-        s.dialog=name==="object"?"object_notice":"task_notice";s.form={object_id:el.dataset.value,notice:name==="object"?"目标页面尚未接入此对象定位。可复制授权编号，在对应业务页面查询。":"目标任务尚未接入统一任务服务定位。保留真实 Mock 任务编号供核对。"};return paint();
+        const ticketId=el.dataset.csId || s.ticketId;
+        try{
+          if(name==="task"){
+            const detail=await api("collaborationDetail",{ticket_id:ticketId,task_id:el.dataset.value});
+            s.dialog="task_notice";s.form={collaboration:detail};s.formError=null;paint();focusDialog();return;
+          }
+          const target=await api("relatedObject",{ticket_id:ticketId,object_type:el.dataset.type,object_id:el.dataset.value});
+          if(target.available)return leave(()=>{s.dialog=null;navigate(target.route);});
+          s.dialog="object_notice";s.form={object_id:el.dataset.value,notice:target.reason};s.formError=null;
+        }catch(e){s.dialog=name==="object"?"object_notice":"task_notice";s.form={object_id:el.dataset.value,notice:e.message || "未找到可访问的关联对象"};s.formError=e;}
+        paint();focusDialog();return;
       }
       if(name==="older-history"){try{const d=await api("history",{ticket_id:s.ticketId,cursor:s.historyCursor,limit:20});s.history.push(...(d.entries||d.items||[]));s.historyCursor=d.next_cursor;}catch(e){s.error=e;}return paint();}
       if(name==="older-messages"){try{const d=await api("messages",{ticket_id:s.ticketId,before:s.messageCursor,cursor:s.messageCursor,limit:50});s.messages=[...(d.items||d.messages||[]),...s.messages];s.messageCursor=d.next_cursor||d.message_cursor;}catch(e){s.error=e;}return paint();}
@@ -10034,10 +10553,6 @@
     let readObserver;
     function mount(){
       if(!s.initialized)queueMicrotask(init);
-      const source=document.querySelector(".tm-workspace small"),footer=document.querySelector(".dev-footer"),brand=document.querySelector(".tm-sidebar-brand > span");
-      if(source)source.textContent="本地统一 Mock 数据层";
-      if(footer)footer.textContent="Affiliate Ops · 客户服务 v0.1 · 合成数据 FIX-CS01 至 FIX-CS20";
-      if(brand)brand.textContent="合作方运营中心";
       if(s.dialog){document.body.classList.add("admin-modal-open");if(!document.querySelector(".cs-modal")?.contains(document.activeElement))focusDialog();}
       readObserver?.disconnect();
       if(s.ticketId && s.readToken && s.tab==="communication"){
@@ -10062,7 +10577,7 @@
     },30000);
     window.addEventListener("offline",paint);window.addEventListener("online",paint);
     window.addEventListener("beforeunload",e=>{if(active()&&hasDraft()){e.preventDefault();e.returnValue="";}});
-    window.AFF_SUPPORT_UI={state:s,refresh:async()=>{await reloadDetail();await query();},setContext(context){window.AFF_SUPPORT_CONTEXT=context;state.role=context.role==="supervisor"?"risk_supervisor":context.role;s.caps=null;s.rows=null;s.detail=null;s.ticketId=null;s.drafts={};s.initialized=false;s.error=null;paint();}};
+    window.AFF_SUPPORT_UI={state:s,refresh:async()=>{await reloadDetail();await query();},setContext(context){state.role=normalizeEmployeeRole(context.role);window.AFF_SUPPORT_CONTEXT={...context,role:state.role==="risk_supervisor"?"supervisor":state.role};s.caps=null;s.rows=null;s.detail=null;s.ticketId=null;s.drafts={};s.initialized=false;s.error=null;paint();}};
     return {page,drawer,dialog,mount,beforeLeave,syncURL,ensureContext};
   })();
   let acceptedHash = location.hash;
@@ -10075,8 +10590,13 @@
       history.replaceState(null,"",acceptedHash);
       return;
     }
-    syncFromHash();render();acceptedHash=location.hash;
+    syncFromHash();render();tqRestoreInspection();acceptedHash=location.hash;
   });
   state.savedViews = loadSavedViews();
   syncFromHash();render();
+  setInterval(()=>{
+    const clock=document.querySelector(".tm-clock");
+    if(clock)clock.innerHTML=adminClockMarkup();
+    if(configRefreshScheduledVersions()&&state.routeId==="admin-config"&&!document.querySelector(".dev-modal")&&!document.querySelector("[data-config-save]"))render();
+  },1000);
 })();

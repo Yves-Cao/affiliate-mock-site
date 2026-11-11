@@ -184,6 +184,10 @@
 
   window.AFF_ADMIN_PROTOTYPE = {
     version: "admin-prototype-v0.36",
+    demoPolicy: {
+      approvalRequired: false,
+      employeeRoles: ["operations","finance","risk_supervisor","system_admin"]
+    },
     dataSource: {
       name: "Affiliate Admin API",
       updatedAt: "2026-11-05 17:30",
@@ -438,7 +442,7 @@
         {id:"risk",label:"风险",hint:"高风险客户筛选"},
         {id:"valid",label:"有效FTD",hint:"有效转化客户"}
       ],
-      riskGradeLabels: {R0:"R0 无风险",R1:"R1 低风险",R2:"R2 中风险",R3:"R3 高风险",R4:"R4 严重"},
+      riskGradeLabels: {R0:"R0 无风险",R1:"R1 低风险",R2:"R2 中风险",R3:"R3 高风险"},
       clients: [
         {id:"client-2001",name:"Somchai W.",partnerId:"partner-1001",country:"TH",stage:"valid_ftd",ftdAmount:1200,risk:"R1",rGrade:"R1",source:"TikTok-TH",attribution:{channel:"官方落地页",linkId:"lnk-4001",subId:"TikTok-TH",attributedAt:"2026-10-12 09:15",rule:"首点击归因"},commissionTotal:860,updated:"2026-11-04 14:20",crmId:"crm-cl-31001",riskProfile:{rGrade:"R1",riskEvents:["rev-evt-2114（同IP多账户注册，已排除）"],devices:["DEV-A31F·2客户共用（同宿舍WiFi，已核实）"],ips:["27.145.x.x（TH住宅IP）"],payments:["VISA*4291（本人卡）"],fraudRefs:["无欺诈库命中"],conclusion:"低风险；首入金正常"}},
         {id:"client-2002",name:"Nguyen T.A.",partnerId:"partner-1002",country:"VN",stage:"ftd",ftdAmount:500,risk:"R2",rGrade:"R2",source:"YouTube-ID",attribution:{channel:"注册直链",linkId:"lnk-4002",subId:"YouTube-ID",attributedAt:"2026-10-18 16:40",rule:"首点击归因"},commissionTotal:210,updated:"2026-11-03 11:05",crmId:"crm-cl-31002",riskProfile:{rGrade:"R2",riskEvents:["rev-evt-2207（入金后快速出金，观察中）"],devices:["DEV-B7C2·唯一设备"],ips:["113.161.x.x（VN住宅IP）"],payments:["Neteller（第三方钱包）"],fraudRefs:["crm-fraud-1120（相似行为模式，弱引用）"],conclusion:"中风险；入金出金间隔48小时，持续观察"}},
@@ -452,7 +456,7 @@
         {id:"client-2010",name:"Thabo N.",partnerId:"partner-1016",country:"ZA",stage:"ftd",ftdAmount:1000,risk:"R2",rGrade:"R2",source:"WhatsApp-ZA",attribution:{channel:"官方落地页",linkId:"lnk-4001",subId:"WhatsApp-ZA",attributedAt:"2026-10-15 08:30",rule:"首点击归因"},commissionTotal:420,updated:"2026-11-01 14:55",crmId:"crm-cl-31010",riskProfile:{rGrade:"R2",riskEvents:["rev-evt-2488（入金渠道敏感国家名单）"],devices:["DEV-I66E·唯一设备"],ips:["105.186.x.x（ZA住宅IP）"],payments:["银行转账FNB（本人账户）"],fraudRefs:["无欺诈库命中"],conclusion:"中风险；仅入金渠道敏感，行为正常"}},
         {id:"client-2011",name:"Hiro T.",partnerId:"partner-1023",country:"TH",stage:"valid_ftd",ftdAmount:2800,risk:"R0",rGrade:"R0",source:"Line-TH",attribution:{channel:"二级渠道链",linkId:"lnk-4006",subId:"Line-TH",attributedAt:"2026-09-20 10:05",rule:"首点击归因"},commissionTotal:1980,updated:"2026-11-05 01:20",crmId:"crm-cl-31011",riskProfile:{rGrade:"R0",riskEvents:["无"],devices:["DEV-J77F·唯一设备"],ips:["1.46.x.x（TH住宅IP）"],payments:["银行转账SCB（本人账户）"],fraudRefs:["无欺诈库命中"],conclusion:"无风险；月均交易量稳定"}},
         {id:"client-2012",name:"Fatima A.",partnerId:"partner-1002",country:"MY",stage:"churned",ftdAmount:400,risk:"R2",rGrade:"R2",source:"Instagram-MY",attribution:{channel:"注册直链",linkId:"lnk-4002",subId:"Instagram-MY",attributedAt:"2026-08-20 14:25",rule:"首点击归因"},commissionTotal:120,updated:"2026-10-15 09:30",crmId:"crm-cl-31012",riskProfile:{rGrade:"R2",riskEvents:["rev-evt-2501（30日零登录流失）"],devices:["DEV-K88G·唯一设备"],ips:["175.136.x.x（MY住宅IP）"],payments:["信用卡Maybank（本人）"],fraudRefs:["无欺诈库命中"],conclusion:"中风险；自然流失"}},
-        {id:"client-2013",name:"Dmitri K.",partnerId:"partner-1025",country:"VN",stage:"churned",ftdAmount:2200,risk:"R4",rGrade:"R4",source:"TikTok-VN",attribution:{channel:"官方落地页",linkId:"lnk-4001",subId:"TikTok-VN",attributedAt:"2026-08-30 19:40",rule:"首点击归因"},commissionTotal:0,updated:"2026-11-01 14:05",crmId:"crm-cl-31013",riskProfile:{rGrade:"R4",riskEvents:["rev-evt-2602（盗卡入金，R4定档）","rev-evt-2610（拒付冲正发起）","rev-evt-2615（保证金抵扣执行）"],devices:["DEV-L99H·关联7客户（欺诈集群）"],ips:["27.68.x.x（VN代理IP）×3"],payments:["盗刷VISA*7781·VISA*8842·Momo×2"],fraudRefs:["crm-fraud-1420（盗卡模式库命中）","crm-fraud-1421（集群cluster-8803）"],conclusion:"严重；欺诈集群成员，佣金清零+追回中"}},
+        {id:"client-2013",name:"Dmitri K.",partnerId:"partner-1025",country:"VN",stage:"churned",ftdAmount:2200,risk:"R3",rGrade:"R3",source:"TikTok-VN",attribution:{channel:"官方落地页",linkId:"lnk-4001",subId:"TikTok-VN",attributedAt:"2026-08-30 19:40",rule:"首点击归因"},commissionTotal:0,updated:"2026-11-01 14:05",crmId:"crm-cl-31013",riskProfile:{rGrade:"R3",riskEvents:["rev-evt-2602（盗卡入金，R3定档）","rev-evt-2610（拒付冲正发起）","rev-evt-2615（保证金抵扣执行）"],devices:["DEV-L99H·关联7客户（欺诈集群）"],ips:["27.68.x.x（VN代理IP）×3"],payments:["盗刷VISA*7781·VISA*8842·Momo×2"],fraudRefs:["crm-fraud-1420（盗卡模式库命中）","crm-fraud-1421（集群cluster-8803）"],conclusion:"严重；欺诈集群成员，佣金清零+追回中"}},
         {id:"client-2014",name:"Grace L.",partnerId:"partner-1016",country:"PH",stage:"valid_ftd",ftdAmount:1800,risk:"R1",rGrade:"R1",source:"Facebook-PH",attribution:{channel:"官方落地页",linkId:"lnk-4001",subId:"Facebook-PH",attributedAt:"2026-09-25 11:15",rule:"首点击归因"},commissionTotal:1240,updated:"2026-11-04 18:35",crmId:"crm-cl-31014",riskProfile:{rGrade:"R1",riskEvents:["无"],devices:["DEV-M11I·唯一设备"],ips:["49.145.x.x（PH住宅IP）"],payments:["GCash+银行转账（本人）"],fraudRefs:["无欺诈库命中"],conclusion:"低风险；双渠道入金正常"}},
         {id:"client-2015",name:"Arif H.",partnerId:"partner-1018",country:"ID",stage:"ftd",ftdAmount:900,risk:"R2",rGrade:"R2",source:"YouTube-ID",attribution:{channel:"素材参数链",linkId:"lnk-4004",subId:"YouTube-ID",attributedAt:"2026-10-28 09:55",rule:"首点击归因"},commissionTotal:380,updated:"2026-11-05 05:10",crmId:"crm-cl-31015",riskProfile:{rGrade:"R2",riskEvents:["rev-evt-2688（注册与入金间隔仅90秒）"],devices:["DEV-N22J·唯一设备"],ips:["139.193.x.x（ID住宅IP）"],payments:["Dana钱包（本人）"],fraudRefs:["无欺诈库命中"],conclusion:"中风险；自动化痕迹待复核"}},
         {id:"client-2016",name:"Mei L.",partnerId:"partner-1008",country:"MY",stage:"registered",ftdAmount:0,risk:"R1",rGrade:"R1",source:"TikTok-MY",attribution:{channel:"注册直链",linkId:"lnk-4003",subId:"TikTok-MY",attributedAt:"2026-11-05 07:45",rule:"首点击归因"},commissionTotal:0,updated:"2026-11-05 07:45",crmId:"crm-cl-31016",riskProfile:null},
@@ -520,8 +524,8 @@
           {seq:3,type:"ftd",time:"2026-08-31 09:15",label:"FTD 2,200 USD",detail:"盗刷VISA*7781入金（当时未识别）",status:"success",target:"client-list"},
           {seq:4,type:"commission",time:"2026-08-31 09:16",label:"计佣1,540 USD",detail:"资格档CPA-VN-A",status:"success",target:"commission-list"},
           {seq:5,type:"hold",time:"2026-08-31 09:16",label:"结算中 1,540 USD（D+21风险附加）",detail:"VN国家风险系数上浮",status:"success",target:"hold-workbench"},
-          {seq:6,type:"exception",time:"2026-09-02 11:00",label:"风险事件：盗卡识别R4",detail:"rev-evt-2602·欺诈库crm-fraud-1420命中·集群cluster-8803",status:"failed",target:"client-list"},
-          {seq:7,type:"commission",time:"2026-09-02 11:05",label:"佣金冲正-1,540 USD",detail:"佣金清零·R4定档·案件组risk-case-5003",status:"failed",target:"commission-list"},
+          {seq:6,type:"exception",time:"2026-09-02 11:00",label:"风险事件：盗卡识别R3",detail:"rev-evt-2602·欺诈库crm-fraud-1420命中·集群cluster-8803",status:"failed",target:"client-list"},
+          {seq:7,type:"commission",time:"2026-09-02 11:05",label:"佣金冲正-1,540 USD",detail:"佣金清零·R3定档·案件组risk-case-5003",status:"failed",target:"commission-list"},
           {seq:8,type:"hold",time:"2026-09-02 11:05",label:"保证金抵扣执行",detail:"partner-1025保证金26,000 USD部分抵扣",status:"success",target:"guarantee-workbench"},
           {seq:9,type:"exception",time:"2026-11-01 14:20",label:"归属异常exc-6001",detail:"重复归属待重算·同TraceId双判定",status:"pending",target:"attribution-links"}
         ]},
@@ -718,11 +722,11 @@
       withdrawals: [
         {id:"wd-401",name:"银行提现",partner:"partner-1001",amount:5000,fee:25,status:"success",updated:"2026-11-01 10:00",steps:[{t:"2026-11-01 10:00",s:"申请提交",d:"运营审核通过"},{t:"2026-11-01 10:05",s:"账户校验",d:"收款账户与CRM一致"},{t:"2026-11-01 10:10",s:"支付下发",d:"银行渠道"},{t:"2026-11-01 14:30",s:"到账确认",d:"成功"}]},
         {id:"wd-402",name:"电子钱包提现",partner:"partner-1014",amount:1200,fee:12,status:"processing",updated:"2026-11-04 15:00",steps:[{t:"2026-11-04 15:00",s:"申请提交",d:"自动审核通过"},{t:"2026-11-04 15:02",s:"账户校验",d:"钱包校验通过"},{t:"2026-11-04 15:05",s:"支付下发",d:"钱包渠道处理中"}]},
-        {id:"wd-403",name:"高风险复核提现",partner:"partner-1013",amount:800,fee:8,status:"manual_required",updated:"2026-11-02 09:00",steps:[{t:"2026-11-02 09:00",s:"申请提交",d:"命中风控：客户R4关联"},{t:"2026-11-02 09:01",s:"人工复核",d:"等待风控确认"}]},
-        {id:"wd-404",name:"失败重试",partner:"partner-1021",amount:600,fee:6,status:"failed",updated:"2026-11-03 16:00",steps:[{t:"2026-11-03 11:00",s:"申请提交",d:"审核通过"},{t:"2026-11-03 11:05",s:"支付下发",d:"渠道超时失败"},{t:"2026-11-03 16:00",s:"自动重试",d:"二次失败，转人工"},{t:"",s:"人工重试",d:"待处理"}]}
+        {id:"wd-403",name:"高风险复核提现",partner:"partner-1013",amount:800,fee:8,status:"manual_required",updated:"2026-11-02 09:00",steps:[{t:"2026-11-02 09:00",s:"申请提交",d:"命中风控：客户R3关联"},{t:"2026-11-02 09:01",s:"人工复核",d:"等待风控确认"}]},
+        {id:"wd-404",name:"失败重试",partner:"partner-1021",amount:600,fee:6,status:"failed",updated:"2026-11-03 16:00",paymentOrderId:"PAY-WD404",channel:"电子钱包",maskedAccount:"wallet-****-4821",failureCode:"CHANNEL_TIMEOUT",failureReason:"支付通道两次响应超时，当前无法确认外部是否已出款。",externalResult:"unknown",balanceState:"申请金额仍占用，未确认最终扣账",reconciliationState:"待人工查证原支付单",attempts:2,maxAttempts:3,receiptId:null,steps:[{t:"2026-11-03 11:00",s:"申请提交",d:"审核通过"},{t:"2026-11-03 11:05",s:"支付下发",d:"渠道超时，外部结果未知"},{t:"2026-11-03 16:00",s:"自动重试",d:"第二次超时，停止自动重试并转人工查证"},{t:"",s:"人工查证",d:"待核对原支付单，不可直接再次出款"}]}
       ],
       reversals: [
-        {id:"rev-501",name:"盗卡拒付冲正",partner:"partner-1025",type:"拒付",amount:1540,liable:"合作方全责",status:"executed",updated:"2026-09-02 11:05",path:["拒付识别R4","佣金冲正-1540","保证金抵扣26,000","追索剩余损失"]},
+        {id:"rev-501",name:"盗卡拒付冲正",partner:"partner-1025",type:"拒付",amount:1540,liable:"合作方全责",status:"executed",updated:"2026-09-02 11:05",path:["拒付识别R3","佣金冲正-1540","保证金抵扣26,000","追索剩余损失"]},
         {id:"rev-502",name:"欺诈追回",partner:"partner-1013",type:"欺诈",amount:2200,liable:"合作方全责",status:"processing",updated:"2026-11-01 14:00",path:["集群定案","追回发起","支付渠道协查"]},
         {id:"rev-503",name:"账务重算",partner:"partner-1012",type:"重算",amount:680,liable:"系统误差",status:"confirmed",updated:"2026-10-22 08:35",path:["归属重算exc-6005","佣金调整","差额补发"]},
         {id:"rev-504",name:"保证金抵扣",partner:"partner-1025",type:"追回",amount:26000,liable:"合作方全责",status:"executed",updated:"2026-11-04 08:45",path:["清退步骤4","抵扣审批","账务入账"]}
@@ -738,7 +742,7 @@
       blacklist: [
         {id:"bl-101",name:"设备DEV-L99H",type:"设备",value:"指纹L99H",reason:"欺诈集群cluster-8803",status:"active",updated:"2026-09-02"},
         {id:"bl-102",name:"IP段154.66.x.x",type:"IP",value:"ZA代理段",reason:"exc-6003来源无效",status:"active",updated:"2026-10-10"},
-        {id:"bl-103",name:"VISA*7781",type:"支付",value:"盗刷卡",reason:"盗卡入金R4",status:"active",updated:"2026-09-02"},
+        {id:"bl-103",name:"VISA*7781",type:"支付",value:"盗刷卡",reason:"盗卡入金R3",status:"active",updated:"2026-09-02"},
         {id:"bl-104",name:"客户client-2013",type:"客户",value:"Dmitri K.",reason:"欺诈集群成员",status:"active",updated:"2026-11-01"},
         {id:"bl-105",name:"合作方partner-1025",type:"合作方",value:"Granite Peak",reason:"多层违规清退",status:"pending_review",updated:"2026-11-01",note:"清退中，移出需风控主管复核"},
         {id:"bl-106",name:"设备DEV-A31F",type:"设备",value:"指纹A31F",reason:"误报（同宿舍WiFi）",status:"removed",updated:"2026-10-20",note:"已移出：复核确认正常共用"}
@@ -1615,9 +1619,9 @@
   const SEED_NOW = "2026-11-08T12:00:00.000Z";
   const QUEUE = {queue_id:"Q-SUPPORT01",name:"合作方服务"};
   const users = [
-    {user_id:"U-SUPPORT01",display_name:"演示客服一",active:true},
-    {user_id:"U-SUPPORT02",display_name:"演示客服二",active:true},
-    {user_id:"U-SUPERVISOR01",display_name:"客服主管",active:true},
+    {user_id:"U-SUPPORT01",display_name:"周亦辰",active:true},
+    {user_id:"U-SUPPORT02",display_name:"江雨桐",active:true},
+    {user_id:"U-SUPERVISOR01",display_name:"陈若宁",active:true},
     {user_id:"U-INACTIVE01",display_name:"历史客服",active:false}
   ];
   const policy = {
@@ -1639,7 +1643,7 @@
   const iso = offset => new Date(Date.parse(clock) + offset * 1000).toISOString();
   const now = () => clock;
   const id = prefix => `${prefix}-CS-${String(++sequence).padStart(5,"0")}`;
-  const user = userId => copy(users.find(item => item.user_id === userId) || {user_id:userId,display_name:"授权协作者",active:true});
+  const user = userId => copy(users.find(item => item.user_id === userId) || {user_id:userId,display_name:({"U-FINANCE01":"许安然","U-TECH01":"陆星河","U-RISK01":"林知远","U-COMPLIANCE01":"顾清和","U-AUDIT01":"沈予安"})[userId] || "授权协作者",active:true});
   const trace = () => id("TRACE");
   function fail(code,message,details = {},status = 422) {
     const error = new Error(message);
@@ -1932,8 +1936,11 @@
       };
       if (index === 2) ticket.related_objects = [makeObject("commission_case",number)];
       if (index === 4) {
-        ticket.related_objects = [makeObject("withdrawal",number,"原提现单核对中")];
+        ticket.partner = {partner_id:"partner-1021",display_name:"Pacific Rim KOL",masked_email:"p***@example.test"};
+        ticket.related_objects = [{object_type:"withdrawal",object_id:"wd-404",readable:true,public_summary:"提现600.00 USD；支付通道超时，待核对原支付单，申请金额仍占用。",data_updated_at:"2026-11-03T08:00:00.000Z"}];
         ticket.collaborations = [makeTask("04","A","finance_query","done",ticket.related_objects[0]),makeTask("04","B","technical","open")];
+        ticket.collaborations[0].public_summary = "已核对600.00 USD申请金额仍占用，尚无成功出款回执；等待技术查证原支付单后回复合作方。";
+        ticket.collaborations[1].public_summary = "核查PAY-WD404两次通道超时的请求与回调记录，确认外部是否出款；在最终结果明确前不重复发起付款。";
       }
       if ([7,8,13,20].includes(index)) {
         const object = makeObject("settlement_case",number,index === 13 ? "当前案件仍处于冻结；服务关闭不改变业务状态" : "当前结算案件：结算中");
@@ -1943,7 +1950,7 @@
       if (index === 17) ticket.collaborations = [makeTask("17","A","finance_query","processing"),makeTask("17","B","technical","open")];
       store.tickets.push(ticket);
       store.messages.push({message_id:index === 9 ? "M09P" : `M${number}P`,ticket_id:ticket.ticket_id,sender_type:"partner",sender_display:"合作方",visibility:"partner",internal_audience:null,collaboration_id:null,kind:"reply",body:ticket.description,attachments:[],business_cta:null,created_at:created,sequence:1});
-      if (first) store.messages.push({message_id:`M${number}R`,ticket_id:ticket.ticket_id,sender_type:"support",sender_display:"演示客服一",visibility:"partner",internal_audience:null,collaboration_id:null,kind:"reply",body:"已收到咨询，正在核对相关资料。",attachments:[],business_cta:null,created_at:first,sequence:2});
+      if (first) store.messages.push({message_id:`M${number}R`,ticket_id:ticket.ticket_id,sender_type:"support",sender_display:user("U-SUPPORT01").display_name,visibility:"partner",internal_audience:null,collaboration_id:null,kind:"reply",body:"已收到咨询，正在核对相关资料。",attachments:[],business_cta:null,created_at:first,sequence:2});
       record(ticket,{role:"partner",user_id:"P-DEMO01"},"created",null,null,{visibility:"partner",internal_audience:null});
     }
     store.objects.push({...makeObject("settlement_case","18"),partner_id:"P-DEMO01"});
@@ -1955,7 +1962,7 @@
       return file;
     }
     seedFile("T-CS009","A09I","内部核对摘要.txt","clean",{visibility:"internal",internal_audience:"support",collaboration_id:null},"M09I");
-    store.messages.push({message_id:"M09I",ticket_id:"T-CS009",sender_type:"support",sender_display:"演示客服一",visibility:"internal",internal_audience:"support",collaboration_id:null,kind:"note",body:"当前记录为客服内部核对摘要，仅授权员工可见。",attachments:["A09I"],business_cta:null,created_at:now(),sequence:3});
+    store.messages.push({message_id:"M09I",ticket_id:"T-CS009",sender_type:"support",sender_display:user("U-SUPPORT01").display_name,visibility:"internal",internal_audience:"support",collaboration_id:null,kind:"note",body:"当前记录为客服内部核对摘要，仅授权员工可见。",attachments:["A09I"],business_cta:null,created_at:now(),sequence:3});
     seedFile("T-CS014","A14P","待扫描资料.txt","pending");
     seedFile("T-CS014","A14R","安全扫描未通过.txt","rejected");
     seedFile("T-CS014","A14C",`${"很长的附件名称".repeat(17)}.txt`,"clean");
@@ -2061,6 +2068,28 @@
       if (!ticket) notFound();
       const messages = messageList(ticket,context);
       data = {ticket:project(ticket,context),messages:messages.slice(-50),message_cursor:messages.length > 50 ? String(messages.length - 50) : null,read_position_token:`RP:${context.user_id}:${ticket.ticket_id}`};
+    } else if (operation === "relatedObject") {
+      if (!ticket || !reader(context)) forbidden();
+      const type = params.object_type, objectId = params.object_id;
+      const reference = project(ticket,context).related_objects.find(item => item.object_type === type && item.object_id === objectId && item.readable);
+      if (type === "partner" ? objectId !== ticket.partner.partner_id : !reference) notFound();
+      const prototype = root.AFF_ADMIN_PROTOTYPE;
+      const partner = prototype?.partner360?.partners.find(item => item.id === ticket.partner.partner_id);
+      if (!partner) data = {available:false,object_id:objectId,reason:"当前统一业务数据中没有此合作方，无法打开对应详情。"};
+      else if (type === "partner") data = {available:true,object_id:partner.id,route:`partner-360/${partner.id}?tab=overview`};
+      else if (type === "withdrawal") {
+        const withdrawal = prototype?.funds360?.withdrawals.find(item => item.id === objectId);
+        if (!withdrawal || withdrawal.partner !== partner.id) data = {available:false,object_id:objectId,reason:"未找到归属于当前合作方的提现记录，无法打开对应详情。"};
+        else data = {available:true,object_id:withdrawal.id,route:`admin-modules/withdrawal-list/${withdrawal.id}`};
+      } else data = {available:false,object_id:objectId,reason:"此关联编号尚未与统一业务数据建立对应关系，无法准确定位详情。"};
+    } else if (operation === "collaborationDetail") {
+      if (!ticket || context.role === "partner") forbidden();
+      const visible = project(ticket,context).collaborations.find(item => item.task_id === params.task_id && item.readable);
+      if (!visible) notFound();
+      const task = ticket.collaborations.find(item => item.task_id === params.task_id);
+      data = {ticket_id:ticket.ticket_id,task:visible,assignee:user(task.assigned_user_id),
+        messages:messageList(ticket,context).filter(item => item.collaboration_id === task.collaboration_id),
+        source:"客服专业协作"};
     } else if (operation === "messages") {
       if (!ticket) notFound();
       const messages = messageList(ticket,context);
@@ -2355,10 +2384,16 @@
     audit: ["DEMO-AUDIT-01","沈予安","DEMO-AUDIT"]
   };
   const actorDefaults = copy(actors);
+  const skipsReview = () => prototype.demoPolicy?.approvalRequired === false;
+  const demoRole = role => skipsReview()
+    ? ({risk:"risk_supervisor",risk_reviewer:"risk_supervisor",finance_reviewer:"finance",compliance:"system_admin",audit:"system_admin"}[role] || role)
+    : role;
   const teams = Object.entries({"DEMO-RISK":"风险复核组","DEMO-FIN":"财务处理组","DEMO-OPS":"渠道运营组","DEMO-ADMIN":"系统集成组","DEMO-COMP":"合规复核组"}).map(([id,name])=>({id,name}));
   const actor = role => { const a=actors[role]||actors.risk; return {user_id:a[0],display_name:a[1],role_code:actors[role]?role:"risk"}; };
   const labels = {risk_review:"风险复核",settlement_overdue:"结算超时复核",appeal:"申诉复核",hold_extend:"结算延长复核",guarantee_offset:"保证金抵扣",chargeback:"冲正追回",circuit_breaker:"熔断复核",credit_review:"信用调级复核",commission_exception:"佣金异常",attribution_review:"归属争议复核",integration:"集成失败",data_backfill:"事件补数",offboarding_step:"清退步骤"};
   const englishLabels={risk_review:"Risk Review",settlement_overdue:"Overdue Settlement Review",appeal:"Appeal Review",hold_extend:"Settlement Extension Review",guarantee_offset:"Reserve Offset",chargeback:"Reversal and Recovery",circuit_breaker:"Circuit Breaker Review",credit_review:"Credit Review",commission_exception:"Commission Exception",attribution_review:"Attribution Review",integration:"Integration Failure",data_backfill:"Event Backfill",offboarding_step:"Offboarding Step"};
+  labels.partner_followup="合作方跟进";
+  englishLabels.partner_followup="Partner Follow-up";
   const stateLabels={open:"待认领",processing:"处理中",waiting_material:"待补件",pending_approval:"待审批",pending_execution:"待执行",executing:"执行中",execution_failed:"执行失败",returned:"已退回",done:"已完成",closed:"已关闭"};
   const terminal = t => ["done","closed"].includes(t.workflow_state);
   const quality = () => ({status:"fresh",source_systems:[{system:"unified_prototype_fixture",status:"fresh",as_of:clock,fresh_until:at(5 * 60 * 1000),error_code:null}],missing_fields:[]});
@@ -2462,14 +2497,15 @@
   }
   function fail(code,message,details={}) { const e=new Error(message); Object.assign(e,{code,message,display_message:message,trace_id:`DEMO-TRACE-${++sequence}`,retryable:false,details}); throw e; }
   function cents(value) { if(typeof value!=="string"||!/^[0-9]{1,18}\.[0-9]{2}$/.test(value)) fail("AFF-42201","金额必须是最多18位整数和两位小数的USD字符串"); return BigInt(value.replace(".","")); }
-  const roleFor=t => ["guarantee_offset","chargeback","commission_exception"].includes(t.source_type)?"finance":["integration","data_backfill"].includes(t.source_type)?"system_admin":["attribution_review","offboarding_step"].includes(t.source_type)?"operations":"risk";
+  const roleFor=t => t.source_type==="partner_followup" ? t.fields?.responsible_role || "operations" : ["guarantee_offset","chargeback","commission_exception"].includes(t.source_type)?"finance":["integration","data_backfill"].includes(t.source_type)?"system_admin":["attribution_review","offboarding_step"].includes(t.source_type)?"operations":"risk";
   const domain=(t,role)=>roleFor(t)===role||(["risk_supervisor","risk_reviewer"].includes(role)&&roleFor(t)==="risk")||(role==="finance_reviewer"&&roleFor(t)==="finance");
-  const visible=(t,role)=>["system_admin","audit","compliance"].includes(role)||domain(t,role);
+  const visible=(t,role)=>["system_admin","audit","compliance"].includes(role)||domain(t,role)||t.created_by?.user_id===actor(role).user_id||t.requester_ids?.includes(actor(role).user_id);
   const own=(t,role)=>t.owner?.user_id===actor(role).user_id;
   const editable=(t,role)=>own(t,role)&&domain(t,role)&&["processing","returned"].includes(t.workflow_state)&&!["integration","offboarding_step"].includes(t.source_type);
   function availability(t,role) {
     if(!Object.hasOwn(labels,t.source_type)||!Object.hasOwn(stateLabels,t.workflow_state))return [];
-    const entries = [["claim",t.workflow_state==="open"&&!t.owner&&domain(t,role)],["assign",domain(t,role)&&["open","processing","waiting_material","returned"].includes(t.workflow_state)],["return_pool",own(t,role)&&["processing","waiting_material","returned"].includes(t.workflow_state)],["save_draft",editable(t,role)],["preview",editable(t,role)],["submit_review",editable(t,role)],["request_material",editable(t,role)],["close",["risk_supervisor","system_admin"].includes(role)&&["open","processing","waiting_material","returned"].includes(t.workflow_state)],["status_check",own(t,role)&&t.source_type==="integration"],["retry_integration",own(t,role)&&t.source_type==="integration"&&!!t.fields.retryable&&["failed","not_found"].includes(t.fields.last_status)&&t.fields.attempt<t.fields.max_attempts],["retry_execution",own(t,role)&&t.workflow_state==="execution_failed"&&executions.some(e=>e.task_id===t.task_id&&e.items.some(i=>i.status==="failed"&&i.retryable))]];
+    const entries = [["claim",t.workflow_state==="open"&&!t.owner&&domain(t,role)],["assign",domain(t,role)&&["open","processing","waiting_material","returned"].includes(t.workflow_state)],["return_pool",own(t,role)&&["processing","waiting_material","returned"].includes(t.workflow_state)],["save_draft",editable(t,role)],["preview",editable(t,role)&&t.source_type!=="partner_followup"],["submit_review",editable(t,role)&&t.source_type!=="partner_followup"],["complete_followup",editable(t,role)&&t.source_type==="partner_followup"],["request_material",editable(t,role)],["close",["risk_supervisor","system_admin"].includes(role)&&["open","processing","waiting_material","returned"].includes(t.workflow_state)],["status_check",own(t,role)&&t.source_type==="integration"],["retry_integration",own(t,role)&&t.source_type==="integration"&&!!t.fields.retryable&&["failed","not_found"].includes(t.fields.last_status)&&t.fields.attempt<t.fields.max_attempts],["retry_execution",own(t,role)&&t.workflow_state==="execution_failed"&&executions.some(e=>e.task_id===t.task_id&&e.items.some(i=>i.status==="failed"&&i.retryable))]];
+    if (skipsReview()) entries.push(["resume_without_review",own(t,role)&&domain(t,role)&&t.workflow_state==="pending_approval"]);
     const permitted=action=>{
       if(role==="audit")return false;
       if(action==="close")return ["risk_supervisor","system_admin"].includes(role);
@@ -2481,16 +2517,17 @@
     return entries.filter(([action])=>permitted(action)).map(([action,value])=>{const enabled=action==="return_pool"?value&&["open","processing"].includes(t.workflow_state):value;return {action,enabled,disabled_reason:enabled?null:"当前任务状态不允许此操作"};});
   }
   function row(t,role) { return {...copy(t),allowed_actions:availability(t,role)}; }
-  function bump(t,state) { if(state)t.workflow_state=state; t.status=t.workflow_state==="open"?"open":terminal(t)?"done":"processing"; t.version=`v${Number(t.version.slice(1))+1}`; t.updated_at=clock; }
+  const taskNow=t=>t?.source_type==="partner_followup"?new Date(window.AFF_ADMIN_CLOCK?.now?.() ?? Date.now()).toISOString():clock;
+  function bump(t,state) { if(state)t.workflow_state=state; t.status=t.workflow_state==="open"?"open":terminal(t)?"done":"processing"; t.version=`v${Number(t.version.slice(1))+1}`; t.updated_at=taskNow(t); }
   function record(t,action,role,extra={}) {
-    const a={id:`DEMO-TQ-AUDIT-${++sequence}`,time:clock,action,object:t?.task_id||extra.export_id||"task_queue",operator:actor(role).display_name,actor:actor(role),result:"succeeded",trace_id:`DEMO-TRACE-${sequence}`,self_review:false,...extra};
+    const a={id:`DEMO-TQ-AUDIT-${++sequence}`,time:taskNow(t),action,object:t?.task_id||extra.export_id||"task_queue",operator:actor(role).display_name,actor:actor(role),result:"succeeded",trace_id:`DEMO-TRACE-${sequence}`,self_review:false,...extra};
     audit.push(a); if(Array.isArray(prototype.auditRecords))prototype.auditRecords.push(copy(a));
     if(t)t.history.items.push(copy(a));
   }
   function emitRiskNotification(t,eventType,{token,eventKey,recipients=[],title,detail,severity="warning"}={}) {
     if (!t?.task_id || !Array.isArray(prototype.notifications) || !Array.isArray(prototype.notificationOutbox)) return;
     const stableEventKey = eventKey || `${eventType}:${t.task_id}:${token || t.version}`;
-    const recipientRoles = [...new Set(recipients.filter(Boolean))];
+    const recipientRoles = [...new Set(recipients.filter(Boolean).map(demoRole))];
     recipientRoles.forEach(recipientRole => {
       const recipient = actors[recipientRole] ? actor(recipientRole) : {user_id:recipientRole,display_name:recipientRole,role_code:recipientRole};
       const notificationId = `risk-notice-${stableEventKey.replace(/[^a-zA-Z0-9_-]+/g,"-")}-${recipient.user_id}`;
@@ -2546,6 +2583,7 @@
   });
   function conclusions(t) {
     const p=t.task_purpose;
+    if(t.source_type==="partner_followup")return ["recorded","referred"];
     if(p==="signal_review")return ["signal_confirm","signal_reject"];
     if(p==="settlement_recheck")return ["change_request"];
     if(p==="cluster_determination")return ["confirm","clear","observe"];
@@ -2567,7 +2605,8 @@
       attribution_review:{customer_id:"DEMO-C1",crm_attribution:{channel:"IB",owner_ref:"DEMO-IB1"},claimant_refs:["DEMO-IB1","DEMO-IB2"],click_events:["DEMO-CLICK1"],ib_isolation_result:"isolated",current_owner_ref:"DEMO-IB1",authorized_owner_refs:["DEMO-IB2"]},
       integration:{integration_task_id:"DEMO-INTEGRATION1",integration_version:"i1",operation:"payment",external_system:"CRM",external_ref:"DEMO-EXTERNAL1",last_error:"RESULT_UNKNOWN",last_status:"unknown",retryable:false,attempt:1,max_attempts:3,next_run_at:null,status_check:null,can_retry_without_new_approval:false},
       data_backfill:{missing_event_ids:["DEMO-MISSING1"],source_system:"CRM",case_refs:refs,precheck_diff:[{event_id:"DEMO-MISSING1",status:"missing"}],backfill_policy_ref:"DEMO-BACKFILL-POLICY1"},
-      offboarding_step:{offboarding_id:"DEMO-OFFBOARD1",step_key:"settlement_check",predecessor_receipts:[],checklist:[{key:"source_receipt",checked:false}],business_jump_url:"#/admin-modules/partner-list/partner-1003?drawer_tab=offboarding&offboarding_id=DEMO-OFFBOARD1"}
+      offboarding_step:{offboarding_id:"DEMO-OFFBOARD1",step_key:"settlement_check",predecessor_receipts:[],checklist:[{key:"source_receipt",checked:false}],business_jump_url:"#/admin-modules/partner-list/partner-1003?drawer_tab=offboarding&offboarding_id=DEMO-OFFBOARD1"},
+      partner_followup:{partner_id:null,responsible_role:"operations",request_kind:"general",request_reason:""}
     }; return copy(f[type]);
   }
   function make(index,type,purpose,state="processing",ownerRole) {
@@ -2629,6 +2668,7 @@
     tasks[19].source_scope=scopeFor(tasks[19]);
     tasks[21].fields={...tasks[21].fields,operation:"postback",last_status:"failed",last_error:"TIMEOUT_CONFIRMED",retryable:true,can_retry_without_new_approval:true};
     tasks[23].title="长".repeat(200); tasks[24].title="LongUnbrokenTaskTitle".repeat(12); tasks[25].title="<img src=x onerror=alert(1)> 合成安全标题"; tasks[26].title="=1+1"; tasks[27].impact=money("0.00"); tasks[28].impact=null; tasks[29].impact=money("999999999999999999.99");
+    tasks.slice(23,30).forEach(task=>{task.boundary_sample=true;});
     const seedDraft=(t,form,reason)=>{const d={...plan(t,form,{}),draft_version:"d1",reason_code:"manual_review",reason,evidence_ids:[`${t.task_id}-EVIDENCE1`],next_review_at:null,checklist:[{key:"source_verified",checked:true}],internal_note:null,form_values:form,updated_at:clock,updated_by:t.owner};t.draft_version="d1";t.draft=copy(d);return d;};
     approvalFor(tasks[3],"risk",seedDraft(tasks[3],{conclusion:"extend_settlement"},"合成延长申请，等待完整串行审批"));
     const a=approvalFor(tasks[10],"finance",seedDraft(tasks[10],{conclusion:"change_request"},"合成佣金重算申请，源案件与差异已核验"));
@@ -2749,7 +2789,7 @@
     let snapshot=q.snapshot_id?snapshots[q.snapshot_id]:null;
     if(q.snapshot_id&&(!snapshot||snapshot.role!==role||snapshot.signature!==signature||snapshot.expires<Date.now()))fail("AFF-40901","快照已失效，请重新查询",{reason:"SNAPSHOT_INVALID"});
     if(!snapshot) {
-      const all=tasks.filter(t=>visible(t,role));
+      const all=tasks.filter(t=>visible(t,role)&&(!ctx.exclude_boundary||!t.boundary_sample));
       const scoped=all.filter(t=>scope==="mine"?own(t,role):scope==="claimable"?t.workflow_state==="open"&&!t.owner&&domain(t,role):scope==="team"?t.team.id===actors[actor(role).role_code][2]:true);
       let selected=scoped.filter(t=>{
         const group=q.status_group||(!q.workflow_states&&!q.status?"active":null);
@@ -2770,15 +2810,170 @@
     const total=snapshot.rows.length,pages=Math.ceil(total/pageSize),dq=quality();if(["partial","missing","stale"].includes(scenario))dq.status=scenario;
     return copy({items:snapshot.rows.slice((page-1)*pageSize,page*pageSize),meta:{page:total?page:1,page_size:pageSize,total,pages,sort:q.sort_by||"default",snapshot_id:snapshot.id,snapshot_at:clock,as_of:clock,snapshot_expires_at:at(5 * 60 * 1000),expires_at:at(5 * 60 * 1000),server_now:clock,server_time:clock,timezone:"Asia/Shanghai",fresh_until:at(60 * 1000)},summary:snapshot.summary,data_quality:dq});
   }
+  function taskEvidence(t,role,scenario) {
+    if(t.source_type==="partner_followup" || scenario==="evidence_missing")return [];
+    const permitted=domain(t,role)||role==="audit";
+    const unavailable=scenario==="evidence_invalidated"||scenario==="evidence_pending";
+    return [{
+      evidence_id:`${t.task_id}-EVIDENCE1`,kind:"source_record",
+      name:`${labels[t.source_type]}核验记录 · ${t.source_ref.id}`,
+      content_type:"text/plain;charset=utf-8",scan_status:scenario==="evidence_pending"?"pending":"clean",
+      invalidated:scenario==="evidence_invalidated",source_system:t.external_system || "Affiliate",
+      source_ref:copy(t.source_ref),source_version:t.source_versions?.source || null,
+      snapshot_version:t.version,collected_at:t.updated_at,hash:null,
+      access:{preview:permitted&&!unavailable,download:permitted&&["risk","risk_supervisor","risk_reviewer","finance","finance_reviewer","operations","system_admin"].includes(role)&&!unavailable,
+        disabled_reason:!permitted?"当前岗位无此证据内容查看权限":unavailable?"证据已失效或尚未通过安全核验":null}
+    }];
+  }
+  function evidenceContent(t,evidence) {
+    const detail={
+      summary:`${t.title}；核对来源 ${t.source_ref.id} 的业务事实及当前案件范围。`,
+      facts:[
+        {label:"任务编号",key:"task_id",value:t.task_id},
+        {label:"任务类型",key:"task_type",value:labels[t.source_type]},
+        {label:"来源对象",key:"source_id",value:t.source_ref.id},
+        {label:"客户编号",key:"customer_id",value:t.customer_id},
+        {label:"合作方编号",key:"partner_id",value:t.partner_id},
+        {label:"影响金额",key:"impact",value:copy(t.impact)},
+        {label:"来源版本",key:"source_version",value:evidence.source_version},
+        {label:"任务快照版本",key:"snapshot_version",value:evidence.snapshot_version}
+      ],
+      records:[{
+        title:"关联案件明细",
+        columns:[{key:"customer_id",label:"客户"},{key:"partner_id",label:"合作方"},{key:"commission_case_id",label:"佣金案件"},{key:"settlement_case_id",label:"结算案件"},{key:"settlement_batch_id",label:"结算批次"}],
+        rows:copy(t.case_refs || [])
+      }],
+      business_facts:copy(t.fields)
+    };
+    const text=value=>value==null?"未提供":typeof value==="object"?JSON.stringify(value,null,2):String(value);
+    const content=[evidence.name,detail.summary,...detail.facts.map(item=>`${item.label}：${text(item.value)}`),
+      ...detail.records.flatMap(group=>[group.title,...group.rows.map(row=>group.columns.map(col=>`${col.label}：${text(row[col.key])}`).join("；"))]),
+      "业务依据",text(detail.business_facts)].join("\n");
+    return {...copy(evidence),task_id:t.task_id,detail,content,expires_at:at(5*60*1000)};
+  }
+  // Task fixtures have their own exact identities; they are not aliases of the CRM list fixtures.
+  const reviewCustomers = [
+    ["DEMO-C1","Arun S.","DEMO-P1","TH","R2","1200.00","200.00",5,"2.40"],
+    ["DEMO-C2","Mali K.","DEMO-P1","TH","R1","800.00","0.00",4,"1.60"],
+    ["DEMO-C3","Budi R.","DEMO-P1","ID","R1","1500.00","100.00",6,"3.20"],
+    ["DEMO-C4","Niran P.","DEMO-P1","TH","R2","1000.00","0.00",3,"1.20"],
+    ["DEMO-C01","Krit W.","DEMO-P01","TH","R2","1000.00","100.00",4,"2.00"],
+    ["DEMO-C02","Pim S.","DEMO-P01","TH","R2","600.00","0.00",2,"0.80"],
+    ["DEMO-C03","Adi F.","DEMO-P02","ID","R3","2000.00","1800.00",2,"0.60"]
+  ].map(([id,name,partner_id,country,risk_band,deposit,withdrawal,active_days,lots],index)=>({
+    id,name,partner_id,country,risk_band,crm_id:`CRM-${id}`,
+    email_masked:`${name.slice(0,2).toLowerCase()}***@example.invalid`,phone_masked:country==="TH"?"+66 *** *** 4821":"+62 *** *** 4803",
+    crm_status:"active",kyc_status:"verified",registered_at:`2026-09-${String(index+10).padStart(2,"0")}T08:00:00.000Z`,
+    lifecycle:"valid_ftd",attribution:{channel:"官方落地页",link_id:`LINK-${partner_id}`,sub_id:`APAC-${country}`,rule:"注册时锁定归属",locked_at:`2026-09-${String(index+10).padStart(2,"0")}T08:00:00.000Z`},
+    account_facts:{deposit,withdrawal,net_deposit:(Number(deposit)-Number(withdrawal)).toFixed(2),active_days,standard_lots:lots,currency:"USD",period:"2026-09-01 至 2026-11-08"},
+    milestones:[{stage:"注册",at:`2026-09-${String(index+10).padStart(2,"0")}T08:00:00.000Z`},{stage:"FTD",at:`2026-09-${String(index+11).padStart(2,"0")}T09:20:00.000Z`},{stage:"有效FTD",at:`2026-09-${String(index+17).padStart(2,"0")}T12:00:00.000Z`}]
+  }));
+  const reviewPartners = [
+    {id:"DEMO-P1",name:"Aurora Partner Network",country:"TH",type:"institution",risk_band:"R2",credit_level:"C2",crm_id:"CRM-DEMO-P1",email_masked:"au***@example.invalid",phone_masked:"+66 *** *** 4801",crm_status:"active",kyc_status:"verified",kyb_status:"pending",registered_at:"2026-08-12T08:00:00.000Z"},
+    {id:"DEMO-P01",name:"Siam Growth Media",country:"TH",type:"institution",risk_band:"R2",credit_level:"C2",crm_id:"CRM-DEMO-P01",email_masked:"si***@example.invalid",phone_masked:"+66 *** *** 4801",crm_status:"active",kyc_status:"verified",kyb_status:"pending",registered_at:"2026-08-15T08:00:00.000Z"},
+    {id:"DEMO-P02",name:"Nusantara Reach",country:"ID",type:"institution",risk_band:"R3",credit_level:"C1",crm_id:"CRM-DEMO-P02",email_masked:"nu***@example.invalid",phone_masked:"+62 *** *** 4802",crm_status:"active",kyc_status:"verified",kyb_status:"pending",registered_at:"2026-08-20T08:00:00.000Z"}
+  ];
+  function reviewProfile(type,id) {
+    const local=(type==="customer"?reviewCustomers:reviewPartners).find(item=>item.id===id);
+    if(local){
+      const current=prototype.riskWorkbench.objects.find(item=>item.id===id);
+      return copy({...local,...(current?{risk_band:current.riskBand,email_masked:current.maskedEmail,...(type==="partner"?{credit_level:current.credit}:{} )}:{})});
+    }
+    if(type==="customer"){
+      const c=prototype.client360.clients.find(item=>item.id===id);
+      return c?{id:c.id,name:c.name,partner_id:c.partnerId,country:c.country,risk_band:c.rGrade,crm_id:c.crmId,lifecycle:c.stage,attribution:copy(c.attribution),updated_at:c.updated}:null;
+    }
+    const p=prototype.partner360.partners.find(item=>item.id===id);
+    return p?{id:p.id,name:p.name,country:p.country,type:p.type,risk_band:p.risk==="high"?"R3":p.risk==="medium"?"R2":"R0",credit_level:p.credit?.grade,crm_id:p.crmId,crm_status:p.status,kyc_status:p.kyc?.status,kyb_status:p.kyb?.status,updated_at:p.updated}:null;
+  }
+  function taskObjectRefs(t) {
+    const refs=new Map();
+    const add=(type,id,relation)=>{
+      if(!["customer","partner"].includes(type)||typeof id!=="string"||!id)return;
+      const key=`${type}:${id}`;
+      if(!refs.has(key))refs.set(key,{type,id,relations:[]});
+      if(!refs.get(key).relations.includes(relation))refs.get(key).relations.push(relation);
+    };
+    add("customer",t.customer_id,"任务客户");add("partner",t.partner_id,"任务合作方");
+    add(t.object_type,t.object_id,"任务主体");
+    const scope=(value,relation)=>{
+      if(!value||typeof value!=="object")return;
+      if(Array.isArray(value)){value.forEach(item=>scope(item,relation));return;}
+      add("customer",value.customer_id,relation);add("partner",value.partner_id,relation);
+      (value.customer_ids||[]).forEach(id=>add("customer",id,relation));
+      (value.partner_ids||[]).forEach(id=>add("partner",id,relation));
+      for(const key of ["case_refs","source_scope","trigger_snapshot","current_snapshot","aggregation","aggregation_detail","aggregationDetail","sourceScope"])scope(value[key],relation);
+    };
+    scope(t.case_refs,"受影响案件");scope(t.source_scope,"任务范围");scope(t.fields,"调查范围");
+    (t.fields.members||[]).forEach(member=>{
+      const id=typeof member==="string"?member:member.customer_id || member.id;
+      if(reviewProfile("customer",id))add("customer",id,"调查成员");
+    });
+    const events=(prototype.riskWorkbench.events||[]).filter(e=>e.id===t.source_ref?.id||(t.related_event_ids||[]).includes(e.id));
+    events.forEach(e=>{
+      [e.primary,...(e.related||[])].forEach(id=>{
+        const object=prototype.riskWorkbench.objects.find(item=>item.id===id);
+        if(object)add(object.type,id,"来源风险事件");
+      });
+      (e.caseRefs||[]).forEach(ref=>{add("customer",ref.customer,"来源案件");add("partner",ref.partner,"来源案件");});
+      scope(e.aggregationDetail,"聚合风险范围");
+    });
+    return [...refs.values()];
+  }
+  function affectedObjects(taskId,ctx={}) {
+    if(["error","offline"].includes(ctx.scenario))fail("AFF-50301","关联资料服务暂不可用");
+    const t=detail(taskId,ctx),raw=get(taskId,ctx.role||"risk"),canView=domain(raw,ctx.role||"risk")||(raw.source_type==="partner_followup"&&visible(raw,ctx.role||"risk"));
+    return {task_id:t.task_id,items:taskObjectRefs(raw).map(ref=>{
+      const p=reviewProfile(ref.type,ref.id);
+      return {...ref,name:canView&&p?p.name:ref.id,available:!!p&&canView,disabled_reason:!canView?"当前岗位无关联资料查看权限":!p?"来源未提供该对象资料":null};
+    })};
+  }
+  function reviewObject(taskId,type,id,ctx={}) {
+    const affected=affectedObjects(taskId,ctx),t=get(taskId,ctx.role||"risk");
+    if(!domain(t,ctx.role||"risk")&&!(t.source_type==="partner_followup"&&visible(t,ctx.role||"risk")))fail("AFF-40301","当前岗位无关联资料查看权限");
+    const refs=affected.items,profile=reviewProfile(type,id);
+    const linkedCustomer=type==="customer"&&profile&&refs.some(ref=>ref.type==="partner"&&ref.id===profile.partner_id);
+    const linkedPartner=type==="partner"&&refs.some(ref=>ref.type==="customer"&&reviewProfile("customer",ref.id)?.partner_id===id);
+    if(!refs.some(ref=>ref.type===type&&ref.id===id)&&!linkedCustomer&&!linkedPartner)fail("AFF-40301","对象不在当前任务及关联主体的授权范围");
+    if(!profile)fail("AFF-40401","来源未提供该对象资料");
+    const allCustomers=[...reviewCustomers,...prototype.client360.clients.map(c=>reviewProfile("customer",c.id))];
+    const customers=type==="partner"?allCustomers.filter(c=>c.partner_id===id):[profile];
+    const matches=ref=>type==="customer"?ref.customer_id===id:ref.partner_id===id;
+    const caseMap=new Map();
+    const includeCase=ref=>{
+      if(ref?.settlement_case_id&&matches(ref))caseMap.set(ref.settlement_case_id,{...caseMap.get(ref.settlement_case_id),...Object.fromEntries(Object.entries(ref).filter(([,value])=>value!=null))});
+    };
+    tasks.forEach(item=>(item.case_refs||[]).forEach(includeCase));
+    settlementSources.forEach(source=>includeCase(source.case_ref));
+    (prototype.riskWorkbench.events||[]).forEach(event=>(event.caseRefs||[]).forEach(ref=>includeCase({customer_id:ref.customer,partner_id:ref.partner,commission_case_id:ref.commission,settlement_case_id:ref.settlement,settlement_batch_id:ref.settlement_batch_id})));
+    (prototype.riskWorkbench.caseLinks||[]).forEach(link=>includeCase({customer_id:link.customer,partner_id:link.partner,commission_case_id:link.commission,settlement_case_id:link.settlement}));
+    const cases=[...caseMap.values()].map(ref=>{
+      const source=authoritativeSettlementSource(ref.settlement_case_id);
+      const link=(prototype.riskWorkbench.caseLinks||[]).find(item=>item.customer===ref.customer_id&&item.commission===ref.commission_case_id&&item.settlement===ref.settlement_case_id);
+      return {...copy(ref),amount:link?.amount??null,frozen_amount:link?.frozen??null,status:source?.status||"unknown",reason:link?.reason||source?.blockers?.join("；")||null,source_version:source?.version||null,in_task_scope:(t.case_refs||[]).some(item=>item.customer_id===ref.customer_id&&item.commission_case_id===ref.commission_case_id&&item.settlement_case_id===ref.settlement_case_id),release_targets:copy(source?.release_targets||[])};
+    });
+    const ownTasks=tasks.filter(item=>visible(item,ctx.role||"risk")&&taskObjectRefs(item).some(ref=>ref.type===type&&ref.id===id));
+    const events=(prototype.riskWorkbench.events||[]).filter(e=>e.primary===id||(e.related||[]).includes(id)||(e.caseRefs||[]).some(ref=>type==="customer"?ref.customer===id:ref.partner===id));
+    const funds=type==="partner"?Object.fromEntries(["commissions","statements","withdrawals","taxRecords","reversals"].map(key=>[key,copy((prototype.funds360[key]||[]).filter(item=>item.partner===id))])):{};
+    return copy({type,profile,task_id:taskId,as_of:clock,customers:customers.map(c=>({id:c.id,name:c.name,country:c.country,lifecycle:c.lifecycle,risk_band:c.risk_band})),partner:type==="customer"?reviewProfile("partner",profile.partner_id):null,cases,events:events.map(e=>({id:e.id,type:e.typeLabel,reason:e.reason,determination:e.determination,occurred:e.occurred,rule:e.rule,rule_version:e.ruleVersion,case_refs:e.caseRefs})),tasks:ownTasks.map(item=>({task_id:item.task_id,title:item.title,status:item.workflow_state,owner:item.owner?.display_name,updated_at:item.updated_at})),history:ownTasks.flatMap(item=>item.history.items.map(entry=>({...entry,task_id:item.task_id}))),funds});
+  }
   function detail(id,ctx={}) {
     const role=ctx.role||"risk";if(["forbidden","revoked"].includes(ctx.scenario))fail("AFF-40301","查看权限已撤销");
-    const t=get(id,role), evidence=[{evidence_id:`${id}-EVIDENCE1`,id:`${id}-EVIDENCE1`,name:"合成来源核验记录.txt",type:"text/plain",status:"clean",scan_status:"clean",invalidated:false,source:"unified_prototype_fixture",source_version:"s1",collected_at:clock,created_at:clock}];
+    const t=get(id,role), evidence=taskEvidence(t,role,ctx.scenario);
     const pack=items=>({items:copy(items),page:1,page_size:20,total:items.length});
-    return {...row(t,role),approval_refs:copy(approvals.filter(a=>a.task_id===id)),execution_refs:copy(executions.filter(e=>e.task_id===id)),evidence_refs:evidence,server_now:clock,server_time:clock,sla_due_at:t.sla?.due_at||null,sla_rule_version:t.sla?.rule_version||null,escalation_refs:[],history:pack(t.history.items),sections:{summary:{business_status:t.fields.settlement_status||"unchanged",risk_status:t.fields.current_determination||"investigating",settlement_status:t.funds_status,source_scope:copy(t.source_scope)},processing:{template_key:t.source_type,template_version:"DEMO-TEMPLATE1",task_purpose:t.task_purpose,fields:copy(t.fields),allowed_conclusions:conclusions(t),allowed_actions:availability(t,role),checklist:[{key:"source_verified",label:"已核验来源与逐案范围",required:true}],blocking_reasons:t.source_type==="hold_extend"?["生产延长规则未配置，演示环境不执行延长"]:[],config_versions:copy(t.config_versions)},evidence:pack(evidence),approvals:pack(approvals.filter(a=>a.task_id===id)),executions:pack(executions.filter(e=>e.task_id===id)),history:pack(t.history.items),related:pack(t.related_task_refs)}};
+    return {...row(t,role),approval_refs:copy(approvals.filter(a=>a.task_id===id)),execution_refs:copy(executions.filter(e=>e.task_id===id)),evidence_refs:evidence,server_now:clock,server_time:clock,sla_due_at:t.sla?.due_at||null,sla_rule_version:t.sla?.rule_version||null,escalation_refs:[],history:pack(t.history.items),sections:{summary:{business_status:t.fields.settlement_status||"unchanged",risk_status:t.source_type==="partner_followup"?"not_applicable":t.fields.current_determination||"investigating",settlement_status:t.funds_status,source_scope:copy(t.source_scope)},processing:{template_key:t.source_type,template_version:"DEMO-TEMPLATE1",task_purpose:t.task_purpose,fields:copy(t.fields),allowed_conclusions:conclusions(t),allowed_actions:availability(t,role),checklist:[{key:"source_verified",label:t.source_type==="partner_followup"?"已核对任务来源与合作方资料":"已核验来源与逐案范围",required:true}],blocking_reasons:t.source_type==="hold_extend"?["生产延长规则未配置，演示环境不执行延长"]:[],config_versions:copy(t.config_versions)},evidence:pack(evidence),approvals:pack(approvals.filter(a=>a.task_id===id)),executions:pack(executions.filter(e=>e.task_id===id)),history:pack(t.history.items),related:pack(t.related_task_refs)}};
   }
-  function assignees(id,ctx={}) { const role=ctx.role||"risk",t=get(id,role);if(!availability(t,role).find(a=>a.action==="assign")?.enabled)fail("AFF-40301","无任务转办权限");const opts=options(role);return {teams:opts.teams.filter(x=>x.id===t.team.id),users:opts.users.filter(x=>x.team_id===t.team.id&&(!ctx.team_id||x.team_id===ctx.team_id)),meta:{page:1,total:2},can_return_pool:own(t,role)}; }
+  function assignees(id,ctx={}) {
+    const role=ctx.role||"risk",t=get(id,role);
+    if(!availability(t,role).find(a=>a.action==="assign")?.enabled)fail("AFF-40301","无任务转办权限");
+    const opts=options(role);
+    const users=opts.users.filter(x=>x.team_id===t.team.id&&(!ctx.team_id||x.team_id===ctx.team_id)
+      &&(!skipsReview()||prototype.demoPolicy.employeeRoles.includes(x.role_code)));
+    return {teams:opts.teams.filter(x=>x.id===t.team.id),users,meta:{page:1,total:users.length},can_return_pool:own(t,role)};
+  }
   function plan(t,values,body) {
     const v=values||{},conclusion=v.conclusion||body.conclusion||null;
+    if(t.source_type==="partner_followup")return {conclusion,action_plan:[]};
     const map={risk_investigation:{confirm:"confirm_event",clear:"clear_event",observe:"observe"},cluster_determination:{confirm:"set_cluster_determination",clear:"set_cluster_determination",observe:"observe"},signal_review:{signal_confirm:"signal_confirm",signal_reject:"signal_reject"}};
     const requestedRiskAction = v.risk_action || body.risk_action || null;
     const purposeAction = ({settlement_recheck:"release_and_recheck",cluster_member_correction:"cluster_member_correction",blacklist_add:"blacklist_add",blacklist_remove:"blacklist_remove",risk_credit_propagation:"credit_propagation",manual_credit_override:"credit_override"})[t.task_purpose];
@@ -2927,6 +3122,7 @@
     return base;
   }
   function validate(t,d,strict) {
+    if(t.source_type==="partner_followup" && Object.keys(d.form_values||{}).some(key=>!["conclusion","next_review_at"].includes(key)))fail("AFF-42201","跟进任务只记录核对结论，不接受资金或风控处置参数");
     if(d.conclusion&&!conclusions(t).includes(d.conclusion))fail("AFF-42201","结论不适用于此任务目的");
     if(d.reason!=null&&typeof d.reason!=="string")fail("AFF-42201","处理说明必须是文本");
     if(d.internal_note!=null&&(typeof d.internal_note!=="string"||[...d.internal_note].length>2000))fail("AFF-42201","内部备注长度无效");
@@ -2982,6 +3178,20 @@
     if(t.source_type==="data_backfill"&&v.missing_event_ids?.some(id=>!t.fields.missing_event_ids.includes(id)))fail("AFF-42201","补数事件超出源范围");
   }
   function createExecution(t,a,status="pending") {const e={execution_id:`DEMO-TQ-EXEC-${++sequence}`,task_id:t.task_id,approval_id:a?.approval_id||null,status,version:"e1",items:[{item_id:"item-1",status:status==="failed"?"failed":"pending",result_ref:null,error_code:status==="failed"?"SOURCE_UNAVAILABLE":null,retryable:status==="failed",attempt:status==="failed"?1:0,last_attempt_at:clock}],settlement_checks:[],server_time:clock,data_quality:quality()};executions.push(e);t.execution_refs.push(e.execution_id);if(a)a.execution_id=e.execution_id;return e; }
+  function prepareWithoutReview(t,role,result) {
+    if (t.draft.conclusion === "observe") {
+      t.next_review_at=t.draft.next_review_at;t.result=null;bump(t,"processing");
+    } else {
+      const execution=createExecution(t,null);
+      const item=t.draft.action_plan?.[0];
+      const futureBlacklist=item?.action==="blacklist_add"&&item.params?.effective_at&&Date.parse(item.params.effective_at)>Date.parse(clock);
+      bump(t,futureBlacklist?"processing":"pending_execution");
+      result.execution=copy(execution);
+    }
+    record(t,"review_skipped",role,{reason:"本地演示版本不启用审核",approval_required:false});
+    Object.assign(result,{task_id:t.task_id,status:t.workflow_state,task_status:t.status,
+      workflow_state:t.workflow_state,approval_status:"not_required",approval_id:null});
+  }
   function settlementAuthoritySnapshot(t, refsOverride = null) {
     const sourceType = t.source_ref?.kind === "settlement_case" ||
       ["risk_investigation","signal_review","settlement_recheck"].includes(t.task_purpose) ||
@@ -3152,9 +3362,10 @@
     if(body.actor_id||body.approver_id)fail("AFF-40301","浏览器不得指定操作身份");
     if(ctx.scenario==="batch_partial"&&id==="DEMO-TASK-024"&&["claim","assign"].includes(action))fail("AFF-40901","演示并发冲突：此项刚被其他处理人更新",{reason:"FIXTURE_CONCURRENT_CHANGE"});
     const digest=JSON.stringify({action,id,body,role});
-    if(keys[key]){if(keys[key].digest!==digest)fail("AFF-40902","同一幂等键不能用于不同请求");return copy(keys[key].result);}
+    if(keys[key]){if(keys[key].digest!==digest)fail("AFF-40902","同一幂等键不能用于不同请求");if(action!=="access_evidence")return copy(keys[key].result);}
     let t=null,result={};
     const isApproval=["approve","reject","return"].includes(action),globalAction=["export","download_export"].includes(action);
+    if(isApproval&&skipsReview())fail("AFF-42201","演示版本不启用审核，请从任务直接提交执行");
     if(!isApproval&&!globalAction){t=get(id,role);if(body.expected_version!==t.version)fail("AFF-40901","任务版本已变化，请重新加载");}
     if(isApproval) {
       const a=approvals.find(x=>x.approval_id===id);if(!a)fail("AFF-40401","审批不存在");
@@ -3200,11 +3411,13 @@
       if(!Array.isArray(columns)||!columns.length||new Set(columns).size!==columns.length||columns.some(c=>!allowedColumns.includes(c)))fail("AFF-42201","导出列超出任务队列安全列白名单");
       const sort=body.sort||{field:query.sort_by||"default",direction:query.direction||"asc"};
       if(sort.field!==(query.sort_by||"default")||sort.direction!==(query.direction||"asc"))fail("AFF-40901","导出排序与已应用快照不一致");
-      const ex={export_id:exid,status:"pending_approval",applicant:actor(role),created_at:clock,row_count:snap.rows.length,purpose,scope:listing.summary.scope,applied_filter:copy(query),sort:copy(sort),snapshot_id:snap.id,query:copy(query),rows:copy(snap.rows),columns:copy(columns),filename:`tasks_20261108_200000_${exid}.csv`};
-      const a=approvalFor(null,role,{},exid);ex.approval_id=a.approval_id;
-      a.export_scope={export_id:exid,purpose,scope:ex.scope,applied_filter:copy(query),sort:copy(sort),snapshot_id:snap.id,columns:copy(columns),row_count:ex.row_count};
-      Object.assign(a,copy(a.export_scope));
-      exportsList.push(ex);record(null,"export_request",role,{export_id:exid,purpose,scope:ex.scope,snapshot_id:snap.id});result.export={...copy(ex),rows:undefined};result.approval=copy(a);
+      const ex={export_id:exid,status:skipsReview()?"ready":"pending_approval",applicant:actor(role),created_at:clock,row_count:snap.rows.length,purpose,scope:listing.summary.scope,applied_filter:copy(query),sort:copy(sort),snapshot_id:snap.id,query:copy(query),rows:copy(snap.rows),columns:copy(columns),filename:`tasks_20261108_200000_${exid}.csv`};
+      if (!skipsReview()) {
+        const a=approvalFor(null,role,{},exid);ex.approval_id=a.approval_id;
+        a.export_scope={export_id:exid,purpose,scope:ex.scope,applied_filter:copy(query),sort:copy(sort),snapshot_id:snap.id,columns:copy(columns),row_count:ex.row_count};
+        Object.assign(a,copy(a.export_scope));result.approval=copy(a);
+      } else ex.approval_status="not_required";
+      exportsList.push(ex);record(null,"export_request",role,{export_id:exid,purpose,scope:ex.scope,snapshot_id:snap.id,approval_required:!skipsReview()});result.export={...copy(ex),rows:undefined};
     } else if(action==="download_export") {
       const ex=exportsList.find(x=>x.export_id===id);if(!ex||ex.applicant.user_id!==actor(role).user_id)fail("AFF-40301","无当前导出下载权限");if(ex.status!=="ready")fail("AFF-42201","导出尚未批准");
       const cell=v=>`"${String(v??"").replace(/^[=+@\t\r-]/,"'$&").replace(/"/g,'""')}"`;
@@ -3212,8 +3425,14 @@
       const value=(t,c)=>({task_id:t.task_id,title:t.title,source_type:labels[t.source_type],workflow_state:stateLabels[t.workflow_state],owner:t.owner?.display_name||"",impact_amount:t.impact?.amount||"",task:`${t.task_id} ${t.title}`,type:labels[t.source_type],source:t.source_ref.id,priority:t.priority,status:stateLabels[t.workflow_state],sla:t.sla?.due_at||"",team:t.team.name,risk:t.risk_level||"",amount:t.impact?.amount||"",updated:t.updated_at,created:t.created_at,system:t.external_system||"",reason:t.reason_codes.join(" / "),approval:approvals.find(a=>a.task_id===t.task_id)?.status||"",credit:t.credit_level||"",trace:`DEMO-TRACE-${t.task_id}`})[c];
       result.csv="\uFEFF"+[ex.columns.map(c=>names[c]),...ex.rows.map(t=>ex.columns.map(c=>value(t,c)))].map(line=>line.map(cell).join(",")).join("\r\n");result.filename=ex.filename;record(null,"export_download",role,{export_id:id});
     } else if(action==="access_evidence") {
-      if(body.evidence_id!==`${id}-EVIDENCE1`)fail("AFF-40301","证据不属于当前任务");
-      result.evidence={evidence_id:body.evidence_id,name:"合成来源核验记录.txt",content_type:"text/plain",content:"仅用于管理端交互验收的合成证据；不包含生产资料。",expires_at:at(5 * 60 * 1000)};record(t,"evidence_access",role,{purpose:body.purpose});
+      if(["forbidden","revoked"].includes(ctx.scenario))fail("AFF-40301","证据查看权限已撤销");
+      if(!["preview","download"].includes(body.purpose))fail("AFF-40001","证据访问用途无效");
+      const evidence=taskEvidence(t,role,ctx.scenario).find(item=>item.evidence_id===body.evidence_id);
+      if(!evidence)fail("AFF-40401","当前任务没有此证据");
+      if(evidence.invalidated||evidence.scan_status!=="clean")fail("AFF-42201","证据已失效或尚未通过安全核验");
+      if(!evidence.access[body.purpose])fail("AFF-40301","当前岗位无此证据内容访问权限");
+      result.evidence=evidenceContent(t,evidence);
+      record(t,"evidence_access",role,{purpose:body.purpose,evidence_id:evidence.evidence_id,source_version:evidence.source_version,snapshot_version:evidence.snapshot_version});
     } else if(action==="coordinator_complete") {
       if(ctx.actor_type!=="domain_coordinator"||!body.domain_receipt_ref)fail("AFF-42201","仅领域执行协调器可凭有效回执完成任务");
       const e=executions.find(x=>x.task_id===id&&x.execution_id===body.execution_id);
@@ -3316,8 +3535,14 @@
         if(body.expected_draft_version!==t.draft_version)fail("AFF-40901","草稿版本已变化");
         const generated=plan(t,body.form_values,body), old=t.draft||{};
         if(body.action_plan&&!body.form_values&&JSON.stringify(body.action_plan)!==JSON.stringify(generated.action_plan))fail("AFF-42201","处理方案必须由当前类型表单生成");
-        const d={...old,...generated,reason_code:body.reason_code??old.reason_code??null,reason:body.reason??old.reason??"",evidence_ids:body.evidence_ids??old.evidence_ids??[],next_review_at:body.next_review_at??body.form_values?.next_review_at??old.next_review_at??null,checklist:body.checklist??old.checklist??[],internal_note:body.internal_note??old.internal_note??null,form_values:copy(body.form_values||old.form_values||{}),updated_at:clock,updated_by:actor(role)};
+        const d={...old,...generated,reason_code:body.reason_code??old.reason_code??null,reason:body.reason??old.reason??"",evidence_ids:body.evidence_ids??old.evidence_ids??[],next_review_at:body.next_review_at??body.form_values?.next_review_at??old.next_review_at??null,checklist:body.checklist??old.checklist??[],internal_note:body.internal_note??old.internal_note??null,form_values:copy(body.form_values||old.form_values||{}),updated_at:taskNow(t),updated_by:actor(role)};
         validate(t,d,false);t.draft_version=`d${Number(t.draft_version.slice(1))+1}`;d.draft_version=t.draft_version;t.draft=d;bump(t);result.draft=copy(d);
+      }
+      if(action==="complete_followup"){
+        if(t.source_type!=="partner_followup"||!t.draft||!["recorded","referred"].includes(t.draft.conclusion)||[...(t.draft.reason||"").trim()].length<10)fail("AFF-42201","请先保存明确的核对结论及至少10字说明");
+        validate(t,t.draft,false);
+        t.result=t.draft.conclusion;
+        bump(t,"done");
       }
       if(action==="preview"){
         if(!t.draft||body.draft_version!==t.draft_version)fail("AFF-40901","请先保存当前草稿");validate(t,t.draft,true);
@@ -3329,11 +3554,33 @@
         const plannedAmount = authority?.impact || copy(t.impact);
         const p={preview_id:`DEMO-PREVIEW-${++sequence}`,preview_hash:`DEMO-HASH-${sequence}-${t.version}`,task_id:id,draft_version:t.draft_version,source_versions:copy(t.source_versions),config_versions:copy(t.config_versions),case_refs:copy(plannedRefs),authority_snapshot:copy(authority),before_after_items:t.draft.action_plan.map(i=>({item_id:i.item_id,object_ref:copy(t.source_ref),before:{workflow_state:t.workflow_state,funds_status:t.funds_status},after:{requested_action:i.action,requires_approval:true},blocking_reasons:authority?.blockers || []})),deduplicated_amount:copy(plannedAmount),amount:copy(plannedAmount),scope:plannedScope,required_approver_roles:approvalRoles(role),blocking_errors:authority?.blockers || [],generated_at:previewNow,expires_at:previewExpires,task_version:t.version,real_expires:Date.now()+300000};previews[p.preview_id]=p;result.preview=copy(p);
       }
+      if(action==="preview"&&skipsReview()){
+        const p=previews[result.preview.preview_id];
+        p.required_approver_roles=[];
+        p.before_after_items.forEach(item=>{item.after.requires_approval=false;});
+        result.preview=copy(p);
+      }
       if(action==="submit_review"){
         const p=previews[body.preview_id];if(!p||p.task_id!==id||p.preview_hash!==body.preview_hash||p.draft_version!==t.draft_version||body.draft_version!==t.draft_version||p.task_version!==t.version||p.real_expires<Date.now())fail("AFF-40901","影响预览已失效");
         const currentAuthority=settlementAuthoritySnapshot(t, t.draft?.action_plan?.[0]?.params?.case_refs || t.case_refs);
         if(!sameAuthoritySnapshot(p.authority_snapshot,currentAuthority))fail("AFF-40901","影响预览已失效：结算案件、限制版本、阻断原因或影响金额已变化");
-        if(body.self_review!==false||body.impact_confirmation!==true)fail("AFF-42201","敏感申请必须确认影响且禁止自审");validate(t,t.draft,true);const a=approvalFor(t,role,t.draft);bump(t,"pending_approval");emitRiskNotification(t,"risk.task.submitted",{eventKey:`risk.task.submitted:${a.approval_id}`,recipients:a.nodes.map(node=>node.role_code),title:`风险任务 ${t.task_id} 已提交审批`,detail:"案件范围、金额和影响预览已冻结，等待审批节点处理。"});result.approval=copy(a);Object.assign(result,{task_id:id,status:"pending_approval",task_status:"processing",approval_status:"pending_approval",workflow_state:"pending_approval",approval_id:a.approval_id});
+        if(body.self_review!==false||body.impact_confirmation!==true)fail("AFF-42201","敏感申请必须确认影响且禁止自审");
+        validate(t,t.draft,true);
+        if (skipsReview()) prepareWithoutReview(t,role,result);
+        else {
+          const a=approvalFor(t,role,t.draft);bump(t,"pending_approval");emitRiskNotification(t,"risk.task.submitted",{eventKey:`risk.task.submitted:${a.approval_id}`,recipients:a.nodes.map(node=>node.role_code),title:`风险任务 ${t.task_id} 已提交审批`,detail:"案件范围、金额和影响预览已冻结，等待审批节点处理。"});result.approval=copy(a);Object.assign(result,{task_id:id,status:"pending_approval",task_status:"processing",approval_status:"pending_approval",workflow_state:"pending_approval",approval_id:a.approval_id});
+        }
+      }
+      if(action==="resume_without_review"){
+        if(!skipsReview()||body.impact_confirmation!==true||[...(body.reason||"").trim()].length<10)fail("AFF-42201","请确认执行影响并填写至少10字说明");
+        if(!t.draft)fail("AFF-42201","原任务缺少可执行方案，请先补齐任务资料");
+        validate(t,t.draft,true);
+        approvals.filter(a=>a.task_id===id&&a.status==="pending_approval").forEach(a=>{
+          a.status="cancelled";a.closed_reason="演示版本停用审核，改为直接提交执行";
+          a.nodes.filter(n=>["pending","not_started"].includes(n.status)).forEach(n=>{n.status="cancelled";});
+          a.version=`a${Number(a.version.slice(1))+1}`;
+        });
+        prepareWithoutReview(t,role,result);
       }
       if(action==="request_material"){
         if(!body.material_keys?.length||!body.recipient?.ref||!body.due_at||!Number.isFinite(Date.parse(body.due_at))||body.due_at<=clock||[...(body.public_message||"").trim()].length<10||[...body.public_message].length>2000)fail("AFF-42201","补件需材料项、接收人、未来期限和10至2000字符说明");t.material_request={material_request_id:`DEMO-MATERIAL-${++sequence}`,...copy(body)};bump(t,"waiting_material");result.material_request_id=t.material_request.material_request_id;
@@ -3358,7 +3605,9 @@
     }
     if(t){t.request_id_history.push(request);t.history.total=t.history.items.length;result.task=row(t,role);}
     const receipt={request_id:request,status:"succeeded",result_ref:{kind:isApproval?"approval":globalAction?"export":"task",id:result.approval?.approval_id||result.export?.export_id||id},error:null,trace_id:`DEMO-TRACE-${++sequence}`};
-    result.receipt=receipt;result.request_receipt=copy(receipt);receipts[request]={role,receipt:copy(receipt),result:copy(result)};keys[key]={digest,result:copy(result)};
+    result.receipt=receipt;result.request_receipt=copy(receipt);
+    const storedResult=action==="access_evidence"?{receipt:copy(receipt),request_receipt:copy(receipt)}:copy(result);
+    receipts[request]={role,receipt:copy(receipt),result:storedResult};keys[key]={digest,result:storedResult};
     if(["write_timeout","timeout"].includes(ctx.scenario))fail("AFF-50401","响应超时，结果未知；请查询原request_id",{result_unknown:true,request_id:request});
     persistQueueState();
     return copy(result);
@@ -3366,13 +3615,34 @@
   function receipt(request,ctx={}) {const r=receipts[request];if(!r)fail("AFF-40401","尚未找到请求回执");if(r.role!==(ctx.role||"risk"))fail("AFF-40301","不能查看其他操作者请求");return {...copy(r.receipt),result:copy(r.result)};}
   function approvalsFor(ctx={}) {const role=context(ctx).role||"risk";return copy(approvals.filter(a=>a.applicant.user_id===actor(role).user_id||a.nodes.some(n=>n.role_code===role)||["audit","system_admin"].includes(role)));}
   function exportsFor(ctx={}) {const role=context(ctx).role||"risk";return copy(exportsList.filter(e=>e.applicant.user_id===actor(role).user_id).map(({rows,...metadata})=>metadata));}
-  function toLegacyRows(role="risk") {return tasks.filter(t=>visible(t,role)).map(t=>({...row(t,role),id:t.task_id,name:t.title,type:labels[t.source_type],status:t.workflow_state,ownerRole:t.owner?.role_code||null,owner:t.owner?.display_name||"未认领",amount:t.impact?Number(t.impact.amount):0,updated:t.updated_at.slice(0,19).replace("T"," "),overdue:t.sla_state==="overdue",sla:t.sla?.due_at||"未配置",partnerId:t.partner_id,partner:"合成合作方",customerId:t.customer_id,clientCount:1,commissionCount:t.case_refs.length,risk:t.risk_level==="R3"?"high":t.risk_level==="R2"?"medium":"low",source:t.source_ref.id,traceId:`DEMO-TRACE-${t.task_id}`,timeline:copy(t.history.items)}));}
+  function queueDisplayTime(value) {
+    return new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Shanghai",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(new Date(value)).replace(",","");
+  }
+  function applyDemoPolicy() {
+    if (!skipsReview()) return;
+    tasks.forEach(t=>{
+      if(t.owner && demoRole(t.owner.role_code)!==t.owner.role_code) {
+        t.owner=actor(demoRole(t.owner.role_code));
+        t.team=copy(teams.find(team=>team.id===actors[t.owner.role_code][2]));
+      }
+      if(t.fields?.responsible_role)t.fields.responsible_role=demoRole(t.fields.responsible_role);
+    });
+    exportsList.filter(ex=>ex.status==="pending_approval").forEach(ex=>{
+      ex.status="ready";ex.approval_status="not_required";
+      approvals.filter(a=>a.export_id===ex.export_id&&a.status==="pending_approval").forEach(a=>{
+        a.status="cancelled";a.closed_reason="演示版本停用审核";
+        a.nodes.filter(n=>["pending","not_started"].includes(n.status)).forEach(n=>{n.status="cancelled";});
+      });
+    });
+  }
+  function toLegacyRows(role="risk") {return tasks.filter(t=>visible(t,role)).map(t=>({...row(t,role),id:t.task_id,name:t.title,type:labels[t.source_type],status:t.workflow_state,ownerRole:t.owner?.role_code||null,owner:t.owner?.display_name||"未认领",amount:t.impact?Number(t.impact.amount):0,updated:queueDisplayTime(t.updated_at),overdue:t.sla_state==="overdue",sla:t.sla?.due_at||"未配置",partnerId:t.partner_id,partner:prototype.partner360.partners.find(partner=>partner.id===t.partner_id)?.name||t.partner_id,customerId:t.customer_id,clientCount:t.customer_id?1:0,commissionCount:t.case_refs.length,risk:t.risk_level==="R3"?"high":t.risk_level==="R2"?"medium":"low",source:t.source_ref.id,traceId:`DEMO-TRACE-${t.task_id}`,timeline:copy(t.history.items)}));}
   function reset() {
     if (Array.isArray(prototype.auditRecords)) for (let i=prototype.auditRecords.length-1;i>=0;i--) if (String(prototype.auditRecords[i].id).startsWith("DEMO-TQ-AUDIT-")) prototype.auditRecords.splice(i,1);
     if (Array.isArray(prototype.notifications)) for (let i=prototype.notifications.length-1;i>=0;i--) if (String(prototype.notifications[i].id).startsWith("risk-notice-")) prototype.notifications.splice(i,1);
     if (Array.isArray(prototype.notificationOutbox)) for (let i=prototype.notificationOutbox.length-1;i>=0;i--) if (String(prototype.notificationOutbox[i].id).startsWith("risk-outbox-")) prototype.notificationOutbox.splice(i,1);
     try { sessionStorage.removeItem(queueSessionStorageKey); } catch {}
     seed();
+    applyDemoPolicy();
     return {ok:true};
   }
   function toRiskRows(role="risk") {
@@ -3414,7 +3684,7 @@
       }
       const receipt={request_id:body.request_id,status:"succeeded",result_ref:{kind:"task",id:t.task_id},error:null,trace_id:`DEMO-TRACE-${++sequence}`};
       const result={task:row(t,role),reused,source_path:`#/tasks?task_id=${origin.task_id}`,task_path:`#/tasks?task_id=${t.task_id}`,receipt,request_receipt:copy(receipt)};
-      receipts[body.request_id]={role,receipt:copy(receipt),result:copy(result)};keys[body.idempotency_key]={digest,result:copy(result)};return copy(result);
+      receipts[body.request_id]={role,receipt:copy(receipt),result:copy(result)};keys[body.idempotency_key]={digest,result:copy(result)};persistQueueState();return copy(result);
     }
     const catalogs={event:store.events,cluster:store.clusters,blacklist:store.blacklist,object:store.objects,settlement_case:store.caseLinks};
     const original=catalogs[source.kind]?.find(item=>source.kind==="settlement_case" ? item.settlement===source.id : item.id===source.id);if(!original)fail("AFF-42201","来源不在当前可信风险对象目录");
@@ -3461,7 +3731,47 @@
       t.reason=body.reason;tasks.push(t);record(t,"source_create_task",role);
     }
     const r={request_id:body.request_id,status:"succeeded",result_ref:{kind:"task",id:t.task_id},error:null,trace_id:`DEMO-TRACE-${++sequence}`};
-    const result={task:row(t,role),reused,receipt:r,request_receipt:copy(r)};receipts[body.request_id]={role,receipt:copy(r),result:copy(result)};keys[body.idempotency_key]={digest,result:copy(result)};return copy(result);
+    const result={task:row(t,role),reused,receipt:r,request_receipt:copy(r)};receipts[body.request_id]={role,receipt:copy(r),result:copy(result)};keys[body.idempotency_key]={digest,result:copy(result)};persistQueueState();return copy(result);
+  }
+  function ensurePartnerTask(body={},ctx={}) {
+    const role=ctx.role;
+    if(!actors[role]||role==="audit")fail("AFF-40301","当前员工不可创建跟进任务");
+    if(!body.request_id||!body.idempotency_key)fail("AFF-40001","缺少请求标识");
+    const digest=JSON.stringify({body,role,action:"ensure_partner_task"});
+    const prior=keys[body.idempotency_key];
+    if(prior){if(prior.digest!==digest)fail("AFF-40902","幂等键已用于不同请求");return copy(prior.result);}
+    const partner=prototype.partner360.partners.find(item=>item.id===body.partner_id);
+    if(!partner)fail("AFF-40401","合作方不存在");
+    const responsibleRole=demoRole(({"crm-sync":"system_admin",finance:"finance",risk:"risk",general:"operations"})[body.type]);
+    if(!responsibleRole)fail("AFF-42201","跟进类型不存在");
+    if(typeof body.reason!=="string"||[...body.reason.trim()].length<10||[...body.reason].length>1000)fail("AFF-42201","任务说明需10至1000字");
+    const businessRef=body.business_ref||null;
+    if(businessRef){
+      const withdrawal=prototype.funds360.withdrawals.find(item=>item.id===businessRef);
+      if(body.type!=="finance"||!withdrawal||withdrawal.partner!==partner.id)fail("AFF-42201","核对单据与合作方不匹配");
+    }
+    let t=tasks.find(item=>item.source_type==="partner_followup"&&item.partner_id===partner.id&&item.task_purpose===body.type&&(item.fields.business_ref||null)===businessRef&&!terminal(item));
+    const reused=Boolean(t);
+    if(!t){
+      t=make(1000+ ++sequence,"partner_followup",body.type,"open",responsibleRole);
+      const title=({"crm-sync":"CRM同步核对",finance:"资金核对",risk:"风险跟进",general:"合作方资料核对"})[body.type];
+      Object.assign(t,{task_id:`PARTNER-TASK-${sequence}`,title:`${title} · ${partner.name}`,partner_id:partner.id,customer_id:null,object_type:"partner",object_id:partner.id,object_summary:partner.name,source_ref:{kind:"partner",id:partner.id},case_refs:[],impact:null,funds_status:"not_applicable",risk_level:null,credit_level:partner.credit?.grade||null,related_event_ids:[],created_by:actor(role),reason:body.reason,priority:["normal","high","urgent"].includes(body.priority)?body.priority:"normal",business_jump_url:`#/partner-360/${partner.id}?tab=follow-up`,fields:{partner_id:partner.id,responsible_role:responsibleRole,request_kind:body.type,request_reason:body.reason}});
+      t.source_scope=scopeFor(t);
+      t.fields.business_ref=businessRef;
+      t.config_versions={};t.source_versions={};
+      t.priority=["high","urgent"].includes(body.priority)?"high":"medium";
+      t.created_at=taskNow(t);t.updated_at=t.created_at;t.sla=null;t.sla_state="unconfigured";
+      tasks.push(t);record(t,"create_partner_followup",role,{responsible_role:responsibleRole});
+    }
+    t.requester_ids=t.requester_ids||[t.created_by.user_id];
+    if(!t.requester_ids.includes(actor(role).user_id)){
+      t.requester_ids.push(actor(role).user_id);
+      record(t,"reference_partner_followup",role);
+    }
+    const receipt={request_id:body.request_id,status:"succeeded",result_ref:{kind:"task",id:t.task_id},error:null,trace_id:`TRACE-${++sequence}`};
+    const result={task:row(t,role),reused,receipt,request_receipt:copy(receipt)};
+    receipts[body.request_id]={role,receipt:copy(receipt),result:copy(result)};keys[body.idempotency_key]={digest,result:copy(result)};
+    persistQueueState();return copy(result);
   }
   const fixtures = {
     setApprovalChain(roles) {
@@ -3515,11 +3825,19 @@
   };
   seed();
   restoreQueueState();
+  applyDemoPolicy();
   prototype.taskQueue={version:"1.0",clock,adapter:"unified_prototype_fixture",options:role=>{
     const result=options(role),current=result.current_user.role_code;
     result.default_scope=["system_admin","audit"].includes(current)?"authorized":"mine";
     if(current==="audit")result.authorized_scopes=result.authorized_scopes.filter(s=>s!=="claimable");
-    result.source_types=result.source_types.filter(type=>["system_admin","audit","compliance"].includes(current)||domain({source_type:type.key},current)).map(type=>({...type,label_en:englishLabels[type.key]}));
+    result.source_types=result.source_types.filter(type=>["system_admin","audit","compliance"].includes(current)||domain({source_type:type.key},current)||type.key==="partner_followup"&&tasks.some(t=>t.source_type==="partner_followup"&&visible(t,current))).map(type=>({...type,label_en:englishLabels[type.key]}));
+    if (skipsReview()) {
+      const roles=prototype.demoPolicy.employeeRoles;
+      result.users=result.users.filter(user=>roles.includes(user.role_code));
+      result.teams=result.teams.filter(team=>result.users.some(user=>user.team_id===team.id));
+      result.source_types=result.source_types.map(type=>({...type,approval_required:false}));
+      result.export_policy.requires_approval=false;
+    }
     return result;
-  },list,detail:(id,ctx)=>{const result=detail(id,ctx);result.settlement_status=result.funds_status;return result;},assignees,write,receipt,approvals:approvalsFor,exports:exportsFor,reset,peek:()=>copy({tasks,approvals,executions,exports:exportsList.map(({rows,...x})=>x)}),toLegacyRows,toRiskRows,ensureRiskTask,fixtures,get audit(){return copy(audit);}};
+  },list,detail:(id,ctx)=>{const result=detail(id,ctx);result.settlement_status=result.funds_status;return result;},affectedObjects,reviewObject,assignees,write,receipt,approvals:approvalsFor,exports:exportsFor,reset,applyDemoPolicy,peek:()=>copy({tasks,approvals,executions,exports:exportsList.map(({rows,...x})=>x)}),toLegacyRows,toRiskRows,ensureRiskTask,ensurePartnerTask,fixtures,get audit(){return copy(audit);}};
 })();

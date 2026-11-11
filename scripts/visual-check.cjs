@@ -147,7 +147,8 @@ async function main() {
   await page.click("#login-form button[type=submit]");
   await page.waitForSelector("#app-view:not(.hidden)");
   await page.evaluate(() => navigate("dash"));
-  assertText(await page.locator(".topbar").innerText(), "可提现余额", "Dashboard topbar");
+  assertText(await page.locator(".topbar").innerText(), "钱包", "Dashboard topbar");
+  assertText(await page.locator("#wallet-toggle").innerText(), "$", "Wallet trigger amount");
   const shellState = await page.evaluate(() => ({
     topbarLeft: document.querySelector(".topbar").getBoundingClientRect().left,
     topbarWidth: document.querySelector(".topbar").getBoundingClientRect().width,
@@ -181,7 +182,7 @@ async function main() {
   await page.locator("#wallet-toggle").hover();
   await page.locator("#wallet-popover").waitFor({ state: "visible" });
   const walletText = await page.locator("#wallet-popover").innerText();
-  for (const expected of ["可提现余额", "总收益", "结算中", "资金详情", "提现"]) {
+  for (const expected of ["总收益", "结算中佣金", "资金详情", "提现"]) {
     assertText(walletText, expected, "Wallet popover");
   }
   await page.locator("#wallet-popover").hover();
@@ -728,13 +729,13 @@ async function main() {
   if (!profileEntryStyle.text.includes("合作者计划") || !profileEntryStyle.background.includes("linear-gradient") || profileEntryStyle.color !== "rgb(255, 255, 255)") {
     throw new Error(`Partner program entry style failed: ${JSON.stringify(profileEntryStyle)}`);
   }
-  const programSteps = ["查看佣金奖励", "高转化地区", "查看支持地区", "素材库总览", "系统使用指引", "分享简介链接"];
+  const programSteps = ["查看佣金奖励", "高转化地区", "查看支持地区", "素材库总览", "收益与系统指引", "分享简介链接"];
   const stepsText = await page.locator(".steps").innerText();
   for (const step of programSteps) assertText(stepsText, step, `Partner program step: ${step}`);
   let programText = await page.locator("#main").innerText();
   if (programText.includes("Commission Reward")) throw new Error("Commission page eyebrow should be removed");
   assertText(programText, "L1-L4资格档与国家佣金", "Commission page title");
-  assertText(programText, "参考CPA按国家直接配置；全部数值可后台配置", "Commission page subtitle");
+  assertText(programText, "了解佣金的组成，再按推广国家查看相应资格要求与奖励。", "Commission page subtitle");
   if (!(await page.locator(".commission-selector-card .commission-page-head > div > p").first().isVisible())) {
     throw new Error("Commission subtitle is not visible");
   }
@@ -899,10 +900,10 @@ async function main() {
 
   await page.click(".action-row .button.primary");
   programText = await page.locator("#main").innerText();
-  assertText(programText, "系统使用指引", "Guide page");
+  assertText(programText, "收益与系统指引", "Guide page");
   assertText(programText, "查看客户数据", "Guide client entry");
-  assertText(programText, "查看业绩", "Guide performance entry");
-  assertText(programText, "查看整体数据", "Guide dashboard entry");
+  assertText(programText, "查看收益数据", "Guide earnings entry");
+  assertText(programText, "查看保证金", "Guide guarantee entry");
 
   await page.click(".action-row .button.primary");
   assertText(await page.locator("#main").innerText(), "分享您的链接，开始赚取收入", "Share page");

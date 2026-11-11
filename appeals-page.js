@@ -20,7 +20,8 @@
     return {
       formOpen: false, object: "佣金冲正", objectId: "", reason: "",
       status: "", objectFilter: "", taskType: "", from: "", to: "", search: "",
-      page: 1, pageSize: 10, detail: null
+      page: 1, pageSize: 10, detail: null, supplementForm: false,
+      supplements: {}
     };
   }
 
@@ -41,25 +42,31 @@
   function investigationTasks() {
     return AFF.reporting.rows
       .filter(row => row.clientId && ["investigating", "quarantined", "released"].includes(row.riskHandlingStatus))
-      .map(row => ({
-        id: `INV-${row.clientId}`,
-        taskType: "investigation",
-        object: "调查补充材料",
-        objectId: row.clientId,
-        clientId: row.clientId,
-        submittedAt: row.riskStartedAt,
-        dueAt: shiftDate(row.riskStartedAt, 7),
-        status: row.riskHandlingStatus === "investigating" ? "materials" : row.riskHandlingStatus === "quarantined" ? "reviewing" : "closed",
-        reason: row.riskReasonCategory,
-        result: row.riskHandlingStatus === "released" ? "调查已解除，等待结算复核" : "",
-        canAppeal: row.riskHandlingStatus !== "released",
-        materials: ["投放说明", "流量来源截图", "客户沟通记录"],
-        consequence: "超时可能升级限制、维持结算阻断或转入人工处理；不会仅因超时自动认定违规。",
-        evidenceScope: row.riskEvidenceScope,
-        impactScope: row.riskImpactScope,
-        nextStep: row.riskNextStep,
-        handlingPath: row.riskHandlingPath
-      }));
+      .map(row => {
+        const id = `INV-${row.clientId}`;
+        const latest = state().supplements[id]?.entries?.at(-1);
+        const baseStatus = row.riskHandlingStatus === "investigating" ? "materials" : row.riskHandlingStatus === "quarantined" ? "reviewing" : "closed";
+        return {
+          id,
+          taskType: "investigation",
+          object: "调查补充材料",
+          objectId: row.clientId,
+          clientId: row.clientId,
+          submittedAt: row.riskStartedAt,
+          dueAt: shiftDate(row.riskStartedAt, 7),
+          status: latest?.status === "submitted" ? "reviewing" : baseStatus,
+          reason: row.riskReasonCategory,
+          result: row.riskHandlingStatus === "released" ? "调查已解除，等待结算复核" : "",
+          canAppeal: row.riskHandlingStatus !== "released",
+          supplementOpen: baseStatus === "materials" && !latest,
+          materials: ["投放说明", "流量来源截图", "客户沟通记录"],
+          consequence: "超时可能升级限制、维持结算阻断或转入人工处理；不会仅因超时自动认定违规。",
+          evidenceScope: row.riskEvidenceScope,
+          impactScope: row.riskImpactScope,
+          nextStep: latest?.status === "submitted" ? "等待人工复核" : row.riskNextStep,
+          handlingPath: row.riskHandlingPath
+        };
+      });
   }
 
   function records() {
@@ -94,7 +101,14 @@
 
   function investigationDetail(row) {
     if (row.taskType !== "investigation") return "";
+    const supplement = state().supplements[row.id] || { entries: [], draftReason: "", draftFiles: [] };
     const field = (name, value) => `<div><dt>${h(name)}</dt><dd>${h(value || "-")}</dd></div>`;
+    const timeline = supplement.entries.length ? `<ul class="finance-detail-timeline appeal-supplement-timeline">${supplement.entries.map(entry => `<li class="complete"><strong>${h(t("补充材料已提交", "Supplement submitted"))}</strong><span>${h(entry.explanation || t("已追加附件", "Attachments added"))}</span><time>${h(entry.submittedAt)}</time>${entry.files?.length ? `<small>${h(entry.files.map(file => file.name).join("、"))}</small>` : ""}</li>`).join("")}</ul>` : `<p class="finance-empty-note">${t("暂无补件记录。", "No supplement records yet.")}</p>`;
+    const form = row.supplementOpen && state().supplementForm ? `<div class="appeal-supplement-form">
+      <label><span>${t("补充说明", "Supplement note")}</span><textarea data-appeal-supplement-field="reason" rows="4" maxlength="1000" placeholder="${t("说明本次补充内容", "Describe this supplement")}">${h(supplement.draftReason)}</textarea></label>
+      <label class="appeal-supplement-upload"><span>${t("补充附件", "Supplement attachments")}</span><input type="file" data-appeal-supplement-files accept=".pdf,.png,.jpg,.jpeg,.txt" multiple><small>${t("可追加材料，已提交内容不会被覆盖。", "Add materials without replacing submitted content.")}</small></label>
+      ${supplement.draftFiles?.length ? `<ul class="appeal-supplement-files">${supplement.draftFiles.map(file => `<li><span>${h(file.name)}</span><button type="button" class="finance-link" data-appeal-remove-file="${h(file.id)}">${t("移除", "Remove")}</button></li>`).join("")}</ul>` : ""}
+    </div>` : "";
     return `<section>
       <h3>${t("调查补充材料", "Investigation evidence")}</h3>
       <dl class="finance-detail-grid">
@@ -107,6 +121,11 @@
         ${field(t("预计处理路径", "Handling path"), row.handlingPath)}
         ${field(t("申诉路径", "Appeal path"), row.canAppeal ? t("申诉中心", "Appeal center") : t("暂无", "None"))}
       </dl>
+      <div class="appeal-supplement-section">
+        <div class="appeal-supplement-heading"><strong>${t("补件记录", "Supplement history")}</strong>${row.supplementOpen && !state().supplementForm ? `<button class="button secondary small" type="button" data-appeal-action="open-supplement">${t("补充材料", "Add materials")}</button>` : ""}</div>
+        ${timeline}
+        ${form}
+      </div>
     </section>`;
   }
 
@@ -142,7 +161,7 @@
             <p>${h(statusStep(row.status))}</p>
           </section>
         </div>
-        <footer><button class="button secondary" type="button" data-appeal-action="close">${t("关闭", "Close")}</button></footer>
+        <footer>${row.supplementOpen && state().supplementForm ? `<button class="button primary" type="button" data-appeal-action="submit-supplement">${t("提交补充材料", "Submit supplement")}</button><button class="button secondary" type="button" data-appeal-action="cancel-supplement">${t("取消", "Cancel")}</button>` : `<button class="button secondary" type="button" data-appeal-action="close">${t("关闭", "Close")}</button>`}</footer>
       </aside>`;
   }
 
@@ -214,7 +233,7 @@
             <tbody>${shown.length ? shown.map(row => `<tr>
               <td>${h(row.id)}</td><td>${t(...taskTypeLabels[row.taskType] || [row.taskType, row.taskType])}</td><td>${h(row.object)}</td><td>${h(row.objectId)}</td><td>${h(row.clientId)}</td>
               <td>${h(row.submittedAt)}</td><td>${h(row.dueAt)}</td><td>${tag(row.status)}</td><td>${h(row.status === "overturned" ? row.result : row.reason)}</td>
-              <td><div class="wd-row-actions"><button class="button secondary small" type="button" data-appeal-detail="${h(row.id)}">${t("详情", "Details")}</button>${row.status === "materials" ? `<button class="button secondary small" type="button" data-route="messages">${t("去补充", "Submit info")}</button>` : ""}</div></td>
+              <td><div class="wd-row-actions"><button class="button secondary small" type="button" data-appeal-detail="${h(row.id)}">${t("详情", "Details")}</button>${row.supplementOpen ? `<button class="button secondary small" type="button" data-appeal-detail="${h(row.id)}" data-appeal-open-supplement="true">${t("去补充", "Submit info")}</button>` : ""}</div></td>
             </tr>`).join("") : `<tr><td colspan="10" class="finance-empty"><strong>${t("暂无申诉", "No appeals")}</strong><p>${t("发起申诉后将在此跟踪进度。", "Appeals will be tracked here.")}</p></td></tr>`}</tbody>
           </table></div>
           ${pagination(rows.length, s)}
@@ -225,13 +244,14 @@
 
   function closeDrawer() {
     state().detail = null;
+    state().supplementForm = false;
     render();
     document.querySelector(returnFocus)?.focus();
   }
 
   document.addEventListener("click", event => {
     if (AFF.state?.route !== "appeals") return;
-    const target = event.target.closest("[data-appeal-action], [data-appeal-page], [data-appeal-detail], [data-aff-page]");
+    const target = event.target.closest("[data-appeal-action], [data-appeal-page], [data-appeal-detail], [data-appeal-remove-file], [data-aff-page]");
     if (!target) return;
     const s = state();
     const action = target.dataset.appealAction;
@@ -252,8 +272,44 @@
       returnFocus = `[data-appeal-detail="${CSS.escape(target.dataset.appealDetail)}"]`;
       s.detail = target.dataset.appealDetail;
       s.formOpen = false;
+      s.supplementForm = target.dataset.appealOpenSupplement === "true";
       render();
       return document.querySelector(".finance-drawer-close")?.focus();
+    }
+    if (action === "open-supplement") {
+      s.supplementForm = true;
+      render();
+      return document.querySelector("[data-appeal-supplement-field]")?.focus();
+    }
+    if (action === "cancel-supplement") {
+      s.supplementForm = false;
+      render();
+      return document.querySelector(".finance-drawer-close")?.focus();
+    }
+    if (target.dataset.appealRemoveFile) {
+      const supplement = s.supplements[s.detail];
+      if (supplement) supplement.draftFiles = supplement.draftFiles.filter(file => file.id !== target.dataset.appealRemoveFile);
+      render();
+      return document.querySelector("[data-appeal-supplement-field]")?.focus();
+    }
+    if (action === "submit-supplement") {
+      const row = allRecords().find(item => item.id === s.detail);
+      const supplement = s.supplements[s.detail];
+      if (!row?.supplementOpen || !supplement) return showToast(t("当前案件不可补件", "Supplements are not available for this case"));
+      if (!supplement.draftReason.trim() && !supplement.draftFiles.length) return showToast(t("请填写补充说明或添加附件", "Add a note or attachment"));
+      supplement.entries.push({
+        id: `SUP-${s.detail}-${supplement.entries.length + 1}`,
+        explanation: supplement.draftReason.trim(),
+        files: supplement.draftFiles.map(file => ({ ...file })),
+        submittedAt: AFF.finance.asOf,
+        status: "submitted"
+      });
+      supplement.draftReason = "";
+      supplement.draftFiles = [];
+      s.supplementForm = false;
+      showToast(t("补充材料已提交，等待人工复核", "Supplement submitted for manual review"));
+      render();
+      return document.querySelector(`.finance-drawer [data-appeal-action="close"]`)?.focus();
     }
     if (action === "submit") {
       if (!s.objectId.trim() || s.reason.trim().length < 2) return showToast(t("请填写关联编号和申诉说明", "Enter the reference ID and explanation"));
@@ -278,9 +334,14 @@
     if (AFF.state?.route !== "appeals") return;
     const field = event.target.closest("[data-appeal-field]");
     const filter = event.target.closest("[data-appeal-filter]");
-    if (!field && !filter) return;
+    const supplementField = event.target.closest("[data-appeal-supplement-field]");
+    if (!field && !filter && !supplementField) return;
     const s = state();
     if (field) s[field.dataset.appealField] = field.value;
+    if (supplementField && s.detail) {
+      s.supplements[s.detail] ||= { entries: [], draftReason: "", draftFiles: [] };
+      s.supplements[s.detail].draftReason = supplementField.value;
+    }
     if (filter) {
       s[filter.dataset.appealFilter] = filter.value;
       s.page = 1;
@@ -288,6 +349,19 @@
       render();
       document.querySelector(`[data-appeal-filter="${filter.dataset.appealFilter}"]`)?.focus();
     }
+  });
+
+  document.addEventListener("change", event => {
+    if (AFF.state?.route !== "appeals" || !event.target.matches("[data-appeal-supplement-files]")) return;
+    const s = state();
+    if (!s.detail) return;
+    s.supplements[s.detail] ||= { entries: [], draftReason: "", draftFiles: [] };
+    const current = s.supplements[s.detail].draftFiles;
+    [...(event.target.files || [])].forEach((file, index) => {
+      current.push({ id: `${Date.now()}-${index}`, name: file.name, size: file.size, type: file.type || "application/octet-stream" });
+    });
+    render();
+    document.querySelector("[data-appeal-supplement-field]")?.focus();
   });
 
   document.addEventListener("change", event => {

@@ -37,14 +37,35 @@ async function main() {
     const after = await page.evaluate(() => AFF.finance.balance());
     assert.equal(after, before - 10000);
     const runtime = await page.evaluate(() => AFF.finance.allWithdrawals().find(order => order.id.startsWith("WOD-U")));
-    assert.equal(runtime.status, "processing");
+    assert.equal(runtime.status, "pending_review");
     assert.equal(runtime.fee, 0);
     assert.equal(runtime.estimatedFee, 350);
+    await page.click(`[data-withdraw-review='${runtime.id}'][data-review-result='approve']`);
+    assert.equal(await page.evaluate(id => AFF.finance.allWithdrawals().find(order => order.id === id).status, runtime.id), "processing");
+    const approved = await page.evaluate(id => AFF.finance.allWithdrawals().find(order => order.id === id), runtime.id);
+    assert.equal(approved.crmPayout.status, "processing");
+    assert.equal(approved.crmPayout.requestId, `CRM-REQ-${runtime.id}`);
+    assert.equal(approved.crmPayout.reconciliationStatus, "pending");
+    await page.click(`[data-withdraw-detail='${runtime.id}']`);
+    const crmDetail = await page.locator(".wd-drawer").innerText();
+    assert.ok(crmDetail.includes("CRM打款请求") && crmDetail.includes(`CRM-REQ-${runtime.id}`));
+    assert.ok(crmDetail.includes("CRM处理状态") && crmDetail.includes("processing"));
+    assert.ok(crmDetail.includes("更新时间") && crmDetail.includes("重试次数") && crmDetail.includes("对账状态"));
+    await page.keyboard.press("Escape");
     await page.click(`[data-withdraw-simulate='${runtime.id}'][data-result='failed']`);
     assert.equal(await page.evaluate(() => AFF.finance.balance()), before);
     const failed = await page.evaluate(id => AFF.finance.allWithdrawals().find(order => order.id === id), runtime.id);
     assert.equal(failed.status, "failed");
     assert.equal(failed.fee, 0);
+    const rejected = await page.evaluate(() => {
+      const before = AFF.finance.balance();
+      const order = AFF.finance.createWithdrawal(10, "wallet");
+      AFF.finance.rejectWithdrawal(order.id, "演示审核驳回");
+      return { before, after: AFF.finance.balance(), order: AFF.finance.allWithdrawals().find(item => item.id === order.id) };
+    });
+    assert.equal(rejected.order.status, "rejected");
+    assert.equal(rejected.order.reviewStatus, "rejected");
+    assert.equal(rejected.after, rejected.before);
 
     const rows = await page.evaluate(() => AFF.withdrawalsUI.records());
     assert.ok(rows.length >= 20);

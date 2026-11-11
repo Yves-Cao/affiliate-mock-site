@@ -34,6 +34,7 @@
     pending_settlement: ["待结算", "Awaiting settlement", "muted"],
     unavailable: ["不可提现", "Not withdrawable", "muted"],
     available: ["可提现", "Available", "info"],
+    pending_review: ["提现待审核", "Withdrawal review pending", "warning"],
     processing: ["提现中", "Withdrawal processing", "warning"],
     partial: ["部分提现", "Partially withdrawn", "warning"],
     paid: ["已提现", "Withdrawn", "ok"]
@@ -127,7 +128,8 @@
         .filter(allocation => allocation.commissionCaseId === row.id)
         .reduce((total, allocation) => total + allocation.amount / 100, 0), 0);
     const paidAmount = allocated("paid");
-    const processingAmount = allocated("processing");
+    const processingAmount = ["pending_review", "processing"]
+      .reduce((sum, status) => sum + allocated(status), 0);
     const availableAmount = row.settlement?.availableAmount ? row.settlement.availableAmount / 100 : 0;
 
     if (!row.settlement) {
@@ -209,7 +211,10 @@
     if (row.hold) return t(...row.hold.reason);
     if (["rejected", "reversed"].includes(row.status)) return t(row.client.commissionReason, row.client.commissionReasonEn);
     if (row.status === "settled") return t("佣金已按税费、保证金和可提现余额拆分。", "The commission has been split into tax, guarantee, and available balance.");
-    if (row.status === "frozen") return t("观察期已超过30天，等待人工审核。", "The observation period exceeded 30 days and requires manual review.");
+    if (row.status === "frozen") {
+      const threshold = AFF.finance.configuration.settlementFreezeThresholdDays;
+      return t(`结算观察超过${threshold}天，等待人工审核。`, `The settlement observation exceeded ${threshold} days and requires manual review.`);
+    }
     return t("佣金资格与结算资料正在核验，尚未完成审核。", "Commission eligibility and settlement details are being verified. Review is not complete.");
   }
 
@@ -266,7 +271,7 @@
     return `<p>${t("佣金观察期初始为1天，系统会根据账户风险分延长观察时间。每笔佣金的天数与预计释放日以详情为准，预计日期不代表届时一定可提现。", "The commission observation period starts at 1 day and may be extended based on the account risk score. See each commission for its duration and expected release date. The expected date does not guarantee withdrawal availability.")}</p>
       <dl><div><dt>${t("入金、交易或身份资料待核验", "Deposit, trading or identity checks")}</dt><dd>${t("核验未完成时可能继续结算中，具体天数随复核结果更新。", "An incomplete check may extend the hold. The duration is updated as the review progresses.")}</dd></div>
       <div><dt>${t("退款、拒付或账户异常待复核", "Refund, chargeback or account review")}</dt><dd>${t("可能触发进一步观察；原因与天数不是固定的一一对应关系。", "Further observation may be needed. Each reason does not have a fixed number of hold days.")}</dd></div>
-      <div><dt>${t("观察期超过30天", "Observation exceeds 30 days")}</dt><dd>${t("转为冻结并进入人工审核；释放时间以人工审核结果为准。", "The commission is frozen for manual review. Release timing depends on the review outcome.")}</dd></div></dl>`;
+      <div><dt>${t(`观察期超过${AFF.finance.configuration.settlementFreezeThresholdDays}天`, `Observation exceeds ${AFF.finance.configuration.settlementFreezeThresholdDays} days`)}</dt><dd>${t("转为冻结并进入人工审核；释放时间以人工审核结果为准。", "The commission is frozen for manual review. Release timing depends on the review outcome.")}</dd></div></dl>`;
   }
 
   function helpContent(id) {
@@ -353,9 +358,9 @@
       ["totalRevenue", t("总收益", "Total revenue"), t("已提现佣金 + 钱包余额 + 全部保证金", "Paid commission + wallet balance + all guarantees"), finance.totalRevenue],
       ["paid", t("已提现", "Withdrawn"), t("已提现金额 + 已提现保证金", "Withdrawn amount + withdrawn guarantees"), finance.paid + finance.paidGuarantee],
       ["held", t("结算中", "In settlement"), t("调查中", "Under investigation"), finance.held],
-      ["guarantee", t("暂扣保证金", "Held guarantee"), t("暂扣中的保证金", "Guarantees currently held"), finance.guarantee]
+      ["guarantee", t("保证金", "Guarantee"), "", finance.guarantee]
     ];
-    return `<div class="earn-stats">${items.map(([key, title, hint, value]) => `<article class="card earn-stat"><span>${title}</span><strong data-earn-stat="${key}">${money(value)}</strong><small>${hint}</small></article>`).join("")}</div>`;
+    return `<div class="earn-stats">${items.map(([key, title, hint, value]) => `<article class="card earn-stat"><span>${title}</span><strong data-earn-stat="${key}">${money(value)}</strong>${hint ? `<small>${hint}</small>` : ""}</article>`).join("")}</div>`;
   }
 
   function pagination(total) {
@@ -401,7 +406,10 @@
     if (row.status === "settled") steps.push({ title: t("结算分摊", "Settlement split"), done: true, date: row.settlement?.settledAt, text: `${t("可提现")} ${money(row.settlement.availableAmount / 100)} / ${t("税费")} ${money(row.settlement.taxAmount / 100)} / ${t("保证金")} ${money(row.settlement.guaranteeAmount / 100)}` });
     else if (row.status === "rejected") steps.push({ title: t("佣金拒绝", "Commission rejected"), done: true, text: `${t("不计入结算净额", "Excluded from settlement net")} · ${unavailable}` });
       else if (row.status === "reversed") steps.push({ title: t("佣金冲正", "Commission reversed"), done: true, text: `${money(-Math.abs(row.amount))} · ${t("原入账明细与扣回记录未提供", "Original credit and recovery records unavailable")}` });
-    else if (row.status === "frozen") steps.push({ title: t("冻结与人工审核", "Frozen for manual review"), done: true, text: t("超过30天，人工审核结果待定", "Over 30 days; manual review pending") });
+    else if (row.status === "frozen") {
+      const threshold = AFF.finance.configuration.settlementFreezeThresholdDays;
+      steps.push({ title: t("冻结与人工审核", "Frozen for manual review"), done: true, text: t(`超过${threshold}天，人工审核结果待定`, `Over ${threshold} days; manual review pending`) });
+    }
     else steps.push({ title: t("佣金入账", "Commission credit"), done: false, text: t("尚未到达", "Not reached") });
     return `<ol class="earn-flow">${steps.map(step => `<li class="${step.done ? "complete" : ""}"><div><strong>${step.title}</strong><span>${h(step.text)}</span></div><time>${h(step.date || (step.done ? unavailable : t("—", "—")))}</time></li>`).join("")}</ol>`;
   }

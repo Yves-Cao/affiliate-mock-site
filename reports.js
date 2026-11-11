@@ -135,19 +135,26 @@
   function commissionStatus(row) {
     const map = {
       not_generated: ["未生成", "Not generated", "muted"],
-      pending_review: ["待检查", "Pending review", "muted"],
-      held: ["结算中", "On hold", "warning"],
-      manual_review: ["人工确认中", "Manual review", "warning"],
-      payable: ["可提现", "Payable", "ok"],
-      paid: ["已支付", "Paid", "ok"],
+      created: ["已生成", "Created", "muted"],
+      holding: ["结算中", "In settlement", "warning"],
+      approved: ["已批准", "Approved", "ok"],
       rejected: ["已拒绝", "Rejected", "danger"],
-      clawed_back: ["已冲正", "Clawed back", "danger"],
-      frozen: ["冻结", "Frozen", "danger"],
-      settled_partial: ["已结算 / 部分支付", "Settled / partially paid", "ok"],
-      settled_closed: ["已支付 / 已结案", "Paid / closed", "ok"],
-      disputed: ["争议处理中", "Disputed", "warning"]
+      reversed: ["已冲正", "Reversed", "danger"],
+      clawed_back: ["已追索", "Clawed back", "danger"]
     };
-    return map[row.fundStatus] || map.pending_review;
+    return map[row.commissionStatus] || map.holding;
+  }
+
+  function settlementStatus(row) {
+    const map = {
+      not_generated: ["未生成", "Not generated", "muted"],
+      processing: ["结算中", "In settlement", "warning"],
+      blocked: ["结算受阻", "Settlement blocked", "warning"],
+      frozen: ["冻结", "Frozen", "danger"],
+      settled: ["已结算", "Settled", "ok"],
+      failed: ["结算失败", "Settlement failed", "danger"]
+    };
+    return map[row.settlementStatus] || map.processing;
   }
 
   function riskStatus(row) {
@@ -182,9 +189,9 @@
   }
 
   function commissionStatusCell(row) {
-    const status = badge(commissionStatus(row));
-    const days = row.fundStatus === "held" ? heldDaysText(row) : "";
-    return `<div class="report-commission-status ${row.fundStatus === "held" ? "held" : ""}" ${row.fundStatus === "held" ? `data-rp-fund-tooltip="${h(heldStatusTooltip(row))}" tabindex="0" aria-label="${t("结算中原因与总天数说明", "In-settlement reason and duration")}"` : ""}>${status}${days ? `<small>${t("结算中", "In settlement")} ${h(days)}</small>` : ""}</div>`;
+    const status = badge(settlementStatus(row));
+    const days = row.settlementStatus === "processing" ? heldDaysText(row) : "";
+    return `<div class="report-commission-status ${row.settlementStatus === "processing" ? "held" : ""}" ${row.settlementStatus === "processing" ? `data-rp-fund-tooltip="${h(heldStatusTooltip(row))}" tabindex="0" aria-label="${t("结算中原因与总天数说明", "In-settlement reason and duration")}"` : ""}>${status}${days ? `<small>${t("结算中", "In settlement")} ${h(days)}</small>` : ""}</div>`;
   }
 
   function badge(values) {
@@ -192,7 +199,7 @@
   }
 
   function canAppeal(row) {
-    return row?.commissionId && ["rejected", "clawed_back"].includes(row.commissionStatus);
+    return row?.commissionId && ["rejected", "reversed", "clawed_back"].includes(row.commissionStatus);
   }
 
   function appealRecord(row) {
@@ -302,7 +309,7 @@
   }
 
   function holdHelp(row) {
-    if (row.commissionStatus !== "held" || !row.expected) return badge(commissionStatus(row));
+    if (row.settlementStatus !== "processing" || !row.expected) return "";
     return `<div class="report-hold-anchor">${badge(commissionStatus(row))}
       <button class="report-hold-button" type="button" data-rp-action="hold-help" aria-label="${t("结算中规则说明", "In-settlement rules")}" aria-expanded="false" aria-controls="rp-hold-help" aria-describedby="rp-hold-help">?</button>
       <section id="rp-hold-help" class="report-commission-help report-hold-help" role="tooltip" hidden>
@@ -353,7 +360,10 @@
       if (f.kyc) rows = rows.filter(row => row.kyc === f.kyc);
       if (f.stage) rows = rows.filter(row => status(row)[1] === f.stage);
       if (f.qualityService) rows = rows.filter(row => f.qualityService === "qualified" ? !!row.qualityAt : !row.qualityAt);
-      if (f.commissionStatus) rows = rows.filter(row => row.fundStatus === f.commissionStatus);
+      if (f.commissionStatus) {
+        const legacySettlementMap = { pending_review: "processing", held: "processing", manual_review: "blocked", settled_partial: "settled", settled_closed: "settled", payable: "settled", paid: "settled", clawed_back: "failed", disputed: "blocked" };
+        rows = rows.filter(row => row.settlementStatus === (legacySettlementMap[f.commissionStatus] || f.commissionStatus));
+      }
       if (f.riskStatus) rows = rows.filter(row => row.riskHandlingStatus === f.riskStatus);
       if (f.riskReason) rows = rows.filter(row => row.riskReasonCategory === f.riskReason);
       if (f.registeredFrom) rows = rows.filter(row => row.registeredAt?.slice(0, 10) >= f.registeredFrom);
@@ -396,10 +406,11 @@
     const valueLabel = (key, value) => {
       if (key === "commissionStatus") return {
         not_generated: t("未生成", "Not generated"), pending_review: t("待检查", "Pending review"),
-        held: t("结算中", "On hold"), manual_review: t("人工确认中", "Manual review"),
-        payable: t("可提现", "Payable"), paid: t("已支付", "Paid"),
-        rejected: t("已拒绝", "Rejected"), clawed_back: t("已冲正", "Clawed back"),
-        frozen: t("冻结", "Frozen"), disputed: t("争议处理中", "Disputed")
+        held: t("结算中", "In settlement"), processing: t("结算中", "In settlement"),
+        manual_review: t("结算受阻", "Settlement blocked"), blocked: t("结算受阻", "Settlement blocked"),
+        payable: t("已结算", "Settled"), paid: t("已结算", "Settled"), settled: t("已结算", "Settled"),
+        rejected: t("结算受阻", "Settlement blocked"), clawed_back: t("结算失败", "Settlement failed"),
+        frozen: t("冻结", "Frozen"), disputed: t("结算受阻", "Settlement blocked")
       }[value] || value;
       if (key === "riskStatus") return {
         none: t("无风险", "No risk"), investigating: t("调查中", "Investigating"),
@@ -509,7 +520,7 @@
         <div><dt>${t("隔离中", "Quarantined")}</dt><dd>${t("关联佣金暂时保留，等待复核。", "Related commission is held pending review.")}</dd></div>
         <div><dt>${t("已解除", "Released")}</dt><dd>${t("风险处置结束，等待结算前检查。", "Risk handling ended and pre-settlement checks are pending.")}</dd></div>
       </dl>`,
-      commissionStatus: `<strong>${t("资金状态", "Fund status")}</strong><dl>
+      commissionStatus: `<strong>${t("结算状态", "Settlement status")}</strong><dl>
         <dt>${t("未生成", "Not generated")}</dt><dd>${t("有效FTD未达成，暂无佣金案件。", "Valid FTD is not reached, so no commission case exists.")}</dd>
         <dt>${t("待检查", "Pending review")}</dt><dd>${t("佣金已生成，等待系统检查。", "A commission exists and awaits system checks.")}</dd>
         <dt>${t("结算中", "On hold")}</dt><dd>${t("处于动态结算观察期，暂不可提现。", "In dynamic hold and not yet withdrawable.")}</dd>
@@ -575,7 +586,7 @@
       ["expected", t("预计佣金", "Expected commission"), true, "expected", false],
       ["settled", t("已结算佣金", "Settled commission"), true, "settled", false],
       ["progress", t("资格档", "Tier"), false, "progress"],
-      ["commissionStatus", t("资金状态", "Fund status"), false, "commissionStatus"],
+      ["commissionStatus", t("结算状态", "Settlement status"), false, "commissionStatus"],
       ["riskHandlingStatus", t("风险处理", "Risk handling"), false, "riskHandlingStatus"]
     ];
     const latestMilestone = row => row.qualityAt || row.effectiveAt || row.ftdAt || row.kycAt || row.registeredAt;
@@ -610,7 +621,7 @@
         <td class="numeric report-expected-cell" data-client-cell="${t("预计佣金", "Expected commission")}" data-rp-expected-tooltip="${h(expectedTooltip(row))}" tabindex="0" aria-label="${t("预计佣金计算说明", "Expected commission calculation")}"><div class="report-expected-inner"><strong>${format(row.expected, "money")}</strong></div></td>
         <td class="numeric report-settled-cell" data-client-cell="${t("已结算佣金", "Settled commission")}"><div class="report-settled-inner"><strong>${format(row.settled, "money")}</strong></div></td>
         <td class="report-progress" data-client-cell="${t("资格档", "Tier")}" data-rp-tier-tooltip="${h(tierTooltip(row))}" tabindex="0" aria-label="${h(row.kyc !== "通过" ? t("资格档暂无法确认", "Tier cannot be confirmed yet") : t("资格档条件", "Tier requirements"))}"><strong>${h(progress(row))}</strong></td>
-        <td class="report-commission-cell" data-client-cell="${t("资金状态", "Fund status")}">${commissionStatusCell(row)}</td>
+        <td class="report-commission-cell" data-client-cell="${t("结算状态", "Settlement status")}">${commissionStatusCell(row)}</td>
         <td class="client-risk-cell" data-client-cell="${t("风险处理", "Risk handling")}">
           <div class="client-risk-inner">${badge(riskStatus(row))}<small>${h(row.riskHandlingStatus === "none" ? "—" : AFF.dataText(row.riskNextStep))}</small></div>
         </td>
@@ -636,7 +647,7 @@
       return `<option value="${h(option[0])}" ${s.filters[key] === option[0] ? "selected" : ""}>${h(option[1])}</option>`;
     }).join("")}</select></label>`;
     const stages = [["Registration", t("注册", "Registration")], ["KYC", "KYC"], ["FTD", "FTD"], ["Valid FTD", t("有效FTD", "Valid FTD")], ["Quality service", t("质量服务", "Quality service")], ["Completed", t("已完成", "Completed")], ["Voided", t("已作废", "Voided")]];
-    const funds = [["not_generated", t("未生成", "Not generated")], ["pending_review", t("待检查", "Pending review")], ["held", t("结算中", "On hold")], ["manual_review", t("人工确认中", "Manual review")], ["settled_partial", t("已结算 / 部分支付", "Settled / partially paid")], ["settled_closed", t("已支付 / 已结案", "Paid / closed")], ["rejected", t("已拒绝", "Rejected")], ["clawed_back", t("已冲正", "Clawed back")], ["frozen", t("冻结", "Frozen")], ["disputed", t("争议处理中", "Disputed")]];
+    const funds = [["not_generated", t("未生成", "Not generated")], ["processing", t("结算中", "In settlement")], ["blocked", t("结算受阻", "Settlement blocked")], ["frozen", t("冻结", "Frozen")], ["settled", t("已结算", "Settled")], ["failed", t("结算失败", "Settlement failed")]];
     const risks = [["none", t("无风险", "No risk")], ["investigating", t("调查中", "Investigating")], ["quarantined", t("隔离中", "Quarantined")], ["released", t("已解除", "Released")]];
     return `<div class="client-quick-filters">
       <div class="client-quick-combobox" data-rp-combobox="campaign">
@@ -713,7 +724,7 @@
             <label class="field"><span>${t("客户编号", "Client ID")}</span><input data-rp-filter="search" value="${h(draft.search || "")}" placeholder="C-100001"></label>
             ${selectField("kyc", draft.kyc, "KYC", ["通过", "未提交", "审核中", "失败"])}
             ${selectField("stage", draft.stage, t("转化阶段", "Conversion stage"), [["Registration", t("注册", "Registration")], ["KYC", "KYC"], ["FTD", "FTD"], ["Valid FTD", t("有效FTD", "Valid FTD")], ["Quality service", t("质量服务", "Quality service")], ["Completed", t("已完成", "Completed")], ["Voided", t("已作废", "Voided")]])}
-            ${selectField("commissionStatus", draft.commissionStatus, t("资金状态", "Fund status"), [["not_generated", t("未生成", "Not generated")], ["pending_review", t("待检查", "Pending review")], ["held", t("结算中", "On hold")], ["manual_review", t("人工确认中", "Manual review")], ["settled_partial", t("已结算 / 部分支付", "Settled / partially paid")], ["settled_closed", t("已支付 / 已结案", "Paid / closed")], ["rejected", t("已拒绝", "Rejected")], ["clawed_back", t("已冲正", "Clawed back")], ["frozen", t("冻结", "Frozen")], ["disputed", t("争议处理中", "Disputed")]])}
+            ${selectField("commissionStatus", draft.commissionStatus, t("结算状态", "Settlement status"), [["not_generated", t("未生成", "Not generated")], ["processing", t("结算中", "In settlement")], ["blocked", t("结算受阻", "Settlement blocked")], ["frozen", t("冻结", "Frozen")], ["settled", t("已结算", "Settled")], ["failed", t("结算失败", "Settlement failed")]])}
             ${selectField("riskStatus", draft.riskStatus, t("风险处理状态", "Risk handling status"), [["none", t("无风险", "No risk")], ["investigating", t("调查中", "Investigating")], ["quarantined", t("隔离中", "Quarantined")], ["released", t("已解除", "Released")]])}
             ${selectField("riskReason", draft.riskReason, t("原因类别", "Reason category"), ["资料待核验", "行为待说明", "质量待复核", "支付风险", "集群风险", "其他"])}
             <label class="field"><span>${t("注册时间范围", "Registration range")}</span>${AFF.dateRange.component({ id: "report-registered-range", from: draft.registeredFrom || "", to: draft.registeredTo || "", max: data.now, placeholder: t("选择注册日期范围", "Select registration dates") })}</label>
@@ -744,7 +755,7 @@
     const registerCommission = Number((mergedCommission * 0.4).toFixed(2));
     const validFtdCommission = Number((mergedCommission - registerCommission).toFixed(2));
     const qualityCommission = Number(row.commissionCases?.find(item => item.type === "quality_service")?.amount || 0);
-    const heldProgress = row.fundStatus === "held"
+    const heldProgress = row.settlementStatus === "processing"
       ? (row.commissionCases || []).filter(item => item.status === "held").map(item => {
           const startedAt = item.holdStartedAt || item.confirmedAt;
           const totalDays = Number(item.holdDays || 0);
@@ -812,7 +823,9 @@
         <section class="report-detail-section"><h3>${t("三层状态", "Three-layer status")}</h3><dl class="report-detail-grid">
           ${field(t("客户资格状态", "Client eligibility status"), eligibilityLabels[row.eligibilityStatus] || row.eligibilityStatus)}
           ${field(t("客户里程碑状态", "Client milestone status"), status(row)[0])}
-          ${field(t("资金状态", "Fund status"), commissionStatus(row)[0])}
+          ${field(t("佣金状态", "Commission status"), commissionStatus(row)[0])}
+          ${field(t("结算状态", "Settlement status"), settlementStatus(row)[0])}
+          ${field(t("提现状态", "Withdrawal status"), row.withdrawalStatus === "paid" ? t("已提现", "Paid") : row.withdrawalStatus === "processing" ? t("提现处理中", "Processing") : t("不可提现", "Unavailable"))}
         </dl></section>
         ${row.riskHandlingStatus !== "none" ? `<section class="report-detail-section"><h3>${t("风险处理", "Risk handling")}</h3><dl class="report-detail-grid">
           ${field(t("处理状态", "Status"), riskStatus(row)[0])}
@@ -855,8 +868,8 @@
           ${settledCases.length ? helpField(label("tax"), row.tax, taxHelp, "rp-tax-help") : ""}
           ${helpField(t("当前滚动保证金", "Current rolling guarantee"), row.guarantee, currentGuaranteeHelp, "rp-guarantee-help")}
           ${settledCases.length ? helpField(label("approved"), row.approved, creditedHelp, "rp-credited-help") : moneyField(label("approved"), row.approved)}
-          ${row.fundStatus === "rejected" ? moneyField(label("rejected"), row.rejected) : ""}
-          ${row.fundStatus === "clawed_back" ? moneyField(label("reversed"), row.reversed) : ""}
+          ${row.commissionStatus === "rejected" ? moneyField(label("rejected"), row.rejected) : ""}
+          ${["reversed", "clawed_back"].includes(row.commissionStatus) ? moneyField(label("reversed"), row.reversed) : ""}
         </dl>
         ${commissionReason(row)}${canAppeal(row) ? `<p class="report-commission-reference">${h(row.commissionId)} · ${h(row.commissionReasonCode)}</p>` : ""}
         ${appealRecord(row) ? `<p class="report-appeal-status" role="status">${t("申诉已提交，等待复核。原佣金状态与金额在复核完成前保持不变。", "Appeal submitted for review. The original commission status and amount remain unchanged pending a decision.")}</p>` : ""}
@@ -899,7 +912,7 @@
     const s = state();
     const clients = AFF.state.route === "clients";
     const keys = clients
-      ? ["clientId", "email", "registeredAt", "country", "platform", "campaign", "kyc", "ftdAt", "effectiveAt", "qualityAt", "milestoneStatus", "fundStatus", "commissionStatus", "riskHandlingStatus", "riskReasonCategory", "riskStartedAt", "riskStatusTime", "riskImpactScope", "riskEvidenceScope", "riskNextStep", "riskHandlingPath", "scenarioCode", "scenarioLabel", "expected", "settled", "tax", "guarantee", "approved", "paid", "rejected", "reversed", "commissionId", "commissionReasonCode", "commissionReason"]
+      ? ["clientId", "email", "registeredAt", "country", "platform", "campaign", "kyc", "ftdAt", "effectiveAt", "qualityAt", "milestoneStatus", "commissionStatus", "settlementStatus", "withdrawalStatus", "taxAssessmentStatus", "guaranteeStatus", "fundStatus", "riskHandlingStatus", "riskReasonCategory", "riskStartedAt", "riskStatusTime", "riskImpactScope", "riskEvidenceScope", "riskNextStep", "riskHandlingPath", "scenarioCode", "scenarioLabel", "expected", "settled", "tax", "guarantee", "approved", "paid", "rejected", "reversed", "commissionId", "commissionReasonCode", "commissionReason"]
       : [...s.groups, ...s.columns];
     const titles = clients ? ["客户编号", "脱敏邮箱", "注册时间", "国家/地区", "注册平台", "转化活动", "KYC状态", "FTD时间", "有效FTD时间", "质量服务时间", "客户里程碑状态", "资金状态", "佣金状态", "风险处理状态", "原因类别", "风险开始时间", "当前状态时间", "影响范围", "证据范围", "下一步", "处理路径", "演示场景代码", "演示场景", "预计佣金", "已结算佣金", "税费", "滚动保证金", "可提现净额", "已支付佣金", "已拒绝佣金", "冲正金额", "佣金编号", "处理原因码", "处理原因"] : keys.map(label);
     const csvCell = value => {

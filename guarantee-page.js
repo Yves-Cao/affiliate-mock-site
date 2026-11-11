@@ -117,7 +117,7 @@
       .reduce((sum, order) => sum + order.allocations.filter(allocation =>
         allocation.sourceId === record.id || (allocation.source === "guarantee_release" && allocation.commissionCaseId === record.commissionCaseId)
       ).reduce((total, allocation) => total + allocation.amount, 0), 0);
-    const processing = orders.filter(order => order.status === "processing")
+    const processing = orders.filter(order => ["pending_review", "processing"].includes(order.status))
       .reduce((sum, order) => sum + order.allocations.filter(allocation =>
         allocation.sourceId === record.id || (allocation.source === "guarantee_release" && allocation.commissionCaseId === record.commissionCaseId)
       ).reduce((total, allocation) => total + allocation.amount, 0), 0);
@@ -247,6 +247,10 @@
 
   function renderPage() {
     const s = state();
+    const configuration = AFF.finance.configuration;
+    const guaranteeRate = `${configuration.guaranteeRate * 100}%`;
+    const guaranteeReleaseDays = `${configuration.guaranteeReleaseDays} ${t("自然日", "days")}`;
+    const terminationRetentionDays = `${configuration.terminationRetentionDays} ${t("自然日", "days")}`;
     const rows = records();
     const pageCount = Math.max(1, Math.ceil(rows.length / s.pageSize));
     s.page = Math.min(pageCount, Math.max(1, s.page));
@@ -262,7 +266,7 @@
       <div class="finance-page">
         ${AFF.helpers.cards([
           { label: t("保证金余额", "Guarantee balance"), value: money(retained.reduce((sum, item) => sum + item.amount, 0)), hint: t("下一批释放", "Next release") + "：" + (next || "-") },
-          { label: t("累计扣留", "Total retained"), value: money(AFF.finance.guaranteeRecords.reduce((sum, item) => sum + item.amount, 0)), hint: t("按佣金总额10%", "10% of gross commission") },
+          { label: t("累计扣留", "Total retained"), value: money(AFF.finance.guaranteeRecords.reduce((sum, item) => sum + item.amount, 0)), hint: t(`按佣金总额${guaranteeRate}`, `${guaranteeRate} of gross commission`) },
           { label: t("已释放", "Released"), value: money(released.reduce((sum, item) => sum + item.amount, 0)), hint: t("已进入可提现余额", "Credited to balance") },
           { label: t("已抵扣", "Used"), value: money(used.reduce((sum, item) => sum + item.amount, 0)), hint: t("冲正或风险扣款", "Reversal or risk deduction") }
         ])}
@@ -270,9 +274,9 @@
           <div class="panel-header"><h2>${t("规则说明", "Rules")}</h2><span class="helper">${t("演示参考值，可配置", "Demo reference, configurable")}</span></div>
           <div class="panel-body">
             <div class="finance-rule-grid">
-              <div><span>${t("扣留比例", "Rate")}</span><strong>10%</strong><small>${t("佣金通过结算检查时扣留", "Retained after settlement checks")}</small></div>
-              <div><span>${t("正常释放", "Normal release")}</span><strong>90 ${t("自然日", "days")}</strong><small>${t("无未结风险自动释放", "Automatic when no open risk")}</small></div>
-              <div><span>${t("终止合作保留", "Termination retention")}</span><strong>30 ${t("自然日", "days")}</strong><small>${t("与正常释放期取更晚", "Uses the later date")}</small></div>
+              <div><span>${t("扣留比例", "Rate")}</span><strong>${guaranteeRate}</strong><small>${t("佣金通过结算检查时扣留", "Retained after settlement checks")}</small></div>
+              <div><span>${t("正常释放", "Normal release")}</span><strong>${guaranteeReleaseDays}</strong><small>${t("无未结风险自动释放", "Automatic when no open risk")}</small></div>
+              <div><span>${t("终止合作保留", "Termination retention")}</span><strong>${terminationRetentionDays}</strong><small>${t("与正常释放期取更晚", "Uses the later date")}</small></div>
               <div><span>${t("释放去向", "Release target")}</span><strong>${t("可提现余额", "Available balance")}</strong><small>${t("不自动打款，不重复扣税", "No auto payout or duplicate tax")}</small></div>
             </div>
           </div>
