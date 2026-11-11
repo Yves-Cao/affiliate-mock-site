@@ -1948,6 +1948,60 @@ th:last-child { background: var(--table-header-bg); }
 .program-material-categories small { color: var(--muted); font-size: 12px; }
 .program-share-body { padding-top: 22px; }
 .program-share-links { display: grid; gap: 12px; margin: 22px 0; }
+.program-basic-tools h3,
+.program-advanced-tools summary {
+  margin: 0;
+  color: var(--blue-black);
+  font-size: 16px;
+  font-weight: 600;
+}
+.program-basic-tools p,
+.program-advanced-tools p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.program-advanced-tools {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #f8fbff;
+}
+.program-advanced-tools summary { min-height: 36px; cursor: pointer; }
+.program-advanced-tools[open] summary { margin-bottom: 8px; }
+.program-advanced-tools .program-share-shortcuts { margin-top: 10px; }
+.funds-stage-card {
+  display: grid;
+  padding: 14px 16px;
+  border: 1px solid #d7e7ff;
+  border-radius: 6px;
+  background: #f8fbff;
+}
+.funds-stage-card-compact { margin-bottom: 14px; }
+.funds-stage-chain {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.funds-stage-chain li {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: #fff;
+}
+.funds-stage-chain li.current { border-color: var(--brand); background: #f0f7ff; }
+.funds-stage-chain li.done { border-color: #b8d4ff; }
+.funds-stage-chain strong { color: var(--text); font-size: 12px; }
+.funds-stage-chain span { color: var(--muted); font-size: 11px; line-height: 1.45; }
+.funds-stage-card .funds-stage-chain li.done strong::after { content: " ✓"; color: var(--brand); }
 .program-share-link { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 16px; padding: 18px; border: 1px solid var(--border); border-radius: 4px; }
 .program-share-icon { display: flex; color: var(--side-icon); }
 .program-share-icon svg { width: 28px; height: 28px; }
@@ -2050,6 +2104,26 @@ th:last-child { background: var(--table-header-bg); }
 .onboarding-details-head span {
   color: var(--muted);
   font: var(--font-text-13-r);
+}
+.onboarding-crm-states {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.onboarding-crm-states > div {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: #fff;
+}
+.onboarding-crm-states p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
 }
 .onboarding-inline-status {
   display: flex;
@@ -2800,6 +2874,8 @@ th:last-child { background: var(--table-header-bg); }
 @media (max-width: 767px) {
   .tutorial-card { width: 100%; }
   .asset-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .funds-stage-chain { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .onboarding-crm-states { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 479px) {
   .wallet-popover { position: fixed; top: 52px; right: 12px; width: min(260px, calc(100vw - 24px)); }
@@ -2847,6 +2923,8 @@ th:last-child { background: var(--table-header-bg); }
   .program-action-card { margin: 0 12px; }
   .program-action-card .panel-body { padding: 10px 12px; }
   .kyc-banner { align-items: flex-start; flex-direction: column; }
+  .funds-stage-chain { grid-template-columns: minmax(0, 1fr); }
+  .program-share-shortcuts { align-items: flex-start; flex-direction: column; gap: 8px; }
 }
 
 /* D-03 unified popover: the hidden attribute always wins over class-based display rules. */

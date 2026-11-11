@@ -22,7 +22,8 @@ async function main() {
     await page.fill("#lookup-input", "C-10241");
     await page.click("[data-action='lookup']");
     const owned = await page.locator(".result-card").innerText();
-    assert.ok(owned.includes("C-10241") && owned.includes("30天归因窗口"));
+    assert.ok(owned.includes("C-10241") && owned.includes("标准点击归属窗口"));
+    assert.ok(owned.includes("30天") && owned.includes("自有效点击时间起算") && owned.includes("ATTR-20261027-1"));
     assert.ok(owned.includes("归因结果状态") && owned.includes("通过"), "Lookup shows a limited attribution result status");
     assert.ok(/[a-z]\*\*\*@/i.test(owned), "Owned result masks email");
 

@@ -150,7 +150,7 @@
       not_generated: ["未生成", "Not generated", "muted"],
       processing: ["结算中", "In settlement", "warning"],
       blocked: ["结算受阻", "Settlement blocked", "warning"],
-      frozen: ["冻结", "Frozen", "danger"],
+    frozen: ["结算中", "In settlement", "warning"],
       settled: ["已结算", "Settled", "ok"],
       failed: ["结算失败", "Settlement failed", "danger"]
     };
@@ -200,6 +200,12 @@
 
   function canAppeal(row) {
     return row?.commissionId && ["rejected", "reversed", "clawed_back"].includes(row.commissionStatus);
+  }
+
+  function appealAvailability(row) {
+    if (canAppeal(row)) return t("当前处理结果允许申诉；提交申诉不会自动恢复佣金或变更可提现余额。", "This result allows an appeal. Submitting one does not automatically restore the commission or change the available balance.");
+    if (row.settlementStatus === "processing") return t("佣金仍在结算中，暂未开放申诉；复核结论出现后再进入申诉窗口。", "The commission is still in settlement; appeals open after a review conclusion.");
+    return t("当前状态没有可申诉的处理结论。", "The current status has no appealable decision.");
   }
 
   function appealRecord(row) {
@@ -410,7 +416,7 @@
         manual_review: t("结算受阻", "Settlement blocked"), blocked: t("结算受阻", "Settlement blocked"),
         payable: t("已结算", "Settled"), paid: t("已结算", "Settled"), settled: t("已结算", "Settled"),
         rejected: t("结算受阻", "Settlement blocked"), clawed_back: t("结算失败", "Settlement failed"),
-        frozen: t("冻结", "Frozen"), disputed: t("结算受阻", "Settlement blocked")
+        frozen: t("结算中", "In settlement"), disputed: t("结算受阻", "Settlement blocked")
       }[value] || value;
       if (key === "riskStatus") return {
         none: t("无风险", "No risk"), investigating: t("调查中", "Investigating"),
@@ -526,7 +532,7 @@
         <dt>${t("结算中", "On hold")}</dt><dd>${t("处于动态结算观察期，暂不可提现。", "In dynamic hold and not yet withdrawable.")}</dd>
         <dt>${t("人工确认中", "Manual review")}</dt><dd>${t("命中人工复核条件，需风控处理。", "Manual review is required by risk controls.")}</dd>
         <dt>${t("可提现 / 已支付", "Payable / paid")}</dt><dd>${t("结算检查通过后进入可提现余额，支付成功后转为已支付。", "After settlement checks, funds become withdrawable and then paid after a successful withdrawal.")}</dd>
-        <dt>${t("已拒绝 / 已冲正 / 冻结", "Rejected / reversed / frozen")}</dt><dd>${t("对应资格不成立、入金退款拒付、风险冻结或争议处理。", "These indicate invalid eligibility, refund or chargeback, risk freezing, or a dispute.")}</dd>
+        <dt>${t("已拒绝 / 已冲正 / 结算中", "Rejected / reversed / in settlement")}</dt><dd>${t("对应资格不成立、入金退款拒付、结算复核或争议处理。", "These indicate invalid eligibility, refund or chargeback, settlement review, or a dispute.")}</dd>
       </dl>`
     };
     return contents[key] || "";
@@ -647,7 +653,7 @@
       return `<option value="${h(option[0])}" ${s.filters[key] === option[0] ? "selected" : ""}>${h(option[1])}</option>`;
     }).join("")}</select></label>`;
     const stages = [["Registration", t("注册", "Registration")], ["KYC", "KYC"], ["FTD", "FTD"], ["Valid FTD", t("有效FTD", "Valid FTD")], ["Quality service", t("质量服务", "Quality service")], ["Completed", t("已完成", "Completed")], ["Voided", t("已作废", "Voided")]];
-    const funds = [["not_generated", t("未生成", "Not generated")], ["processing", t("结算中", "In settlement")], ["blocked", t("结算受阻", "Settlement blocked")], ["frozen", t("冻结", "Frozen")], ["settled", t("已结算", "Settled")], ["failed", t("结算失败", "Settlement failed")]];
+    const funds = [["not_generated", t("未生成", "Not generated")], ["processing", t("结算中", "In settlement")], ["blocked", t("结算受阻", "Settlement blocked")], ["frozen", t("结算中", "In settlement")], ["settled", t("已结算", "Settled")], ["failed", t("结算失败", "Settlement failed")]];
     const risks = [["none", t("无风险", "No risk")], ["investigating", t("调查中", "Investigating")], ["quarantined", t("隔离中", "Quarantined")], ["released", t("已解除", "Released")]];
     return `<div class="client-quick-filters">
       <div class="client-quick-combobox" data-rp-combobox="campaign">
@@ -724,7 +730,7 @@
             <label class="field"><span>${t("客户编号", "Client ID")}</span><input data-rp-filter="search" value="${h(draft.search || "")}" placeholder="C-100001"></label>
             ${selectField("kyc", draft.kyc, "KYC", ["通过", "未提交", "审核中", "失败"])}
             ${selectField("stage", draft.stage, t("转化阶段", "Conversion stage"), [["Registration", t("注册", "Registration")], ["KYC", "KYC"], ["FTD", "FTD"], ["Valid FTD", t("有效FTD", "Valid FTD")], ["Quality service", t("质量服务", "Quality service")], ["Completed", t("已完成", "Completed")], ["Voided", t("已作废", "Voided")]])}
-            ${selectField("commissionStatus", draft.commissionStatus, t("结算状态", "Settlement status"), [["not_generated", t("未生成", "Not generated")], ["processing", t("结算中", "In settlement")], ["blocked", t("结算受阻", "Settlement blocked")], ["frozen", t("冻结", "Frozen")], ["settled", t("已结算", "Settled")], ["failed", t("结算失败", "Settlement failed")]])}
+            ${selectField("commissionStatus", draft.commissionStatus, t("结算状态", "Settlement status"), [["not_generated", t("未生成", "Not generated")], ["processing", t("结算中", "In settlement")], ["blocked", t("结算受阻", "Settlement blocked")], ["frozen", t("结算中", "In settlement")], ["settled", t("已结算", "Settled")], ["failed", t("结算失败", "Settlement failed")]])}
             ${selectField("riskStatus", draft.riskStatus, t("风险处理状态", "Risk handling status"), [["none", t("无风险", "No risk")], ["investigating", t("调查中", "Investigating")], ["quarantined", t("隔离中", "Quarantined")], ["released", t("已解除", "Released")]])}
             ${selectField("riskReason", draft.riskReason, t("原因类别", "Reason category"), ["资料待核验", "行为待说明", "质量待复核", "支付风险", "集群风险", "其他"])}
             <label class="field"><span>${t("注册时间范围", "Registration range")}</span>${AFF.dateRange.component({ id: "report-registered-range", from: draft.registeredFrom || "", to: draft.registeredTo || "", max: data.now, placeholder: t("选择注册日期范围", "Select registration dates") })}</label>
@@ -782,7 +788,7 @@
       pending: t("待检查", "Pending review"),
       held: t("结算中", "On hold"),
       manual_review: t("人工确认中", "Manual review"),
-      frozen: t("冻结", "Frozen"),
+      frozen: t("结算中", "In settlement"),
       rejected: t("已拒绝", "Rejected"),
       reversed: t("已冲正", "Reversed")
     };
@@ -812,7 +818,7 @@
         ].join("\n")
       : t("佣金完成结算检查后，才生成税费。", "Tax is generated after settlement checks.");
     const currentGuaranteeHelp = [
-      t("当前滚动保证金 = 仍处于保留或冻结状态的保证金合计。", "Current rolling guarantee equals retained or frozen guarantee amounts."),
+      t("当前滚动保证金 = 仍处于保留或结算中状态的保证金合计。", "Current rolling guarantee equals retained or in-settlement guarantee amounts."),
       releasedGuarantee > 0 ? `${t("本行已释放", "Released in this row")} ${format(releasedGuarantee, "money")}${t("，已进入可提现余额，不再计入当前滚动保证金。", "; it has entered the available balance and is excluded here.")}` : "",
       t("结算时扣留的完整金额会在结算净额的对账说明中展示。", "The full amount withheld at settlement is shown in the settlement-net reconciliation.")
     ].filter(Boolean).join("\n");
@@ -848,6 +854,7 @@
           ${data.dimensions.filter(item => !timeKeys.includes(item.key) && !["country", "platform", "os"].includes(item.key)).map(item => field(t(item.label, item.en), AFF.dataText(row[item.key]))).join("")}
         </dl></section>
         <section class="report-detail-section"><h3>${t("佣金信息", "Commission information")}</h3>
+          ${AFF.fundsStageChain(row.withdrawalStatus === "paid" ? "paid" : settledCases.length ? "available" : "settling")}
           ${hasCommissionBreakdown ? `<div class="report-commission-summary">
             <div><span>${t("注册用户佣金", "Registration commission")} <span class="report-inline-help"><button class="report-help-button" type="button" aria-label="${t("注册用户佣金说明", "Registration commission explanation")}" aria-describedby="rp-register-commission-help">?</button><span class="report-inline-tooltip" id="rp-register-commission-help" role="tooltip" hidden>${t("完成有效FTD后才开始结算此佣金；完成前仅作参考。", "Settlement starts only after valid FTD; before then it is reference-only.")}</span></span></span><strong>${format(registerCommission, "money")}</strong></div>
             <div><span>${t("有效FTD佣金", "Valid FTD commission")}</span><strong>${format(validFtdCommission, "money")}</strong></div>
@@ -872,6 +879,7 @@
           ${["reversed", "clawed_back"].includes(row.commissionStatus) ? moneyField(label("reversed"), row.reversed) : ""}
         </dl>
         ${commissionReason(row)}${canAppeal(row) ? `<p class="report-commission-reference">${h(row.commissionId)} · ${h(row.commissionReasonCode)}</p>` : ""}
+        <p class="report-commission-reference">${h(appealAvailability(row))}</p>
         ${appealRecord(row) ? `<p class="report-appeal-status" role="status">${t("申诉已提交，等待复核。原佣金状态与金额在复核完成前保持不变。", "Appeal submitted for review. The original commission status and amount remain unchanged pending a decision.")}</p>` : ""}
         </section>
         ${s.appeal ? `<section class="report-detail-section report-appeal-form"><h3>${t("佣金申诉", "Commission appeal")}</h3>

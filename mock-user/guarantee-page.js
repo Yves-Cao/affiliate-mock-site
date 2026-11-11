@@ -6,7 +6,7 @@
     retained: ["保留中", "Retained", "warning"],
     released: ["已释放", "Released", "ok"],
     used: ["已抵扣", "Used", "danger"],
-    frozen: ["已冻结", "Frozen", "danger"]
+    frozen: ["结算中", "In settlement", "warning"]
   };
   const types = {
     retained: ["扣留", "Retained"],
@@ -31,7 +31,7 @@
     settled: ["已结算", "Settled"],
     rejected: ["已拒绝", "Rejected"],
     reversed: ["已冲正", "Reversed"],
-    frozen: ["冻结", "Frozen"]
+    frozen: ["结算中", "In settlement"]
   };
   let detailReturnFocus = null;
   const initialized = new WeakSet();
@@ -219,7 +219,7 @@
               ${detailField(t("正常释放日", "Normal release date"), record.normalReleaseAt)}
               ${detailField(t("预计释放日", "Estimated release date"), record.estimatedReleaseAt)}
               ${detailField(t("抵扣原因", "Use reason"), reason)}
-              ${detailField(t("冻结原因", "Freeze reason"), frozenReason)}
+              ${detailField(t("结算中原因", "In-settlement reason"), frozenReason)}
               ${detailField(t("规则版本", "Rule version"), record.ruleVersion)}
             </dl>
           </section>

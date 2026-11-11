@@ -337,8 +337,22 @@ AFF.pages.deep = () => {
     </div>`;
 };
 
+AFF.fundsStageChain = (activeStage = "calculated") => {
+  const t = (zh, en) => AFF.state.language === "en" ? en : zh;
+  const stages = [
+    ["calculated", t("已计算", "Calculated"), t("资格与金额已生成", "Eligibility and amount generated")],
+    ["settling", t("结算中", "In settlement"), t("观察、核验或复核进行中", "Observation, checks, or review in progress")],
+    ["available", t("已入余额", "In balance"), t("计入可提现金额", "Counted as withdrawable")],
+    ["paid", t("已支付", "Paid"), t("提现成功", "Withdrawal succeeded")]
+  ];
+  const activeIndex = Math.max(0, stages.findIndex(item => item[0] === activeStage));
+  return `<ol class="funds-stage-chain" aria-label="${t("资金阶段", "Funds stages")}">${stages.map(([key, label, hint], index) => `
+    <li class="${index < activeIndex ? "done" : ""} ${index === activeIndex ? "current" : ""}"><strong>${label}</strong><span>${hint}</span></li>`).join("")}</ol>`;
+};
+
 AFF.pages.pay = () => `
-  ${AFF.helpers.pageHeader("收益与提现", "钱包余额、收益四态与结算流水；动态结算后日结。", `<button class="button primary" type="button" data-route="wd">提现</button>`)}
+  ${AFF.helpers.pageHeader("收益数据", "钱包余额、收益四态与结算流水；动态结算后日结。", `<button class="button primary" type="button" data-route="wd">提现</button>`)}
+  <section class="card funds-stage-card">${AFF.fundsStageChain("settling")}</section>
   ${AFF.helpers.cards(AFF.commissions.metrics)}
   <section class="card">
     <div class="panel-header"><h2>结算流水</h2><span class="helper">日结 · 不设最低提现 · 手续费因方式而异</span></div>
@@ -355,6 +369,7 @@ AFF.pages.pay = () => `
 AFF.pages.lookup = () => {
   const state = AFF.state;
   const t = (zh, en) => state.language === "en" ? en : zh;
+  const attributionRule = AFF.finance.configuration.attributionWindow;
   const resultTag = (ok, pending = false) => `<span class="tag tag-${ok ? "ok" : pending ? "warning" : "muted"}">${ok ? t("通过", "Matched") : pending ? t("待审核", "Pending review") : t("无匹配", "No match")}</span>`;
   const methodText = value => ({
     "Web有效点击": t("Web有效点击", "Valid web click"),
@@ -362,7 +377,10 @@ AFF.pages.lookup = () => {
     "受控查询": t("受控查询", "Controlled lookup")
   })[value] || value || t("受控查询", "Controlled lookup");
   const reasonText = value => ({
-    "30天归因窗口内首次点击，此后锁定": t("30天归因窗口内首次点击，此后锁定", "First click within the 30-day attribution window, then locked"),
+    "30天归因窗口内首次点击，此后锁定": t(
+      `按${attributionRule.name}判定：${attributionRule.days}天窗口内首次点击，此后锁定。`,
+      `Judged by ${attributionRule.name}: first click within ${attributionRule.days} days, then locked.`
+    ),
     "该客户已归属其他推广方，仅返回有限原因": t("该客户已归属其他推广方，仅返回有限原因", "This client is attributed to another partner; only a limited reason is returned")
   })[value] || value;
   const result = state.lookup.result;
@@ -386,6 +404,10 @@ AFF.pages.lookup = () => {
           <div class="info-item"><span>${t("归因方式", "Attribution method")}</span><strong>${AFF.helpers.h(methodText(result.method))}</strong></div>
           <div class="info-item"><span>${t("归因结果状态", "Result status")}</span>${resultTag(result.owned, true)}</div>
           <div class="info-item"><span>${t("首触时间", "First touch")}</span><strong>${AFF.helpers.h(result.firstTouch || t("不披露", "Not disclosed"))}</strong></div>
+          <div class="info-item wide"><span>${t("适用归因规则", "Attribution rule")}</span><strong>${AFF.helpers.h(t(
+            `${attributionRule.name} · ${attributionRule.days}天 · 自${attributionRule.start}起算 · ${attributionRule.version}`,
+            `${attributionRule.name} · ${attributionRule.days} days · from ${attributionRule.start} · ${attributionRule.version}`
+          ))}</strong></div>
           <div class="info-item wide"><span>${t("判定依据", "Decision reason")}</span><strong>${AFF.helpers.h(reasonText(result.reason))}</strong></div>
         </div>` : state.lookup.blocked ? `
         <div class="result-card info-grid" role="alert">
@@ -925,7 +947,7 @@ AFF.pages.onboarding = () => {
           <div class="info-item"><span>邮箱验证</span>
             <div class="onboarding-inline-status">
               <span class="tag ${state.onboarding.emailVerified ? "tag-ok" : "tag-warning"}">${state.onboarding.emailVerified ? "已验证" : "未验证"}</span>
-              ${state.onboarding.emailVerified ? "" : `<button class="button secondary small" type="button" data-action="verify-onboarding-email">模拟验证</button>`}
+              ${state.onboarding.emailVerified ? "" : `<button class="button secondary small" type="button" data-action="verify-onboarding-email" title="仅用于本地Mock演示">演示：验证邮箱</button>`}
             </div>
           </div>
         </div>
@@ -951,7 +973,6 @@ AFF.pages.onboarding = () => {
               ${profilePicker("channel", "推广渠道类型")}
               ${AFF.profileSelect.render({ key: "primaryCountries", label: "主要推广国家", options: AFF.onboardingOptions("country"), value: trafficProfile.primaryCountries, multiple: true, attributes: 'data-onboarding-country-selection' })}
               ${profileInput("websites", "网站 / App", "至少一个可访问URL；多个用逗号分隔")}
-              ${profileInput("historicalPlatforms", "历史合作平台", "多个平台用逗号分隔，最多10个")}
               <label class="onboarding-name"><span class="field-label">其他渠道说明</span><textarea data-onboarding-profile="otherExplanation" rows="3" maxlength="500" placeholder="补充渠道或投放方式说明（选填）">${AFF.helpers.h(trafficProfile.otherExplanation)}</textarea></label>
             </div>
             <div class="onboarding-kyc-panel">
@@ -972,7 +993,7 @@ AFF.pages.onboarding = () => {
             <span class="tag ${state.onboarding.kycCompleted ? "tag-ok" : "tag-info"}">${state.onboarding.kycCompleted ? "认证已同步" : state.onboarding.kycRedirected ? "已打开认证页面" : "等待认证"}</span>
             ${state.onboarding.kycCompleted ? "" : `
               <button class="button primary small" type="button" data-action="open-onboarding-kyc">去完成</button>
-              <button class="button secondary small" type="button" data-action="complete-onboarding-kyc">模拟完成</button>
+              <button class="button secondary small" type="button" data-action="complete-onboarding-kyc" title="仅用于本地Mock演示，不代表CRM回执">演示：标记完成</button>
             `}
           </div>
         </div>
@@ -1000,6 +1021,13 @@ AFF.pages.onboarding = () => {
             <span class="tag ${state.onboarding.submitted ? "tag-info" : "tag-warning"}">${state.onboarding.submitted ? "审核中" : "待提交"}</span>
           </div>
           <p>审核结果将通过站内消息通知。</p>
+          <div class="onboarding-crm-states" aria-label="CRM同步状态说明">
+            <div><span class="tag tag-info">待CRM确认</span><p>资料已提交，等待CRM同版确认；此时不推断链接已启用。</p></div>
+            <div><span class="tag tag-danger">同步失败</span><p>CRM未收到或未确认本版本，可重试；重试前不创建新申请版本。</p></div>
+            <div><span class="tag tag-warning">重试中</span><p>系统正在重新提交；结果未知时不重复提交。</p></div>
+            <div><span class="tag tag-warning">需要补件</span><p>按CRM原因补充指定材料，提交后生成新版本。</p></div>
+            <div><span class="tag tag-danger">版本冲突</span><p>CRM资料已更新，需重新加载后按最新版本提交。</p></div>
+          </div>
         </div>
       </section>`;
   };
@@ -1383,7 +1411,11 @@ AFF.pages.applyStep = () => {
       <p>复制您的专属推广链接，分享到网站、社交平台或社群，追踪客户转化与佣金。</p>
     </div>
     <div class="program-share-body">
-      <p>推广准备已就绪。客户通过您的专属链接注册后，您可以在仪表盘查看推广效果；符合佣金条件的转化将计入您的收益。请选择适合投放场景的链接。</p>
+      <p>申请与资质确认完成后，推广链接才会启用。链接可用时，客户通过您的专属链接注册后，可以在仪表盘查看推广效果；符合佣金条件的转化将计入收益。请选择适合投放场景的链接。</p>
+      <div class="program-basic-tools">
+        <h3>基础推广：先拿链接和素材</h3>
+        <p>适合内容站、社群和KOL先开始投放；不需要先配置Sub ID或回传。</p>
+      </div>
       <div class="program-share-links">
         ${[["网页链接", "适用于网站与桌面浏览器", webLink.href, "globe"], ["移动/手机链接", "适用于应用与移动端推广", mobileLink.href, "smartphone"]].map(([label, hint, url, icon]) => `
           <div class="program-share-link">
@@ -1401,10 +1433,15 @@ AFF.pages.applyStep = () => {
           <li>保证金单独记录，符合释放条件后可提现。</li>
         </ul>
       </section>
-      <div class="program-share-shortcuts">
+      <details class="program-advanced-tools">
+        <summary>进阶优化与技术集成</summary>
+        <p>以下能力适合专业买量团队或使用广告追踪器的合作者，可在基础推广运行后再配置。</p>
+        <div class="program-share-shortcuts">
         <button class="program-text-link" type="button" data-route="deep">配置专属深度链接 <span aria-hidden="true">→</span></button>
         <button class="program-text-link" type="button" data-apply-step="1">查看奖励规则 <span aria-hidden="true">→</span></button>
         <button class="program-text-link" type="button" data-apply-step="5">查看结算规则 <span aria-hidden="true">→</span></button>
+        </div>
+      </details>
       </div>
       <section class="program-postback-guide" aria-labelledby="program-postback-title">
         <h3 id="program-postback-title">用回传链接连接您的追踪平台</h3>

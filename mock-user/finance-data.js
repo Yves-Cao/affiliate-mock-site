@@ -22,13 +22,19 @@
   const scenarioLabels = {
     normal_l1: "正常L1全链路", normal_l2: "正常L2全链路", tier_downgrade: "档位取低",
     ftd_only: "仅FTD", qftd_pending: "有效FTD待确认", quality_void: "质量服务未达标",
-    hold_extended: "动态结算延长", frozen_d30: "结算超时冻结", chargeback: "拒付冲正",
+    hold_extended: "动态结算延长", frozen_d30: "结算超时复核", chargeback: "拒付冲正",
     not_new_customer: "非新客户", fraud_hit: "欺诈库命中", appeal_overturned: "申诉改判"
   };
 
   const configuration = {
     id: "CFG-P0-FINANCE",
     version: "v2026.10.27-P0",
+    attributionWindow: {
+      name: "标准点击归属窗口",
+      days: 30,
+      start: "有效点击时间",
+      version: "ATTR-20261027-1"
+    },
     guaranteeRate: 0.10,
     guaranteeReleaseDays: 90,
     terminationRetentionDays: 30,

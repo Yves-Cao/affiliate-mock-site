@@ -83,8 +83,6 @@ const defaultState = {
       primaryCountries: "",
       websites: "",
       promotionMethods: [],
-      expectedTraffic: "",
-      historicalPlatforms: "",
       otherExplanation: "",
       status: "not_submitted",
       version: ""
@@ -610,10 +608,6 @@ function statePage(route) {
 
 function navigate(route) {
   closeOnboardingPicker();
-  if (route === "statements") {
-    AFF.state.wdTab = "records";
-    route = "wd";
-  }
   if (!AFF.routes.some(item => item.id === route)) route = "dash";
   setWalletOpen(false);
   AFF.state.route = route;
@@ -1968,12 +1962,7 @@ function initialize() {
   if (["login", "register"].includes(route)) {
     setAuthMode(route, false);
   } else if (route) {
-    if (route === "statements") {
-      AFF.state.wdTab = "records";
-      AFF.state.route = "wd";
-    } else {
-      AFF.state.route = route;
-    }
+    AFF.state.route = route;
   }
   if (restoreSession()) render();
 }

@@ -83,7 +83,7 @@ AFF.dataText = value => {
     "注册事件回传": "Registration event postback", "佣金获批回传": "Commission approval postback",
     "正常流程": "Normal flow", "层级下调": "Tier downgrade", "仅FTD": "FTD only",
     "有效FTD待审": "Valid FTD pending review", "质量服务作废": "Quality service voided",
-    "结算延长": "Extended hold", "D+30冻结": "D+30 frozen", "拒付": "Chargeback",
+    "结算延长": "Extended settlement", "结算超时复核": "Settlement timeout review", "拒付": "Chargeback",
     "非新客户": "Not a new client", "欺诈命中": "Fraud hit", "申诉改判": "Appeal overturned"
   };
   Object.assign(dictionary, {
@@ -95,8 +95,8 @@ AFF.dataText = value => {
     "邮箱": "Email", "邮箱验证": "Email verification", "未验证": "Not verified", "模拟验证": "Simulate verification",
     "账号已创建": "Account created", "请先完成邮箱验证，再继续填写合作者资料。": "Verify your email before completing the partner profile.",
     "账号": "Account", "姓名": "Name", "国家/地区": "Country / region", "推广渠道类型": "Channel type",
-    "主要推广国家": "Primary countries", "网站/App": "Website / app", "预计月流量": "Expected monthly traffic",
-    "历史合作平台": "Previous platforms", "投放方式": "Promotion methods", "自然流量": "Organic traffic",
+    "主要推广国家": "Primary countries", "网站/App": "Website / app",
+    "投放方式": "Promotion methods", "自然流量": "Organic traffic",
     "付费投放": "Paid media", "社群运营": "Community operations", "内容营销": "Content marketing",
     "邮件": "Email marketing", "线下活动": "Offline events", "流量画像": "Traffic profile",
     "画像审核": "Profile review", "端到端staging": "End-to-end staging", "待提交": "Not submitted",
@@ -456,7 +456,7 @@ AFF.subIds = [
 AFF.commissions = {
   metrics: [
     { label: "可提现余额", value: "$12,480.50", hint: "已过结算期且已批准" },
-    { label: "结算中", value: "$1,260.00", hint: "初始1天，按风险分递增；超30天冻结转人工" },
+    { label: "结算中", value: "$1,260.00", hint: "初始1天，按风险情况递增；超30天转人工复核" },
     { label: "已拒绝（本期）", value: "$140.00", hint: "资格未达标拒付 · 申诉期内" },
     { label: "已付追回", value: "$300.00", hint: "已付佣金冲正 · 追回进行中" }
   ],
