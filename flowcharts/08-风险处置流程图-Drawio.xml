@@ -1,0 +1,351 @@
+<mxfile host="app.diagrams.net" modified="2026-11-10T04:58:29.000Z" agent="Codex" version="24.7.17">
+  <diagram id="page-08-1" name="1. 1. 识别、调查及处置">
+    <mxGraphModel dx="1600" dy="1200" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="F" value="&quot;CRM事实与Affiliate行为事实&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="Q" value="&quot;数据与证据可用？&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="GAP" value="&quot;保留已有佣金及事实&#10;阻断受影响自动结算并生成补数任务&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="RULE" value="&quot;硬规则、疑似信号及风险评分&#10;保存来源与规则版本&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="HIT" value="&quot;命中适用规则？&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="OBS" value="&quot;持续观察&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="SCOPE" value="&quot;定位客户与案件&#10;记录R0-R3及影响范围&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="CONTROL" value="&quot;按已批准规则拦截受影响结算&#10;继续保留佣金计算&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="TASK" value="&quot;生成或复用风险调查任务&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="CLAIM" value="&quot;风控认领、补证与调查&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="ENOUGH" value="&quot;证据及处置范围完整？&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="WAIT" value="&quot;继续观察或补证&#10;保留负责人和下次复核时间&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="PLAN" value="&quot;提交确认、排除或处置建议&#10;保存影响预览及案件引用&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="540" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="AUTH" value="&quot;权限、版本及授权审批策略有效？&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="540" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="STOP" value="&quot;拒绝或保持待处理&#10;不执行未获授权动作&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="540" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="MODE" value="&quot;配置允许且满足自动审核条件？&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="540" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="AUTO" value="&quot;按配置自动审核&#10;记录规则与授权依据&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="700" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="MANUAL" value="&quot;进入对应岗位人工审核&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="700" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="SELF" value="&quot;是否涉及本人审批？&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="700" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="SELF_AUTH" value="&quot;本人具备该动作审批权限&#10;且配置允许自审？&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="700" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="CONFIRM" value="&quot;是否显式确认本人自动同意？&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="860" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="DUAL" value="&quot;同事务写SUBMIT与APPROVE&#10;双审计成功后记录审核结果&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="860" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="AUTO_AUDIT" value="&quot;保存自动审核规则、授权依据和结果审计&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="860" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="RESULT" value="&quot;审核结果&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="860" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="KEEP" value="&quot;保留原限制与原事实&#10;记录驳回原因&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1020" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="EXEC" value="&quot;受保护执行已批准计划&#10;资金动作进入财务执行链&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="1020" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="EXECRESULT" value="&quot;执行结果&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="1020" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="RECOVER" value="&quot;保留执行记录&#10;查证后仅处理明确失败子项&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="1020" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="REVIEW" value="&quot;分别更新风险结论、任务与执行结果&#10;不直接改成已付款&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1180" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="RELEASE" value="&quot;需要解除结算限制？&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="1180" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="CLOSE" value="&quot;满足后续检查及关闭条件后关闭&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="1180" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="APPROVED" value="&quot;按权限完成解除审批与受保护执行&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="1180" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="RECHECK" value="&quot;财务及系统重新执行全部结算前检查&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1340" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="CHECK" value="&quot;检查全部通过？&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="1340" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="BLOCK" value="&quot;保留剩余阻断和处理责任&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="1340" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="ELIGIBLE" value="&quot;进入后续结算资格&#10;不直接打款&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="1340" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="UNDECIDED" value="&quot;VIS-RISK-Q01待确认&#10;解除申请、审批、执行与申诉并发时点&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1500" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="F" target="Q">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-2" value="关键缺数或冲突" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="Q" target="GAP">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-3" value="可用" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="Q" target="RULE">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="RULE" target="HIT">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-5" value="否" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="HIT" target="OBS">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-6" value="是" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="HIT" target="SCOPE">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="SCOPE" target="CONTROL">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-8" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="CONTROL" target="TASK">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="GAP" target="TASK">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-10" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="TASK" target="CLAIM">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="CLAIM" target="ENOUGH">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-12" value="否" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="ENOUGH" target="WAIT">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-13" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="WAIT" target="CLAIM">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-14" value="是" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="ENOUGH" target="PLAN">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-15" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="PLAN" target="AUTH">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-16" value="否或策略未确认" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="AUTH" target="STOP">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-17" value="是" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="AUTH" target="MODE">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-18" value="是" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="MODE" target="AUTO">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-19" value="否" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="MODE" target="MANUAL">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-20" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="AUTO" target="SELF">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-21" value="是" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="SELF" target="SELF_AUTH">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-22" value="否或授权未明确" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="SELF_AUTH" target="STOP">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-23" value="是" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="SELF_AUTH" target="CONFIRM">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-24" value="是" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="CONFIRM" target="DUAL">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-25" value="否" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="CONFIRM" target="MANUAL">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-26" value="否" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="SELF" target="AUTO_AUDIT">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-27" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="DUAL" target="RESULT">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-28" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="AUTO_AUDIT" target="RESULT">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-29" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="MANUAL" target="RESULT">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-30" value="退回" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="RESULT" target="PLAN">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-31" value="驳回申请" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="RESULT" target="KEEP">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-32" value="批准" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="RESULT" target="EXEC">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-33" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="EXEC" target="EXECRESULT">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-34" value="失败或部分成功" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="EXECRESULT" target="RECOVER">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-35" value="成功" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="EXECRESULT" target="REVIEW">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-36" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="REVIEW" target="RELEASE">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-37" value="否" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="RELEASE" target="CLOSE">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-38" value="非超时限制" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="RELEASE" target="APPROVED">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-39" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="APPROVED" target="RECHECK">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-40" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="RECHECK" target="CHECK">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-41" value="否" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="CHECK" target="BLOCK">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-42" value="是" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="CHECK" target="ELIGIBLE">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-43" value="超时信号派生冻结" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="RELEASE" target="UNDECIDED">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="page-08-2" name="2. 2. 超时冻结与申诉">
+    <mxGraphModel dx="1600" dy="1200" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="START" value="&quot;当前结算案件等待时长超过配置阈值&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="FREEZE" value="&quot;仅当前三元组结算状态转冻结&#10;客户ID＋佣金案件ID＋结算案件ID&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="ID" value="ID" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="SIGNAL" value="&quot;生成settlement_overdue信号及后台任务&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="HIDDEN" value="&quot;信号待处理、调查或审核期间&#10;合作者申诉入口隐藏，接口拒绝创建&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="DECISION" value="&quot;按授权策略处理信号确认或驳回建议&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="HOLD" value="&quot;维持受影响冻结&#10;转后续逐案处置&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="GATE" value="&quot;申诉开关开启且窗口、次数满足？&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="UNAVAILABLE" value="&quot;入口保持关闭&#10;展示有限原因与下一步&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="APPEAL" value="&quot;允许合作者提交当前案件申诉&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="CREATED" value="&quot;成功创建新申诉？&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="NOCOUNT" value="&quot;不新增次数&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="COUNT" value="&quot;按当前结算案件累计一次&#10;进入独立申诉复核&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="540" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="RESULT" value="&quot;形成申诉结论&#10;保留原决定和新决定引用&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="540" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="TIMING" value="&quot;解除时点与并发门禁待VIS-RISK-Q01确认&#10;本图不继续画自动解冻&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="540" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="LIMIT" value="&quot;同客户其他案件、其他客户和同批次案件&#10;均不因本信号连带冻结&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="540" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="START" target="ID">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="FREEZE" target="SIGNAL">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="SIGNAL" target="HIDDEN">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="HIDDEN" target="DECISION">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-5" value="确认" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="DECISION" target="HOLD">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-6" value="驳回生效" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="DECISION" target="GATE">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-7" value="否" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="GATE" target="UNAVAILABLE">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-8" value="是" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="GATE" target="APPEAL">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="APPEAL" target="CREATED">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-10" value="否或幂等重复" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="CREATED" target="NOCOUNT">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-11" value="是" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="CREATED" target="COUNT">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-12" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="COUNT" target="RESULT">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-13" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="RESULT" target="TIMING">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-14" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="UNAVAILABLE" target="TIMING">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-15" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="HOLD" target="LIMIT">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

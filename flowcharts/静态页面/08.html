@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>08 风险处置流程图</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+  <div class="layout">
+                <nav class="sidebar">
+      <p class="sidebar-title">流程图导航</p>
+      <div class="nav-group">
+        <p class="group-title">评审主线</p>
+        <a class="nav-item" href="./01.html"><span>01</span><span>项目全景图</span></a>
+        <a class="nav-item" href="./02.html"><span>02</span><span>当前态与目标态服务蓝图</span></a>
+        <a class="nav-item" href="./03.html"><span>03</span><span>端到端业务泳道图</span></a>
+        <a class="nav-item" href="./04.html"><span>04</span><span>注册归因泳道图</span></a>
+        <a class="nav-item" href="./05.html"><span>05</span><span>佣金计算流程图</span></a>
+        <a class="nav-item" href="./06.html"><span>06</span><span>结算与资金时序图</span></a>
+        <a class="nav-item" href="./07.html"><span>07</span><span>提现流程图</span></a>
+        <a class="nav-item active" href="./08.html"><span>08</span><span>风险处置流程图</span></a>
+        <a class="nav-item" href="./09.html"><span>09</span><span>风险传播图</span></a>
+        <a class="nav-item" href="./10.html"><span>10</span><span>配置审批流程图</span></a>
+        <a class="nav-item" href="./11.html"><span>11</span><span>状态机图</span></a>
+        <a class="nav-item" href="./19.html"><span>19</span><span>权限矩阵图</span></a>
+        <a class="nav-item" href="./20.html"><span>20</span><span>评审到研发门禁图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">技术附录</p>
+        <a class="nav-item" href="./12.html"><span>12</span><span>系统上下文图</span></a>
+        <a class="nav-item" href="./13.html"><span>13</span><span>逻辑架构图</span></a>
+        <a class="nav-item" href="./14.html"><span>14</span><span>数据流图</span></a>
+        <a class="nav-item" href="./15.html"><span>15</span><span>ER图</span></a>
+        <a class="nav-item" href="./16.html"><span>16</span><span>数据血缘图</span></a>
+        <a class="nav-item" href="./17.html"><span>17</span><span>API与页面映射图</span></a>
+        <a class="nav-item" href="./18.html"><span>18</span><span>事件流转图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">CRM专项</p>
+        <a class="nav-item" href="./21.html"><span>21</span><span>CRM系统上下文与数据边界图</span></a>
+        <a class="nav-item" href="./22.html"><span>22</span><span>合作者入驻与CRM账户/KYC联动图</span></a>
+        <a class="nav-item" href="./23.html"><span>23</span><span>客户注册归因与CRM事实流图</span></a>
+        <a class="nav-item" href="./24.html"><span>24</span><span>客户资金、交易、风险事实到计佣结算图</span></a>
+        <a class="nav-item" href="./25.html"><span>25</span><span>CRM打款与对账联动图</span></a>
+        <a class="nav-item" href="./26.html"><span>26</span><span>CRM数据异常、补偿与更正图</span></a>
+        <a class="nav-item" href="./27.html"><span>27</span><span>Affiliate数据回传CRM与合规边界图</span></a>
+      </div>
+    </nav>
+    <main>
+      <div class="topbar">
+        <h1>08 风险处置流程图</h1>
+        <span>评审主线</span>
+      </div>
+      <div class="stage">
+        
+        <section class="diagram-block">
+          <h2>1. 识别、调查及处置</h2>
+          <div class="diagram-output" data-index="0"></div>
+        </section>
+        <section class="diagram-block">
+          <h2>2. 超时冻结与申诉</h2>
+          <div class="diagram-output" data-index="1"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script type="application/json" id="page-data">[{"heading":"1. 识别、调查及处置","code":"flowchart TB\n    F[\"CRM事实与Affiliate行为事实\"] --> Q{\"数据与证据可用？\"}\n    Q -->|关键缺数或冲突| GAP[\"保留已有佣金及事实<br/>阻断受影响自动结算并生成补数任务\"]\n    Q -->|可用| RULE[\"硬规则、疑似信号及风险评分<br/>保存来源与规则版本\"]\n    RULE --> HIT{\"命中适用规则？\"}\n    HIT -->|否| OBS[\"持续观察\"]\n    HIT -->|是| SCOPE[\"定位客户与案件<br/>记录R0-R3及影响范围\"]\n    SCOPE --> CONTROL[\"按已批准规则拦截受影响结算<br/>继续保留佣金计算\"]\n    CONTROL --> TASK[\"生成或复用风险调查任务\"]\n    GAP --> TASK\n    TASK --> CLAIM[\"风控认领、补证与调查\"]\n    CLAIM --> ENOUGH{\"证据及处置范围完整？\"}\n    ENOUGH -->|否| WAIT[\"继续观察或补证<br/>保留负责人和下次复核时间\"]\n    WAIT --> CLAIM\n    ENOUGH -->|是| PLAN[\"提交确认、排除或处置建议<br/>保存影响预览及案件引用\"]\n    PLAN --> AUTH{\"权限、版本及授权审批策略有效？\"}\n    AUTH -->|否或策略未确认| STOP[\"拒绝或保持待处理<br/>不执行未获授权动作\"]\n    AUTH -->|是| MODE{\"配置允许且满足自动审核条件？\"}\n    MODE -->|是| AUTO[\"按配置自动审核<br/>记录规则与授权依据\"]\n    MODE -->|否| MANUAL[\"进入对应岗位人工审核\"]\n    AUTO --> SELF{\"是否涉及本人审批？\"}\n    SELF -->|是| SELF_AUTH{\"本人具备该动作审批权限<br/>且配置允许自审？\"}\n    SELF_AUTH -->|否或授权未明确| STOP\n    SELF_AUTH -->|是| CONFIRM{\"是否显式确认本人自动同意？\"}\n    CONFIRM -->|是| DUAL[\"同事务写SUBMIT与APPROVE<br/>双审计成功后记录审核结果\"]\n    CONFIRM -->|否| MANUAL\n    SELF -->|否| AUTO_AUDIT[\"保存自动审核规则、授权依据和结果审计\"]\n    DUAL --> RESULT{\"审核结果\"}\n    AUTO_AUDIT --> RESULT\n    MANUAL --> RESULT\n    RESULT -->|退回| PLAN\n    RESULT -->|驳回申请| KEEP[\"保留原限制与原事实<br/>记录驳回原因\"]\n    RESULT -->|批准| EXEC[\"受保护执行已批准计划<br/>资金动作进入财务执行链\"]\n    EXEC --> EXECRESULT{\"执行结果\"}\n    EXECRESULT -->|失败或部分成功| RECOVER[\"保留执行记录<br/>查证后仅处理明确失败子项\"]\n    EXECRESULT -->|成功| REVIEW[\"分别更新风险结论、任务与执行结果<br/>不直接改成已付款\"]\n    REVIEW --> RELEASE{\"需要解除结算限制？\"}\n    RELEASE -->|否| CLOSE[\"满足后续检查及关闭条件后关闭\"]\n    RELEASE -->|非超时限制| APPROVED[\"按权限完成解除审批与受保护执行\"]\n    APPROVED --> RECHECK[\"财务及系统重新执行全部结算前检查\"]\n    RECHECK --> CHECK{\"检查全部通过？\"}\n    CHECK -->|否| BLOCK[\"保留剩余阻断和处理责任\"]\n    CHECK -->|是| ELIGIBLE[\"进入后续结算资格<br/>不直接打款\"]\n    RELEASE -->|超时信号派生冻结| UNDECIDED[\"VIS-RISK-Q01待确认<br/>解除申请、审批、执行与申诉并发时点\"]","type":"mermaid"},{"heading":"2. 超时冻结与申诉","code":"flowchart TB\n    START[\"当前结算案件等待时长超过配置阈值\"] --> FREEZE[\"仅当前三元组结算状态转冻结<br/>客户ID＋佣金案件ID＋结算案件ID\"]\n    FREEZE --> SIGNAL[\"生成settlement_overdue信号及后台任务\"]\n    SIGNAL --> HIDDEN[\"信号待处理、调查或审核期间<br/>合作者申诉入口隐藏，接口拒绝创建\"]\n    HIDDEN --> DECISION[\"按授权策略处理信号确认或驳回建议\"]\n    DECISION -->|确认| HOLD[\"维持受影响冻结<br/>转后续逐案处置\"]\n    DECISION -->|驳回生效| GATE{\"申诉开关开启且窗口、次数满足？\"}\n    GATE -->|否| UNAVAILABLE[\"入口保持关闭<br/>展示有限原因与下一步\"]\n    GATE -->|是| APPEAL[\"允许合作者提交当前案件申诉\"]\n    APPEAL --> CREATED{\"成功创建新申诉？\"}\n    CREATED -->|否或幂等重复| NOCOUNT[\"不新增次数\"]\n    CREATED -->|是| COUNT[\"按当前结算案件累计一次<br/>进入独立申诉复核\"]\n    COUNT --> RESULT[\"形成申诉结论<br/>保留原决定和新决定引用\"]\n    RESULT --> TIMING[\"解除时点与并发门禁待VIS-RISK-Q01确认<br/>本图不继续画自动解冻\"]\n    UNAVAILABLE --> TIMING\n    HOLD -.-> LIMIT[\"同客户其他案件、其他客户和同批次案件<br/>均不因本信号连带冻结\"]","type":"mermaid"}]</script>
+  <script src="./assets/mermaid.min.js"></script>
+  <script src="./assets/viewer-static.min.js"></script>
+  <script>
+    const blocks = JSON.parse(document.getElementById("page-data").textContent);
+    mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "default", fontFamily: 'Arial, "PingFang SC", sans-serif', flowchart: { useMaxWidth: true, padding: 16 }, sequence: { useMaxWidth: true, wrap: true } });
+    async function renderBlock(block, output) {
+      try {
+        output.innerHTML = '<div class="loading">渲染中...</div>';
+        if (block.type === "drawio") {
+          const host = document.createElement("div");
+          host.className = "mxgraph";
+          host.setAttribute("data-mxgraph", JSON.stringify({ xml: block.code, nav: true, resize: true, toolbar: "zoom layers" }));
+          output.appendChild(host);
+          GraphViewer.createViewerForElement(host);
+          return;
+        }
+        const result = await mermaid.render("svg-" + Math.random().toString(36).slice(2), block.code);
+        output.innerHTML = result.svg;
+      } catch (error) {
+        output.innerHTML = '<div class="error"></div>';
+        output.querySelector(".error").textContent = error && error.message ? error.message : String(error);
+      }
+    }
+    document.querySelectorAll(".diagram-output").forEach((output, index) => renderBlock(blocks[index], output));
+  </script>
+</body>
+</html>

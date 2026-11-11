@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>03 端到端业务泳道图</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+  <div class="layout">
+                <nav class="sidebar">
+      <p class="sidebar-title">流程图导航</p>
+      <div class="nav-group">
+        <p class="group-title">评审主线</p>
+        <a class="nav-item" href="./01.html"><span>01</span><span>项目全景图</span></a>
+        <a class="nav-item" href="./02.html"><span>02</span><span>当前态与目标态服务蓝图</span></a>
+        <a class="nav-item active" href="./03.html"><span>03</span><span>端到端业务泳道图</span></a>
+        <a class="nav-item" href="./04.html"><span>04</span><span>注册归因泳道图</span></a>
+        <a class="nav-item" href="./05.html"><span>05</span><span>佣金计算流程图</span></a>
+        <a class="nav-item" href="./06.html"><span>06</span><span>结算与资金时序图</span></a>
+        <a class="nav-item" href="./07.html"><span>07</span><span>提现流程图</span></a>
+        <a class="nav-item" href="./08.html"><span>08</span><span>风险处置流程图</span></a>
+        <a class="nav-item" href="./09.html"><span>09</span><span>风险传播图</span></a>
+        <a class="nav-item" href="./10.html"><span>10</span><span>配置审批流程图</span></a>
+        <a class="nav-item" href="./11.html"><span>11</span><span>状态机图</span></a>
+        <a class="nav-item" href="./19.html"><span>19</span><span>权限矩阵图</span></a>
+        <a class="nav-item" href="./20.html"><span>20</span><span>评审到研发门禁图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">技术附录</p>
+        <a class="nav-item" href="./12.html"><span>12</span><span>系统上下文图</span></a>
+        <a class="nav-item" href="./13.html"><span>13</span><span>逻辑架构图</span></a>
+        <a class="nav-item" href="./14.html"><span>14</span><span>数据流图</span></a>
+        <a class="nav-item" href="./15.html"><span>15</span><span>ER图</span></a>
+        <a class="nav-item" href="./16.html"><span>16</span><span>数据血缘图</span></a>
+        <a class="nav-item" href="./17.html"><span>17</span><span>API与页面映射图</span></a>
+        <a class="nav-item" href="./18.html"><span>18</span><span>事件流转图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">CRM专项</p>
+        <a class="nav-item" href="./21.html"><span>21</span><span>CRM系统上下文与数据边界图</span></a>
+        <a class="nav-item" href="./22.html"><span>22</span><span>合作者入驻与CRM账户/KYC联动图</span></a>
+        <a class="nav-item" href="./23.html"><span>23</span><span>客户注册归因与CRM事实流图</span></a>
+        <a class="nav-item" href="./24.html"><span>24</span><span>客户资金、交易、风险事实到计佣结算图</span></a>
+        <a class="nav-item" href="./25.html"><span>25</span><span>CRM打款与对账联动图</span></a>
+        <a class="nav-item" href="./26.html"><span>26</span><span>CRM数据异常、补偿与更正图</span></a>
+        <a class="nav-item" href="./27.html"><span>27</span><span>Affiliate数据回传CRM与合规边界图</span></a>
+      </div>
+    </nav>
+    <main>
+      <div class="topbar">
+        <h1>03 端到端业务泳道图</h1>
+        <span>评审主线</span>
+      </div>
+      <div class="stage">
+        
+        <section class="diagram-block">
+          <h2>1. 入驻到官方链接</h2>
+          <div class="diagram-output" data-index="0"></div>
+        </section>
+        <section class="diagram-block">
+          <h2>2. 获客到结算、提现及追索</h2>
+          <div class="diagram-output" data-index="1"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script type="application/json" id="page-data">[{"heading":"1. 入驻到官方链接","code":"flowchart TB\n    subgraph USER[\"合作者\"]\n        E01[\"在Affiliate发起申请<br/>继续使用CRM登录\"]\n        E02[\"补充资料并重新提交<br/>沿用原主体和申请版本链\"]\n    end\n    subgraph CRM[\"CRM账户与主体\"]\n        E03[\"创建或关联主体<br/>校验IB身份冲突\"]\n        E04{\"CRM创建或关联<br/>及主体检查通过？\"}\n        E05[\"CPA合作者待审核标记\"]\n        E06[\"保存审核结果并返回确认\"]\n    end\n    subgraph OPS[\"Affiliate与运营\"]\n        E07{\"发布阶段与开链策略\"}\n        E08[\"运营审核<br/>通过、驳回或补件\"]\n        E09{\"审核结果\"}\n        E10[\"审核通过<br/>请求CRM确认\"]\n        E11{\"CRM确认成功？\"}\n        E12[\"同步任务：自动重试<br/>超限转人工\"]\n        E13[\"灰度不得开链<br/>全量已有链接可保留<br/>两者均不得结算或提现\"]\n        E14[\"实时硬风控、画像与协议<br/>官方路径、staging及已开启门禁\"]\n        E15{\"硬门禁通过？\"}\n        E16[\"官方推广链接可用<br/>不等于资金资格通过\"]\n        E17[\"记录原因和下一步<br/>不启用链接\"]\n        E18[\"驳回并立即停链<br/>保留归因与历史佣金\"]\n    end\n    E01 --> E03 --> E04\n    E04 -->|否| E17\n    E04 -->|是| E05 --> E07\n    E07 -->|灰度：审核确认后开链| E08\n    E07 -->|全量：获准配置可提前开链| E14\n    E07 -->|全量审核仍独立执行| E08\n    E08 --> E09\n    E09 -->|补件| E02 --> E08\n    E09 -->|驳回| E18\n    E09 -->|通过| E10 --> E06 --> E11\n    E11 -->|成功| E14\n    E11 -->|失败| E12 --> E13\n    E12 -->|取得确认结果后重检| E11\n    E14 --> E15\n    E15 -->|否| E17\n    E15 -->|是| E16","type":"mermaid"},{"heading":"2. 获客到结算、提现及追索","code":"sequenceDiagram\n    autonumber\n    participant P as 合作者\n    participant U as 被推荐客户\n    participant CRM as CRM事实与打款\n    participant A as Affiliate\n    participant R as 运营与风控\n    participant F as 财务与审批\n    participant B as 支付与银行\n    participant I as IMC\n    P->>U: 分享有效官方推广链接\n    U->>CRM: 注册、认证、入金和交易\n    CRM-->>A: 注册参数、客户与行为事实及版本\n    alt 归因缺失、冲突或禁止归属\n        A->>R: 保留证据并创建核验或补数任务\n        Note over A,R: 不猜测归属，不凭空生成CPA佣金\n    else 归因有效且IB隔离通过\n        A->>A: 锁定最终归属、规则版本和审计\n        A-->>I: 发布归因结果事件\n        A->>A: 记录FTD里程碑，不生成可放款资金\n        alt 有效FTD确认\n            A->>A: 基础CPA及FTD、有效FTD环节附加\n            A->>A: 保存独立佣金案件和权益快照\n        else 有效FTD未确认\n            Note over A: 等待后续事实，不提前生成基础CPA\n        end\n        opt 后续质量服务确认\n            A->>A: 单独生成基础CPA之外的附加案件\n        end\n        A->>A: 案件进入动态结算中与风险检查\n        alt 集群、调查、隔离或关键结算缺数\n            A->>R: 佣金保留，阻断自动结算并生成任务\n            Note over A,R: 风险解除后仍需重新执行结算前检查\n        else 当前案件到期且门禁满足\n            A->>A: 每日凌晨筛选并执行结算前检查\n            Note over A,CRM: 核验实名及CRM确认，未满足不得结算\n            A->>A: 税费、保证金及结算明细处理\n            A-->>P: 符合条件的金额进入可提现余额\n            Note over A: 自动结算不建提现单、结算单或打款请求\n            P->>A: 手动提交提现\n            A->>A: 防重复纳入，创建一对一提现订单与结算单\n            A->>F: MVP人工审核，按已授权策略处理\n            alt 审核与执行前复查通过\n                A->>CRM: 幂等打款请求与订单引用\n                CRM->>B: 执行外部付款\n                B-->>CRM: 支付结果或退回事实\n                CRM-->>A: 回执或查询结果\n                alt 结果未知或超时\n                    A->>CRM: 查询原打款结果\n                    Note over A,CRM: 不先回余额，不重复打款\n                else 结果可确认\n                    A->>A: 更新提现、结算单、分摊及反向流水\n                    A->>F: 内部一致性对账及差异处理\n                    A-->>P: 有限原因、状态和通知\n                end\n            else 驳回或执行复查失败\n                F-->>A: 保留原因与处理任务，不发起付款\n            end\n        end\n    end\n    opt CRM后续确认拒付或欺诈等异常\n        CRM-->>A: 外部事实与更正版本\n        A->>F: 冲正案件及按已授权策略审批\n        F-->>A: 获准执行的结论\n        A->>A: 未放行佣金、余额、保证金、后续佣金、挂负依次抵扣\n        A-->>I: 输出计佣、资金及调整事件用于分析\n    end","type":"mermaid"}]</script>
+  <script src="./assets/mermaid.min.js"></script>
+  <script src="./assets/viewer-static.min.js"></script>
+  <script>
+    const blocks = JSON.parse(document.getElementById("page-data").textContent);
+    mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "default", fontFamily: 'Arial, "PingFang SC", sans-serif', flowchart: { useMaxWidth: true, padding: 16 }, sequence: { useMaxWidth: true, wrap: true } });
+    async function renderBlock(block, output) {
+      try {
+        output.innerHTML = '<div class="loading">渲染中...</div>';
+        if (block.type === "drawio") {
+          const host = document.createElement("div");
+          host.className = "mxgraph";
+          host.setAttribute("data-mxgraph", JSON.stringify({ xml: block.code, nav: true, resize: true, toolbar: "zoom layers" }));
+          output.appendChild(host);
+          GraphViewer.createViewerForElement(host);
+          return;
+        }
+        const result = await mermaid.render("svg-" + Math.random().toString(36).slice(2), block.code);
+        output.innerHTML = result.svg;
+      } catch (error) {
+        output.innerHTML = '<div class="error"></div>';
+        output.querySelector(".error").textContent = error && error.message ? error.message : String(error);
+      }
+    }
+    document.querySelectorAll(".diagram-output").forEach((output, index) => renderBlock(blocks[index], output));
+  </script>
+</body>
+</html>

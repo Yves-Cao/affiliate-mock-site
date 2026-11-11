@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>09 风险传播图</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+  <div class="layout">
+                <nav class="sidebar">
+      <p class="sidebar-title">流程图导航</p>
+      <div class="nav-group">
+        <p class="group-title">评审主线</p>
+        <a class="nav-item" href="./01.html"><span>01</span><span>项目全景图</span></a>
+        <a class="nav-item" href="./02.html"><span>02</span><span>当前态与目标态服务蓝图</span></a>
+        <a class="nav-item" href="./03.html"><span>03</span><span>端到端业务泳道图</span></a>
+        <a class="nav-item" href="./04.html"><span>04</span><span>注册归因泳道图</span></a>
+        <a class="nav-item" href="./05.html"><span>05</span><span>佣金计算流程图</span></a>
+        <a class="nav-item" href="./06.html"><span>06</span><span>结算与资金时序图</span></a>
+        <a class="nav-item" href="./07.html"><span>07</span><span>提现流程图</span></a>
+        <a class="nav-item" href="./08.html"><span>08</span><span>风险处置流程图</span></a>
+        <a class="nav-item active" href="./09.html"><span>09</span><span>风险传播图</span></a>
+        <a class="nav-item" href="./10.html"><span>10</span><span>配置审批流程图</span></a>
+        <a class="nav-item" href="./11.html"><span>11</span><span>状态机图</span></a>
+        <a class="nav-item" href="./19.html"><span>19</span><span>权限矩阵图</span></a>
+        <a class="nav-item" href="./20.html"><span>20</span><span>评审到研发门禁图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">技术附录</p>
+        <a class="nav-item" href="./12.html"><span>12</span><span>系统上下文图</span></a>
+        <a class="nav-item" href="./13.html"><span>13</span><span>逻辑架构图</span></a>
+        <a class="nav-item" href="./14.html"><span>14</span><span>数据流图</span></a>
+        <a class="nav-item" href="./15.html"><span>15</span><span>ER图</span></a>
+        <a class="nav-item" href="./16.html"><span>16</span><span>数据血缘图</span></a>
+        <a class="nav-item" href="./17.html"><span>17</span><span>API与页面映射图</span></a>
+        <a class="nav-item" href="./18.html"><span>18</span><span>事件流转图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">CRM专项</p>
+        <a class="nav-item" href="./21.html"><span>21</span><span>CRM系统上下文与数据边界图</span></a>
+        <a class="nav-item" href="./22.html"><span>22</span><span>合作者入驻与CRM账户/KYC联动图</span></a>
+        <a class="nav-item" href="./23.html"><span>23</span><span>客户注册归因与CRM事实流图</span></a>
+        <a class="nav-item" href="./24.html"><span>24</span><span>客户资金、交易、风险事实到计佣结算图</span></a>
+        <a class="nav-item" href="./25.html"><span>25</span><span>CRM打款与对账联动图</span></a>
+        <a class="nav-item" href="./26.html"><span>26</span><span>CRM数据异常、补偿与更正图</span></a>
+        <a class="nav-item" href="./27.html"><span>27</span><span>Affiliate数据回传CRM与合规边界图</span></a>
+      </div>
+    </nav>
+    <main>
+      <div class="topbar">
+        <h1>09 风险传播图</h1>
+        <span>评审主线</span>
+      </div>
+      <div class="stage">
+        
+        <section class="diagram-block">
+          <h2>1. 事实、聚合与处置范围</h2>
+          <div class="diagram-output" data-index="0"></div>
+        </section>
+        <section class="diagram-block">
+          <h2>2. 全局暂停与恢复</h2>
+          <div class="diagram-output" data-index="1"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script type="application/json" id="page-data">[{"heading":"1. 事实、聚合与处置范围","code":"flowchart TB\n    subgraph L1[\"一、事实与单案件\"]\n        CRM[\"CRM身份、资金、交易及欺诈事实\"]\n        AFF[\"点击、归因、设备及行为事实\"]\n        EVENT[\"客户或佣金案件风险事件<br/>直接R0-R3风险档\"]\n        LOCAL[\"仅受影响客户及案件的结算拦截<br/>保留计算和原始事实\"]\n        CRM --> EVENT\n        AFF --> EVENT\n        EVENT --> LOCAL\n    end\n    subgraph L2[\"二、集群与聚合\"]\n        FEATURES{\"两条独立特征<br/>或可追溯权威确权例外？\"}\n        CLUSTER[\"疑似集群及成员关系<br/>认定与控制分别保存\"]\n        AGG[\"按合作者、Sub ID、国家、活动或渠道聚合<br/>保存窗口、分子分母、金额及版本\"]\n        THRESHOLD{\"达到对应已批准聚合阈值？\"}\n        OBS[\"仅观察和保留证据\"]\n    end\n    EVENT --> FEATURES\n    FEATURES -->|满足| CLUSTER\n    FEATURES -->|不满足| OBS\n    EVENT --> AGG\n    CLUSTER --> AGG\n    AGG --> THRESHOLD\n    THRESHOLD -->|否| OBS\n    subgraph L3[\"三、人工判断与范围升级\"]\n        TYPE{\"命中的事件类型和实际范围\"}\n        TASK[\"标记风险合作者<br/>生成后台事件和人工任务\"]\n        OTHER[\"生成对应范围聚合事件<br/>按已批准规则施加控制并转人工\"]\n        INVESTIGATE[\"风控核验来源构成、证据和逐案影响\"]\n        SCOPE{\"局部可隔离？\"}\n        LOCALPLAN[\"提出局部处置计划\"]\n        WIDEPLAN[\"提出扩大合作者范围计划<br/>附跨范围证据及完整影响清单\"]\n        AUTH[\"核对动作权限和已授权审批策略<br/>按配置完成审核\"]\n    end\n    THRESHOLD -->|是| TYPE\n    TYPE -->|对应合作者风险客户占比超阈值| TASK\n    TYPE -->|地区、额度或其他聚合条件| OTHER\n    TASK --> INVESTIGATE --> SCOPE\n    OTHER --> INVESTIGATE\n    SCOPE -->|是| LOCALPLAN\n    SCOPE -->|否且有扩大证据| WIDEPLAN\n    LOCALPLAN --> AUTH\n    WIDEPLAN --> AUTH\n    subgraph L4[\"四、分域执行与恢复\"]\n        CREDIT[\"信用处置<br/>扣积分或降至指定C0-C4等级\"]\n        MONEY[\"获批范围内的结算控制或财务任务<br/>逐案保留资金事实\"]\n        FUTURE[\"按获准恢复条件及复核处理未来权益<br/>不重写历史佣金\"]\n        RECHECK[\"解除获批限制后全量结算重检\"]\n    end\n    AUTH -->|批准且具备执行依据| CREDIT\n    AUTH -->|批准且具备执行依据| MONEY\n    CREDIT --> FUTURE\n    MONEY --> RECHECK\n    AUTH -->|驳回或授权不完整| KEEP[\"不执行新增处置<br/>原限制按原依据保持\"]","type":"mermaid"},{"heading":"2. 全局暂停与恢复","code":"flowchart TB\n    RANGE[\"已发现风险范围和硬门禁严重度\"] --> LEVEL{\"可按案件或合作者范围隔离？\"}\n    LEVEL -->|可以| SCOPED[\"沿局部处置链处理<br/>不自动暂停整个灰度\"]\n    LEVEL -->|不可隔离或重大事件| PAUSE[\"运营发起紧急暂停流量或链接<br/>保留已有案件、资金与证据\"]\n    PAUSE --> RECORD[\"事后补齐风控、财务审核与审计记录\"]\n    RECORD --> RESTORE[\"运营发起恢复\"]\n    RESTORE --> RISK[\"风控确认风险解除\"]\n    RISK --> FIN[\"财务确认资金与对账正常\"]\n    FIN --> APPROVE[\"按权限及已授权审批配置完成恢复审批\"]\n    APPROVE --> RESUME[\"受控恢复并继续观察\"]","type":"mermaid"}]</script>
+  <script src="./assets/mermaid.min.js"></script>
+  <script src="./assets/viewer-static.min.js"></script>
+  <script>
+    const blocks = JSON.parse(document.getElementById("page-data").textContent);
+    mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "default", fontFamily: 'Arial, "PingFang SC", sans-serif', flowchart: { useMaxWidth: true, padding: 16 }, sequence: { useMaxWidth: true, wrap: true } });
+    async function renderBlock(block, output) {
+      try {
+        output.innerHTML = '<div class="loading">渲染中...</div>';
+        if (block.type === "drawio") {
+          const host = document.createElement("div");
+          host.className = "mxgraph";
+          host.setAttribute("data-mxgraph", JSON.stringify({ xml: block.code, nav: true, resize: true, toolbar: "zoom layers" }));
+          output.appendChild(host);
+          GraphViewer.createViewerForElement(host);
+          return;
+        }
+        const result = await mermaid.render("svg-" + Math.random().toString(36).slice(2), block.code);
+        output.innerHTML = result.svg;
+      } catch (error) {
+        output.innerHTML = '<div class="error"></div>';
+        output.querySelector(".error").textContent = error && error.message ? error.message : String(error);
+      }
+    }
+    document.querySelectorAll(".diagram-output").forEach((output, index) => renderBlock(blocks[index], output));
+  </script>
+</body>
+</html>

@@ -1,0 +1,522 @@
+{
+  "executedAt": "2026-11-10T02:58:57.581Z",
+  "renderer": "Mermaid major 11; CDN bundle loaded into an offline browser context",
+  "rendererVersion": "11.17.2",
+  "rendererSha256": "581ed7d74bd9048d0e3a91363927d72ef22942d7722546b27f7cc29e35390eb8",
+  "browser": "Google Chrome installed locally; browser requests blocked during rendering",
+  "scope": "02-20 Markdown previews; parse/render/nonblank checks only, not business approval or implementation acceptance",
+  "files": 19,
+  "diagrams": 46,
+  "passed": 46,
+  "failed": 0,
+  "hashes": {
+    "02-当前态与目标态服务蓝图-Mermaid预览.md": "525d3500a422a1a5bb12587b344ae703e8f2a482ef7545a9d4f05ea437b78c3f",
+    "03-端到端业务泳道图-Mermaid预览.md": "7460194c1a2bc1e4682384e6e2a1318425cfa7006d4a0c51309422be856aca13",
+    "04-注册归因泳道图-Mermaid预览.md": "db91e2ab0960dbf2eca670bd0126f897aba9196224303cbe1aa9482550bb7d5c",
+    "05-佣金计算流程图-Mermaid预览.md": "0ccc8996addc56f5d24e670b8ec1c203fc0a779abb01c7c05c1553ecc01065d8",
+    "06-结算与资金时序图-Mermaid预览.md": "ec9fdfe0b5df0e9263f8f591269c421434798c12c9b129764426fad01850e287",
+    "07-提现流程图-Mermaid预览.md": "aa220f7921df6a217d1ba1a75ae9c021ab09c10fc6df0394984a3c9c51eecc27",
+    "08-风险处置流程图-Mermaid预览.md": "39b55738f263e97f9237deebcf14bf4438835e314520548e69700f031828b1b7",
+    "09-风险传播图-Mermaid预览.md": "a66cc1a45b23038f1fbaa0ae755bbe96ec8073edd0dcc64ab3a1af05188490f6",
+    "10-配置审批流程图-Mermaid预览.md": "3868eaabc6cdd03e6200fe4f89ce345ca391c2bf580758563673d686fc0618b6",
+    "11-状态机图-Mermaid预览.md": "9ad5f663957bd98646321779afede71a34ea1223b9849b77936caed8fc49f753",
+    "12-系统上下文图-Mermaid预览.md": "18996fbbd881a32fc9b5f87f79dc2185f5895506afc359f1692bf33c65607e46",
+    "13-逻辑架构图-Mermaid预览.md": "bdbf974c2020fbf9b344b82f215c9a7f43e87bbe177bdd0ba24d4b180e75f2b9",
+    "14-数据流图-Mermaid预览.md": "c247c3bc7703096fd2c99fac6327215a285c25b821a40f36e1731cad1997118f",
+    "15-ER图-Mermaid预览.md": "e98c152c2de2284f0835127295d4aeb3c892b1ff1fc42fb74b3623fe3c885e1c",
+    "16-数据血缘图-Mermaid预览.md": "6b18b85b97d4743d80ac3478755c5644db82d13e33ac0f625325061d9c1a0228",
+    "17-API与页面映射图-Mermaid预览.md": "e4865be21072641ac12fe100cea2dabf9f0229a735e94454c66e2968fa2505fd",
+    "18-事件流转图-Mermaid预览.md": "cd2316b382cad58e9ff8bb4185a864affe73c6e62db2ed9c4a2d68eb3f8ed43a",
+    "19-权限矩阵图-Mermaid预览.md": "307678224ee3fc5044ca0349405469c1d1f3ef8bf409b054aebde8aaea16ae6a",
+    "20-评审到研发门禁图-Mermaid预览.md": "ec044668b0ae39edf71bb1e11d1938a5ce63c99b4268c24cc668acd932d6d3cc"
+  },
+  "results": [
+    {
+      "file": "02-当前态与目标态服务蓝图-Mermaid预览.md",
+      "block": 1,
+      "key": "02-1",
+      "type": "flowchart-v2",
+      "width": 296,
+      "height": 1346,
+      "shapes": 25,
+      "status": "passed"
+    },
+    {
+      "file": "02-当前态与目标态服务蓝图-Mermaid预览.md",
+      "block": 2,
+      "key": "02-2",
+      "type": "flowchart-v2",
+      "width": 2677,
+      "height": 2024,
+      "shapes": 49,
+      "status": "passed"
+    },
+    {
+      "file": "03-端到端业务泳道图-Mermaid预览.md",
+      "block": 1,
+      "key": "03-1",
+      "type": "flowchart-v2",
+      "width": 1916,
+      "height": 2458,
+      "shapes": 69,
+      "status": "passed"
+    },
+    {
+      "file": "03-端到端业务泳道图-Mermaid预览.md",
+      "block": 2,
+      "key": "03-2",
+      "type": "sequence",
+      "width": 1746,
+      "height": 3334,
+      "shapes": 144,
+      "status": "passed"
+    },
+    {
+      "file": "04-注册归因泳道图-Mermaid预览.md",
+      "block": 1,
+      "key": "04-1",
+      "type": "flowchart-v2",
+      "width": 2140,
+      "height": 3036,
+      "shapes": 79,
+      "status": "passed"
+    },
+    {
+      "file": "04-注册归因泳道图-Mermaid预览.md",
+      "block": 2,
+      "key": "04-2",
+      "type": "flowchart-v2",
+      "width": 906,
+      "height": 1404,
+      "shapes": 37,
+      "status": "passed"
+    },
+    {
+      "file": "05-佣金计算流程图-Mermaid预览.md",
+      "block": 1,
+      "key": "05-1",
+      "type": "flowchart-v2",
+      "width": 1736,
+      "height": 2436,
+      "shapes": 72,
+      "status": "passed"
+    },
+    {
+      "file": "05-佣金计算流程图-Mermaid预览.md",
+      "block": 2,
+      "key": "05-2",
+      "type": "flowchart-v2",
+      "width": 1286,
+      "height": 1026,
+      "shapes": 49,
+      "status": "passed"
+    },
+    {
+      "file": "06-结算与资金时序图-Mermaid预览.md",
+      "block": 1,
+      "key": "06-1",
+      "type": "sequence",
+      "width": 1522,
+      "height": 2535,
+      "shapes": 111,
+      "status": "passed"
+    },
+    {
+      "file": "06-结算与资金时序图-Mermaid预览.md",
+      "block": 2,
+      "key": "06-2",
+      "type": "flowchart-v2",
+      "width": 739,
+      "height": 1826,
+      "shapes": 52,
+      "status": "passed"
+    },
+    {
+      "file": "06-结算与资金时序图-Mermaid预览.md",
+      "block": 3,
+      "key": "06-3",
+      "type": "flowchart-v2",
+      "width": 1234,
+      "height": 1366,
+      "shapes": 54,
+      "status": "passed"
+    },
+    {
+      "file": "07-提现流程图-Mermaid预览.md",
+      "block": 1,
+      "key": "07-1",
+      "type": "flowchart-v2",
+      "width": 1925,
+      "height": 2424,
+      "shapes": 74,
+      "status": "passed"
+    },
+    {
+      "file": "07-提现流程图-Mermaid预览.md",
+      "block": 2,
+      "key": "07-2",
+      "type": "flowchart-v2",
+      "width": 2537,
+      "height": 954,
+      "shapes": 61,
+      "status": "passed"
+    },
+    {
+      "file": "08-风险处置流程图-Mermaid预览.md",
+      "block": 1,
+      "key": "08-1",
+      "type": "flowchart-v2",
+      "width": 1583,
+      "height": 5450,
+      "shapes": 125,
+      "status": "passed"
+    },
+    {
+      "file": "08-风险处置流程图-Mermaid预览.md",
+      "block": 2,
+      "key": "08-2",
+      "type": "flowchart-v2",
+      "width": 920,
+      "height": 2004,
+      "shapes": 53,
+      "status": "passed"
+    },
+    {
+      "file": "09-风险传播图-Mermaid预览.md",
+      "block": 1,
+      "key": "09-1",
+      "type": "flowchart-v2",
+      "width": 1458,
+      "height": 2994,
+      "shapes": 81,
+      "status": "passed"
+    },
+    {
+      "file": "09-风险传播图-Mermaid预览.md",
+      "block": 2,
+      "key": "09-2",
+      "type": "flowchart-v2",
+      "width": 570,
+      "height": 1360,
+      "shapes": 37,
+      "status": "passed"
+    },
+    {
+      "file": "10-配置审批流程图-Mermaid预览.md",
+      "block": 1,
+      "key": "10-1",
+      "type": "flowchart-v2",
+      "width": 1216,
+      "height": 4020,
+      "shapes": 88,
+      "status": "passed"
+    },
+    {
+      "file": "11-状态机图-Mermaid预览.md",
+      "block": 1,
+      "key": "11-1",
+      "type": "flowchart-v2",
+      "width": 770,
+      "height": 1118,
+      "shapes": 39,
+      "status": "passed"
+    },
+    {
+      "file": "11-状态机图-Mermaid预览.md",
+      "block": 2,
+      "key": "11-2",
+      "type": "flowchart-v2",
+      "width": 1652,
+      "height": 584,
+      "shapes": 51,
+      "status": "passed"
+    },
+    {
+      "file": "11-状态机图-Mermaid预览.md",
+      "block": 3,
+      "key": "11-3",
+      "type": "stateDiagram",
+      "width": 480,
+      "height": 648,
+      "shapes": 20,
+      "status": "passed"
+    },
+    {
+      "file": "11-状态机图-Mermaid预览.md",
+      "block": 4,
+      "key": "11-4",
+      "type": "flowchart-v2",
+      "width": 1239,
+      "height": 1090,
+      "shapes": 44,
+      "status": "passed"
+    },
+    {
+      "file": "11-状态机图-Mermaid预览.md",
+      "block": 5,
+      "key": "11-5",
+      "type": "flowchart-v2",
+      "width": 1254,
+      "height": 1172,
+      "shapes": 49,
+      "status": "passed"
+    },
+    {
+      "file": "11-状态机图-Mermaid预览.md",
+      "block": 6,
+      "key": "11-6",
+      "type": "flowchart-v2",
+      "width": 729,
+      "height": 1592,
+      "shapes": 50,
+      "status": "passed"
+    },
+    {
+      "file": "11-状态机图-Mermaid预览.md",
+      "block": 7,
+      "key": "11-7",
+      "type": "flowchart-v2",
+      "width": 850,
+      "height": 1356,
+      "shapes": 45,
+      "status": "passed"
+    },
+    {
+      "file": "12-系统上下文图-Mermaid预览.md",
+      "block": 1,
+      "key": "12-1",
+      "type": "flowchart-v2",
+      "width": 2568,
+      "height": 1228,
+      "shapes": 55,
+      "status": "passed"
+    },
+    {
+      "file": "13-逻辑架构图-Mermaid预览.md",
+      "block": 1,
+      "key": "13-1",
+      "type": "flowchart-v2",
+      "width": 2851,
+      "height": 2394,
+      "shapes": 89,
+      "status": "passed"
+    },
+    {
+      "file": "13-逻辑架构图-Mermaid预览.md",
+      "block": 2,
+      "key": "13-2",
+      "type": "flowchart-v2",
+      "width": 717,
+      "height": 1362,
+      "shapes": 33,
+      "status": "passed"
+    },
+    {
+      "file": "14-数据流图-Mermaid预览.md",
+      "block": 1,
+      "key": "14-1",
+      "type": "flowchart-v2",
+      "width": 1959,
+      "height": 1624,
+      "shapes": 59,
+      "status": "passed"
+    },
+    {
+      "file": "14-数据流图-Mermaid预览.md",
+      "block": 2,
+      "key": "14-2",
+      "type": "flowchart-v2",
+      "width": 2149,
+      "height": 1712,
+      "shapes": 72,
+      "status": "passed"
+    },
+    {
+      "file": "15-ER图-Mermaid预览.md",
+      "block": 1,
+      "key": "15-1",
+      "type": "er",
+      "width": 1422,
+      "height": 758,
+      "shapes": 121,
+      "status": "passed"
+    },
+    {
+      "file": "15-ER图-Mermaid预览.md",
+      "block": 2,
+      "key": "15-2",
+      "type": "er",
+      "width": 1195,
+      "height": 1131,
+      "shapes": 104,
+      "status": "passed"
+    },
+    {
+      "file": "15-ER图-Mermaid预览.md",
+      "block": 3,
+      "key": "15-3",
+      "type": "flowchart-v2",
+      "width": 998,
+      "height": 1568,
+      "shapes": 49,
+      "status": "passed"
+    },
+    {
+      "file": "15-ER图-Mermaid预览.md",
+      "block": 4,
+      "key": "15-4",
+      "type": "flowchart-v2",
+      "width": 1641,
+      "height": 782,
+      "shapes": 44,
+      "status": "passed"
+    },
+    {
+      "file": "16-数据血缘图-Mermaid预览.md",
+      "block": 1,
+      "key": "16-1",
+      "type": "flowchart-v2",
+      "width": 2729,
+      "height": 1360,
+      "shapes": 86,
+      "status": "passed"
+    },
+    {
+      "file": "16-数据血缘图-Mermaid预览.md",
+      "block": 2,
+      "key": "16-2",
+      "type": "flowchart-v2",
+      "width": 391,
+      "height": 1438,
+      "shapes": 32,
+      "status": "passed"
+    },
+    {
+      "file": "17-API与页面映射图-Mermaid预览.md",
+      "block": 1,
+      "key": "17-1",
+      "type": "flowchart-v2",
+      "width": 2517,
+      "height": 764,
+      "shapes": 68,
+      "status": "passed"
+    },
+    {
+      "file": "17-API与页面映射图-Mermaid预览.md",
+      "block": 2,
+      "key": "17-2",
+      "type": "flowchart-v2",
+      "width": 948,
+      "height": 1076,
+      "shapes": 43,
+      "status": "passed"
+    },
+    {
+      "file": "17-API与页面映射图-Mermaid预览.md",
+      "block": 3,
+      "key": "17-3",
+      "type": "flowchart-v2",
+      "width": 656,
+      "height": 1290,
+      "shapes": 30,
+      "status": "passed"
+    },
+    {
+      "file": "18-事件流转图-Mermaid预览.md",
+      "block": 1,
+      "key": "18-1",
+      "type": "flowchart-v2",
+      "width": 1174,
+      "height": 1800,
+      "shapes": 55,
+      "status": "passed"
+    },
+    {
+      "file": "18-事件流转图-Mermaid预览.md",
+      "block": 2,
+      "key": "18-2",
+      "type": "sequence",
+      "width": 1514,
+      "height": 1600,
+      "shapes": 66,
+      "status": "passed"
+    },
+    {
+      "file": "18-事件流转图-Mermaid预览.md",
+      "block": 3,
+      "key": "18-3",
+      "type": "flowchart-v2",
+      "width": 861,
+      "height": 1270,
+      "shapes": 35,
+      "status": "passed"
+    },
+    {
+      "file": "19-权限矩阵图-Mermaid预览.md",
+      "block": 1,
+      "key": "19-1",
+      "type": "flowchart-v2",
+      "width": 1670,
+      "height": 3964,
+      "shapes": 84,
+      "status": "passed"
+    },
+    {
+      "file": "19-权限矩阵图-Mermaid预览.md",
+      "block": 2,
+      "key": "19-2",
+      "type": "flowchart-v2",
+      "width": 1227,
+      "height": 566,
+      "shapes": 39,
+      "status": "passed"
+    },
+    {
+      "file": "20-评审到研发门禁图-Mermaid预览.md",
+      "block": 1,
+      "key": "20-1",
+      "type": "flowchart-v2",
+      "width": 1975,
+      "height": 3366,
+      "shapes": 70,
+      "status": "passed"
+    },
+    {
+      "file": "20-评审到研发门禁图-Mermaid预览.md",
+      "block": 2,
+      "key": "20-2",
+      "type": "flowchart-v2",
+      "width": 608,
+      "height": 1238,
+      "shapes": 40,
+      "status": "passed"
+    }
+  ],
+  "relocation": {
+    "recordedAt": "2026-11-10T11:12:38+08:00",
+    "from": "流程图",
+    "to": "PRD/流程图",
+    "originalRenderHashes": {
+      "02-当前态与目标态服务蓝图-Mermaid预览.md": "f30861ef8a31e45aaef5a837adbd81f73b4b8e0f580862e8a76da1f82692e40d",
+      "03-端到端业务泳道图-Mermaid预览.md": "c1b8e03611c63a5ff7f7eaf67913f68bf9e9f345d6faaa9703aee6280ff9c1cd",
+      "04-注册归因泳道图-Mermaid预览.md": "95b526a04109b30c5b4d453a2a62f2f7e326ec336bc62fd9c19877da894e074a",
+      "05-佣金计算流程图-Mermaid预览.md": "ee96e4e8f7b72e6254734f83c335e417f7e06621ef7607fc6706ffb21b720dd9",
+      "06-结算与资金时序图-Mermaid预览.md": "0411e48eb6e2033103840bb306b620b2af787a187fb8ec333ac3086118bf1f40",
+      "07-提现流程图-Mermaid预览.md": "d58cf589234330e1303f7d559759c68ee5d80aeeafed6afb69699f70107a1d73",
+      "08-风险处置流程图-Mermaid预览.md": "3185f3677ee5c832df6b66250afeb49eda24a37f1dbffa5c72defa26914c9511",
+      "09-风险传播图-Mermaid预览.md": "61629a517d9ca121822fe111a2130513e48a6aa42e5763b125ac2d68f9686182",
+      "10-配置审批流程图-Mermaid预览.md": "e0e5e70eac65b159fed0d09c1b95ea94d302145b8673485db5db924a9d1efde2",
+      "11-状态机图-Mermaid预览.md": "f5d4736edfa060fe69ea6b0762f0b1fc7cf86edbe881c70912cc1418424859ab",
+      "12-系统上下文图-Mermaid预览.md": "24dcf36e8f4405c703eaadd64c1df57f0b8d05dfc29d49c3921f015353c58d96",
+      "13-逻辑架构图-Mermaid预览.md": "a6ddd63181f03f35985b948a511d1b062001fb50040f89fb32069bef3cffbfc8",
+      "14-数据流图-Mermaid预览.md": "2dbe46c92d137f0797e6a96f0d409421d82d9eeaa2aa05550e1bacb9c0133062",
+      "15-ER图-Mermaid预览.md": "d2b1e4f1eab1d547fe455d525e9decd6735fa8057f4edbfd8c3069c394e9fc64",
+      "16-数据血缘图-Mermaid预览.md": "920926d992212107064ed3769cff95e321d7094ac5093b0b636ce5024cf85143",
+      "17-API与页面映射图-Mermaid预览.md": "ea719dedfe52d6f2dcc4a0c4e16031d1ef46777ce56749af00cdc32d389be863",
+      "18-事件流转图-Mermaid预览.md": "1bf442f1ef9986c34c3a47235d7c50c55c61d314b267d55a462e50af23aa52ed",
+      "19-权限矩阵图-Mermaid预览.md": "3ee32b7ee003c8d2f8580be2687080337c65528750566748ba929bb74f633475",
+      "20-评审到研发门禁图-Mermaid预览.md": "b19b310a321d3a0e28e9909d3508a6ab6d5ae38f5d2f0121ea7f0428c802c6bf"
+    },
+    "verification": "Markdown links rebased; every Mermaid source block verified byte-identical before and after relocation. Original rendering results retained; current document hashes refreshed."
+  }
+}

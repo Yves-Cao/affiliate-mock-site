@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>04 注册归因泳道图</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+  <div class="layout">
+                <nav class="sidebar">
+      <p class="sidebar-title">流程图导航</p>
+      <div class="nav-group">
+        <p class="group-title">评审主线</p>
+        <a class="nav-item" href="./01.html"><span>01</span><span>项目全景图</span></a>
+        <a class="nav-item" href="./02.html"><span>02</span><span>当前态与目标态服务蓝图</span></a>
+        <a class="nav-item" href="./03.html"><span>03</span><span>端到端业务泳道图</span></a>
+        <a class="nav-item active" href="./04.html"><span>04</span><span>注册归因泳道图</span></a>
+        <a class="nav-item" href="./05.html"><span>05</span><span>佣金计算流程图</span></a>
+        <a class="nav-item" href="./06.html"><span>06</span><span>结算与资金时序图</span></a>
+        <a class="nav-item" href="./07.html"><span>07</span><span>提现流程图</span></a>
+        <a class="nav-item" href="./08.html"><span>08</span><span>风险处置流程图</span></a>
+        <a class="nav-item" href="./09.html"><span>09</span><span>风险传播图</span></a>
+        <a class="nav-item" href="./10.html"><span>10</span><span>配置审批流程图</span></a>
+        <a class="nav-item" href="./11.html"><span>11</span><span>状态机图</span></a>
+        <a class="nav-item" href="./19.html"><span>19</span><span>权限矩阵图</span></a>
+        <a class="nav-item" href="./20.html"><span>20</span><span>评审到研发门禁图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">技术附录</p>
+        <a class="nav-item" href="./12.html"><span>12</span><span>系统上下文图</span></a>
+        <a class="nav-item" href="./13.html"><span>13</span><span>逻辑架构图</span></a>
+        <a class="nav-item" href="./14.html"><span>14</span><span>数据流图</span></a>
+        <a class="nav-item" href="./15.html"><span>15</span><span>ER图</span></a>
+        <a class="nav-item" href="./16.html"><span>16</span><span>数据血缘图</span></a>
+        <a class="nav-item" href="./17.html"><span>17</span><span>API与页面映射图</span></a>
+        <a class="nav-item" href="./18.html"><span>18</span><span>事件流转图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">CRM专项</p>
+        <a class="nav-item" href="./21.html"><span>21</span><span>CRM系统上下文与数据边界图</span></a>
+        <a class="nav-item" href="./22.html"><span>22</span><span>合作者入驻与CRM账户/KYC联动图</span></a>
+        <a class="nav-item" href="./23.html"><span>23</span><span>客户注册归因与CRM事实流图</span></a>
+        <a class="nav-item" href="./24.html"><span>24</span><span>客户资金、交易、风险事实到计佣结算图</span></a>
+        <a class="nav-item" href="./25.html"><span>25</span><span>CRM打款与对账联动图</span></a>
+        <a class="nav-item" href="./26.html"><span>26</span><span>CRM数据异常、补偿与更正图</span></a>
+        <a class="nav-item" href="./27.html"><span>27</span><span>Affiliate数据回传CRM与合规边界图</span></a>
+      </div>
+    </nav>
+    <main>
+      <div class="topbar">
+        <h1>04 注册归因泳道图</h1>
+        <span>评审主线</span>
+      </div>
+      <div class="stage">
+        
+        <section class="diagram-block">
+          <h2>1. 官方点击到最终归属</h2>
+          <div class="diagram-output" data-index="0"></div>
+        </section>
+        <section class="diagram-block">
+          <h2>2. 异常恢复与更正边界</h2>
+          <div class="diagram-output" data-index="1"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script type="application/json" id="page-data">[{"heading":"1. 官方点击到最终归属","code":"flowchart TB\n    subgraph U[\"合作者与被推荐客户\"]\n        A01[\"分享官方域名和官方路径链接\"]\n        A02[\"客户点击并在CRM注册\"]\n    end\n    subgraph CRM[\"CRM事实保存\"]\n        A03[\"保存注册和客户主键<br/>原始参数快照及点击序列\"]\n        A04[\"UTM、活动、二级渠道<br/>自定义参数、点击与链接引用\"]\n        A05[\"提供候选归因、IB归属<br/>事实版本和数据时点\"]\n    end\n    subgraph AFF[\"Affiliate归因判断\"]\n        A06{\"数据完整、及时<br/>且版本无冲突？\"}\n        A07{\"官方入口、点击有效性<br/>及风险检查是否允许？\"}\n        A08{\"已有IB客户归属？\"}\n        A09{\"已存在有效Affiliate归属？\"}\n        A10{\"有归因窗口内<br/>可用点击？\"}\n        A11[\"保留多触点序列<br/>按首次有效点击确定候选\"]\n        A12{\"点击缺失时<br/>推广码可合法兜底？\"}\n        A13[\"记录推广码兜底依据\"]\n        A14[\"保存最终归属与锁定时间<br/>规则版本、来源和审计\"]\n        A15[\"返回原归属结果<br/>后续点击不自动改判\"]\n        A16[\"无有效来源<br/>不按国家、IP或设备猜归属\"]\n        A17[\"排除禁止归属来源<br/>不据此生成CPA佣金\"]\n        A18[\"输出归因事件<br/>后续资格与计佣使用锁定结果\"]\n    end\n    subgraph TASK[\"核验与补偿\"]\n        A19[\"补数或归因冲突任务<br/>保留原始事实\"]\n        A20[\"补数或复核后取得<br/>可核验事实与版本\"]\n        A21[\"CRM最终归属回传范围及通道<br/>待CRM业务回传评审\"]\n    end\n    A01 --> A02 --> A03 --> A04 --> A05 --> A06\n    A06 -->|否| A19\n    A19 -->|处理完成| A20 --> A06\n    A06 -->|是| A07\n    A07 -->|禁止或点击无效| A17\n    A07 -->|允许继续| A08\n    A08 -->|是| A17\n    A08 -->|否| A09\n    A09 -->|已锁定且无冲突| A15\n    A09 -->|有归属冲突| A19\n    A09 -->|未归属| A10\n    A10 -->|有| A11 --> A14\n    A10 -->|无点击| A12\n    A12 -->|是| A13 --> A14\n    A12 -->|否| A16\n    A14 --> A18\n    A14 -.->|回传能力与范围未关闭| A21\n    A15 --> A18","type":"mermaid"},{"heading":"2. 异常恢复与更正边界","code":"flowchart TB\n    X01[\"重复注册通知或重复读取\"] --> X02{\"相同事实与版本<br/>是否已处理？\"}\n    X02 -->|是| X03[\"返回原处理结果<br/>不重复客户归属和下游副作用\"]\n    X02 -->|否或版本变化| X04[\"按业务时间和版本重新核验\"]\n    X04 --> X05{\"仅为缺数补齐<br/>还是历史结论更正？\"}\n    X05 -->|缺数补齐| X06[\"回到主图A06<br/>重新检查而非直接锁定\"]\n    X05 -->|历史归属更正| X07[\"核验依据、权限和审计<br/>保留原始事实及历史结论\"]\n    X07 --> X08{\"已影响佣金或资金？\"}\n    X08 -->|是| X09[\"进入重算或冲正评审<br/>不覆盖原账、不直接改已付金额\"]\n    X08 -->|否| X10[\"按获准更正契约处理<br/>具体动作与状态待核验\"]","type":"mermaid"}]</script>
+  <script src="./assets/mermaid.min.js"></script>
+  <script src="./assets/viewer-static.min.js"></script>
+  <script>
+    const blocks = JSON.parse(document.getElementById("page-data").textContent);
+    mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "default", fontFamily: 'Arial, "PingFang SC", sans-serif', flowchart: { useMaxWidth: true, padding: 16 }, sequence: { useMaxWidth: true, wrap: true } });
+    async function renderBlock(block, output) {
+      try {
+        output.innerHTML = '<div class="loading">渲染中...</div>';
+        if (block.type === "drawio") {
+          const host = document.createElement("div");
+          host.className = "mxgraph";
+          host.setAttribute("data-mxgraph", JSON.stringify({ xml: block.code, nav: true, resize: true, toolbar: "zoom layers" }));
+          output.appendChild(host);
+          GraphViewer.createViewerForElement(host);
+          return;
+        }
+        const result = await mermaid.render("svg-" + Math.random().toString(36).slice(2), block.code);
+        output.innerHTML = result.svg;
+      } catch (error) {
+        output.innerHTML = '<div class="error"></div>';
+        output.querySelector(".error").textContent = error && error.message ? error.message : String(error);
+      }
+    }
+    document.querySelectorAll(".diagram-output").forEach((output, index) => renderBlock(blocks[index], output));
+  </script>
+</body>
+</html>

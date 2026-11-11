@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>21 CRM系统上下文与数据边界图</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+  <div class="layout">
+        <nav class="sidebar">
+      <p class="sidebar-title">流程图导航</p>
+      <div class="nav-group">
+        <p class="group-title">评审主线</p>
+        <a class="nav-item" href="./01.html"><span>01</span><span>项目全景图</span></a>
+        <a class="nav-item" href="./02.html"><span>02</span><span>当前态与目标态服务蓝图</span></a>
+        <a class="nav-item" href="./03.html"><span>03</span><span>端到端业务泳道图</span></a>
+        <a class="nav-item" href="./04.html"><span>04</span><span>注册归因泳道图</span></a>
+        <a class="nav-item" href="./05.html"><span>05</span><span>佣金计算流程图</span></a>
+        <a class="nav-item" href="./06.html"><span>06</span><span>结算与资金时序图</span></a>
+        <a class="nav-item" href="./07.html"><span>07</span><span>提现流程图</span></a>
+        <a class="nav-item" href="./08.html"><span>08</span><span>风险处置流程图</span></a>
+        <a class="nav-item" href="./09.html"><span>09</span><span>风险传播图</span></a>
+        <a class="nav-item" href="./10.html"><span>10</span><span>配置审批流程图</span></a>
+        <a class="nav-item" href="./11.html"><span>11</span><span>状态机图</span></a>
+        <a class="nav-item" href="./19.html"><span>19</span><span>权限矩阵图</span></a>
+        <a class="nav-item" href="./20.html"><span>20</span><span>评审到研发门禁图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">技术附录</p>
+        <a class="nav-item" href="./12.html"><span>12</span><span>系统上下文图</span></a>
+        <a class="nav-item" href="./13.html"><span>13</span><span>逻辑架构图</span></a>
+        <a class="nav-item" href="./14.html"><span>14</span><span>数据流图</span></a>
+        <a class="nav-item" href="./15.html"><span>15</span><span>ER图</span></a>
+        <a class="nav-item" href="./16.html"><span>16</span><span>数据血缘图</span></a>
+        <a class="nav-item" href="./17.html"><span>17</span><span>API与页面映射图</span></a>
+        <a class="nav-item" href="./18.html"><span>18</span><span>事件流转图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">CRM专项</p>
+        <a class="nav-item active" href="./21.html"><span>21</span><span>CRM系统上下文与数据边界图</span></a>
+        <a class="nav-item" href="./22.html"><span>22</span><span>合作者入驻与CRM账户/KYC联动图</span></a>
+        <a class="nav-item" href="./23.html"><span>23</span><span>客户注册归因与CRM事实流图</span></a>
+        <a class="nav-item" href="./24.html"><span>24</span><span>客户资金、交易、风险事实到计佣结算图</span></a>
+        <a class="nav-item" href="./25.html"><span>25</span><span>CRM打款与对账联动图</span></a>
+        <a class="nav-item" href="./26.html"><span>26</span><span>CRM数据异常、补偿与更正图</span></a>
+        <a class="nav-item" href="./27.html"><span>27</span><span>Affiliate数据回传CRM与合规边界图</span></a>
+      </div>
+    </nav>
+    <main>
+      <div class="topbar">
+        <h1>21 CRM系统上下文与数据边界图</h1>
+        <span>CRM专项</span>
+      </div>
+      <div class="stage">
+        <section class="diagram-block">
+          <h2>1. CRM系统上下文与数据边界图 Mermaid预览</h2>
+          <div class="diagram-output" data-index="0"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script type="application/json" id="page-data">[{"heading":"1. CRM系统上下文与数据边界图","code":"flowchart LR\n    PARTNER[合作者]\n    CUSTOMER[被推荐客户]\n    STAFF[运营/风控/财务/客服/审计]\n    AFF[Affiliate\u003cbr/>点击·归因·计佣·风险·结算·提现·审计]\n    CRM[CRM\u003cbr/>账户·客户·KYC/KYB·资金·交易·欺诈事实]\n    ACCESS[受控数据库访问层\u003cbr/>表/视图/增量/受控写入]\n    PAY[支付渠道/银行]\n    IMC[IMC\u003cbr/>分析消费]\n    MAIL[邮件/站内通知]\n    RETURN[Affiliate业务摘要回传\u003cbr/>用途与范围待CRM评审]\n\n    PARTNER --> AFF\n    CUSTOMER --> CRM\n    STAFF --> AFF\n    CRM --> ACCESS\n    ACCESS -->|注册/KYC/资金/交易/风险事实| AFF\n    AFF -->|主体关联/受控状态确认/打款请求| ACCESS\n    AFF -->|统一事件| IMC\n    AFF -->|通知任务| MAIL\n    AFF -->|幂等打款请求| CRM\n    CRM -->|付款执行请求| PAY\n    PAY -->|回执/外部流水| CRM\n    CRM -->|打款结果/对账事实| AFF\n    AFF -.-> RETURN\n    RETURN -.-> CRM\n\n    classDef source fill:#e8f1ff,stroke:#2563eb,color:#111827;\n    classDef core fill:#eefbf3,stroke:#16a34a,color:#111827;\n    classDef pending fill:#fff7ed,stroke:#ea580c,color:#111827;\n    class CRM,ACCESS,PAY source;\n    class AFF core;\n    class RETURN pending;","type":"mermaid"}]</script>
+  <script src="./assets/mermaid.min.js"></script>
+  <script src="./assets/viewer-static.min.js"></script>
+  <script>
+    const blocks = JSON.parse(document.getElementById("page-data").textContent);
+    mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "default", fontFamily: 'Arial, "PingFang SC", sans-serif', flowchart: { useMaxWidth: true, padding: 16 }, sequence: { useMaxWidth: true, wrap: true } });
+    async function renderBlock(block, output) {
+      try {
+        output.innerHTML = '<div class="loading">渲染中...</div>';
+        const result = await mermaid.render("svg-" + Math.random().toString(36).slice(2), block.code);
+        output.innerHTML = result.svg;
+      } catch (error) {
+        output.innerHTML = '<div class="error"></div>';
+        output.querySelector(".error").textContent = error && error.message ? error.message : String(error);
+      }
+    }
+    document.querySelectorAll(".diagram-output").forEach((output, index) => renderBlock(blocks[index], output));
+  </script>
+</body>
+</html>

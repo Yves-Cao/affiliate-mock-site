@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>17 API与页面映射图</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+  <div class="layout">
+                <nav class="sidebar">
+      <p class="sidebar-title">流程图导航</p>
+      <div class="nav-group">
+        <p class="group-title">评审主线</p>
+        <a class="nav-item" href="./01.html"><span>01</span><span>项目全景图</span></a>
+        <a class="nav-item" href="./02.html"><span>02</span><span>当前态与目标态服务蓝图</span></a>
+        <a class="nav-item" href="./03.html"><span>03</span><span>端到端业务泳道图</span></a>
+        <a class="nav-item" href="./04.html"><span>04</span><span>注册归因泳道图</span></a>
+        <a class="nav-item" href="./05.html"><span>05</span><span>佣金计算流程图</span></a>
+        <a class="nav-item" href="./06.html"><span>06</span><span>结算与资金时序图</span></a>
+        <a class="nav-item" href="./07.html"><span>07</span><span>提现流程图</span></a>
+        <a class="nav-item" href="./08.html"><span>08</span><span>风险处置流程图</span></a>
+        <a class="nav-item" href="./09.html"><span>09</span><span>风险传播图</span></a>
+        <a class="nav-item" href="./10.html"><span>10</span><span>配置审批流程图</span></a>
+        <a class="nav-item" href="./11.html"><span>11</span><span>状态机图</span></a>
+        <a class="nav-item" href="./19.html"><span>19</span><span>权限矩阵图</span></a>
+        <a class="nav-item" href="./20.html"><span>20</span><span>评审到研发门禁图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">技术附录</p>
+        <a class="nav-item" href="./12.html"><span>12</span><span>系统上下文图</span></a>
+        <a class="nav-item" href="./13.html"><span>13</span><span>逻辑架构图</span></a>
+        <a class="nav-item" href="./14.html"><span>14</span><span>数据流图</span></a>
+        <a class="nav-item" href="./15.html"><span>15</span><span>ER图</span></a>
+        <a class="nav-item" href="./16.html"><span>16</span><span>数据血缘图</span></a>
+        <a class="nav-item active" href="./17.html"><span>17</span><span>API与页面映射图</span></a>
+        <a class="nav-item" href="./18.html"><span>18</span><span>事件流转图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">CRM专项</p>
+        <a class="nav-item" href="./21.html"><span>21</span><span>CRM系统上下文与数据边界图</span></a>
+        <a class="nav-item" href="./22.html"><span>22</span><span>合作者入驻与CRM账户/KYC联动图</span></a>
+        <a class="nav-item" href="./23.html"><span>23</span><span>客户注册归因与CRM事实流图</span></a>
+        <a class="nav-item" href="./24.html"><span>24</span><span>客户资金、交易、风险事实到计佣结算图</span></a>
+        <a class="nav-item" href="./25.html"><span>25</span><span>CRM打款与对账联动图</span></a>
+        <a class="nav-item" href="./26.html"><span>26</span><span>CRM数据异常、补偿与更正图</span></a>
+        <a class="nav-item" href="./27.html"><span>27</span><span>Affiliate数据回传CRM与合规边界图</span></a>
+      </div>
+    </nav>
+    <main>
+      <div class="topbar">
+        <h1>17 API与页面映射图</h1>
+        <span>技术附录</span>
+      </div>
+      <div class="stage">
+        
+        <section class="diagram-block">
+          <h2>1. 页面到接口与逻辑对象</h2>
+          <div class="diagram-output" data-index="0"></div>
+        </section>
+        <section class="diagram-block">
+          <h2>2. 专项页面与场景、测试和证据</h2>
+          <div class="diagram-output" data-index="1"></div>
+        </section>
+        <section class="diagram-block">
+          <h2>3. 每个写动作的验证关系</h2>
+          <div class="diagram-output" data-index="2"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script type="application/json" id="page-data">[{"heading":"1. 页面到接口与逻辑对象","code":"flowchart TB\n    subgraph PAGE[\"页面与业务入口\"]\n        ACC[\"合作者账户与合规\"]\n        WD[\"合作者手动提现\"]\n        ST[\"合作者结算单\"]\n        RUN[\"管理端结算运行查询/调度入口\"]\n        AW[\"管理端提现核验\"]\n        AP[\"统一审批队列\"]\n        C360[\"管理端客户360\"]\n    end\n    subgraph API[\"文档已有的目标接口\"]\n        A1[\"GET /accounts/{partner_id}/overview<br/>GET/PATCH /accounts/{partner_id}/profile\"]\n        A2[\"POST /withdrawals<br/>GET /withdrawals/{withdrawal_id}\"]\n        A3[\"GET /statements/{statement_id}<br/>POST /statements/{statement_id}/download\"]\n        A4[\"POST /settlements/daily/run<br/>GET /settlements/daily/runs/{run_id}\"]\n        A5[\"GET /admin/withdrawals/{id}<br/>POST /admin/withdrawals/{id}/verify\"]\n        A6[\"GET /admin/approval-queue/{id}<br/>POST /admin/approval-queue/{id}/approve\"]\n        A7[\"GET /admin/customers/{customer_id}/360\"]\n    end\n    subgraph OBJ[\"主要逻辑对象与数据契约\"]\n        O1[\"CRM账户引用、资料版本及限制摘要\"]\n        O2[\"提现、唯一结算单及分摊\"]\n        O3[\"结算单版本、明细与下载任务\"]\n        O4[\"每日运行及逐案处理结果\"]\n        O5[\"核验清单、付款时间线及资金引用\"]\n        O6[\"审批记录、批准范围、对象版本及审计\"]\n        O7[\"客户、归因、案件及CRM事实引用\"]\n    end\n    ACC --> A1 --> O1\n    WD --> A2 --> O2\n    ST --> A3 --> O3\n    RUN --> A4 --> O4\n    AW --> A5 --> O5\n    AP --> A6 --> O6\n    C360 --> A7 --> O7\n    O2 -->|\"同一withdrawal_id及statement_id\"| O3","type":"mermaid"},{"heading":"2. 专项页面与场景、测试和证据","code":"flowchart TB\n    TASK[\"统一任务队列<br/>列表、详情、草稿及提交复核\"]\n    RISK[\"风险工作台<br/>对象、事件、集群及复核请求\"]\n    CS[\"管理端客户服务<br/>工单、公开回复与内部备注\"]\n    TC[\"任务接口契约v0.1<br/>已有路径与处理包\"]\n    RC[\"风险页面数据契约v1.0<br/>已有目标路径与字段裁剪\"]\n    CC[\"客服开发契约v0.1<br/>公开/内部受众及附件规则\"]\n    SC[\"正式Schema与状态枚举<br/>未补齐部分仍待回填\"]\n    MOCK[\"同版Mock场景<br/>对象ID、版本、状态、金额及权限\"]\n    TEST[\"对应原验收编号及实际用例<br/>成功、拒绝、重复、未知、并发与恢复\"]\n    LOCAL[\"已有专项本地交付与局部测试记录\"]\n    GAP[\"待补：完整HTTP、持久化、跨端<br/>真实IAM/CRM/外部服务与完整验收\"]\n    FULL[\"相应阶段真实证据与专业签核<br/>未取得前不标全部通过\"]\n    TASK --> TC\n    RISK --> RC\n    CS --> CC\n    TC --> SC\n    RC --> SC\n    CC --> SC\n    SC --> MOCK\n    MOCK --> TEST\n    TEST --> LOCAL\n    TEST --> GAP\n    GAP --> FULL","type":"mermaid"},{"heading":"3. 每个写动作的验证关系","code":"flowchart TB\n    INTENT[\"页面提交业务意图\"]\n    AUTH{\"服务端身份、对象范围与动作允许？\"}\n    VER{\"幂等摘要、对象版本及必要前置有效？\"}\n    POLICY[\"按适用审批策略与执行条件处理\"]\n    RESULT[\"返回实际业务对象、状态与trace<br/>关联原场景、用例及证据\"]\n    DENY[\"拒绝并保留原因/审计<br/>不依赖菜单隐藏\"]\n    UNKNOWN[\"请求结果未知<br/>查询原请求，不盲目重复写\"]\n    INTENT --> AUTH\n    AUTH -->|\"否\"| DENY\n    AUTH -->|\"是\"| VER\n    VER -->|\"冲突或缺失\"| DENY\n    VER -->|\"通过\"| POLICY\n    POLICY --> RESULT\n    POLICY -->|\"超时未知\"| UNKNOWN\n    UNKNOWN -->|\"复用原业务引用核对结果\"| RESULT","type":"mermaid"}]</script>
+  <script src="./assets/mermaid.min.js"></script>
+  <script src="./assets/viewer-static.min.js"></script>
+  <script>
+    const blocks = JSON.parse(document.getElementById("page-data").textContent);
+    mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "default", fontFamily: 'Arial, "PingFang SC", sans-serif', flowchart: { useMaxWidth: true, padding: 16 }, sequence: { useMaxWidth: true, wrap: true } });
+    async function renderBlock(block, output) {
+      try {
+        output.innerHTML = '<div class="loading">渲染中...</div>';
+        if (block.type === "drawio") {
+          const host = document.createElement("div");
+          host.className = "mxgraph";
+          host.setAttribute("data-mxgraph", JSON.stringify({ xml: block.code, nav: true, resize: true, toolbar: "zoom layers" }));
+          output.appendChild(host);
+          GraphViewer.createViewerForElement(host);
+          return;
+        }
+        const result = await mermaid.render("svg-" + Math.random().toString(36).slice(2), block.code);
+        output.innerHTML = result.svg;
+      } catch (error) {
+        output.innerHTML = '<div class="error"></div>';
+        output.querySelector(".error").textContent = error && error.message ? error.message : String(error);
+      }
+    }
+    document.querySelectorAll(".diagram-output").forEach((output, index) => renderBlock(blocks[index], output));
+  </script>
+</body>
+</html>
