@@ -47,6 +47,9 @@ assert.ok(css.includes("help-assistant-composer"), "Assistant composer is a dist
 assert.ok(app.includes("assistantOpen: false"), "Assistant is collapsed by default");
 assert.ok(css.includes(".help-assistant[hidden] { display: none !important; }"), "Hidden state wins over the flex panel");
 assert.ok(!js.includes('class="visually-hidden"'), "Launcher renders icon only");
+assert.ok(js.includes("if (s.assistantOpen) {"), "Floating and topbar assistant triggers toggle the panel");
+assert.ok(js.includes("assistantSearchComposition") && js.includes("compositionend"), "Assistant search preserves IME composition");
+assert.ok(js.includes("data-help-assistant-results") && js.includes("assistantResultsMarkup"), "Assistant search updates results without replacing the input");
 assert.ok(drawerCss.includes(".aff-drawer--compact { width: min(480px, 100vw);"), "Drawer follows the compact 480px geometry");
 assert.ok(css.includes("@media (max-width: 767px)"), "Mobile layout is explicit");
 assert.ok(!/letter-spacing:\s*-/.test(css), "No negative letter spacing");
