@@ -2241,7 +2241,7 @@ function acShell(meta,route,bodyHtml){
 function acRender(){
   const {route,tab,view} = acParseHash();
   if (route === "tickets") {
-    location.replace(`./admin-dev.html${location.hash}`);
+    location.replace(`../../../admin-dev.html${location.hash}`);
     return;
   }
   AC_STATE.route = route;AC_STATE.tab = tab;
@@ -2512,7 +2512,7 @@ document.addEventListener("click",e => {
   const attrJumpEvent = e.target.closest("[data-attr-jump-event]");
   if (attrJumpEvent) { location.hash = `#/events?trace_id=${encodeURIComponent(attrJumpEvent.dataset.attrJumpEvent)}`; return; }
   const attrJumpCustomer = e.target.closest("[data-attr-jump-customer]");
-  if (attrJumpCustomer) { window.location.href = `./customer-360.html#/customer-360/${encodeURIComponent(attrJumpCustomer.dataset.attrJumpCustomer)}?tab=attribution&from=attribution`; return; }
+  if (attrJumpCustomer) { window.location.href = `../customer-360/customer-360.html#/customer-360/${encodeURIComponent(attrJumpCustomer.dataset.attrJumpCustomer)}?tab=attribution&from=attribution`; return; }
   const it = e.target.closest("[data-dd-item]");
   if (it) {const def = AC_DROPDOWN.items[it.dataset.ddKey];acDDClose();if (def) def.onSelect(it.dataset.ddItem);return;}
   const tr = e.target.closest("[data-dd-trigger]");
@@ -2637,7 +2637,7 @@ document.addEventListener("click",e => {
   const ro = e.target.closest("[data-riskobj]");
   if (ro) {drawerRisk(JSON.parse(ro.dataset.riskobj));return;}
   const c360 = e.target.closest("[data-customer360]");
-  if (c360) {window.location.href = `./customer-360.html#/customer-360/${encodeURIComponent(c360.dataset.customer360)}`;return;}
+  if (c360) {window.location.href = `../customer-360/customer-360.html#/customer-360/${encodeURIComponent(c360.dataset.customer360)}`;return;}
   const pb = e.target.closest("[data-pb]");
   if (pb) {drawerPB(pb.dataset.pb);return;}
   const wd = e.target.closest("[data-wd]");

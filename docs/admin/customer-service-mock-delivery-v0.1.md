@@ -10,7 +10,7 @@
 - 启动：在本仓库执行 `PORT=4181 npm run serve`；此端口已启动。刷新页面重建本地内存数据。
 - 菜单：风控 › 客户服务；四视图、查询、11个默认列及3个可选列、分页和同页720px处理抽屉。
 - 抽屉：沟通、关联与协作、处理记录；按能力显示认领、分派、回复、内部备注、补充资料、协作、解决、关闭、重开、申诉指引和关联对象操作。
-- 旧 `#/admin-modules/support-ticket` 及其详情别名进入当前页面；`admin-rebuild.html#/tickets` 转向统一 `admin-dev.html`。旧客服展示由新页面取代，不建立第二套客服页面。
+- 旧 `#/admin-modules/support-ticket` 及其详情别名进入当前页面；归档的重建版 `archive/legacy-management/rebuild/admin-rebuild.html#/tickets` 仍保留历史兼容跳转，最终进入统一 `admin-dev.html`。旧客服展示由新页面取代，不建立第二套客服页面。
 - 页面批次：`admin-support-v1`（HTML资源查询标识）。未提交的共享工作区，无独立commit或构建号；全局壳版本不代表本专项版本。
 - 数据：`customer-service-v0.1`，FIX-CS01至20对应T-CS001至020；初始 `server_now=2026-11-08T12:00:00.000Z`，显示时区Asia/Shanghai。
 - 8小时首响、3天解决、7天重开及5/10MiB、25MiB文件限额均为夹具策略，不是生产默认值。可信测试钩子可以推进模拟时钟。

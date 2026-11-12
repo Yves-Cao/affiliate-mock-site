@@ -39,7 +39,7 @@ The demo login is a presentation gate only, not authentication. A successful moc
 
 Hover the top-right account avatar to open account management and logout. Account management opens as a fullscreen mock dialog for the display timezone; logout clears the demo session.
 
-Operations-admin build files remain in the repository for development review, but the public user navigation does not expose an admin-demo entry.
+The active operations-admin entry is `admin-dev.html` (also available under `admin/index.html`). The former static admin bundle and standalone rebuild/customer-360 pages are preserved under `archive/` for version comparison and are not exposed by the active navigation.
 
 The normal user view keeps internal scenario controls out of the visible top bar.
 
@@ -82,7 +82,7 @@ npm run serve
 ```
 
 - UI: `http://127.0.0.1:4179/admin-dev.html`
-- Customer 360: `http://127.0.0.1:4179/customer-360.html#/customer-360/C-88231`
+- Customer 360 task context: `http://127.0.0.1:4179/admin-dev.html#/customer-360/DEMO-C01?tab=finance&task_id=DEMO-T01`
 - OpenAPI: `openapi/admin-api.yaml`
 - Target 30-tab OpenAPI skeleton: `openapi/affiliate-mock-openapi.yaml`
 - Mock API: `http://127.0.0.1:4020/admin/api/v1`
@@ -95,7 +95,7 @@ npm run test:admin-api
 npm run test:target-openapi
 ```
 
-The public admin target is `http://affiliate.evecha.cn/admin/`. This is a static synthetic UI deployment for development review; Cloudflare Access is not configured, so do not use it for real operational data or credentials. OpenAPI and mock-server execution remain local development workflows.
+The public admin target is `http://affiliate.evecha.cn/admin/`. This is a static synthetic UI deployment for development review; Cloudflare Access is not configured, so do not use it for real operational data or credentials. OpenAPI and mock-server execution remain local development workflows. The active product surfaces are the user side (`index.html`) and unified admin (`admin/index.html`); `campaign-link.html` remains a user-side promotion-link helper.
 
 ## UI Check
 

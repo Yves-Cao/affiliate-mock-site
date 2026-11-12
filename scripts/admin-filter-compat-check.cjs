@@ -78,7 +78,7 @@ async function main() {
     const base = `http://127.0.0.1:${server.address().port}/`;
     async function open(surface, route, tab) {
       await page.goto("about:blank");
-      await page.goto(`${base}${surface === "rebuilt" ? "admin-rebuild.html#/" : "admin.html#"}${route}`);
+      await page.goto(`${base}${surface === "rebuilt" ? "archive/legacy-management/rebuild/admin-rebuild.html#/" : "archive/legacy-admin/admin.html#"}${route}`);
       if (surface === "legacy") {
         await page.locator(`[data-tab="${tab}"]`).click();
         await page.waitForFunction(value => document.querySelector(`[data-tab="${value}"]`)?.classList.contains("active"), tab);

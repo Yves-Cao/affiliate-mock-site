@@ -14,7 +14,15 @@
     supportMenuGroup.items.push({id:"nav-customer-service",label:"客户服务",stage:"MVP",routeId:"tickets",tabId:"customer-service",summary:"合作方服务工单、沟通、专业协作与处理记录。",objects:["工单","消息","协作任务"],actions:["认领","回复","协作","解决","关闭"],dependency:["客户服务"]});
   }
   const legacySupportMenu = prototype.menuBlueprint.find(group => group.id === "processing")?.items.find(item => item.id === "nav-appeals");
-  if (legacySupportMenu) {legacySupportMenu.label = "申诉处理";legacySupportMenu.summary = "进入专业申诉任务；一般服务工单在客户服务处理。";}
+  if (legacySupportMenu) {
+    Object.assign(legacySupportMenu,{
+      label:"申诉处理",
+      routeId:"tasks",
+      tabId:"task-queue",
+      query:"scope=authorized&source_type=appeal",
+      summary:"进入统一任务队列并筛选申诉任务；一般服务工单在客户服务处理。"
+    });
+  }
   const taskQueueStates = ["open","processing","waiting_material","pending_approval","returned","pending_execution","executing","execution_failed","done","closed"];
   Object.assign(prototype.scenarios,{batch_partial:"批量部分失败",write_timeout:"写入响应超时",summary_error:"统计暂不可用",boundary:"边界数据检查"});
   prototype.routes.push(
@@ -1049,9 +1057,9 @@
       return {routeId:"admin-review",tabId:"integration",detailId:null,view:null,openExportCenter:true};
     }
     if (parts[0] === "analytics-performance") {
-      const target = "./admin-rebuild.html#/analytics-performance";
-      if (!location.href.endsWith(target)) location.replace(target);
-      return {routeId:"admin-workbench",tabId:"tasks",detailId:null,view:null};
+      const target = "#/admin-performance/roi";
+      if (location.hash !== target) history.replaceState(null,"",target);
+      return {routeId:"admin-performance",tabId:"roi",detailId:null,view:null};
     }
     if (parts[0] === "customer-360") {
       const tabId=["overview","attribution","finance","risk","events"].includes(params.get("tab"))?params.get("tab"):"overview";
@@ -1131,6 +1139,11 @@
 
   function menuGroupItems(group) {
     return flattenMenuItems(group?.items || []);
+  }
+
+  function menuItemPath(item) {
+    const path = item.view ? `${item.routeId}/${item.tabId}/view=${item.view}` : `${item.routeId}/${item.tabId}`;
+    return item.query ? `${path}?${item.query}` : path;
   }
 
   function activeCockpitView() {
@@ -4040,7 +4053,7 @@
   }
 
   function moduleActionLabel(actionId) {
-    return moduleActionLabels[state.tabId]?.[actionId] || actionCatalog[actionId].label;
+    return moduleActionLabels[state.tabId]?.[actionId] || actionCatalog[actionId]?.label || actionId || "";
   }
 
   function actionDisplayLabel(actionId) {
@@ -8917,7 +8930,7 @@
       }
       if (data?.item.routeId) {
         state.menuActiveGroupId = data.group.id;
-        return navigate(data.item.view ? `${data.item.routeId}/${data.item.tabId}/view=${data.item.view}` : `${data.item.routeId}/${data.item.tabId}`);
+        return navigate(menuItemPath(data.item));
       }
       if (data?.item.action === "audit") {state.auditOpen=true;return render();}
       return render();
@@ -8977,7 +8990,7 @@
       const {group,item} = data;
       state.menuActiveGroupId = group.id;
       state.menuOpenGroups = new Set([group.id]);
-      if (item.routeId) {state.menuBlueprintId=null;return navigate(item.view ? `${item.routeId}/${item.tabId}/view=${item.view}` : `${item.routeId}/${item.tabId}`);}
+      if (item.routeId) {state.menuBlueprintId=null;return navigate(menuItemPath(item));}
       if (item.action === "audit") {state.auditOpen=true;return render();}
       state.menuBlueprintId = item.id;
       return render();

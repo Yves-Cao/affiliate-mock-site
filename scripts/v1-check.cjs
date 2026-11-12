@@ -76,7 +76,7 @@ async function shot(page, name) {
     await desktop.page.locator("[data-rp-client]").first().click();
     await desktop.page.waitForSelector(".report-drawer");
     const drawerText = await desktop.page.locator(".report-drawer").innerText();
-    for (const text of ["客户资格状态", "客户里程碑状态", "资金状态", "质量服务"]) {
+    for (const text of ["客户资格状态", "客户里程碑状态", "佣金状态", "质量服务"]) {
       if (!drawerText.includes(text)) throw new Error(`client drawer missing ${text}`);
     }
     const paidState = await desktop.page.evaluate(() => {
@@ -89,7 +89,7 @@ async function shot(page, name) {
     await desktop.page.goto(`${baseUrl}/#/pay`, { waitUntil: "domcontentloaded" });
     await desktop.page.waitForSelector(".earn-table");
     const payText = await desktop.page.locator("#main").innerText();
-    for (const text of ["有效FTD", "质量服务", "佣金案件"]) {
+    for (const text of ["有效FTD", "质量服务", "佣金流水"]) {
       if (!payText.includes(text)) throw new Error(`pay missing ${text}`);
     }
 
@@ -118,7 +118,7 @@ async function shot(page, name) {
     await shot(desktop.page, "user-wd-kyb-1440");
 
     for (const route of ["admin-config", "admin-risk", "admin-review", "admin-performance"]) {
-      await desktop.page.goto(`${baseUrl}/admin.html#${route}`, { waitUntil: "domcontentloaded" });
+      await desktop.page.goto(`${baseUrl}/archive/legacy-admin/admin.html#${route}`, { waitUntil: "domcontentloaded" });
       await desktop.page.waitForSelector(".tm-table-wrap");
       await assertNoOverflow(desktop.page, `admin ${route}`);
       await shot(desktop.page, `admin-${route}-1440`);
@@ -137,7 +137,7 @@ async function shot(page, name) {
       await assertNoOverflow(mobile.page, `mobile ${route}`);
       await shot(mobile.page, `user-${route}-390`);
     }
-    await mobile.page.goto(`${baseUrl}/admin.html#admin-risk`, { waitUntil: "domcontentloaded" });
+    await mobile.page.goto(`${baseUrl}/archive/legacy-admin/admin.html#admin-risk`, { waitUntil: "domcontentloaded" });
     await mobile.page.waitForSelector(".tm-table-wrap");
     await assertNoOverflow(mobile.page, "mobile admin-risk");
     await shot(mobile.page, "admin-risk-390");

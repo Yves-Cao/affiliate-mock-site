@@ -376,7 +376,7 @@ async function main() {
       assert.ok(subjects.length > 0 && subjects.every(subject => subject.includes("佣金")));
     });
     await runCase("legacy unified route and previous rebuild entry resolve to new page", ["AC-CS24"], async () => {
-      await fresh({file:"admin-rebuild.html"});
+      await fresh({file:"archive/legacy-management/rebuild/admin-rebuild.html"});
       assert.ok(page.url().includes("admin-dev.html#/tickets"));
       assert.equal(await page.locator(".cs-page h1").innerText(),"客户服务");
       await page.goto(`${baseUrl}/admin-dev.html#/admin-modules/support-ticket/T-CS002`,{waitUntil:"domcontentloaded"});

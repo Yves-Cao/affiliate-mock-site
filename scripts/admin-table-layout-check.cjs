@@ -14,18 +14,17 @@ try {
 const root = path.resolve(__dirname, "..");
 const artifacts = path.join(root, ".artifacts/admin-tables");
 const routes = [
-  ["legacy", "admin.html#/admin-performance"],
+  ["legacy", "archive/legacy-admin/admin.html#/admin-performance"],
   ["clients", "admin-dev.html#/admin-modules/client-list"],
   ["tasks", "admin-dev.html#/tasks"],
   ["tickets", "admin-dev.html#/tickets"],
   ["risk", "admin-dev.html#/risk-workbench?tab=events"],
   ["partner", "admin-dev.html#/partner-360/partner-1003?tab=finance"],
-  ["rebuilt-clients", "admin-rebuild.html#/clients"],
-  ["attribution", "admin-rebuild.html#/attribution"],
-  ["commissions", "admin-rebuild.html#/commission-settlement?tab=commissions"],
-  ["config", "admin-rebuild.html#/config"],
-  ["analytics", "admin-rebuild.html#/analytics-performance"],
-  ["customer", "customer-360.html#/customer-360/C-88231?tab=finance"]
+  ["rebuilt-clients", "archive/legacy-management/rebuild/admin-rebuild.html#/clients"],
+  ["attribution", "archive/legacy-management/rebuild/admin-rebuild.html#/attribution"],
+  ["commissions", "archive/legacy-management/rebuild/admin-rebuild.html#/commission-settlement?tab=commissions"],
+  ["config", "archive/legacy-management/rebuild/admin-rebuild.html#/config"],
+  ["analytics", "admin-dev.html#/admin-performance/roi"]
 ];
 const report = {cases: [], errors: []};
 const mime = {".html": "text/html", ".css": "text/css", ".js": "text/javascript"};
@@ -147,6 +146,15 @@ async function main() {
         }
       });
     }
+    await run("customer 360 task context remains in unified admin", async () => {
+      await page.goto("about:blank");
+      await page.goto(`${base}admin-dev.html#/admin-workbench`);
+      await page.locator("[data-role]").selectOption("risk_supervisor");
+      await page.goto(`${base}admin-dev.html#/customer-360/DEMO-C01?tab=finance&task_id=DEMO-T01`);
+      await page.locator(".tq-object-page").waitFor();
+      assert.equal(await page.locator(".tq-object-page h1").innerText(), "Krit W.");
+      assert.equal(await page.locator(".tq-object-page table tbody tr").count(), 2);
+    });
 
     await run("task sorting, keyboard resizing, pointer resizing and fixed action", async () => {
       await open("admin-dev.html#/tasks");
@@ -187,7 +195,7 @@ async function main() {
     });
 
     await run("configuration menu escapes table through existing portal", async () => {
-      await open("admin-rebuild.html#/config");
+      await open("archive/legacy-management/rebuild/admin-rebuild.html#/config");
       await page.locator("[data-config-menu]").first().click();
       const menu = page.locator(".ac-action-portal");
       await menu.waitFor({state: "visible"});
@@ -197,7 +205,7 @@ async function main() {
     });
 
     await run("long headers and action groups stay inside their columns", async () => {
-      await open("admin-rebuild.html#/attribution");
+      await open("archive/legacy-management/rebuild/admin-rebuild.html#/attribution");
       const widths = await page.locator("table").first().locator("th").evaluateAll(
         cells => cells.map(cell => cell.getBoundingClientRect().width)
       );

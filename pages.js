@@ -1065,12 +1065,13 @@ AFF.pages.onboarding = () => {
 
 AFF.pages.apply = () => {
   const state = AFF.state;
-  const steps = ["查看佣金奖励", "高转化地区", "查看支持地区", "素材库总览", "收益与系统指引", "分享简介链接"];
+  const steps = AFF.programNavigation.steps.map(item => item[state.language === "en" ? 1 : 0]);
   const reached = Math.max(state.programMaxStep || 1, state.applyStep);
   const content = AFF.pages.applyStep();
   return `
     ${AFF.helpers.pageHeader("合作者计划", "按国家看佣金、选市场、查端支持、取素材、学系统并分享链接。")}
     <section class="card program-steps-card"><div class="panel-body">
+      <button class="button secondary program-contents-button" type="button" data-action="open-program-navigation">${state.language === "en" ? "Program contents" : "计划目录"}</button>
       <div class="steps">${steps.map((label, index) => {
         const number = index + 1;
         const status = number === state.applyStep ? "current" : number <= reached ? "done" : "disabled";
