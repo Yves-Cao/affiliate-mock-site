@@ -24,6 +24,9 @@ fs.mkdirSync(artifacts, { recursive: true });
       await page.click("#login-form button[type=submit]");
       const drawer = page.locator(".program-navigation");
       await drawer.waitFor();
+      assert.equal(await page.evaluate(() => AFF.state.route), "dash", "Login opens the directory over the dashboard");
+      assert.equal(new URL(page.url()).hash, "#/dash");
+      assert.equal(await page.locator(".program-step-card").count(), 0, "Guide content waits until a step is selected");
       assert.equal(await drawer.locator(".program-navigation-list button").count(), 6);
       assert.equal(await drawer.locator(".program-navigation-list button:disabled").count(), 5);
       assert.equal(await page.evaluate(() => AFF.state.applyStep), 1);
@@ -41,6 +44,7 @@ fs.mkdirSync(artifacts, { recursive: true });
       assert.equal(await drawer.locator("footer .primary").evaluate(node => node === document.activeElement), true);
       await page.keyboard.press("Escape");
       assert.equal(await drawer.count(), 0);
+      assert.equal(await page.evaluate(() => AFF.state.route), "dash", "Closing the directory stays on the dashboard");
       assert.equal(await page.locator("#profile-entry").evaluate(node => node === document.activeElement), true);
       assert.notEqual(await page.evaluate(() => getComputedStyle(document.body).overflow), "hidden");
 
@@ -66,11 +70,27 @@ fs.mkdirSync(artifacts, { recursive: true });
       }
       assert.equal(await drawer.count(), 0);
 
+      await page.evaluate(() => navigate("clients"));
+      await page.locator("#profile-entry").click();
+      await drawer.waitFor();
+      assert.equal(await page.evaluate(() => AFF.state.route), "clients", "Sidebar directory preserves the current page");
+      await drawer.locator("footer .secondary").click();
+      assert.equal(await page.evaluate(() => AFF.state.route), "clients");
+      await page.evaluate(() => sessionStorage.removeItem("affiliate-user-session"));
+      await page.reload({ waitUntil: "networkidle" });
+      await page.fill("#login-form input[name=email]", "program-nav@example.com");
+      await page.fill("#login-form input[name=password]", "mock");
+      await page.click("#login-form button[type=submit]");
+      await drawer.waitFor();
+      assert.deepEqual(await page.evaluate(() => [AFF.state.route, AFF.state.applyStep, AFF.state.programMaxStep]), ["dash", 2, 2]);
+      await drawer.locator("footer .primary").click();
+      assert.deepEqual(await page.evaluate(() => [AFF.state.route, AFF.state.applyStep]), ["apply", 2], "Continue opens the saved step");
+
       await page.evaluate(() => {
         AFF.state.language = "en";
         AFF.state.programCompleted = true;
         AFF.state.programMaxStep = 6;
-        AFF.state.onboarding.submitted = true;
+        AFF.state.onboarding.submitted = false;
         persist();
         sessionStorage.removeItem("affiliate-user-session");
       });
@@ -79,6 +99,7 @@ fs.mkdirSync(artifacts, { recursive: true });
       await page.fill("#login-form input[name=password]", "mock");
       await page.click("#login-form button[type=submit]");
       assert.equal(await drawer.count(), 0, "Completed partner login skips the directory");
+      assert.equal(await page.evaluate(() => AFF.state.route), "dash", "Completed guide login stays on the dashboard even before application submission");
       await page.locator("#profile-entry").click();
       await drawer.waitFor();
       assert.equal(await drawer.locator("h2").innerText(), "Partner Program");

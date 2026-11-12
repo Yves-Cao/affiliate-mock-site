@@ -1698,13 +1698,8 @@ async function handleLogin(event) {
   if (isFirstLogin) localStorage.setItem(markerKey, "1");
   if (!AFF.state.programCompleted) {
     AFF.state.applyStep = Math.min(6, Math.max(1, Number(AFF.state.programMaxStep) || Number(AFF.state.applyStep) || 1));
-    AFF.state.route = "apply";
-  } else if (!AFF.state.onboarding.submitted) {
-    AFF.state.onboarding.step = Math.min(5, Math.max(1, Number(AFF.state.onboarding.maxStep) || Number(AFF.state.onboarding.step) || 1));
-    AFF.state.route = "onboarding";
-  } else {
-    AFF.state.route = "dash";
   }
+  AFF.state.route = "dash";
   history.replaceState(null, "", `${location.pathname}${location.search}#/${AFF.state.route}`);
   elements["login-view"].classList.add("hidden");
   elements["app-view"].classList.remove("hidden");
