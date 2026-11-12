@@ -1,0 +1,109 @@
+<mxfile host="app.diagrams.net" modified="2026-11-10T04:58:29.000Z" agent="Codex" version="24.7.17">
+  <diagram id="page-12-1" name="1. 1. 系统与参与者">
+    <mxGraphModel dx="1600" dy="1200" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="P" value="&quot;合作者&#10;CRM登录、申请、推广、查收益、手动提现、申诉&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C" value="&quot;被推荐客户&#10;经官方路径注册、认证、入金和交易&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="E" value="&quot;公司员工&#10;运营、风控、财务及获授权治理岗位&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="A" value="&quot;Affiliate&#10;点击与最终归因、资格与计佣、风险信用&#10;结算余额、提现订单、结算单、任务与审计&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="CRM" value="&quot;CRM&#10;账户、资料、认证及KYC/KYB事实源&#10;注册、资金、交易、欺诈、观察收益事实与实际打款&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="DB" value="&quot;CRM受控数据通道&#10;获批表/视图及受控写动作&#10;实际资源、权限与版本待核验&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="PAY" value="&quot;支付渠道与银行&#10;由CRM对接执行并提供付款事实&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="IMC" value="&quot;IMC&#10;消费获准事件作分析&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="MAIL" value="&quot;邮件服务&#10;通知投递及结果&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="PB" value="&quot;合作者回传地址&#10;接收约定公开转化结果&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="IAM" value="&quot;公司身份、权限与运维能力&#10;具体接入方案待技术确认&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="TAX" value="&quot;财务与税务规则来源&#10;规则及接入方式待专业确认&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="RET" value="&quot;待决：是否向CRM回传&#10;Affiliate业务摘要&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="540" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="TASK" value="&quot;统一任务与补偿&#10;同步异常、付款查询、投递重试和人工核验&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="540" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-1" value="&quot;已认证业务请求；仅本人范围&quot;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="P" target="A">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-2" value="&quot;获授权的查询、审批、处置与配置&quot;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="E" target="A">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-3" value="&quot;官方推广参数随注册提交&quot;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="C" target="CRM">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-4" value="&quot;创建/关联主体、审核结果同步等受控命令&quot;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="A" target="CRM">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-5" value="&quot;最小事实集、主键、版本与截至时间&quot;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="CRM" target="DB">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-6" value="&quot;受控读取；保存必要引用和快照&quot;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="DB" target="A">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-7" value="&quot;提现获批并重检后请求打款&quot;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="A" target="CRM">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-8" value="&quot;执行付款&quot;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="CRM" target="PAY">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-9" value="&quot;回执、查询或对账事实&quot;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="PAY" target="CRM">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-10" value="&quot;请求确认、付款编号及结果&quot;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="CRM" target="A">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-11" value="&quot;获准业务事件；不回流控制计佣&quot;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="A" target="IMC">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-12" value="&quot;邮件任务；失败不重做原业务&quot;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="A" target="MAIL">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-13" value="&quot;裁剪字段、签名及去重&quot;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="A" target="PB">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-14" value="&quot;管理端认证、授权与运行支撑&quot;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="IAM" target="A">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-15" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="TAX" target="A">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-16" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="A" target="RET">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-17" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="RET" target="CRM">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-18" value="&quot;外部失败或结果未知&quot;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="A" target="TASK">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-19" value="&quot;查询原结果、补数或原任务重试&quot;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="TASK" target="A">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

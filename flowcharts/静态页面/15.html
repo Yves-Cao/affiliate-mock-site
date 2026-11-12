@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>15 ER图</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+  <div class="layout">
+                <nav class="sidebar">
+      <p class="sidebar-title">流程图导航</p>
+      <div class="nav-group">
+        <p class="group-title">评审主线</p>
+        <a class="nav-item" href="./01.html"><span>01</span><span>项目全景图</span></a>
+        <a class="nav-item" href="./02.html"><span>02</span><span>当前态与目标态服务蓝图</span></a>
+        <a class="nav-item" href="./03.html"><span>03</span><span>端到端业务泳道图</span></a>
+        <a class="nav-item" href="./04.html"><span>04</span><span>注册归因泳道图</span></a>
+        <a class="nav-item" href="./05.html"><span>05</span><span>佣金计算流程图</span></a>
+        <a class="nav-item" href="./06.html"><span>06</span><span>结算与资金时序图</span></a>
+        <a class="nav-item" href="./07.html"><span>07</span><span>提现流程图</span></a>
+        <a class="nav-item" href="./08.html"><span>08</span><span>风险处置流程图</span></a>
+        <a class="nav-item" href="./09.html"><span>09</span><span>风险传播图</span></a>
+        <a class="nav-item" href="./10.html"><span>10</span><span>配置审批流程图</span></a>
+        <a class="nav-item" href="./11.html"><span>11</span><span>状态机图</span></a>
+        <a class="nav-item" href="./19.html"><span>19</span><span>权限矩阵图</span></a>
+        <a class="nav-item" href="./20.html"><span>20</span><span>评审到研发门禁图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">技术附录</p>
+        <a class="nav-item" href="./12.html"><span>12</span><span>系统上下文图</span></a>
+        <a class="nav-item" href="./13.html"><span>13</span><span>逻辑架构图</span></a>
+        <a class="nav-item" href="./14.html"><span>14</span><span>数据流图</span></a>
+        <a class="nav-item active" href="./15.html"><span>15</span><span>ER图</span></a>
+        <a class="nav-item" href="./16.html"><span>16</span><span>数据血缘图</span></a>
+        <a class="nav-item" href="./17.html"><span>17</span><span>API与页面映射图</span></a>
+        <a class="nav-item" href="./18.html"><span>18</span><span>事件流转图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">CRM专项</p>
+        <a class="nav-item" href="./21.html"><span>21</span><span>CRM系统上下文与数据边界图</span></a>
+        <a class="nav-item" href="./22.html"><span>22</span><span>合作者入驻与CRM账户/KYC联动图</span></a>
+        <a class="nav-item" href="./23.html"><span>23</span><span>客户注册归因与CRM事实流图</span></a>
+        <a class="nav-item" href="./24.html"><span>24</span><span>客户资金、交易、风险事实到计佣结算图</span></a>
+        <a class="nav-item" href="./25.html"><span>25</span><span>CRM打款与对账联动图</span></a>
+        <a class="nav-item" href="./26.html"><span>26</span><span>CRM数据异常、补偿与更正图</span></a>
+        <a class="nav-item" href="./27.html"><span>27</span><span>Affiliate数据回传CRM与合规边界图</span></a>
+      </div>
+    </nav>
+    <main>
+      <div class="topbar">
+        <h1>15 ER图</h1>
+        <span>技术附录</span>
+      </div>
+      <div class="stage">
+        
+        <section class="diagram-block">
+          <h2>1. 合作者、归因与计佣的已有逻辑关系</h2>
+          <div class="diagram-output" data-index="0"></div>
+        </section>
+        <section class="diagram-block">
+          <h2>2. 提现与结算单的一对一逻辑关系</h2>
+          <div class="diagram-output" data-index="1"></div>
+        </section>
+        <section class="diagram-block">
+          <h2>3. 新资金对象与风控治理关联</h2>
+          <div class="diagram-output" data-index="2"></div>
+        </section>
+        <section class="diagram-block">
+          <h2>4. CRM事实、价格与信用快照关系</h2>
+          <div class="diagram-output" data-index="3"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script type="application/json" id="page-data">[{"heading":"1. 合作者、归因与计佣的已有逻辑关系","code":"erDiagram\n    partner ||--o{ click : \"关联点击\"\n    partner ||--o{ attribution : \"获得有效归属\"\n    qualification_case ||--o{ commission_case : \"按阶段和版本生成\"\n\n    partner {\n        string partner_id PK\n        string crm_subject_id UK\n        string status \"合作者业务状态\"\n    }\n    click {\n        string click_id PK\n        string partner_id FK\n        string link_id\n        string sub_id\n        datetime click_time\n    }\n    attribution {\n        string attribution_id PK\n        string customer_id \"CRM客户引用；单一有效归属\"\n        string partner_id FK\n        datetime locked_at\n        string source\n    }\n    qualification_case {\n        string qualification_case_id PK\n        string customer_id \"CRM客户引用\"\n        string case_type\n        string status\n    }\n    commission_case {\n        string commission_case_id PK\n        string qualification_case_id FK\n        string stage\n        string version\n        decimal base_amount\n        decimal credit_bonus\n        decimal personal_bonus\n        decimal fixed_amount\n        string currency \"MVP仅USD\"\n    }","type":"mermaid"},{"heading":"2. 提现与结算单的一对一逻辑关系","code":"erDiagram\n    partner ||--o{ withdrawal_order : \"发起手动提现\"\n    withdrawal_order ||--|| statement : \"一次提现绑定唯一逻辑单据\"\n    statement ||--o{ statement_line : \"包含明细\"\n    withdrawal_order ||--o{ withdrawal_allocation : \"锁定资金分摊\"\n\n    partner {\n        string partner_id PK\n    }\n    withdrawal_order {\n        string withdrawal_id PK\n        string request_ref UK\n        string partner_id FK\n        decimal amount\n        string withdrawal_status\n    }\n    statement {\n        string statement_id PK\n        string withdrawal_id FK\n        string statement_status\n        string version \"同一逻辑单据的更正版本\"\n    }\n    statement_line {\n        string line_id PK\n        string statement_id FK\n        string source_type\n        string source_id\n        decimal amount\n    }\n    withdrawal_allocation {\n        string allocation_id PK\n        string withdrawal_id FK\n        string commission_case_id \"既有来源引用；其他来源待字段补齐\"\n        decimal amount\n    }","type":"mermaid"},{"heading":"3. 新资金对象与风控治理关联","code":"flowchart TB\n    C[\"CRM客户引用<br/>customer_id\"]\n    COMM[\"佣金案件<br/>commission_case_id\"]\n    SET[\"结算案件<br/>settlement_case_id<br/>与佣金的物理基数待确认\"]\n    RUN[\"每日结算运行<br/>run_id及逐案处理结果<br/>不等于用户结算单\"]\n    GUAR[\"逐案保证金明细<br/>来源佣金及保留/释放/抵扣流水<br/>拆行和字段待补齐\"]\n    LED[\"合作者资金流水<br/>ledger_id、来源引用、方向及金额\"]\n    WD[\"提现订单与分摊<br/>withdrawal_id、allocation_id\"]\n    PAY[\"CRM付款尝试记录<br/>请求、CRM付款及外部交易引用<br/>物理主键和尝试映射待确认\"]\n    RISK[\"风险信号、风险案件及申诉<br/>各自ID、状态与证据\"]\n    TRI[\"当前案件三元组<br/>客户ID + 佣金案件ID + 结算案件ID\"]\n    TASK[\"统一任务、审批与执行<br/>task_id、approval_id、execution_id\"]\n    AUD[\"审计、规则快照与事件<br/>audit_id、规则版本、event_id\"]\n\n    C -->|\"CRM事实引用\"| COMM\n    COMM -->|\"必须可追溯；基数待评审\"| SET\n    RUN -->|\"逐案处理记录\"| SET\n    COMM -->|\"逐案来源，不假定拆行数量\"| GUAR\n    SET -->|\"合格金额入余额\"| LED\n    GUAR -->|\"获准保留、释放或抵扣\"| LED\n    LED -->|\"可用明细分摊\"| WD\n    WD -->|\"尝试留痕；未知先查询\"| PAY\n    RISK -->|\"超时冻结及申诉绑定\"| TRI\n    TRI --> C\n    TRI --> COMM\n    TRI --> SET\n    RISK -->|\"稳定业务引用\"| TASK\n    WD -->|\"稳定业务引用\"| TASK\n    TASK --> AUD\n    LED --> AUD\n    PAY --> AUD","type":"mermaid"},{"heading":"4. CRM事实、价格与信用快照关系","code":"flowchart TB\n    CRM[\"CRM事实源\"]\n    CUSTOMER[\"客户状态快照 customer_snapshot<br/>customer_id + snapshot_version\"]\n    FUND[\"资金事实 fund_fact<br/>fund_fact_id；external_ref + event_type<br/>客户、金额、币种、状态及到账时间\"]\n    TRADE[\"交易事实 trade_fact<br/>trade_fact_id；external_ref<br/>客户、账户、手数及交易时间\"]\n    QUAL[\"资格案件 qualification_case<br/>引用适用事实与观察结果<br/>CRM与Affiliate具体分工见SBV-12\"]\n    PRICE[\"价格快照 price_snapshot<br/>price_version + country + tier<br/>基础CPA及两段基础比例\"]\n    CREDIT[\"信用快照 credit_snapshot<br/>partner_id + credit_version<br/>积分、等级、维度分及生效期间\"]\n    RULE[\"规则版本 rule_version<br/>rule_id + version<br/>参数版本及生效期间\"]\n    RISK[\"风险事件 risk_event<br/>risk_event_id、对象、事件类型及处置\"]\n    POINT[\"信用积分流水 credit_point_ledger<br/>point_ledger_id；risk_event_id + dimension<br/>变更前、增减值、变更后及规则版本\"]\n    COMM[\"佣金案件 commission_case<br/>锁定计算所用事实、价格、信用及规则版本\"]\n\n    CRM -->|\"受控同步；保留来源与版本\"| CUSTOMER\n    CRM -->|\"到账、出金等事实\"| FUND\n    CRM -->|\"交易事实\"| TRADE\n    CUSTOMER --> QUAL\n    FUND --> QUAL\n    TRADE --> QUAL\n    QUAL -->|\"按阶段及版本生成\"| COMM\n    PRICE -->|\"计价依据\"| COMM\n    CREDIT -->|\"信用权益依据\"| COMM\n    RULE -->|\"适用规则引用\"| QUAL\n    RULE -->|\"计算快照依据\"| COMM\n    RISK -->|\"按获准传导规则记录增减\"| POINT\n    RULE -->|\"传导规则及参数依据\"| POINT\n    POINT -->|\"积分与等级结果可对账\"| CREDIT","type":"mermaid"}]</script>
+  <script src="./assets/mermaid.min.js"></script>
+  <script src="./assets/viewer-static.min.js"></script>
+  <script>
+    const blocks = JSON.parse(document.getElementById("page-data").textContent);
+    mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "default", fontFamily: 'Arial, "PingFang SC", sans-serif', flowchart: { useMaxWidth: true, padding: 16 }, sequence: { useMaxWidth: true, wrap: true } });
+    async function renderBlock(block, output) {
+      try {
+        output.innerHTML = '<div class="loading">渲染中...</div>';
+        if (block.type === "drawio") {
+          const host = document.createElement("div");
+          host.className = "mxgraph";
+          host.setAttribute("data-mxgraph", JSON.stringify({ xml: block.code, nav: true, resize: true, toolbar: "zoom layers" }));
+          output.appendChild(host);
+          GraphViewer.createViewerForElement(host);
+          return;
+        }
+        const result = await mermaid.render("svg-" + Math.random().toString(36).slice(2), block.code);
+        output.innerHTML = result.svg;
+      } catch (error) {
+        output.innerHTML = '<div class="error"></div>';
+        output.querySelector(".error").textContent = error && error.message ? error.message : String(error);
+      }
+    }
+    document.querySelectorAll(".diagram-output").forEach((output, index) => renderBlock(blocks[index], output));
+  </script>
+</body>
+</html>

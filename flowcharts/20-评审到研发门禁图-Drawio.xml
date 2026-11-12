@@ -1,0 +1,213 @@
+<mxfile host="app.diagrams.net" modified="2026-11-10T04:58:29.000Z" agent="Codex" version="24.7.17">
+  <diagram id="page-20-1" name="1. 1. 从资料准备到研发启动">
+    <mxGraphModel dx="1600" dy="1200" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="G01" value="&quot;产品及项目负责人&#10;组装同版评审资料包和版本清单&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="G02" value="&quot;会前核对&#10;范围、资料、所需Mock证据&#10;参会及授权是否具备&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="PRE" value="&quot;资料预审或专题讨论&#10;记录缺口、责任和影响&#10;不代替正式门禁决议&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="FIX" value="&quot;回对应资料责任人&#10;补齐或修订并记录差异&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="G03" value="&quot;需求评审&#10;目标、范围、规则、例外和验收口径&#10;输出独立需求决议&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="G04" value="&quot;设计评审&#10;页面、交互、状态、权限和同版Mock&#10;输出独立设计决议&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="G05" value="&quot;技术评审&#10;事实源、模型、接口、事件&#10;安全、幂等、补偿和外部依赖&#10;输出独立技术决议&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="G06" value="&quot;测试评审&#10;测试范围、用例矩阵、数据&#10;验收标准与发布阻断条件&#10;输出独立测试决议&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="G07" value="&quot;四类决议及问题核对&#10;当前范围阻断项是否关闭&#10;带入项是否得到批准&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="G08" value="&quot;契约及API Mock验收&#10;页面、接口、事件、权限与场景同源&#10;核对必要检查及实际证据&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="G08Q" value="&quot;契约与Mock检查通过&#10;且无未处理版本分叉&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="G09" value="&quot;冻结本轮研发基线&#10;需求、页面、接口、事件&#10;Mock、测试版本及变更入口&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="G10" value="&quot;建立D级开发跟踪&#10;一份实施追踪矩阵&#10;变更日志及阻塞依赖日志&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="540" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="G11" value="&quot;授权人判断启动范围&#10;核对资源、环境、责任及前置门禁&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="540" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="GO" value="&quot;通过&#10;启动本轮获准范围研发&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="540" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="CG" value="&quot;有条件通过&#10;写清可做与禁止范围&#10;带入项、责任、期限和阻断条件&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="540" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="NG" value="&quot;不通过&#10;保留阻断及补齐要求&#10;不启动受影响研发范围&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="700" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="DEV" value="&quot;研发执行&#10;任务引用同版需求与验收基线&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="700" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="G01" target="G02">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-2" value="不足" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="G02" target="PRE">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="PRE" target="FIX">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="FIX" target="G01">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-5" value="足以开展对应正式评审" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="G02" target="G03">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-6" value="范围和主规则形成结论" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="G03" target="G04">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-7" value="页面和关键路径形成结论" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="G04" target="G05">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-8" value="契约可形成可执行验收" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="G05" target="G06">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="G06" target="G07">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-10" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="G03" target="FIX">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="G04" target="FIX">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-12" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="G05" target="FIX">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-13" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="G06" target="FIX">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-14" value="否" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="G07" target="FIX">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-15" value="是" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="G07" target="G08">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-16" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="G08" target="G08Q">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-17" value="否：回技术或测试复核" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="G08Q" target="FIX">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-18" value="是" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="G08Q" target="G09">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-19" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="G09" target="G10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-20" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="G10" target="G11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-21" value="Go" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="G11" target="GO">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-22" value="Conditional Go" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="G11" target="CG">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-23" value="No-Go" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="G11" target="NG">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-24" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="GO" target="DEV">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-25" value="仅授权范围" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="CG" target="DEV">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-26" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="NG" target="FIX">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="page-20-2" name="2. 2. 冻结后变更与重新评审">
+    <mxGraphModel dx="1600" dy="1200" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="C01" value="&quot;提出需求或实现差异&#10;保留来源及变更原因&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C02" value="&quot;登记变更日志&#10;明确范围、对象和原基线&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C03" value="&quot;评估业务、资金、风险及技术影响&#10;定位受影响规则、页面、接口&#10;事件、Mock、测试和迁移&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C04" value="&quot;进入受影响的评审环节&#10;保留对应专业意见及决定&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C05" value="&quot;变更是否获准&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C06" value="&quot;按批准范围修订文档及实现&#10;核对同源与必要回归证据&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C07" value="&quot;建立新版本基线&#10;更新实施追踪与阻塞依赖&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C08" value="&quot;继续获准范围研发&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C09" value="&quot;保留不采纳或暂缓结论&#10;原基线不因提案自动改变&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="E01" value="&quot;生产紧急止血&#10;按既有应急权限先执行&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="E02" value="&quot;24小时内补齐记录&#10;实际影响、依据、执行和后续处理&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="C01" target="C02">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="C02" target="C03">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="C03" target="C04">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="C04" target="C05">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-5" value="是" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="C05" target="C06">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="C06" target="C07">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="C07" target="C08">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-8" value="否" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="C05" target="C09">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="E01" target="E02">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-10" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="E02" target="C03">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

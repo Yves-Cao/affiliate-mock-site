@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>14 数据流图</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+  <div class="layout">
+                <nav class="sidebar">
+      <p class="sidebar-title">流程图导航</p>
+      <div class="nav-group">
+        <p class="group-title">评审主线</p>
+        <a class="nav-item" href="./01.html"><span>01</span><span>项目全景图</span></a>
+        <a class="nav-item" href="./02.html"><span>02</span><span>当前态与目标态服务蓝图</span></a>
+        <a class="nav-item" href="./03.html"><span>03</span><span>端到端业务泳道图</span></a>
+        <a class="nav-item" href="./04.html"><span>04</span><span>注册归因泳道图</span></a>
+        <a class="nav-item" href="./05.html"><span>05</span><span>佣金计算流程图</span></a>
+        <a class="nav-item" href="./06.html"><span>06</span><span>结算与资金时序图</span></a>
+        <a class="nav-item" href="./07.html"><span>07</span><span>提现流程图</span></a>
+        <a class="nav-item" href="./08.html"><span>08</span><span>风险处置流程图</span></a>
+        <a class="nav-item" href="./09.html"><span>09</span><span>风险传播图</span></a>
+        <a class="nav-item" href="./10.html"><span>10</span><span>配置审批流程图</span></a>
+        <a class="nav-item" href="./11.html"><span>11</span><span>状态机图</span></a>
+        <a class="nav-item" href="./19.html"><span>19</span><span>权限矩阵图</span></a>
+        <a class="nav-item" href="./20.html"><span>20</span><span>评审到研发门禁图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">技术附录</p>
+        <a class="nav-item" href="./12.html"><span>12</span><span>系统上下文图</span></a>
+        <a class="nav-item" href="./13.html"><span>13</span><span>逻辑架构图</span></a>
+        <a class="nav-item active" href="./14.html"><span>14</span><span>数据流图</span></a>
+        <a class="nav-item" href="./15.html"><span>15</span><span>ER图</span></a>
+        <a class="nav-item" href="./16.html"><span>16</span><span>数据血缘图</span></a>
+        <a class="nav-item" href="./17.html"><span>17</span><span>API与页面映射图</span></a>
+        <a class="nav-item" href="./18.html"><span>18</span><span>事件流转图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">CRM专项</p>
+        <a class="nav-item" href="./21.html"><span>21</span><span>CRM系统上下文与数据边界图</span></a>
+        <a class="nav-item" href="./22.html"><span>22</span><span>合作者入驻与CRM账户/KYC联动图</span></a>
+        <a class="nav-item" href="./23.html"><span>23</span><span>客户注册归因与CRM事实流图</span></a>
+        <a class="nav-item" href="./24.html"><span>24</span><span>客户资金、交易、风险事实到计佣结算图</span></a>
+        <a class="nav-item" href="./25.html"><span>25</span><span>CRM打款与对账联动图</span></a>
+        <a class="nav-item" href="./26.html"><span>26</span><span>CRM数据异常、补偿与更正图</span></a>
+        <a class="nav-item" href="./27.html"><span>27</span><span>Affiliate数据回传CRM与合规边界图</span></a>
+      </div>
+    </nav>
+    <main>
+      <div class="topbar">
+        <h1>14 数据流图</h1>
+        <span>技术附录</span>
+      </div>
+      <div class="stage">
+        
+        <section class="diagram-block">
+          <h2>1. 注册、认证与归因数据流</h2>
+          <div class="diagram-output" data-index="0"></div>
+        </section>
+        <section class="diagram-block">
+          <h2>2. 资金、风险及输出的数据流</h2>
+          <div class="diagram-output" data-index="1"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script type="application/json" id="page-data">[{"heading":"1. 注册、认证与归因数据流","code":"flowchart TB\n    subgraph CLIENT[\"公网客户端：不可信输入\"]\n        C[\"客户浏览器<br/>官方链接参数及注册提交\"]\n        P[\"合作者浏览器<br/>CRM登录后的业务请求\"]\n    end\n    subgraph CRMZONE[\"CRM受控域：账户与外部事实源\"]\n        REG[\"注册事实及原始归因参数<br/>关联注册、客户、点击及链接引用\"]\n        KYC[\"合作者/客户认证事实<br/>账户、资料、KYC/KYB状态和版本\"]\n        VIEW[\"获批表、视图或受控服务<br/>实际映射与权限待核验\"]\n    end\n    subgraph AFF[\"Affiliate服务端：逐次鉴权\"]\n        IN[\"入口授权与输入校验<br/>身份、对象、动作、字段及版本\"]\n        CLICK[\"官方路径校验与点击登记\"]\n        READ[\"事实主键、版本及新鲜度检查\"]\n        LOCK[\"IB隔离、归因冲突检查及最终锁定\"]\n        PROJ[\"按受众裁剪的页面投影\"]\n        EX[\"补数、冲突及同步任务\"]\n    end\n    subgraph STORE[\"Affiliate受控数据区\"]\n        SNAP[\"必要事实引用与快照<br/>不建立第二套账户事实源\"]\n        ATTR[\"点击与最终归因记录<br/>保留原始引用、规则及锁定版本\"]\n        AUD[\"访问、变更及审计记录<br/>不含凭证或证件明文\"]\n    end\n    C -->|\"官方推广参数\"| CLICK\n    C -->|\"注册及原始参数\"| REG\n    P -->|\"已认证业务意图\"| IN\n    REG --> VIEW\n    KYC --> VIEW\n    VIEW -->|\"最小获准字段\"| READ\n    READ -->|\"可用事实\"| SNAP\n    READ -->|\"缺失、过期或冲突\"| EX\n    CLICK --> ATTR\n    SNAP --> LOCK\n    ATTR --> LOCK\n    LOCK -->|\"结论及证据引用\"| ATTR\n    IN --> PROJ\n    SNAP -->|\"掩码资料及有限认证状态\"| PROJ\n    ATTR -->|\"本人客户及公开归属结果\"| PROJ\n    PROJ --> P\n    READ --> AUD\n    LOCK --> AUD\n    IN --> AUD","type":"mermaid"},{"heading":"2. 资金、风险及输出的数据流","code":"flowchart TB\n    CRM[\"CRM资金、交易、欺诈及观察收益事实<br/>外部引用、业务时间、版本和截至时间\"]\n    N[\"合作者已认证请求<br/>手动提现、查看结果或提交支持\"]\n    EMP[\"获授权员工<br/>调查、审批、导出及专业处理\"]\n    FACT[\"事实引用与合法归属\"]\n    CALC[\"资格与三环节计佣<br/>保留计算及权益快照\"]\n    RISK[\"内部风险证据与处置记录<br/>按对象范围与授权控制\"]\n    SET[\"每日逐案结算检查<br/>实名、风险、税费和保证金\"]\n    LED[\"资金流水与可提现余额\"]\n    WD[\"提现、分摊及唯一结算单<br/>授权、版本、锁定及适用审批\"]\n    CRMOUT[\"CRM受控打款通道\"]\n    RES[\"CRM回执或原请求查询<br/>去重、状态核对及分摊对账\"]\n    PUB[\"合作者公开投影<br/>本人金额、状态、有限原因及下一步\"]\n    AUD[\"受控审计与证据引用\"]\n    EXP[\"导出范围/字段/快照校验<br/>下载时再次鉴权\"]\n    OUT[\"按接收方裁剪的事件和消息\"]\n    CON[\"IMC、邮件、合作者回传\"]\n    RET{\"待决：CRM业务摘要回传<br/>用途、最小字段与生命周期\"}\n    CRMBIZ[\"CRM业务摘要接收目标<br/>是否建设及具体通道待评审\"]\n\n    CRM --> FACT\n    FACT --> CALC\n    FACT --> RISK\n    CALC --> SET\n    RISK -->|\"案件阻断与获批处置\"| SET\n    SET -->|\"合格案件及无风险释放金额\"| LED\n    N --> WD\n    LED -->|\"可用明细引用及金额\"| WD\n    EMP -->|\"按动作授权处理\"| RISK\n    EMP -->|\"按策略审批与执行\"| WD\n    WD -->|\"获批且重检通过的付款请求\"| CRMOUT\n    CRMOUT -->|\"受理、付款编号及结果\"| RES\n    RES -->|\"对应对象及必要反向流水\"| LED\n    RES --> WD\n    LED --> PUB\n    WD --> PUB\n    RISK -->|\"只给获准公开原因\"| PUB\n    EMP --> EXP\n    LED --> EXP\n    RISK -->|\"仅获授权字段与证据\"| EXP\n    WD --> AUD\n    RISK --> AUD\n    EXP --> AUD\n    LED --> OUT\n    WD --> OUT\n    OUT --> CON\n    OUT -. \"内部证据不默认共享\" .-> RET\n    RET -. \"评审后另定受控通道\" .-> CRMBIZ","type":"mermaid"}]</script>
+  <script src="./assets/mermaid.min.js"></script>
+  <script src="./assets/viewer-static.min.js"></script>
+  <script>
+    const blocks = JSON.parse(document.getElementById("page-data").textContent);
+    mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "default", fontFamily: 'Arial, "PingFang SC", sans-serif', flowchart: { useMaxWidth: true, padding: 16 }, sequence: { useMaxWidth: true, wrap: true } });
+    async function renderBlock(block, output) {
+      try {
+        output.innerHTML = '<div class="loading">渲染中...</div>';
+        if (block.type === "drawio") {
+          const host = document.createElement("div");
+          host.className = "mxgraph";
+          host.setAttribute("data-mxgraph", JSON.stringify({ xml: block.code, nav: true, resize: true, toolbar: "zoom layers" }));
+          output.appendChild(host);
+          GraphViewer.createViewerForElement(host);
+          return;
+        }
+        const result = await mermaid.render("svg-" + Math.random().toString(36).slice(2), block.code);
+        output.innerHTML = result.svg;
+      } catch (error) {
+        output.innerHTML = '<div class="error"></div>';
+        output.querySelector(".error").textContent = error && error.message ? error.message : String(error);
+      }
+    }
+    document.querySelectorAll(".diagram-output").forEach((output, index) => renderBlock(blocks[index], output));
+  </script>
+</body>
+</html>

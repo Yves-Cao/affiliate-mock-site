@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>05 佣金计算流程图</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+  <div class="layout">
+                <nav class="sidebar">
+      <p class="sidebar-title">流程图导航</p>
+      <div class="nav-group">
+        <p class="group-title">评审主线</p>
+        <a class="nav-item" href="./01.html"><span>01</span><span>项目全景图</span></a>
+        <a class="nav-item" href="./02.html"><span>02</span><span>当前态与目标态服务蓝图</span></a>
+        <a class="nav-item" href="./03.html"><span>03</span><span>端到端业务泳道图</span></a>
+        <a class="nav-item" href="./04.html"><span>04</span><span>注册归因泳道图</span></a>
+        <a class="nav-item active" href="./05.html"><span>05</span><span>佣金计算流程图</span></a>
+        <a class="nav-item" href="./06.html"><span>06</span><span>结算与资金时序图</span></a>
+        <a class="nav-item" href="./07.html"><span>07</span><span>提现流程图</span></a>
+        <a class="nav-item" href="./08.html"><span>08</span><span>风险处置流程图</span></a>
+        <a class="nav-item" href="./09.html"><span>09</span><span>风险传播图</span></a>
+        <a class="nav-item" href="./10.html"><span>10</span><span>配置审批流程图</span></a>
+        <a class="nav-item" href="./11.html"><span>11</span><span>状态机图</span></a>
+        <a class="nav-item" href="./19.html"><span>19</span><span>权限矩阵图</span></a>
+        <a class="nav-item" href="./20.html"><span>20</span><span>评审到研发门禁图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">技术附录</p>
+        <a class="nav-item" href="./12.html"><span>12</span><span>系统上下文图</span></a>
+        <a class="nav-item" href="./13.html"><span>13</span><span>逻辑架构图</span></a>
+        <a class="nav-item" href="./14.html"><span>14</span><span>数据流图</span></a>
+        <a class="nav-item" href="./15.html"><span>15</span><span>ER图</span></a>
+        <a class="nav-item" href="./16.html"><span>16</span><span>数据血缘图</span></a>
+        <a class="nav-item" href="./17.html"><span>17</span><span>API与页面映射图</span></a>
+        <a class="nav-item" href="./18.html"><span>18</span><span>事件流转图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">CRM专项</p>
+        <a class="nav-item" href="./21.html"><span>21</span><span>CRM系统上下文与数据边界图</span></a>
+        <a class="nav-item" href="./22.html"><span>22</span><span>合作者入驻与CRM账户/KYC联动图</span></a>
+        <a class="nav-item" href="./23.html"><span>23</span><span>客户注册归因与CRM事实流图</span></a>
+        <a class="nav-item" href="./24.html"><span>24</span><span>客户资金、交易、风险事实到计佣结算图</span></a>
+        <a class="nav-item" href="./25.html"><span>25</span><span>CRM打款与对账联动图</span></a>
+        <a class="nav-item" href="./26.html"><span>26</span><span>CRM数据异常、补偿与更正图</span></a>
+        <a class="nav-item" href="./27.html"><span>27</span><span>Affiliate数据回传CRM与合规边界图</span></a>
+      </div>
+    </nav>
+    <main>
+      <div class="topbar">
+        <h1>05 佣金计算流程图</h1>
+        <span>评审主线</span>
+      </div>
+      <div class="stage">
+        
+        <section class="diagram-block">
+          <h2>1. 事实、资格与三环节计佣</h2>
+          <div class="diagram-output" data-index="0"></div>
+        </section>
+        <section class="diagram-block">
+          <h2>2. 金额构成与风险边界</h2>
+          <div class="diagram-output" data-index="1"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script type="application/json" id="page-data">[{"heading":"1. 事实、资格与三环节计佣","code":"flowchart TB\n    C01[\"CRM提供客户、认证、到账<br/>交易等原始事实与版本\"]\n    C02{\"事实可用于本次计算<br/>且未重复执行？\"}\n    C03[\"重复事实返回原结果<br/>不重复生成案件与明细\"]\n    C04[\"计算必需事实缺失或冲突<br/>补数、核验后重新检查\"]\n    C05{\"有效锁定归属<br/>唯一性及IB隔离通过？\"}\n    C06[\"不凭空计佣<br/>转归因核验或排除\"]\n    C07[\"按已确认规则处理资格与里程碑<br/>逐项判定分工见SBV-12\"]\n    C08[\"FTD只记录里程碑<br/>不生成可放款资金\"]\n    C09{\"有效FTD是否确认？\"}\n    C10[\"继续等待后续事实<br/>不提前生成基础CPA\"]\n    C11[\"适用单国覆盖价优先<br/>否则资格档单价乘国家系数\"]\n    C12[\"生成基础CPA案件<br/>基础CPA加FTD环节附加<br/>加有效FTD环节附加\"]\n    C13[\"锁定归属、价格、资格档<br/>信用权益、个人配置和规则版本\"]\n    C14[\"案件独立进入动态结算中<br/>记录金额、明细和审计\"]\n    C15{\"后续质量服务是否确认？\"}\n    C16[\"尚未确认：不生成质量服务奖励<br/>不追回已成立基础CPA\"]\n    C17[\"额外生成质量服务附加案件<br/>不占基础CPA的100%\"]\n    C18[\"独立快照、明细及动态结算中<br/>不阻塞基础CPA案件\"]\n    C19[\"输出计佣结果和领域事件<br/>合作者只见获准结果\"]\n    C20[\"CRM与财务提供观察收益<br/>及最终净贡献、窗口和版本\"]\n    C21[\"Affiliate读取、展示和用于决策<br/>不自行拆解或重算最终净贡献\"]\n    C01 --> C02\n    C02 -->|已重复| C03\n    C02 -->|缺数或冲突| C04\n    C04 -->|补齐后| C02\n    C02 -->|可用且未执行| C05\n    C05 -->|否| C06\n    C05 -->|是| C07 --> C08 --> C09\n    C09 -->|否| C10\n    C10 -->|取得新事实| C02\n    C09 -->|是| C11 --> C12 --> C13 --> C14 --> C19\n    C12 -->|质量服务是后续独立分支| C15\n    C15 -->|否| C16\n    C15 -->|是| C17 --> C18 --> C19\n    C20 --> C21","type":"mermaid"},{"heading":"2. 金额构成与风险边界","code":"flowchart TB\n    M01[\"基础CPA价格为统一比例基数\"]\n    M02[\"FTD段基础比例<br/>加有效FTD段基础比例等于100%\"]\n    M03[\"FTD环节附加<br/>基础CPA乘信用与个人比例之和<br/>再加信用与个人固定额\"]\n    M04[\"有效FTD环节附加<br/>基础CPA乘信用与个人比例之和<br/>再加信用与个人固定额\"]\n    M05[\"质量服务环节附加<br/>基础CPA乘信用与个人比例之和<br/>再加信用与个人固定额\"]\n    M06[\"有效FTD确认<br/>基础CPA加前两环节附加\"]\n    M07[\"质量服务确认<br/>另案生成第三环节附加\"]\n    M08[\"已生成佣金及完整计算依据\"]\n    M09{\"存在集群、调查、隔离<br/>或关键结算缺数？\"}\n    M10[\"佣金照算与保留<br/>自动结算被阻断并生成任务\"]\n    M11[\"按案件到期及门禁<br/>进入结算前检查\"]\n    M12[\"事实更正、拒付或欺诈<br/>按获准重算或冲正契约处理\"]\n    M13[\"保留原账与快照<br/>记录差额或反向流水\"]\n    M01 --> M02\n    M01 --> M03\n    M01 --> M04\n    M01 --> M05\n    M02 --> M06\n    M03 --> M06\n    M04 --> M06\n    M05 --> M07\n    M06 --> M08\n    M07 --> M08\n    M08 --> M09\n    M09 -->|是| M10\n    M09 -->|否| M11\n    M08 -->|后续事实修正| M12 --> M13","type":"mermaid"}]</script>
+  <script src="./assets/mermaid.min.js"></script>
+  <script src="./assets/viewer-static.min.js"></script>
+  <script>
+    const blocks = JSON.parse(document.getElementById("page-data").textContent);
+    mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "default", fontFamily: 'Arial, "PingFang SC", sans-serif', flowchart: { useMaxWidth: true, padding: 16 }, sequence: { useMaxWidth: true, wrap: true } });
+    async function renderBlock(block, output) {
+      try {
+        output.innerHTML = '<div class="loading">渲染中...</div>';
+        if (block.type === "drawio") {
+          const host = document.createElement("div");
+          host.className = "mxgraph";
+          host.setAttribute("data-mxgraph", JSON.stringify({ xml: block.code, nav: true, resize: true, toolbar: "zoom layers" }));
+          output.appendChild(host);
+          GraphViewer.createViewerForElement(host);
+          return;
+        }
+        const result = await mermaid.render("svg-" + Math.random().toString(36).slice(2), block.code);
+        output.innerHTML = result.svg;
+      } catch (error) {
+        output.innerHTML = '<div class="error"></div>';
+        output.querySelector(".error").textContent = error && error.message ? error.message : String(error);
+      }
+    }
+    document.querySelectorAll(".diagram-output").forEach((output, index) => renderBlock(blocks[index], output));
+  </script>
+</body>
+</html>

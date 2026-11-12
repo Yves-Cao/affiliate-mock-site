@@ -1,0 +1,204 @@
+<mxfile host="app.diagrams.net" modified="2026-11-10T04:58:29.000Z" agent="Codex" version="24.7.17">
+  <diagram id="page-05-1" name="1. 1. 事实、资格与三环节计佣">
+    <mxGraphModel dx="1600" dy="1200" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="C01" value="&quot;CRM提供客户、认证、到账&#10;交易等原始事实与版本&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C02" value="&quot;事实可用于本次计算&#10;且未重复执行？&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C03" value="&quot;重复事实返回原结果&#10;不重复生成案件与明细&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C04" value="&quot;计算必需事实缺失或冲突&#10;补数、核验后重新检查&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C05" value="&quot;有效锁定归属&#10;唯一性及IB隔离通过？&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C06" value="&quot;不凭空计佣&#10;转归因核验或排除&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C07" value="&quot;按已确认规则处理资格与里程碑&#10;逐项判定分工见SBV-12&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C08" value="&quot;FTD只记录里程碑&#10;不生成可放款资金&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C09" value="&quot;有效FTD是否确认？&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C10" value="&quot;继续等待后续事实&#10;不提前生成基础CPA&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C11" value="&quot;适用单国覆盖价优先&#10;否则资格档单价乘国家系数&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C12" value="&quot;生成基础CPA案件&#10;基础CPA加FTD环节附加&#10;加有效FTD环节附加&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C13" value="&quot;锁定归属、价格、资格档&#10;信用权益、个人配置和规则版本&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="540" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C14" value="&quot;案件独立进入动态结算中&#10;记录金额、明细和审计&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="540" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C15" value="&quot;后续质量服务是否确认？&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="540" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C16" value="&quot;尚未确认：不生成质量服务奖励&#10;不追回已成立基础CPA&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="540" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C17" value="&quot;额外生成质量服务附加案件&#10;不占基础CPA的100%&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="700" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C18" value="&quot;独立快照、明细及动态结算中&#10;不阻塞基础CPA案件&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="700" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C19" value="&quot;输出计佣结果和领域事件&#10;合作者只见获准结果&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="700" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C20" value="&quot;CRM与财务提供观察收益&#10;及最终净贡献、窗口和版本&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="700" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="C21" value="&quot;Affiliate读取、展示和用于决策&#10;不自行拆解或重算最终净贡献&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="860" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="C01" target="C02">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-2" value="已重复" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="C02" target="C03">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-3" value="缺数或冲突" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="C02" target="C04">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-4" value="补齐后" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="C04" target="C02">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-5" value="可用且未执行" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="C02" target="C05">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-6" value="否" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="C05" target="C06">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-7" value="是" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="C05" target="C07">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-8" value="否" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="C09" target="C10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-9" value="取得新事实" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="C10" target="C02">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-10" value="是" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="C09" target="C11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-11" value="质量服务是后续独立分支" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="C12" target="C15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-12" value="否" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="C15" target="C16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-13" value="是" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="C15" target="C17">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-14" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="C20" target="C21">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="page-05-2" name="2. 2. 金额构成与风险边界">
+    <mxGraphModel dx="1600" dy="1200" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="M01" value="&quot;基础CPA价格为统一比例基数&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="M02" value="&quot;FTD段基础比例&#10;加有效FTD段基础比例等于100%&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="M03" value="&quot;FTD环节附加&#10;基础CPA乘信用与个人比例之和&#10;再加信用与个人固定额&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="M04" value="&quot;有效FTD环节附加&#10;基础CPA乘信用与个人比例之和&#10;再加信用与个人固定额&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="60" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="M05" value="&quot;质量服务环节附加&#10;基础CPA乘信用与个人比例之和&#10;再加信用与个人固定额&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="M06" value="&quot;有效FTD确认&#10;基础CPA加前两环节附加&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="M07" value="&quot;质量服务确认&#10;另案生成第三环节附加&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="M08" value="&quot;已生成佣金及完整计算依据&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="220" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="M09" value="&quot;存在集群、调查、隔离&#10;或关键结算缺数？&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="M10" value="&quot;佣金照算与保留&#10;自动结算被阻断并生成任务&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="M11" value="&quot;按案件到期及门禁&#10;进入结算前检查&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="M12" value="&quot;事实更正、拒付或欺诈&#10;按获准重算或冲正契约处理&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="380" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="M13" value="&quot;保留原账与快照&#10;记录差额或反向流水&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="540" width="240" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="M01" target="M02">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="M01" target="M03">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="M01" target="M04">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="M01" target="M05">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="M02" target="M06">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="M03" target="M06">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="M04" target="M06">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-8" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="M05" target="M07">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="M06" target="M08">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-10" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="M07" target="M08">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="M08" target="M09">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-12" value="是" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="M09" target="M10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-13" value="否" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="M09" target="M11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-14" value="后续事实修正" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="M08" target="M12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

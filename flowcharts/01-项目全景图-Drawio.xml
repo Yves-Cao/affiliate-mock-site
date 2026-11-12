@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-11-10T00:00:00.000Z" agent="Codex" version="24.7.17">
+  <diagram id="affiliate-overview" name="项目全景图">
+    <mxGraphModel dx="1600" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0" compressed="false">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="title" value="Affiliate 项目全景图" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#1f2937;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="500" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="subtitle" value="目标方案预览：业务目标、参与角色、核心链路、系统协作与贯穿保障" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=12;fontColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="42" y="58" width="800" height="24" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="goals" value="一、业务目标" style="swimlane;html=1;horizontal=0;startSize=34;rounded=0;strokeWidth=1;strokeColor=#2563eb;fillColor=#eff6ff;fontColor=#1e3a8a;fontStyle=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="40" y="100" width="1520" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="g" value="建立 CPA 获客闭环&lt;br&gt;真实获客 · 可核验计佣 · 安全结算 · 可追溯运营" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dbeafe;strokeColor=#2563eb;fontColor=#1e3a8a;fontSize=15;align=center;verticalAlign=middle;" vertex="1" parent="goals">
+          <mxGeometry x="320" y="42" width="880" height="52" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="roles" value="二、参与角色" style="swimlane;html=1;horizontal=0;startSize=34;rounded=0;strokeWidth=1;strokeColor=#16a34a;fillColor=#f0fdf4;fontColor=#166534;fontStyle=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="40" y="240" width="1520" height="150" as="geometry"/>
+        </mxCell>
+        <mxCell id="u" value="合作者与被推荐客户&lt;br&gt;申请、推广、注册、交易、查询与提现" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;fontColor=#166534;align=center;verticalAlign=middle;" vertex="1" parent="roles">
+          <mxGeometry x="80" y="54" width="390" height="64" as="geometry"/>
+        </mxCell>
+        <mxCell id="o" value="运营 · 风控 · 财务&lt;br&gt;审核、调查、审批、对账与异常处理" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;fontColor=#166534;align=center;verticalAlign=middle;" vertex="1" parent="roles">
+          <mxGeometry x="565" y="54" width="390" height="64" as="geometry"/>
+        </mxCell>
+        <mxCell id="m" value="管理层 · 审计 · 产品与研发&lt;br&gt;决策、监督、建设与验收" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;fontColor=#166534;align=center;verticalAlign=middle;" vertex="1" parent="roles">
+          <mxGeometry x="1050" y="54" width="390" height="64" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="business" value="三、核心业务链路" style="swimlane;html=1;horizontal=0;startSize=34;rounded=0;strokeWidth=1;strokeColor=#d97706;fillColor=#fffbeb;fontColor=#92400e;fontStyle=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="40" y="420" width="1520" height="570" as="geometry"/>
+        </mxCell>
+        <mxCell id="b1" value="申请与 CRM 主体建档或关联&lt;br&gt;运营审核；官方链接按阶段与配置启用" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;fontColor=#78350f;align=center;verticalAlign=middle;" vertex="1" parent="business">
+          <mxGeometry x="70" y="55" width="300" height="66" as="geometry"/>
+        </mxCell>
+        <mxCell id="b2" value="推广与客户注册&lt;br&gt;官方链接追踪；CRM 保存注册和归因事实" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;fontColor=#78350f;align=center;verticalAlign=middle;" vertex="1" parent="business">
+          <mxGeometry x="420" y="55" width="300" height="66" as="geometry"/>
+        </mxCell>
+        <mxCell id="b3" value="归因锁定与资格判断&lt;br&gt;Affiliate 确认归属；校验 IB 隔离及 CRM 行为事实" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;fontColor=#78350f;align=center;verticalAlign=middle;" vertex="1" parent="business">
+          <mxGeometry x="770" y="55" width="300" height="66" as="geometry"/>
+        </mxCell>
+        <mxCell id="b4" value="三环节计佣：FTD、有效 FTD、质量服务&lt;br&gt;FTD 记录里程碑，不生成可放款资金&lt;br&gt;有效 FTD 生成基础 CPA；质量服务另案计奖" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;fontColor=#78350f;align=center;verticalAlign=middle;" vertex="1" parent="business">
+          <mxGeometry x="1120" y="48" width="330" height="82" as="geometry"/>
+        </mxCell>
+        <mxCell id="q" value="质量服务达成&lt;br&gt;基础 CPA 之外另建佣金案件，独立结算" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;fontColor=#78350f;align=center;verticalAlign=middle;" vertex="1" parent="business">
+          <mxGeometry x="205" y="180" width="300" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="b5" value="风险与结算前检查&lt;br&gt;实名、期限、集群、调查及关键数据完整性" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;fontColor=#78350f;align=center;verticalAlign=middle;" vertex="1" parent="business">
+          <mxGeometry x="610" y="180" width="300" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="r" value="受影响案件阻断或冻结&lt;br&gt;生成任务、人工调查与按权限审批" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fee2e2;strokeColor=#dc2626;fontColor=#991b1b;align=center;verticalAlign=middle;" vertex="1" parent="business">
+          <mxGeometry x="1015" y="180" width="300" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="b6" value="每日自动结算&lt;br&gt;税费与保证金处理；合规可用金额进入可提现余额" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;fontColor=#78350f;align=center;verticalAlign=middle;" vertex="1" parent="business">
+          <mxGeometry x="175" y="330" width="300" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="b7" value="合作者手动提现&lt;br&gt;一笔提现对应一份结算单；人工审核及执行前复查" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;fontColor=#78350f;align=center;verticalAlign=middle;" vertex="1" parent="business">
+          <mxGeometry x="610" y="330" width="300" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="b8" value="CRM 实际打款与结果核验&lt;br&gt;支付回执、分摊对账、失败退回及冲正追索" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;fontColor=#78350f;align=center;verticalAlign=middle;" vertex="1" parent="business">
+          <mxGeometry x="1015" y="330" width="300" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="systems" value="四、系统协作" style="swimlane;html=1;horizontal=0;startSize=34;rounded=0;strokeWidth=1;strokeColor=#7c3aed;fillColor=#faf5ff;fontColor=#5b21b6;fontStyle=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1020" width="1520" height="210" as="geometry"/>
+        </mxCell>
+        <mxCell id="af" value="Affiliate&lt;br&gt;归因、计佣、风险、结算与业务审计" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#7c3aed;fontColor=#4c1d95;align=center;verticalAlign=middle;" vertex="1" parent="systems">
+          <mxGeometry x="55" y="62" width="240" height="66" as="geometry"/>
+        </mxCell>
+        <mxCell id="crm" value="CRM&lt;br&gt;账户、认证及客户事实；实际打款对接" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#7c3aed;fontColor=#4c1d95;align=center;verticalAlign=middle;" vertex="1" parent="systems">
+          <mxGeometry x="350" y="62" width="240" height="66" as="geometry"/>
+        </mxCell>
+        <mxCell id="pay" value="支付渠道与银行&lt;br&gt;执行支付并返回结果" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#7c3aed;fontColor=#4c1d95;align=center;verticalAlign=middle;" vertex="1" parent="systems">
+          <mxGeometry x="645" y="62" width="240" height="66" as="geometry"/>
+        </mxCell>
+        <mxCell id="imc" value="IMC&lt;br&gt;消费事件做分析，不参与计佣" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#7c3aed;fontColor=#4c1d95;align=center;verticalAlign=middle;" vertex="1" parent="systems">
+          <mxGeometry x="940" y="62" width="240" height="66" as="geometry"/>
+        </mxCell>
+        <mxCell id="msg" value="站内消息与邮件&lt;br&gt;业务通知及投递跟踪" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#7c3aed;fontColor=#4c1d95;align=center;verticalAlign=middle;" vertex="1" parent="systems">
+          <mxGeometry x="1235" y="62" width="240" height="66" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="governance" value="五、贯穿全链路的保障" style="swimlane;html=1;horizontal=0;startSize=34;rounded=0;strokeWidth=1;strokeColor=#475569;fillColor=#f8fafc;fontColor=#334155;fontStyle=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1260" width="1520" height="105" as="geometry"/>
+        </mxCell>
+        <mxCell id="s" value="配置版本与生效管理 · 权限与审批 · 统一任务&lt;br&gt;风险与信用分离 · 幂等与补偿 · 操作审计 · 资金对账" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e2e8f0;strokeColor=#475569;fontColor=#334155;align=center;verticalAlign=middle;" vertex="1" parent="governance">
+          <mxGeometry x="210" y="42" width="1100" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e-goals-roles" value="服务对象与责任" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#64748b;fontColor=#475569;endArrow=block;endFill=0;" edge="1" parent="1" source="goals" target="roles">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-roles-business" value="参与及处理" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#64748b;fontColor=#475569;endArrow=block;endFill=0;" edge="1" parent="1" source="roles" target="business">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-business-systems" value="系统支撑关系" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#64748b;fontColor=#475569;endArrow=block;endFill=0;" edge="1" parent="1" source="business" target="systems">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-systems-governance" value="全链路治理" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#64748b;fontColor=#475569;endArrow=block;endFill=0;" edge="1" parent="1" source="systems" target="governance">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e-b1-b2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#92400e;endArrow=block;endFill=1;" edge="1" parent="1" source="b1" target="b2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-b2-b3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#92400e;endArrow=block;endFill=1;" edge="1" parent="1" source="b2" target="b3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-b3-b4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#92400e;endArrow=block;endFill=1;" edge="1" parent="1" source="b3" target="b4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-b4-b5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#92400e;endArrow=block;endFill=1;" edge="1" parent="1" source="b4" target="b5">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-b4-q" value="后续独立奖励" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#b45309;fontColor=#92400e;endArrow=block;endFill=0;" edge="1" parent="1" source="b4" target="q">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-q-b5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#92400e;endArrow=block;endFill=1;" edge="1" parent="1" source="q" target="b5">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-b5-b6" value="检查通过" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#92400e;fontColor=#92400e;endArrow=block;endFill=1;" edge="1" parent="1" source="b5" target="b6">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-b5-r" value="存在阻断" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#dc2626;fontColor=#991b1b;endArrow=block;endFill=1;" edge="1" parent="1" source="b5" target="r">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-r-b5" value="获准解除后重新检查" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#dc2626;fontColor=#991b1b;endArrow=block;endFill=0;" edge="1" parent="1" source="r" target="b5">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-b6-b7" value="合作者主动申请" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#92400e;fontColor=#92400e;endArrow=block;endFill=1;" edge="1" parent="1" source="b6" target="b7">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-b7-b8" value="审核及复查通过" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#92400e;fontColor=#92400e;endArrow=block;endFill=1;" edge="1" parent="1" source="b7" target="b8">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e-af-crm" value="受控读取事实及提交打款请求" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#6d28d9;fontColor=#4c1d95;endArrow=block;endFill=1;" edge="1" parent="1" source="af" target="crm">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-crm-af" value="事实、确认与付款结果" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#6d28d9;fontColor=#4c1d95;endArrow=block;endFill=1;" edge="1" parent="1" source="crm" target="af">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-crm-pay" value="付款指令" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#6d28d9;fontColor=#4c1d95;endArrow=block;endFill=1;" edge="1" parent="1" source="crm" target="pay">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-pay-crm" value="支付结果" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#6d28d9;fontColor=#4c1d95;endArrow=block;endFill=1;" edge="1" parent="1" source="pay" target="crm">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-af-imc" value="结果事件" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#6d28d9;fontColor=#4c1d95;endArrow=block;endFill=1;" edge="1" parent="1" source="af" target="imc">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-af-msg" value="通知任务" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#6d28d9;fontColor=#4c1d95;endArrow=block;endFill=1;" edge="1" parent="1" source="af" target="msg">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="note" value="边界说明：灰度期审核通过后开链；全量期可在申请账号完成后自动开链，但不等于身份、结算或提现通过。CRM 提供账户、认证和客户事实；Affiliate 负责归因、计佣、风险处置结论与业务审计。FTD 只记录里程碑；风险、集群、隔离和关键缺数可阻断自动结算但不删除已计算佣金。" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff7ed;strokeColor=#f97316;fontColor=#7c2d12;size=14;align=left;verticalAlign=top;spacingTop=8;spacingLeft=10;spacingRight=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1395" width="1520" height="82" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

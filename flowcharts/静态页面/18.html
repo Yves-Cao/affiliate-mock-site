@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>18 事件流转图</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+  <div class="layout">
+                <nav class="sidebar">
+      <p class="sidebar-title">流程图导航</p>
+      <div class="nav-group">
+        <p class="group-title">评审主线</p>
+        <a class="nav-item" href="./01.html"><span>01</span><span>项目全景图</span></a>
+        <a class="nav-item" href="./02.html"><span>02</span><span>当前态与目标态服务蓝图</span></a>
+        <a class="nav-item" href="./03.html"><span>03</span><span>端到端业务泳道图</span></a>
+        <a class="nav-item" href="./04.html"><span>04</span><span>注册归因泳道图</span></a>
+        <a class="nav-item" href="./05.html"><span>05</span><span>佣金计算流程图</span></a>
+        <a class="nav-item" href="./06.html"><span>06</span><span>结算与资金时序图</span></a>
+        <a class="nav-item" href="./07.html"><span>07</span><span>提现流程图</span></a>
+        <a class="nav-item" href="./08.html"><span>08</span><span>风险处置流程图</span></a>
+        <a class="nav-item" href="./09.html"><span>09</span><span>风险传播图</span></a>
+        <a class="nav-item" href="./10.html"><span>10</span><span>配置审批流程图</span></a>
+        <a class="nav-item" href="./11.html"><span>11</span><span>状态机图</span></a>
+        <a class="nav-item" href="./19.html"><span>19</span><span>权限矩阵图</span></a>
+        <a class="nav-item" href="./20.html"><span>20</span><span>评审到研发门禁图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">技术附录</p>
+        <a class="nav-item" href="./12.html"><span>12</span><span>系统上下文图</span></a>
+        <a class="nav-item" href="./13.html"><span>13</span><span>逻辑架构图</span></a>
+        <a class="nav-item" href="./14.html"><span>14</span><span>数据流图</span></a>
+        <a class="nav-item" href="./15.html"><span>15</span><span>ER图</span></a>
+        <a class="nav-item" href="./16.html"><span>16</span><span>数据血缘图</span></a>
+        <a class="nav-item" href="./17.html"><span>17</span><span>API与页面映射图</span></a>
+        <a class="nav-item active" href="./18.html"><span>18</span><span>事件流转图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">CRM专项</p>
+        <a class="nav-item" href="./21.html"><span>21</span><span>CRM系统上下文与数据边界图</span></a>
+        <a class="nav-item" href="./22.html"><span>22</span><span>合作者入驻与CRM账户/KYC联动图</span></a>
+        <a class="nav-item" href="./23.html"><span>23</span><span>客户注册归因与CRM事实流图</span></a>
+        <a class="nav-item" href="./24.html"><span>24</span><span>客户资金、交易、风险事实到计佣结算图</span></a>
+        <a class="nav-item" href="./25.html"><span>25</span><span>CRM打款与对账联动图</span></a>
+        <a class="nav-item" href="./26.html"><span>26</span><span>CRM数据异常、补偿与更正图</span></a>
+        <a class="nav-item" href="./27.html"><span>27</span><span>Affiliate数据回传CRM与合规边界图</span></a>
+      </div>
+    </nav>
+    <main>
+      <div class="topbar">
+        <h1>18 事件流转图</h1>
+        <span>技术附录</span>
+      </div>
+      <div class="stage">
+        
+        <section class="diagram-block">
+          <h2>1. 事件接收、业务处理与消费者投递</h2>
+          <div class="diagram-output" data-index="0"></div>
+        </section>
+        <section class="diagram-block">
+          <h2>2. 自动结算、提现、CRM打款的事件时点</h2>
+          <div class="diagram-output" data-index="1"></div>
+        </section>
+        <section class="diagram-block">
+          <h2>3. 风险与申诉事件的作用范围</h2>
+          <div class="diagram-output" data-index="2"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script type="application/json" id="page-data">[{"heading":"1. 事件接收、业务处理与消费者投递","code":"flowchart TB\n    SRC[\"来源生产者<br/>CRM事实适配、领域操作、批准执行及调度\"]\n    VALID{\"来源认证、Schema及事件类型有效？\"}\n    IDEM{\"事件ID、幂等摘要与对象版本检查\"}\n    REUSE[\"同事件/同业务结果复用<br/>不重复产生资金或任务\"]\n    HANDLE[\"按合法状态与前置事实处理<br/>不按接收顺序盲目改状态\"]\n    STORE[\"保存业务结果、审计及待投递事件<br/>可靠一致性机制待技术评审\"]\n    OUT[\"事件Outbox<br/>保留事件ID、来源对象与负载摘要\"]\n    DEL[\"按消费者裁剪字段并投递<br/>分别记录尝试与确认\"]\n    IMC[\"IMC<br/>分析统计，不回流控制计佣\"]\n    PUB[\"通知与合作者回传<br/>仅获准公开字段及有限原因\"]\n    INNER[\"内部消费者<br/>任务、投影和必要重检\"]\n    ACK[\"持久处理完成的消费确认<br/>接收响应与完成语义需契约明确\"]\n    COMP[\"补偿与人工任务<br/>来源无效、摘要冲突、前置缺失、投递失败\"]\n    FIX[\"补事实、复核或重投原事件<br/>保留原事件与原因；策略待配置\"]\n\n    SRC --> VALID\n    VALID -->|\"否\"| COMP\n    VALID -->|\"是\"| IDEM\n    IDEM -->|\"重复且结果一致\"| REUSE\n    IDEM -->|\"冲突、无法排序或前置缺失\"| COMP\n    IDEM -->|\"新合法事件\"| HANDLE\n    HANDLE --> STORE\n    STORE --> OUT\n    OUT --> DEL\n    DEL --> IMC\n    DEL --> PUB\n    DEL --> INNER\n    IMC --> ACK\n    PUB --> ACK\n    INNER --> ACK\n    DEL -->|\"失败或确认超时\"| COMP\n    COMP --> FIX\n    FIX -->|\"事实补齐后重新校验\"| VALID\n    FIX -->|\"允许的投递重试\"| DEL","type":"mermaid"},{"heading":"2. 自动结算、提现、CRM打款的事件时点","code":"sequenceDiagram\n    participant J as 每日结算调度\n    participant A as Affiliate资金域\n    participant O as 事件Outbox\n    participant U as 合作者\n    participant R as 审批与受保护执行\n    participant C as CRM\n    participant D as 对账处理\n\n    J->>A: 按结算日、时区及配置版本执行\n    A->>O: settlement_run_started\n    A->>A: 逐案门禁、税费、无风险保证金释放与入余额\n    opt 相应处理确已发生\n        A->>O: tax_assessment_calculated / guarantee_released\n    end\n    alt 本次运行完成\n        A->>O: settlement_run_completed及成功/阻断/失败统计\n    else 本次运行失败\n        A->>O: settlement_run_failed及原因\n    end\n    Note over A,O: 每日结算不创建提现、结算单或CRM打款\n    U->>A: 手动提交提现\n    A->>A: 幂等创建订单、锁定分摊与唯一结算单\n    A->>O: withdrawal_submitted / statement_generated\n    A->>R: 进入适用审批与执行条件检查\n    opt 获批且执行前重检通过\n        R->>C: 原业务引用与幂等键发起打款\n        R->>O: crm_payout_requested\n        C-->>A: CRM受理及后续付款结果/查询结果\n        A->>O: crm_payout_status_changed\n        A->>A: 分别更新提现、单据、分摊及必要流水\n        A->>D: 原CRM编号、外部交易及分摊核对\n        D->>O: withdrawal_reconciled\n    end\n    Note over A,C: 结果未知先查询原付款，不先退款或盲目重付","type":"mermaid"},{"heading":"3. 风险与申诉事件的作用范围","code":"flowchart TB\n    OVER[\"当前案件超过获批冻结阈值\"]\n    FREEZE[\"settlement_overdue_frozen<br/>仅当前客户、佣金及结算案件\"]\n    SIGNAL[\"settlement_overdue_signal_created<br/>后台风险信号与人工任务\"]\n    REVIEW{\"人工核验风险信号\"}\n    CONF[\"settlement_overdue_signal_confirmed<br/>进入相应风险处置\"]\n    REJ[\"settlement_overdue_signal_rejected<br/>不等于解除冻结或实际放款\"]\n    POLICY[\"按开关、窗口及次数重算申诉可见性<br/>settlement_appeal_visibility_changed\"]\n    APPEAL[\"符合资格且提交成功<br/>settlement_appeal_created\"]\n    UNDEC[\"VIS-RISK-Q01待决<br/>解除申请、审批、执行与申诉并发时点\"]\n    OVER --> FREEZE\n    FREEZE --> SIGNAL\n    SIGNAL --> REVIEW\n    REVIEW -->|\"确认\"| CONF\n    REVIEW -->|\"驳回\"| REJ\n    REJ --> POLICY\n    POLICY -->|\"允许且用户提交\"| APPEAL\n    REJ -. \"解除不能直接越过待决\" .-> UNDEC\n    APPEAL -. \"并发与恢复规则待统一\" .-> UNDEC","type":"mermaid"}]</script>
+  <script src="./assets/mermaid.min.js"></script>
+  <script src="./assets/viewer-static.min.js"></script>
+  <script>
+    const blocks = JSON.parse(document.getElementById("page-data").textContent);
+    mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "default", fontFamily: 'Arial, "PingFang SC", sans-serif', flowchart: { useMaxWidth: true, padding: 16 }, sequence: { useMaxWidth: true, wrap: true } });
+    async function renderBlock(block, output) {
+      try {
+        output.innerHTML = '<div class="loading">渲染中...</div>';
+        if (block.type === "drawio") {
+          const host = document.createElement("div");
+          host.className = "mxgraph";
+          host.setAttribute("data-mxgraph", JSON.stringify({ xml: block.code, nav: true, resize: true, toolbar: "zoom layers" }));
+          output.appendChild(host);
+          GraphViewer.createViewerForElement(host);
+          return;
+        }
+        const result = await mermaid.render("svg-" + Math.random().toString(36).slice(2), block.code);
+        output.innerHTML = result.svg;
+      } catch (error) {
+        output.innerHTML = '<div class="error"></div>';
+        output.querySelector(".error").textContent = error && error.message ? error.message : String(error);
+      }
+    }
+    document.querySelectorAll(".diagram-output").forEach((output, index) => renderBlock(blocks[index], output));
+  </script>
+</body>
+</html>

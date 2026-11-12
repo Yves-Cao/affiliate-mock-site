@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>09 风险传播图</title>
+  <link rel="stylesheet" href="./assets/style.css">
+<style id="risk-page-style">
+    .revision { margin: 0 0 16px; font-size: 13px; line-height: 1.8; overflow-wrap: anywhere; }
+    .sidebar-title { display: block; color: inherit; text-decoration: none; }
+    .diagram-output svg { max-width: none; }
+    .diagram-output { overscroll-behavior-x: contain; }
+    .diagram-toolbar { display: flex; gap: 6px; padding: 8px 16px 0; }
+    .diagram-toolbar button { width: 32px; height: 32px; border: 1px solid #dbe1ea; border-radius: 4px; background: #fff; color: #334155; font-size: 20px; cursor: pointer; }
+    .diagram-toolbar button:hover { background: #f1f5f9; }
+    @media (max-width: 720px) { .sidebar .nav-group { display: none; } .sidebar { height: auto; padding: 10px 14px; } .sidebar-title { margin: 0; } .topbar { flex-wrap: wrap; } }
+  </style>
+</head>
+<body>
+  <div class="layout">
+                <nav class="sidebar">
+      <a class="sidebar-title" href="./00.html">流程图导航</a>
+      <div class="nav-group">
+        <p class="group-title">评审主线</p>
+        <a class="nav-item" href="./01.html"><span>01</span><span>项目全景图</span></a>
+        <a class="nav-item" href="./02.html"><span>02</span><span>当前态与目标态服务蓝图</span></a>
+        <a class="nav-item" href="./03.html"><span>03</span><span>端到端业务泳道图</span></a>
+        <a class="nav-item" href="./04.html"><span>04</span><span>注册归因泳道图</span></a>
+        <a class="nav-item" href="./05.html"><span>05</span><span>佣金计算流程图</span></a>
+        <a class="nav-item" href="./06.html"><span>06</span><span>结算与资金时序图</span></a>
+        <a class="nav-item" href="./07.html"><span>07</span><span>提现流程图</span></a>
+        <a class="nav-item" href="./08.html"><span>08</span><span>风险处置流程图</span></a>
+        <a class="nav-item active" href="./09.html"><span>09</span><span>风险传播图</span></a>
+        <a class="nav-item" href="./10.html"><span>10</span><span>配置审批流程图</span></a>
+        <a class="nav-item" href="./11.html"><span>11</span><span>状态机图</span></a>
+        <a class="nav-item" href="./19.html"><span>19</span><span>权限矩阵图</span></a>
+        <a class="nav-item" href="./20.html"><span>20</span><span>评审到研发门禁图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">技术附录</p>
+        <a class="nav-item" href="./12.html"><span>12</span><span>系统上下文图</span></a>
+        <a class="nav-item" href="./13.html"><span>13</span><span>逻辑架构图</span></a>
+        <a class="nav-item" href="./14.html"><span>14</span><span>数据流图</span></a>
+        <a class="nav-item" href="./15.html"><span>15</span><span>ER图</span></a>
+        <a class="nav-item" href="./16.html"><span>16</span><span>数据血缘图</span></a>
+        <a class="nav-item" href="./17.html"><span>17</span><span>API与页面映射图</span></a>
+        <a class="nav-item" href="./18.html"><span>18</span><span>事件流转图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">CRM专项</p>
+        <a class="nav-item" href="./21.html"><span>21</span><span>CRM系统上下文与数据边界图</span></a>
+        <a class="nav-item" href="./22.html"><span>22</span><span>合作者入驻与CRM账户/KYC联动图</span></a>
+        <a class="nav-item" href="./23.html"><span>23</span><span>客户注册归因与CRM事实流图</span></a>
+        <a class="nav-item" href="./24.html"><span>24</span><span>客户资金、交易、风险事实到计佣结算图</span></a>
+        <a class="nav-item" href="./25.html"><span>25</span><span>CRM打款与对账联动图</span></a>
+        <a class="nav-item" href="./26.html"><span>26</span><span>CRM数据异常、补偿与更正图</span></a>
+        <a class="nav-item" href="./27.html"><span>27</span><span>Affiliate数据回传CRM与合规边界图</span></a>
+      </div>
+    </nav>
+    <main>
+      <div class="topbar">
+        <h1>09 风险传播图</h1>
+        <span>评审主线</span>
+      </div>
+      <div class="stage">
+        <p class="revision">v0.2 · 2026-11-12 · 目标设计，待专业评审 · <a href="../09-风险传播图.md">文字说明</a> · <a href="../09-风险传播图-Mermaid预览.md">Mermaid源稿</a> · <a href="../09-风险传播图-Drawio.xml">Drawio XML</a></p>
+        <section class="diagram-block"><h2>1. 事实、聚合与处置范围</h2><div class="diagram-toolbar" role="group" aria-label="图形缩放"><button type="button" data-zoom="out" title="缩小" aria-label="缩小">−</button><button type="button" data-zoom="in" title="放大" aria-label="放大">+</button><button type="button" data-zoom="fit" title="适应宽度" aria-label="适应宽度">↔</button></div><div class="diagram-output" data-index="0"></div></section>
+        <section class="diagram-block"><h2>2. 分域执行、维持限制与恢复</h2><div class="diagram-toolbar" role="group" aria-label="图形缩放"><button type="button" data-zoom="out" title="缩小" aria-label="缩小">−</button><button type="button" data-zoom="in" title="放大" aria-label="放大">+</button><button type="button" data-zoom="fit" title="适应宽度" aria-label="适应宽度">↔</button></div><div class="diagram-output" data-index="1"></div></section>
+        <section class="diagram-block"><h2>3. 集群调查与Hold到期闭环</h2><div class="diagram-toolbar" role="group" aria-label="图形缩放"><button type="button" data-zoom="out" title="缩小" aria-label="缩小">−</button><button type="button" data-zoom="in" title="放大" aria-label="放大">+</button><button type="button" data-zoom="fit" title="适应宽度" aria-label="适应宽度">↔</button></div><div class="diagram-output" data-index="2"></div></section>
+        <section class="diagram-block"><h2>4. 全局暂停与恢复</h2><div class="diagram-toolbar" role="group" aria-label="图形缩放"><button type="button" data-zoom="out" title="缩小" aria-label="缩小">−</button><button type="button" data-zoom="in" title="放大" aria-label="放大">+</button><button type="button" data-zoom="fit" title="适应宽度" aria-label="适应宽度">↔</button></div><div class="diagram-output" data-index="3"></div></section>
+      </div>
+    </main>
+  </div>
+  <script type="application/json" id="page-data">[{"heading":"1. 事实、聚合与处置范围","code":"flowchart TB\n    FACT[\"CRM权威事实及Affiliate行为事实\"] --> EVENT[\"客户或佣金案件风险事件\u003cbr/>保存直接R0-R3及来源版本\"]\n    EVENT --> LOCAL[\"按适用已批准规则拦截受影响自动结算\u003cbr/>继续计佣，保留原始事实\"]\n    EVENT --> AGG[\"按合作者、Sub ID、国家、活动或渠道聚合\u003cbr/>保存去重分子分母、窗口、金额及版本\"]\n    CLUSTER[\"集群识别与认定结果\u003cbr/>来自图3\"] --> AGG\n    AGG --> DATA{\"窗口和分子分母可评估？\"}\n    DATA -->|否| GAP[\"登记缺数及补数责任\u003cbr/>不制造风险比例\"]\n    GAP --> AGG\n    DATA -->|是| THRESHOLD{\"达到适用已批准阈值？\"}\n    THRESHOLD -->|否| OBS[\"保留快照并持续观察\"]\n    OBS --> AGG\n    THRESHOLD -->|是| TYPE{\"实际命中的聚合类型\"}\n    TYPE -->|合作者风险客户占比超阈值| TASK[\"标记风险合作者\u003cbr/>生成后台事件及人工任务\"]\n    TYPE -->|其他聚合条件| OTHER[\"建立对应范围事件及任务\u003cbr/>控制仅按适用已批准规则\"]\n    TASK --> INVESTIGATE[\"风控核验来源构成、证据及逐案影响\"]\n    OTHER --> INVESTIGATE\n    INVESTIGATE --> SCOPE{\"局部可隔离？\"}\n    SCOPE -->|是| PLAN[\"提交局部处置计划\"]\n    SCOPE -->|否| WIDE{\"跨范围证据及完整对象清单充分？\"}\n    WIDE -->|否| WAIT[\"继续调查补证\u003cbr/>不扩大限制，保留现有合法控制\"]\n    WAIT --> INVESTIGATE\n    WIDE -->|是| WIDEPLAN[\"提交扩大合作者范围计划\u003cbr/>记录原因、证据及影响预览\"]\n    PLAN --> APPROVAL[\"进入08图2审批\u003cbr/>风险结论与申请审批结果分别记录\"]\n    WIDEPLAN --> APPROVAL\n    APPROVAL -->|全部必要节点通过| EXEC[\"进入图2分域执行与恢复\"]\n    APPROVAL -->|退回| INVESTIGATE\n    APPROVAL -->|驳回申请| KEEP[\"不执行新增处置\u003cbr/>不等于风险排除，原限制按原依据保持\"]","type":"mermaid"},{"heading":"2. 分域执行、维持限制与恢复","code":"flowchart TB\n    APPROVED[\"图1已批准的明确处置计划\"] --> DOMAIN{\"获批动作所属领域\"}\n    DOMAIN -->|信用| CREDIT[\"普通风险扣积分或目标等级二选一\u003cbr/>硬风险按配置组合且受上限、最低等级及去重保护\"]\n    CREDIT --> CREDITCHECK[\"沿08图3核验信用执行\u003cbr/>成功后按配置影响未来权益\"]\n    CREDITCHECK -->|核验执行成功| FUTURE[\"窗口衰减或获准人工恢复\u003cbr/>不改写历史佣金及付款\"]\n    DOMAIN -->|结算控制或财务任务| MONEY[\"仅执行获批对象及动作\u003cbr/>保留资金事实及限制ID\"]\n    MONEY --> VERIFY[\"沿08图3核验执行\u003cbr/>失败补偿，未知先查询，不重复成功子项\"]\n    VERIFY -->|执行成功| MAINTAIN[\"维持已生效限制\u003cbr/>记录恢复条件、责任及复核时间\"]\n    VERIFY -->|未完成| VERIFY\n    MAINTAIN --> CONDITION{\"恢复条件满足且具备解除申请资格？\"}\n    CONDITION -->|否| MAINTAIN\n    CONDITION -->|是| SOURCE{\"是否超时信号派生限制？\"}\n    SOURCE -->|是| PENDING[\"VIS-RISK-Q01待确认\u003cbr/>解除与申诉并发时点未定，停止自动推进\"]\n    SOURCE -->|否| RELEASE[\"提交解除指定限制申请\u003cbr/>沿08图2审批、图3执行及图4恢复\"]\n    RELEASE -->|退回或驳回| MAINTAIN\n    RELEASE -->|执行完成| RECHECK[\"逐案重跑全部结算前检查\u003cbr/>实名、CRM确权、Hold、风险及缺数等\"]\n    RECHECK --> PASS{\"全部独立门禁通过？\"}\n    PASS -->|否| BLOCK[\"保留剩余阻断及处理责任\"]\n    BLOCK -->|相关问题处理后| RECHECK\n    PASS -->|是| ELIGIBLE[\"进入后续结算资格\u003cbr/>不直接入钱包或打款\"]","type":"mermaid"},{"heading":"3. 集群调查与Hold到期闭环","code":"flowchart TB\n    INPUT[\"设备、IP、注册、资金及身份关联线索\"] --> FEATURES{\"满足两条独立有效特征\u003cbr/>或可追溯权威确权例外？\"}\n    FEATURES -->|否或只有弱特征| OBSERVE[\"仅观察及保留证据\u003cbr/>不据此标记集群或硬处置\"]\n    OBSERVE -->|新证据| INPUT\n    FEATURES -->|是| SUSPECT[\"疑似集群suspected\u003cbr/>不扣分，继续计佣，阻断受影响自动结算\"]\n    SUSPECT --> INVESTIGATE[\"风控调查成员、证据独立性及影响范围\"]\n    INVESTIGATE --> ENOUGH{\"证据足以形成认定建议？\"}\n    ENOUGH -->|否| SUPPLEMENT[\"补证或等待外部事实\u003cbr/>保留负责人及复核时间\"]\n    SUPPLEMENT --> INVESTIGATE\n    ENOUGH -->|是| PROPOSAL[\"提交确认或排除建议\u003cbr/>沿08图2审批及图3执行核验\"]\n    PROPOSAL -->|退回或驳回申请| SUPPLEMENT\n    PROPOSAL -->|确认建议获批且执行生效| CONFIRMED[\"认定confirmed\u003cbr/>保存成员及证据版本\"]\n    PROPOSAL -->|排除建议获批且执行生效| CLEARED[\"认定cleared\u003cbr/>保留原始事实及关系历史\"]\n    CONFIRMED --> PLAN[\"仅对获批范围执行配置处置\u003cbr/>转图1及图2，不自动处罚全部成员\"]\n    CLEARED --> RECOVER[\"按图2申请解除并全量重检\u003cbr/>不直接放行\"]\n    SUSPECT --> DUE[\"当前案件理论Hold到期或到复核时间\"]\n    DUE --> OVERDUE{\"等待时长大于锁定冻结阈值？\"}\n    OVERDUE -->|是| FREEZE[\"交08图5逐案超时冻结\u003cbr/>不重置起算，不靠延期规避冻结\"]\n    OVERDUE -->|否| ACTIVE{\"集群风险仍存在？\"}\n    ACTIVE -->|否| RECOVER\n    ACTIVE -->|是| LIMIT{\"适用配置允许且未达到\u003cbr/>延期次数及总天数边界？\"}\n    LIMIT -->|是| EXTEND[\"控制hold_extended\u003cbr/>按锁定配置延期并记录累计值\"]\n    EXTEND --> DUE\n    LIMIT -->|否或配置不完整| MANUAL[\"控制manual_required\u003cbr/>停止自动延期，强制人工复核\"]\n    MANUAL --> INVESTIGATE","type":"mermaid"},{"heading":"4. 全局暂停与恢复","code":"flowchart TB\n    RANGE[\"已发现风险范围和严重度\"] --> LEVEL{\"可按案件或合作者范围隔离？\"}\n    LEVEL -->|可以| SCOPED[\"沿局部处置链处理\u003cbr/>保留对应案件门禁\"]\n    LEVEL -->|不可隔离或重大事件| PAUSE[\"运营发起紧急暂停流量或链接\u003cbr/>保留已有案件、资金及证据\"]\n    PAUSE --> RECORD[\"事后补齐风控、财务审核及审计\"]\n    RECORD --> RESTORE[\"运营发起恢复并提交影响评估\"]\n    RESTORE --> RISK{\"风控确认风险解除？\"}\n    RISK -->|否或证据不足| WAIT[\"维持暂停，补证或整改\u003cbr/>记录责任与下次复核\"]\n    RISK -->|是| FIN{\"财务确认资金及对账正常？\"}\n    FIN -->|否或资料不足| WAIT\n    FIN -->|是| APPROVAL[\"按08图2及权限策略完成恢复审批\u003cbr/>其他必要专业节点仍须通过\"]\n    APPROVAL -->|退回或驳回| WAIT\n    WAIT -->|补齐后重新提交| RESTORE\n    APPROVAL -->|全部必要节点通过| EXEC[\"受保护执行并沿08图3核验\u003cbr/>未知先查询，仅补偿明确失败子项\"]\n    EXEC -->|未完成| WAITEXEC[\"保持未解除范围暂停\u003cbr/>保留部分成功明细并继续补偿\"]\n    WAITEXEC --> EXEC\n    EXEC -->|成功| RESUME[\"受控恢复流量并持续观察\u003cbr/>不自动解除独立案件限制\"]\n    RESUME --> RECHECK[\"受影响案件沿图2逐案重检\u003cbr/>全部门禁通过才进入后续结算资格\"]","type":"mermaid"}]</script>
+  <script src="./assets/mermaid.min.js"></script>
+  <script src="./assets/viewer-static.min.js"></script>
+  <script>
+    const blocks = JSON.parse(document.getElementById("page-data").textContent);
+    mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "default", fontFamily: 'Arial, "PingFang SC", sans-serif', flowchart: { useMaxWidth: false, padding: 16, nodeSpacing: 44, rankSpacing: 60, wrappingWidth: 260 }, sequence: { useMaxWidth: true, wrap: true } });
+    async function renderBlock(block, output) {
+      try {
+        output.innerHTML = '<div class="loading">渲染中...</div>';
+        if (block.type === "drawio") {
+          const host = document.createElement("div");
+          host.className = "mxgraph";
+          host.setAttribute("data-mxgraph", JSON.stringify({ xml: block.code, nav: true, resize: true, toolbar: "zoom layers" }));
+          output.appendChild(host);
+          GraphViewer.createViewerForElement(host);
+          return;
+        }
+        const result = await mermaid.render("svg-" + Math.random().toString(36).slice(2), block.code);
+        output.innerHTML = result.svg;
+      } catch (error) {
+        output.innerHTML = '<div class="error"></div>';
+        output.querySelector(".error").textContent = error && error.message ? error.message : String(error);
+      }
+    }
+    document.querySelectorAll(".diagram-output").forEach((output, index) => renderBlock(blocks[index], output));
+  </script>
+<script id="risk-zoom">
+    function fitDiagram(output) {
+      const svg = output.querySelector("svg");
+      if (!svg) return;
+      const nativeWidth = svg.viewBox.baseVal.width;
+      const scale = Math.min(1, (output.clientWidth - 32) / nativeWidth);
+      output.dataset.scale = scale;
+      output.dataset.fit = "true";
+      svg.style.width = nativeWidth * scale + "px";
+      svg.style.height = "auto";
+    }
+    document.querySelectorAll(".diagram-output").forEach(output => {
+      new MutationObserver(() => fitDiagram(output)).observe(output, { childList: true });
+      new ResizeObserver(() => { if (output.dataset.fit === "true") fitDiagram(output); }).observe(output);
+      fitDiagram(output);
+    });
+    document.querySelectorAll(".diagram-toolbar button").forEach(button => button.addEventListener("click", () => {
+      const output = button.closest(".diagram-block").querySelector(".diagram-output");
+      const svg = output.querySelector("svg");
+      if (!svg) return;
+      if (button.dataset.zoom === "fit") { fitDiagram(output); output.scrollLeft = 0; return; }
+      const scale = Math.max(0.1, Math.min(3, Number(output.dataset.scale || 1) * (button.dataset.zoom === "in" ? 1.4 : 1 / 1.4)));
+      output.dataset.scale = scale;
+      output.dataset.fit = "false";
+      svg.style.width = svg.viewBox.baseVal.width * scale + "px";
+    }));
+  </script>
+</body>
+</html>

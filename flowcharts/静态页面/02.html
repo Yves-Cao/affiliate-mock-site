@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>02 当前态与目标态服务蓝图</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+  <div class="layout">
+                <nav class="sidebar">
+      <p class="sidebar-title">流程图导航</p>
+      <div class="nav-group">
+        <p class="group-title">评审主线</p>
+        <a class="nav-item" href="./01.html"><span>01</span><span>项目全景图</span></a>
+        <a class="nav-item active" href="./02.html"><span>02</span><span>当前态与目标态服务蓝图</span></a>
+        <a class="nav-item" href="./03.html"><span>03</span><span>端到端业务泳道图</span></a>
+        <a class="nav-item" href="./04.html"><span>04</span><span>注册归因泳道图</span></a>
+        <a class="nav-item" href="./05.html"><span>05</span><span>佣金计算流程图</span></a>
+        <a class="nav-item" href="./06.html"><span>06</span><span>结算与资金时序图</span></a>
+        <a class="nav-item" href="./07.html"><span>07</span><span>提现流程图</span></a>
+        <a class="nav-item" href="./08.html"><span>08</span><span>风险处置流程图</span></a>
+        <a class="nav-item" href="./09.html"><span>09</span><span>风险传播图</span></a>
+        <a class="nav-item" href="./10.html"><span>10</span><span>配置审批流程图</span></a>
+        <a class="nav-item" href="./11.html"><span>11</span><span>状态机图</span></a>
+        <a class="nav-item" href="./19.html"><span>19</span><span>权限矩阵图</span></a>
+        <a class="nav-item" href="./20.html"><span>20</span><span>评审到研发门禁图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">技术附录</p>
+        <a class="nav-item" href="./12.html"><span>12</span><span>系统上下文图</span></a>
+        <a class="nav-item" href="./13.html"><span>13</span><span>逻辑架构图</span></a>
+        <a class="nav-item" href="./14.html"><span>14</span><span>数据流图</span></a>
+        <a class="nav-item" href="./15.html"><span>15</span><span>ER图</span></a>
+        <a class="nav-item" href="./16.html"><span>16</span><span>数据血缘图</span></a>
+        <a class="nav-item" href="./17.html"><span>17</span><span>API与页面映射图</span></a>
+        <a class="nav-item" href="./18.html"><span>18</span><span>事件流转图</span></a>
+      </div>
+      <div class="nav-group">
+        <p class="group-title">CRM专项</p>
+        <a class="nav-item" href="./21.html"><span>21</span><span>CRM系统上下文与数据边界图</span></a>
+        <a class="nav-item" href="./22.html"><span>22</span><span>合作者入驻与CRM账户/KYC联动图</span></a>
+        <a class="nav-item" href="./23.html"><span>23</span><span>客户注册归因与CRM事实流图</span></a>
+        <a class="nav-item" href="./24.html"><span>24</span><span>客户资金、交易、风险事实到计佣结算图</span></a>
+        <a class="nav-item" href="./25.html"><span>25</span><span>CRM打款与对账联动图</span></a>
+        <a class="nav-item" href="./26.html"><span>26</span><span>CRM数据异常、补偿与更正图</span></a>
+        <a class="nav-item" href="./27.html"><span>27</span><span>Affiliate数据回传CRM与合规边界图</span></a>
+      </div>
+    </nav>
+    <main>
+      <div class="topbar">
+        <h1>02 当前态与目标态服务蓝图</h1>
+        <span>评审主线</span>
+      </div>
+      <div class="stage">
+        
+        <section class="diagram-block">
+          <h2>2. 当前态：已有证据与待核实缺口</h2>
+          <div class="diagram-output" data-index="0"></div>
+        </section>
+        <section class="diagram-block">
+          <h2>3. 目标态：用户触点与服务支撑</h2>
+          <div class="diagram-output" data-index="1"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script type="application/json" id="page-data">[{"heading":"2. 当前态：已有证据与待核实缺口","code":"flowchart TB\n    C1[\"一、入驻<br/>已有：申请、CRM主体与审核需求<br/>待核实：真实建档、审核回写及确认闭环\"]\n    C2[\"二、推广<br/>已有：官方链接及分阶段开链规则<br/>待核实：真实开链、停链与失败补偿\"]\n    C3[\"三、注册归因<br/>已有：CRM事实源及归因设计<br/>待核实：注册参数落库、受控读取与锁定联调\"]\n    C4[\"四、行为与计佣<br/>已有：FTD、有效FTD、质量服务三环节规则<br/>待核实：真实事实、金额计算与版本一致性\"]\n    C5[\"五、风险与结算<br/>已有：风险、任务与结算专项Mock局部证据<br/>待核实：完整验收、自动结算及生产参数\"]\n    C6[\"六、提现与支持<br/>已有：提现契约及客服Mock局部证据<br/>待核实：CRM打款、真实回执与跨端服务闭环\"]\n    C1 -.阶段顺序.-> C2\n    C2 -.阶段顺序.-> C3\n    C3 -.阶段顺序.-> C4\n    C4 -.阶段顺序.-> C5\n    C5 -.阶段顺序.-> C6","type":"mermaid"},{"heading":"3. 目标态：用户触点与服务支撑","code":"flowchart TB\n    subgraph S1[\"一、入驻\"]\n        U1[\"用户与触点<br/>合作者申请、补件；查看申请与CRM确认状态\"]\n        H1[\"人工：运营审核通过、驳回或补件<br/>后台：关联或请求CRM创建主体，保存申请与审核结果<br/>依赖：CRM主体、认证引用与状态确认\"]\n        U1 -.服务支撑.-> H1\n    end\n    subgraph S2[\"二、推广\"]\n        U2[\"用户与触点<br/>合作者获取官方链接、素材及二级渠道标识并推广\"]\n        H2[\"人工：运营处理开链异常<br/>后台：按灰度或全量配置及硬门禁启用链接<br/>依赖：CRM主体创建/关联、官方域名与生效配置\"]\n        U2 -.服务支撑.-> H2\n    end\n    subgraph S3[\"三、注册归因\"]\n        U3[\"用户与触点<br/>客户经官方链接在CRM注册；合作者查看归属结果\"]\n        H3[\"人工：运营及技术核查缺数和归因冲突<br/>后台：关联点击与注册，校验IB隔离并锁定归属<br/>依赖：CRM注册、UTM、活动、二级渠道及自定义参数\"]\n        U3 -.服务支撑.-> H3\n    end\n    subgraph S4[\"四、行为与计佣\"]\n        U4[\"用户与触点<br/>客户在CRM认证、入金和交易；合作者查看里程碑与佣金结果\"]\n        H4[\"后台：FTD记录里程碑，不生成可放款资金<br/>有效FTD生成基础CPA及FTD、有效FTD两环节附加<br/>质量服务达成后另建奖励案件，不阻塞基础CPA<br/>人工与依赖：业务及财务核查异常；CRM提供行为事实\"]\n        U4 -.服务支撑.-> H4\n    end\n    subgraph S5[\"五、风险与结算\"]\n        U5[\"用户与触点<br/>合作者查看结算中、有限受限原因、保证金及可提现余额\"]\n        H5[\"人工：风控调查复核，财务核查资金问题<br/>后台：实名及逐案门禁检查，每日自动结算入余额<br/>依赖：风险结论、配置版本、税费与逐案保证金流水\"]\n        U5 -.服务支撑.-> H5\n    end\n    subgraph S6[\"六、提现与支持\"]\n        U6[\"用户与触点<br/>合作者手动提现、查看结算单与回执；按资格申诉或提交工单\"]\n        H6[\"人工：财务审核提现，运营处理一般支持，风控处理风险申诉<br/>后台：一单一结算单、分摊锁定、请求CRM打款与对账<br/>依赖：CRM及支付银行回执、站内消息与邮件投递\"]\n        U6 -.服务支撑.-> H6\n    end\n    U1 -->|取得适用阶段的推广资格| U2\n    U2 -->|客户访问有效链接| U3\n    U3 -->|最终归属合法锁定| U4\n    U4 -->|生成各自独立佣金案件| U5\n    U5 -->|余额可用且合作者主动申请| U6","type":"mermaid"}]</script>
+  <script src="./assets/mermaid.min.js"></script>
+  <script src="./assets/viewer-static.min.js"></script>
+  <script>
+    const blocks = JSON.parse(document.getElementById("page-data").textContent);
+    mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "default", fontFamily: 'Arial, "PingFang SC", sans-serif', flowchart: { useMaxWidth: true, padding: 16 }, sequence: { useMaxWidth: true, wrap: true } });
+    async function renderBlock(block, output) {
+      try {
+        output.innerHTML = '<div class="loading">渲染中...</div>';
+        if (block.type === "drawio") {
+          const host = document.createElement("div");
+          host.className = "mxgraph";
+          host.setAttribute("data-mxgraph", JSON.stringify({ xml: block.code, nav: true, resize: true, toolbar: "zoom layers" }));
+          output.appendChild(host);
+          GraphViewer.createViewerForElement(host);
+          return;
+        }
+        const result = await mermaid.render("svg-" + Math.random().toString(36).slice(2), block.code);
+        output.innerHTML = result.svg;
+      } catch (error) {
+        output.innerHTML = '<div class="error"></div>';
+        output.querySelector(".error").textContent = error && error.message ? error.message : String(error);
+      }
+    }
+    document.querySelectorAll(".diagram-output").forEach((output, index) => renderBlock(blocks[index], output));
+  </script>
+</body>
+</html>
