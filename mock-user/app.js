@@ -385,6 +385,8 @@ function currentState() {
 }
 
 AFF.state = currentState();
+AFF.state.scenario = AFF.simulation.state().scenarioId;
+AFF.state.settlementRuns = AFF.simulation.state().settlementRuns;
 if (Array.isArray(AFF.state.createdCampaigns)) {
   const existingCodes = new Set(AFF.campaigns.map(item => item.code));
   const savedCampaigns = AFF.state.createdCampaigns.filter(item =>
@@ -607,6 +609,7 @@ function statePage(route) {
 }
 
 function navigate(route) {
+  AFF.programNavigation?.close(false);
   closeOnboardingPicker();
   if (!AFF.routes.some(item => item.id === route)) route = "dash";
   setWalletOpen(false);
@@ -833,6 +836,7 @@ function saveAccount() {
 }
 
 function logout() {
+  AFF.programNavigation?.close(false);
   accountDraft = null;
   accountTimezonePickerOpen = false;
   accountTimezoneQuery = "";
@@ -1016,6 +1020,7 @@ function lookup() {
 }
 
 function handleAction(action, target) {
+  if (action === "open-program-navigation") return AFF.programNavigation.open(target);
   const state = AFF.state;
   if (AFF.postbacks?.handleAction(action, target)) return;
   if (action === "close-modal") return closeModal();
@@ -1418,7 +1423,7 @@ function handleAction(action, target) {
     return render();
   }
   if (action === "reset-scenario") {
-    AFF.state.scenario = "normal-flow";
+    AFF.simulation.setScenario("normal-flow");
     return render();
   }
 }
@@ -1704,6 +1709,7 @@ async function handleLogin(event) {
   elements["login-view"].classList.add("hidden");
   elements["app-view"].classList.remove("hidden");
   render();
+  if (!AFF.state.programCompleted) AFF.programNavigation.open(elements["profile-entry"]);
   showToast(`已登录：${maskEmail(email)}`);
 }
 
@@ -1884,7 +1890,7 @@ function initialize() {
     render();
   });
   elements["scenario-select"].addEventListener("change", event => {
-    AFF.state.scenario = event.target.value;
+    AFF.simulation.setScenario(event.target.value);
     render();
   });
   document.addEventListener("click", handleClick);

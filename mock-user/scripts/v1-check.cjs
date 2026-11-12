@@ -76,7 +76,7 @@ async function shot(page, name) {
     await desktop.page.locator("[data-rp-client]").first().click();
     await desktop.page.waitForSelector(".report-drawer");
     const drawerText = await desktop.page.locator(".report-drawer").innerText();
-    for (const text of ["客户资格状态", "客户里程碑状态", "资金状态", "质量服务"]) {
+    for (const text of ["客户资格状态", "客户里程碑状态", "佣金状态", "质量服务"]) {
       if (!drawerText.includes(text)) throw new Error(`client drawer missing ${text}`);
     }
     const paidState = await desktop.page.evaluate(() => {

@@ -6,6 +6,7 @@
   let recordDraft = null;
   let violationDraft = null;
   let importText = "";
+  let snapshotPreview = null;
   let creditPointAmount = "10";
   let error = "";
 
@@ -27,12 +28,37 @@
 
   function scenarios() {
     return [
-      ["normal-flow", "正常流", "恢复默认演示链路"],
-      ["closure-flow", "合作清退", "链接下线并暂停新提现"],
-      ["loading-flow", "加载中", "显示稳定骨架屏"],
-      ["empty-state", "空态", "展示无数据状态"],
-      ["api-error", "API异常", "展示错误码、TraceId和重试"]
+      { id: "normal-flow", title: "正常链路", description: "切换为正常业务展示，不清除已有仿真数据。", group: "业务状态", checkpoints: ["客户可进入客户数据和收益数据", "结算结果按当前Mock日期重算", "无额外风险处置"] },
+      { id: "closure-flow", title: "合作清退", description: "链接下线并暂停新提现。", group: "业务状态", checkpoints: ["推广链接显示不可用", "新提现入口显示限制说明", "历史数据仍可查看"] },
+      { id: "loading-flow", title: "加载中", description: "展示稳定骨架屏。", group: "页面状态", checkpoints: ["页面保持固定布局", "加载中不会显示旧数据", "完成后恢复内容"] },
+      { id: "empty-state", title: "空态", description: "展示无数据状态。", group: "页面状态", checkpoints: ["列表显示空态说明", "筛选器仍可使用", "返回正常数据不改变仿真对象"] },
+      { id: "api-error", title: "API异常", description: "展示错误码、TraceId和重试。", group: "页面状态", checkpoints: ["显示可定位的错误信息", "重试按钮可用", "不产生重复业务数据"] }
     ];
+  }
+
+  function countryOptions(selected) {
+    const markets = AFF.partnerProgram?.commissionMarkets || [
+      { code: "VN", zh: "越南", name: "Vietnam" },
+      { code: "TH", zh: "泰国", name: "Thailand" },
+      { code: "ID", zh: "印度尼西亚", name: "Indonesia" },
+      { code: "ZA", zh: "南非", name: "South Africa" },
+      { code: "NG", zh: "尼日利亚", name: "Nigeria" },
+      { code: "PK", zh: "巴基斯坦", name: "Pakistan" },
+      { code: "EG", zh: "埃及", name: "Egypt" },
+      { code: "KZ", zh: "哈萨克斯坦", name: "Kazakhstan" }
+    ];
+    return markets.map(item => `<option value="${h(item.code)}" ${item.code === selected ? "selected" : ""}>${h(AFF.dataText(item.code))} · ${h(item.code)}</option>`).join("");
+  }
+
+  function subIdOptions(selected) {
+    const values = [...new Set((AFF.subIds || []).map(item => item.id || item.subId).filter(Boolean))];
+    if (selected && !values.includes(selected)) values.unshift(selected);
+    return [`<option value="">${t("不关联Sub ID", "No Sub ID")}</option>`, ...values.map(value => `<option value="${h(value)}" ${value === selected ? "selected" : ""}>${h(value)}</option>`)].join("");
+  }
+
+  function targetClientOptions(selected) {
+    const rows = (AFF.reporting?.rows || []).filter(row => row.clientId);
+    return [`<option value="">${t("留空自动生成SIM客户", "Generate a SIM client")}</option>`, ...rows.map(row => `<option value="${h(row.clientId)}" ${row.clientId === selected ? "selected" : ""}>${h(row.clientId)} · ${h(AFF.countryLabel(row.country))}</option>`)].join("");
   }
 
   function summaryDelta() {
@@ -50,18 +76,18 @@
   }
 
   function timePanel() {
-    const runs = Array.isArray(AFF.state?.settlementRuns) ? AFF.state.settlementRuns : [];
+    const runs = AFF.simulation.state().settlementRuns;
     const latestRun = runs[0];
     return `${summaryDelta()}<section class="sim-section">
       <h3>${t("模拟时间", "Mock time")}</h3>
       <p>当前Mock日期：<b>${AFF.simulation.date()}</b></p>
       <div class="sim-time-actions">${[1, 7, 30].map(days => `<button type="button" data-sim-advance="${days}">+${days}${t("天", "d")}</button>`).join("")}</div>
       <form data-sim-time-form><label><span>${t("自定义天数", "Custom days")}</span><input type="number" min="1" max="180" value="1" data-sim-days></label><button type="submit" class="button primary">${t("推进时间", "Advance")}</button></form>
-      <p>${t("时间推进会重放数据管道：动态结算、保证金、结算周期、提现和申诉阶段同步更新。人工任务不会自动通过。", "Time advance replays the data pipeline: dynamic hold, guarantee, settlement periods, withdrawals, and appeal stages update together. Manual tasks do not auto-pass.")}</p>
+      <p>${t("时间推进会重放用户端数据链路：结算中、保证金、提现和申诉阶段按Mock日期更新。人工任务不会自动通过。", "Time advance replays the user-side data chain: settlement, guarantees, withdrawals, and appeal stages update by mock date. Manual tasks do not auto-pass.")}</p>
       <div class="sim-settlement-run">
-        <div><strong>${t("每日自动结算", "Daily automatic settlement")}</strong><p>${t("模拟在当前日期凌晨运行一次，将符合条件的金额进入可提现余额；不会创建提现记录，也不会直接打款。", "Run the midnight settlement job for the current mock date. Eligible amounts enter available balance; no withdrawal or direct payout is created.")}</p></div>
-        <button type="button" class="button secondary" data-sim-run-settlement>${t("运行每日自动结算", "Run daily settlement")}</button>
-        ${latestRun ? `<dl class="sim-settlement-run-meta"><div><dt>${t("最近运行", "Last run")}</dt><dd>${h(latestRun.id)}</dd></div><div><dt>${t("处理/阻断/失败", "Processed / blocked / failed")}</dt><dd>${latestRun.processedCount} / ${latestRun.blockedCount} / ${latestRun.failedCount}</dd></div><div><dt>${t("处理金额", "Processed amount")}</dt><dd>${money((latestRun.processedAmount || 0) / 100)}</dd></div><div><dt>${t("执行时区", "Timezone")}</dt><dd>${h(latestRun.executionTimezone || "UTC+8")}</dd></div><div><dt>TraceId</dt><dd>${h(latestRun.traceId)}</dd></div></dl>` : `<small>${t("尚未运行自动结算", "No automatic settlement run yet")}</small>`}
+        <div><strong>${t("每日自动结算核验", "Daily automatic settlement check")}</strong><p>${t("按当前Mock日期记录凌晨结算快照，展示处理、阻断和失败对象；不会创建提现记录，也不会直接打款。余额变化来自日期推进后的数据重算。", "Record a midnight settlement snapshot for the current mock date. No withdrawal or direct payout is created; balance changes come from recalculation after time advances.")}</p></div>
+        <button type="button" class="button secondary" data-sim-run-settlement>${t("记录结算快照", "Record settlement snapshot")}</button>
+        ${latestRun ? `<dl class="sim-settlement-run-meta"><div><dt>${t("最近运行", "Last run")}</dt><dd>${h(latestRun.id)}</dd></div><div><dt>${t("处理/阻断/失败", "Processed / blocked / failed")}</dt><dd>${latestRun.processedCount} / ${latestRun.blockedCount} / ${latestRun.failedCount}</dd></div><div><dt>${t("处理金额", "Processed amount")}</dt><dd>${money((latestRun.processedAmount || 0) / 100)}</dd></div><div><dt>${t("可提现前后", "Available before / after")}</dt><dd>${money(latestRun.beforeSummary?.available)} → ${money(latestRun.afterSummary?.available)}</dd></div><div><dt>${t("执行时区", "Timezone")}</dt><dd>${h(latestRun.executionTimezone || "UTC+8")}</dd></div><div><dt>TraceId</dt><dd>${h(latestRun.traceId)}</dd></div></dl>` : `<small>${t("尚未记录结算快照", "No settlement snapshot yet")}</small>`}
       </div>
     </section>`;
   }
@@ -72,17 +98,17 @@
     return `<section class="sim-section"><h3>${t("录入仿真客户", "Add synthetic client")}</h3>
       <form data-sim-record-form>
         <label><span>${t("事件日期", "Event date")}</span><input type="date" max="${AFF.simulation.date()}" data-sim-record="date" value="${h(draft.date)}"></label>
-        <label><span>${t("国家/地区", "Country / region")}</span><input data-sim-record="country" value="${h(draft.country)}"></label>
+        <label><span>${t("国家/地区", "Country / region")}</span><select data-sim-record="country">${countryOptions(draft.country)}</select></label>
         <label><span>${t("平台", "Platform")}</span><select data-sim-record="platform">${["Web", "Android", "iOS"].map(value => `<option ${value === draft.platform ? "selected" : ""}>${value}</option>`).join("")}</select></label>
         <label><span>${t("活动", "Campaign")}</span><select data-sim-record="campaignCode">${campaigns.map(([code, name]) => `<option value="${h(code)}" ${code === draft.campaignCode ? "selected" : ""}>${h(name)} · ${h(code)}</option>`).join("")}</select></label>
-        <label><span>${t("来源", "Source")}</span><input data-sim-record="source" value="${h(draft.source)}"></label>
+        <label><span>${t("来源", "Source")}</span><input data-sim-record="source" value="${h(draft.source)}" placeholder="${t("例如：YouTube自然流", "e.g. YouTube organic")}"></label>
         <label><span>${t("KYC", "KYC")}</span><select data-sim-record="kyc">${["通过", "审核中", "未提交", "失败"].map(value => `<option ${value === draft.kyc ? "selected" : ""}>${value}</option>`).join("")}</select></label>
         <label><span>${t("转化阶段", "Milestone")}</span><select data-sim-record="milestone">${[["registered", "注册"], ["ftd", "FTD"], ["effective", "有效FTD"], ["quality", "质量服务"]].map(([value, label]) => `<option value="${value}" ${value === draft.milestone ? "selected" : ""}>${label}</option>`).join("")}</select></label>
         <label><span>${t("首次入金", "FTD amount")}</span><input type="number" min="0" step="50" data-sim-record="ftdAmount" value="${h(draft.ftdAmount)}"></label>
         <label><span>${t("净入金", "Net deposit")}</span><input type="number" min="0" step="50" data-sim-record="netDeposit" value="${h(draft.netDeposit)}"></label>
         <label><span>${t("交易量（手）", "Volume")}</span><input type="number" min="0" step="0.1" data-sim-record="volume" value="${h(draft.volume)}"></label>
         <label><span>${t("交易日", "Trading days")}</span><input type="number" min="0" data-sim-record="tradingDays" value="${h(draft.tradingDays)}"></label>
-        <label><span>${t("Sub ID", "Sub ID")}</span><input data-sim-record="subId" value="${h(draft.subId)}"></label>
+        <label><span>${t("Sub ID", "Sub ID")}</span><select data-sim-record="subId">${subIdOptions(draft.subId)}</select></label>
         <button type="submit" class="button primary">${t("录入并重放", "Add and replay")}</button>
       </form><p>${t("生成对象使用SIM前缀，邮箱始终脱敏；本入口不采集真实个人隐私。", "Generated objects use the SIM prefix and masked emails. This entry does not collect real personal privacy data.")}</p>
     </section>`;
@@ -93,7 +119,7 @@
     const types = [["fraud_hit", "欺诈库命中"], ["identity_duplicate", "重复身份"], ["non_new_customer", "非新客户"], ["prohibited_region", "禁推地区"], ["chargeback", "支付拒付"], ["payment_abnormal", "支付异常"], ["false_traffic", "虚假流量"], ["brand_bidding", "品牌词违规竞价"], ["self_referral", "自荐或亲属注册"], ["material_violation", "素材违规"], ["cluster_risk", "集群风险"]];
     return `<section class="sim-section"><h3>${t("注入违规事件", "Inject violation event")}</h3>
       <form data-sim-violation-form>
-        <label><span>${t("目标客户ID", "Target client ID")}</span><input data-sim-violation="targetId" value="${h(draft.targetId)}" placeholder="${t("留空自动生成SIM客户", "Leave empty to generate a SIM client")}"></label>
+        <label><span>${t("目标客户ID", "Target client ID")}</span><select data-sim-violation="targetId">${targetClientOptions(draft.targetId)}</select></label>
         <label><span>${t("违规类型", "Violation type")}</span><select data-sim-violation="type">${types.map(([value, label]) => `<option value="${value}" ${value === draft.type ? "selected" : ""}>${label}</option>`).join("")}</select></label>
         <label><span>${t("发生日期", "Occurred at")}</span><input type="date" max="${AFF.simulation.date()}" data-sim-violation="occurredAt" value="${h(draft.occurredAt)}"></label>
         <label><span>${t("原因说明", "Reason")}</span><textarea rows="3" data-sim-violation="reason">${h(draft.reason)}</textarea></label>
@@ -105,7 +131,12 @@
   }
 
   function scenarioPanel() {
-    return `<section class="sim-section"><h3>${t("一键场景", "Scenarios")}</h3><div class="sim-scenarios">${scenarios().map(([id, zh, en]) => `<button type="button" class="${AFF.state.scenario === id ? "active" : ""}" data-sim-scenario="${id}"><strong>${zh}</strong><span>${en}</span></button>`).join("")}</div></section>`;
+    const current = AFF.simulation.state().scenarioId;
+    const groups = ["业务状态", "页面状态"];
+    return `<section class="sim-section"><h3>${t("场景切换", "Scenarios")}</h3><p>${t("场景切换只改变展示场景，不会清除仿真客户、违规事件或日志。需要恢复数据请使用“数据”页签。", "Scenario switching changes the display state only. It does not clear synthetic clients, violations, or logs.")}</p>
+      ${groups.map(group => `<div class="sim-scenario-group"><h4>${t(group, group === "业务状态" ? "Business state" : "Page state")}</h4><div class="sim-scenarios">${scenarios().filter(item => item.group === group).map(item => `<button type="button" class="${current === item.id ? "active" : ""}" data-sim-scenario="${item.id}"><strong>${h(t(item.title, item.title))}</strong><span>${h(t(item.description, item.description))}</span></button>`).join("")}</div></div>`).join("")}
+      <div class="sim-checkpoints"><h4>${t("当前场景检查点", "Scenario checkpoints")}</h4>${(scenarios().find(item => item.id === current)?.checkpoints || []).map(item => `<label><input type="checkbox" data-sim-checkpoint="${h(item)}"><span>${h(t(item, item))}</span></label>`).join("")}</div>
+    </section>`;
   }
 
   function creditPanel() {
@@ -141,19 +172,27 @@
 
   function dataPanel() {
     const state = AFF.simulation.state();
+    const preview = snapshotPreview;
+    const recordList = state.records.slice(0, 8);
+    const violationList = state.violations.slice(0, 8);
     return `<section class="sim-section"><h3>${t("数据管理", "Data management")}</h3>
       <dl class="sim-state"><div><dt>${t("Mock日期")}</dt><dd>${state.date}</dd></div><div><dt>${t("仿真客户")}</dt><dd>${state.records.length}</dd></div><div><dt>${t("违规事件")}</dt><dd>${state.violations.length}</dd></div><div><dt>${t("操作日志")}</dt><dd>${state.logs.length}</dd></div></dl>
       <div class="sim-actions-row"><button type="button" data-sim-copy-snapshot>${t("复制快照", "Copy snapshot")}</button><button type="button" data-sim-download-snapshot>${t("下载快照", "Download snapshot")}</button></div>
       <label><span>${t("导入快照JSON", "Import snapshot JSON")}</span><textarea rows="7" data-sim-import>${h(importText)}</textarea></label>
-      <button type="button" data-sim-import-snapshot>${t("导入并重放", "Import and replay")}</button>
-      <button type="button" class="danger" data-sim-reset>${t("重置模拟环境", "Reset mock environment")}</button>
-      <p>${t("重置恢复初始Mock日期（2026-10-27）、正常流场景及初始信用等级与积分；仿真客户、违规事件和操作日志全部保留，可继续查看。", "Reset restores the initial mock date (2026-10-27), normal-flow scenario, and baseline credit level and points. Synthetic clients, violations, and logs are all kept for continued review.")}</p>
+      <div class="sim-actions-row"><button type="button" data-sim-preview-snapshot>${t("检查快照", "Validate snapshot")}</button><button type="button" data-sim-import-snapshot ${preview?.valid === false ? "disabled" : ""}>${t("导入并重放", "Import and replay")}</button></div>
+      ${preview ? `<div class="sim-snapshot-preview ${preview.valid ? "is-valid" : "is-invalid"}"><strong>${preview.valid ? t("快照可导入", "Snapshot ready") : t("快照不可导入", "Snapshot invalid")}</strong>${preview.valid ? `<dl><div><dt>Mock日期</dt><dd>${h(preview.summary.date)}</dd></div><div><dt>仿真客户</dt><dd>${preview.summary.records}</dd></div><div><dt>违规事件</dt><dd>${preview.summary.violations}</dd></div><div><dt>结算快照</dt><dd>${preview.summary.settlementRuns}</dd></div></dl>` : `<p>${h(preview.errors.join(" "))}</p>`}</div>` : ""}
+      <div class="sim-reset-grid"><button type="button" data-sim-reset-mode="view">${t("重置展示环境", "Reset view")}</button><button type="button" data-sim-reset-mode="data">${t("清空仿真数据", "Clear simulation data")}</button><button type="button" class="danger" data-sim-reset-mode="all">${t("恢复初始演示包", "Restore demo pack")}</button></div>
+      <p>${t("重置展示环境保留客户、违规和日志；清空仿真数据会删除本次录入和违规；恢复初始演示包会同时清除历史日志。三种操作都不会修改真实用户资料。", "Reset view keeps clients, violations, and logs. Clear simulation data removes this session's synthetic objects. Restore demo pack also clears logs. None changes real user data.")}</p>
+      <div class="sim-object-cleanup"><h4>${t("仿真对象清理", "Synthetic object cleanup")}</h4>
+        ${recordList.length ? `<ul>${recordList.map(item => `<li><span>${h(item.clientId)} · ${h(AFF.countryLabel(item.country))}</span><button type="button" data-sim-remove-record="${h(item.clientId)}">${t("删除", "Delete")}</button></li>`).join("")}</ul>` : `<p>${t("暂无仿真客户。", "No synthetic clients.")}</p>`}
+        ${violationList.length ? `<ul>${violationList.map(item => `<li><span>${h(item.id)} · ${h(item.category || item.type)}</span><button type="button" data-sim-remove-violation="${h(item.id)}">${t("删除", "Delete")}</button></li>`).join("")}</ul>` : `<p>${t("暂无违规事件。", "No violations.")}</p>`}
+      </div>
     </section>`;
   }
 
   function logPanel() {
     const logs = AFF.simulation.state().logs;
-    return `<section class="sim-section"><h3>${t("操作日志", "Operation log")}</h3>${logs.length ? `<ol>${logs.map(item => `<li><strong>${item.action}</strong><span>${item.operatedAt.replace("T", " ").slice(0, 19)}</span><p>${h(item.detail)}</p></li>`).join("")}</ol>` : `<p>${t("暂无操作日志")}</p>`}</section>`;
+    return `<section class="sim-section"><h3>${t("操作日志", "Operation log")}</h3>${logs.length ? `<ol>${logs.map(item => `<li><strong>${h(item.action)}</strong><span>${h(item.operatedAt.replace("T", " ").slice(0, 19))} · Mock ${h(item.mockDate || "-")}</span><p>${h(item.detail)}</p></li>`).join("")}</ol>` : `<p>${t("暂无操作日志")}</p>`}</section>`;
   }
 
   function render(focusSelector = "button[data-sim-close]") {
@@ -205,10 +244,9 @@
       return render();
     }
     const campaign = AFF.campaigns.find(item => item.code === draft.campaignCode) || AFF.campaigns[0];
-    const sequence = AFF.simulation.state().records.length + 1;
     const milestone = draft.milestone;
     AFF.simulation.addRecord({
-      date: draft.date, clientId: `SIM-C-${String(10000 + sequence)}`, email: "s***@example.com",
+      date: draft.date, clientId: AFF.simulation.nextClientId(), email: "s***@example.com",
       country: draft.country, platform: draft.platform, campaignCode: campaign.code, campaign: AFF.dataText(campaign.name),
       source: draft.source, kyc: draft.kyc, ftd: ["ftd", "effective", "quality"].includes(milestone),
       effective: ["effective", "quality"].includes(milestone) && draft.kyc === "通过", quality: milestone === "quality" && draft.kyc === "通过",
@@ -231,8 +269,7 @@
       return render();
     }
     if (!targetId) {
-      const sequence = AFF.simulation.state().records.length + 1;
-      targetId = `SIM-RISK-${String(10000 + sequence)}`;
+      targetId = AFF.simulation.nextClientId("SIM-RISK-");
       AFF.simulation.addRecord({
         date: draft.occurredAt, clientId: targetId, email: "r***@example.com", country: "VN", platform: "Web",
         campaignCode: AFF.campaigns[0].code, campaign: AFF.dataText(AFF.campaigns[0].name), source: "Violation simulation",
@@ -245,7 +282,7 @@
   }
 
   launcher.addEventListener("click", () => { open = true; error = ""; render(); });
-  root.addEventListener("click", event => {
+  root.addEventListener("click", async event => {
     const tabButton = event.target.closest("[data-sim-tab]");
     if (tabButton) {
       tab = tabButton.dataset.simTab;
@@ -263,34 +300,65 @@
     if (advance) { AFF.simulation.advanceDays(Number(advance.dataset.simAdvance), AFF.finance.summary()); return replay(); }
     if (event.target.closest("[data-sim-run-settlement]")) {
       const run = AFF.finance.runAutomaticSettlement();
-      AFF.simulation.log?.("run-automatic-settlement", `运行每日自动结算 ${run.id}：处理${run.processedCount}，阻断${run.blockedCount}，失败${run.failedCount}`, [run.id]);
+      snapshotPreview = null;
       return render();
     }
     const scenario = event.target.closest("[data-sim-scenario]");
     if (scenario) {
       const id = scenario.dataset.simScenario;
-      AFF.simulation.setScenario(id); AFF.state.scenario = id; persist(); return render();
+      AFF.simulation.setScenario(id);
+      window.render();
+      return render(`[data-sim-scenario="${id}"]`);
     }
-    if (event.target.closest("[data-sim-copy-snapshot]")) { try { navigator.clipboard.writeText(AFF.simulation.exportSnapshot()); showToast("模拟数据快照已复制"); } catch { showToast("剪贴板不可用"); } }
+    if (event.target.closest("[data-sim-copy-snapshot]")) {
+      try {
+        await navigator.clipboard.writeText(AFF.simulation.exportSnapshot());
+        showToast("模拟数据快照已复制");
+      } catch {
+        showToast("剪贴板不可用，请使用下载快照");
+      }
+      return;
+    }
     if (event.target.closest("[data-sim-download-snapshot]")) {
       const blob = new Blob([AFF.simulation.exportSnapshot()], { type: "application/json" });
       const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `affiliate-simulation-${AFF.simulation.date()}.json`; link.click(); URL.revokeObjectURL(link.href);
     }
-    if (event.target.closest("[data-sim-import-snapshot]")) {
-      try { AFF.simulation.importSnapshot(importText); replay(); } catch (parseError) { error = `快照导入失败：${parseError.message}`; render(); }
+    if (event.target.closest("[data-sim-preview-snapshot]")) {
+      snapshotPreview = AFF.simulation.inspectSnapshot(importText);
+      return render("[data-sim-preview-snapshot]");
     }
-    if (event.target.closest("[data-sim-reset]")) {
-      // D-08: window.confirm replaced by an in-UI two-step confirmation.
-      const btn = event.target.closest("[data-sim-reset]");
-      if (btn.dataset.confirming === "1") {
-        delete btn.dataset.confirming;
-        AFF.simulation.reset(); replay();
-      } else {
-        btn.dataset.confirming = "1";
-        btn.dataset.label = btn.textContent;
-        btn.textContent = "再次点击确认重置";
-        setTimeout(() => { if (btn.dataset.confirming === "1") { delete btn.dataset.confirming; btn.textContent = btn.dataset.label; } }, 3000);
+    if (event.target.closest("[data-sim-import-snapshot]")) {
+      const inspection = AFF.simulation.inspectSnapshot(importText);
+      if (!inspection.valid) {
+        snapshotPreview = inspection;
+        error = `快照导入失败：${inspection.errors.join(" ")}`;
+        return render();
       }
+      try { AFF.simulation.importSnapshot(importText); snapshotPreview = null; replay(); } catch (parseError) { error = `快照导入失败：${parseError.message}`; render(); }
+    }
+    const resetMode = event.target.closest("[data-sim-reset-mode]");
+    if (resetMode) {
+      const mode = resetMode.dataset.simResetMode;
+      if (mode === "all" && resetMode.dataset.confirming !== "1") {
+        resetMode.dataset.confirming = "1";
+        resetMode.dataset.label = resetMode.textContent;
+        resetMode.textContent = "再次点击确认";
+        setTimeout(() => { if (resetMode.dataset.confirming === "1") { delete resetMode.dataset.confirming; resetMode.textContent = resetMode.dataset.label; } }, 3000);
+        return;
+      }
+      AFF.simulation.reset(mode);
+      snapshotPreview = null;
+      return replay();
+    }
+    const removeRecord = event.target.closest("[data-sim-remove-record]");
+    if (removeRecord) {
+      AFF.simulation.removeRecord(removeRecord.dataset.simRemoveRecord);
+      return replay();
+    }
+    const removeViolation = event.target.closest("[data-sim-remove-violation]");
+    if (removeViolation) {
+      AFF.simulation.removeViolation(removeViolation.dataset.simRemoveViolation);
+      return replay();
     }
   });
   root.addEventListener("submit", event => {
@@ -315,6 +383,10 @@
     if (importField) importText = importField.value;
   });
   root.addEventListener("change", event => {
+    const recordField = event.target.closest("[data-sim-record]");
+    const violationField = event.target.closest("[data-sim-violation]");
+    if (recordField && recordDraft) recordDraft[recordField.dataset.simRecord] = recordField.value;
+    if (violationField && violationDraft) violationDraft[violationField.dataset.simViolation] = violationField.value;
     const check = event.target.closest("[data-sim-violation-check]");
     if (check) violationDraft[check.dataset.simViolationCheck] = check.checked;
   });

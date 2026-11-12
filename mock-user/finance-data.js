@@ -488,9 +488,13 @@
   }
 
   function runAutomaticSettlement() {
-    const runs = Array.isArray(AFF.state?.settlementRuns) ? AFF.state.settlementRuns : [];
+    const simulationState = AFF.simulation?.state?.() || {};
+    const runs = Array.isArray(simulationState.settlementRuns)
+      ? simulationState.settlementRuns
+      : (Array.isArray(AFF.state?.settlementRuns) ? AFF.state.settlementRuns : []);
     const existing = runs.find(item => item.date === now);
     if (existing) return existing;
+    const beforeSummary = summary();
     const eligibleCases = commissionCases.filter(item => item.settlementStatus === "settled");
     const blockedCases = commissionCases.filter(item => ["blocked", "frozen"].includes(item.settlementStatus));
     const failedCases = commissionCases.filter(item => item.settlementStatus === "failed");
@@ -509,11 +513,31 @@
       blockedAmount: blockedCases.reduce((sum, item) => sum + item.amountCents, 0),
       failedCount: failedCases.length,
       failedAmount: failedCases.reduce((sum, item) => sum + item.amountCents, 0),
+      processedCaseIds: eligibleCases.map(item => item.id),
+      blockedCaseIds: blockedCases.map(item => item.id),
+      failedCaseIds: failedCases.map(item => item.id),
+      beforeSummary: {
+        available: beforeSummary.available,
+        held: beforeSummary.held,
+        guarantee: beforeSummary.guarantee,
+        settled: beforeSummary.settled
+      },
       status: "completed",
-      traceId: `trace-${now}-settlement`
+      traceId: `trace-${now}-settlement`,
+      resultMode: "recalculated",
+      note: "Mock按当前日期重算结算结果并记录运行快照；不创建提现记录，也不直接打款。"
     };
     runs.unshift(run);
     AFF.state.settlementRuns = runs;
+    simulationState.settlementRuns = runs;
+    const afterSummary = summary();
+    run.afterSummary = {
+      available: afterSummary.available,
+      held: afterSummary.held,
+      guarantee: afterSummary.guarantee,
+      settled: afterSummary.settled
+    };
+    AFF.simulation?.log?.("settlement-snapshot", `记录每日自动结算快照 ${run.id}：处理${run.processedCount}，阻断${run.blockedCount}，失败${run.failedCount}`, [run.id, ...run.processedCaseIds]);
     return run;
   }
 
@@ -701,6 +725,7 @@
     { id: "APL-0009", object: "硬拦截", objectId: "C-12010", clientId: "C-12010", submittedAt: "-", dueAt: "-", status: "blocked", reason: "欺诈库确权命中不可申诉", canAppeal: false }
   ];
   AFF.simulation.state().violations.forEach(violation => {
+    if (violation.occurredAt > now) return;
     const client = AFF.reporting.rows.find(row => row.clientId === violation.targetId);
     if (!client) return;
     const caseId = client.commissionCases?.[0]?.id || "-";

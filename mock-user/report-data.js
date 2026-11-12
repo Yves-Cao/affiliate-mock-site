@@ -185,6 +185,7 @@
     });
   }
   AFF.simulation.state().records.forEach((record, recordIndex) => {
+    if (!canReach(record.date)) return;
     const tier = record.netDeposit >= 4000 && record.volume >= 10 && record.tradingDays >= 8 ? "L4"
       : record.netDeposit >= 1500 && record.volume >= 5 && record.tradingDays >= 5 ? "L3"
       : record.netDeposit >= 800 && record.volume >= 3 && record.tradingDays >= 5 ? "L2"
@@ -373,6 +374,7 @@
     cluster_risk: { risk: "quarantined", commission: "manual_review", category: "集群风险" }
   };
   AFF.simulation.state().violations.forEach(violation => {
+    if (!canReach(violation.occurredAt)) return;
     const row = rows.find(item => item.clientId === violation.targetId);
     const rule = violationRules[violation.type] || violationRules.false_traffic;
     if (!row) return;

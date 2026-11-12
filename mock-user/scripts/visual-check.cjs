@@ -146,6 +146,7 @@ async function main() {
   await page.fill("#login-form input[name=password]", "demo-password");
   await page.click("#login-form button[type=submit]");
   await page.waitForSelector("#app-view:not(.hidden)");
+  await page.keyboard.press("Escape");
   await page.evaluate(() => navigate("dash"));
   assertText(await page.locator(".topbar").innerText(), "钱包", "Dashboard topbar");
   assertText(await page.locator("#wallet-toggle").innerText(), "$", "Wallet trigger amount");
@@ -259,8 +260,11 @@ async function main() {
       width: node.getBoundingClientRect().width,
       linkWidth: document.querySelector(".dashboard-link-controls").closest(".card").getBoundingClientRect().width
     }));
+    const expectedLinkWidth = width > 991
+      ? (summaryPosition.width - 16) / 2
+      : summaryPosition.width;
     if (!summaryPosition.last || summaryPosition.top < summaryPosition.tutorialBottom + 15 ||
-        Math.abs(summaryPosition.linkWidth - (width > 991 ? summaryPosition.width / 2 : summaryPosition.width)) > 2) {
+        Math.abs(summaryPosition.linkWidth - expectedLinkWidth) > 2) {
       throw new Error(`Dashboard summary position failed at ${width}px: ${JSON.stringify(summaryPosition)}`);
     }
     const layout = await page.evaluate(() => {
@@ -273,7 +277,8 @@ async function main() {
       };
     });
     if (!layout.image || Math.abs(layout.link.width - layout.materials.width) > 2) throw new Error(`Materials sizing failed: ${JSON.stringify(layout)}`);
-    if (width > 991 && (Math.abs(layout.link.right - layout.materials.left) > 2 || Math.abs(layout.link.top - layout.materials.top) > 2)) throw new Error("Promotion panels should join on desktop");
+    const promotionGap = layout.materials.left - layout.link.right;
+    if (width > 991 && (Math.abs(promotionGap - 16) > 2 || Math.abs(layout.link.top - layout.materials.top) > 2)) throw new Error("Promotion panels should keep the desktop spacing");
     if (width <= 991 && layout.materials.top < layout.link.bottom + 15) throw new Error("Promotion panels should separate and stack");
     if (width >= 768 && Math.abs(layout.tutorial.height - layout.status.height) > 2) throw new Error("Guide and status should split the column evenly");
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -338,6 +343,7 @@ async function main() {
   await page.fill("#login-form input[name=password]", "demo-password");
   await page.click("#login-form button[type=submit]");
   await page.waitForSelector("#app-view:not(.hidden)");
+  await page.keyboard.press("Escape");
 
   await page.focus("#avatar-button");
   await page.waitForTimeout(100);
@@ -354,8 +360,11 @@ async function main() {
   for (const [route, label] of routes) {
     if (route === "apply") {
       await page.click("#profile-entry");
+      await page.locator(".program-navigation footer .primary").click();
     } else if (route === "onboarding") {
       await page.goto(`${baseUrl}/#/onboarding`, { waitUntil: "domcontentloaded" });
+    } else if (route === "statements") {
+      await page.goto(`${baseUrl}/#/${route}`, { waitUntil: "domcontentloaded" });
     } else if (route === "dash") {
       await page.click("#nav [data-route='dash']");
     } else if (route === "account") {
@@ -720,7 +729,8 @@ async function main() {
   await page.click(".asset-landing-drawer .aff-drawer-close");
   if (await page.locator("[data-action='load-more-assets']").count()) throw new Error("Asset load more should be hidden when all records fit one batch");
 
-  await page.click("[data-route='apply']");
+  await page.click("#profile-entry");
+  await page.locator(".program-navigation footer .primary").click();
   const profileEntryStyle = await page.locator("#profile-entry").evaluate(node => ({
     text: node.innerText,
     background: getComputedStyle(node).backgroundImage,
