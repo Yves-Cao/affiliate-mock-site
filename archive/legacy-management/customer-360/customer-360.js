@@ -40,7 +40,7 @@
   const customers = {
     "C-88231": {
       customer_id: "C-88231", country_code: "ID", country_name: "印度尼西亚 / Indonesia",
-      crm_customer_status: "已激活", lifecycle_stage: "有效FTD", lifecycle_updated_at: "2026-11-06 09:12:07",
+      crm_customer_status: "已激活", lifecycle_stage: "有效转化", lifecycle_updated_at: "2026-11-06 09:12:07",
       registered_at: "2026-11-02 11:24:18", email_masked: "r••••@example.test", phone_masked: "+62 •••• 4821",
       partner_id: "AF-1023", partner_name: "Meridian Leads", attribution_status: "已锁定",
       risk_band: "R1", risk_status: "正常", risk_score: 18, open_tasks: 0, cluster_members: 0,
@@ -50,22 +50,22 @@
       path: [
         ["点击", "2026-11-02 11:18:03", "完成", "done"],
         ["注册", "2026-11-02 11:24:18", "完成", "done"],
-        ["FTD", "2026-11-06 09:12:04", "完成", "done"],
-        ["有效FTD", "2026-11-06 09:12:06", "通过", "done"],
+        ["首次入金", "2026-11-06 09:12:04", "完成", "done"],
+        ["有效转化", "2026-11-06 09:12:06", "通过", "done"],
         ["计佣", "2026-11-06 09:12:07", "已生成", "current"],
         ["结算", "2026-11-20", "已释放", "done"]
       ],
       events: [
         ["点击", "Tracking", "成功", "2026-11-02 11:18:03", "tr-7a3f", "首点击归因已记录"],
         ["注册", "CRM", "成功", "2026-11-02 11:24:18", "tr-7a3f", "客户主档创建"],
-        ["FTD", "CRM", "成功", "2026-11-06 09:12:04", "tr-7a3f", "CRM确认到账"],
+        ["首次入金", "CRM", "成功", "2026-11-06 09:12:04", "tr-7a3f", "CRM确认到账"],
         ["计佣", "Affiliate", "成功", "2026-11-06 09:12:07", "tr-7a3f", "价格与资格快照已锁定"]
       ],
       risks: [], clusters: [], tasks: [], audit: [["2026-11-06 09:12:07", "system", "生成佣金案件", "成功", "tr-7a3f"]]
     },
     "C-88479": {
       customer_id: "C-88479", country_code: "MX", country_name: "墨西哥 / Mexico",
-      crm_customer_status: "已激活", lifecycle_stage: "有效FTD", lifecycle_updated_at: "2026-11-06 09:41:08",
+      crm_customer_status: "已激活", lifecycle_stage: "有效转化", lifecycle_updated_at: "2026-11-06 09:41:08",
       registered_at: "2026-11-05 14:09:38", email_masked: "l••••@example.test", phone_masked: "+52 •••• 9130",
       partner_id: "AF-1023", partner_name: "Meridian Leads", attribution_status: "已锁定",
       risk_band: "R2", risk_status: "观察", risk_score: 44, open_tasks: 1, cluster_members: 3,
@@ -76,22 +76,22 @@
         {...baseCases[0], commission_case_id: "CC-202611-88479-02", settlement_case_id: "SC-202611-88479-02", settlement_batch_id: "SB-2026-11-B", commission_amount: 60, settled_amount: 60, settlement_status: "已释放", block_reason: "无阻断", risk_signal: "无", generated_at: "2026-10-26 10:00:05", settlement_due_at: "2026-11-10", trace_id: "tr-8b11"}
       ],
       attribution: {...defaultAttribution},
-      path: [["点击", "2026-11-05 14:02:11", "完成", "done"], ["注册", "2026-11-05 14:09:38", "完成", "done"], ["FTD", "2026-11-06 09:12:04", "完成", "done"], ["有效FTD", "2026-11-06 09:41:08", "观察", "current"], ["计佣", "2026-11-06 09:41:11", "已生成", "done"], ["结算", "2026-11-21", "调查中", "blocked"]],
-      events: [["点击", "Tracking", "成功", "2026-11-05 14:02:11", "tr-7a3f", "设备与来源已登记"], ["注册", "CRM", "成功", "2026-11-05 14:09:38", "tr-7a3f", "客户主档创建"], ["FTD", "CRM", "成功", "2026-11-06 09:12:04", "tr-7a3f", "CRM确认到账"], ["风险信号", "Affiliate Risk", "观察", "2026-11-06 09:41:09", "tr-7a3f", "同设备关联3个客户"]],
+      path: [["点击", "2026-11-05 14:02:11", "完成", "done"], ["注册", "2026-11-05 14:09:38", "完成", "done"], ["首次入金", "2026-11-06 09:12:04", "完成", "done"], ["有效转化", "2026-11-06 09:41:08", "观察", "current"], ["计佣", "2026-11-06 09:41:11", "已生成", "done"], ["结算", "2026-11-21", "调查中", "blocked"]],
+      events: [["点击", "Tracking", "成功", "2026-11-05 14:02:11", "tr-7a3f", "设备与来源已登记"], ["注册", "CRM", "成功", "2026-11-05 14:09:38", "tr-7a3f", "客户主档创建"], ["首次入金", "CRM", "成功", "2026-11-06 09:12:04", "tr-7a3f", "CRM确认到账"], ["风险信号", "Affiliate Risk", "观察", "2026-11-06 09:41:09", "tr-7a3f", "同设备关联3个客户"]],
       risks: [["RS-88479-01", "设备关联", "观察中", "2026-11-06 09:41:09", "当前案件 CC-202611-88479-01", "共享设备指纹••8F2A"]], clusters: [["CL-204", "设备 + IP", "4", "观察中", "当前客户及3个关联客户"]], tasks: [["TASK-88479-01", "风险复核", "处理中", "当前案件结算阻断，等待风控结论"]], audit: [["2026-11-06 09:41:11", "system", "生成佣金案件", "成功", "tr-7a3f"], ["2026-11-06 09:41:12", "risk-engine", "创建风险信号", "观察", "tr-7a3f"]]
     },
     "C-88354": {
       customer_id: "C-88354", country_code: "NG", country_name: "尼日利亚 / Nigeria",
-      crm_customer_status: "已激活", lifecycle_stage: "有效FTD", lifecycle_updated_at: "2026-11-03 21:50:19",
+      crm_customer_status: "已激活", lifecycle_stage: "有效转化", lifecycle_updated_at: "2026-11-03 21:50:19",
       registered_at: "2026-11-03 21:50:19", email_masked: "m••••@example.test", phone_masked: "+234 •••• 7720",
       partner_id: "AF-0921", partner_name: "Lagos Partners", attribution_status: "待复核",
       risk_band: "R3", risk_status: "调查中", risk_score: 78, open_tasks: 2, cluster_members: 10,
       ftd_count: 1, ftd_amount: 500, valid_ftd_count: 0, valid_ftd_amount: 0, data_as_of: iso, last_synced_at: "2026-11-08 09:10:09",
       cases: [{...baseCases[0], commission_case_id: "CC-202611-88354-01", settlement_case_id: "SC-202611-88354-01", settlement_batch_id: "SB-2026-11-A", commission_status: "已计佣", settlement_status: "冻结", commission_amount: 96, settled_amount: 0, block_reason: "关键事件缺数", risk_signal: "RS-88354-01", generated_at: "2026-11-03 21:50:23", settlement_due_at: "2026-11-17", trace_id: "tr-9b21"}],
       attribution: {...defaultAttribution, registration_id: "REG-88354-01", attribution_id: "ATTR-88354-01", link_id: "L-2009", sub_id: "ng_bulk"},
-      path: [["点击", "2026-11-03 21:44:02", "完成", "done"], ["注册", "2026-11-03 21:50:19", "完成", "done"], ["FTD", "—", "缺数", "missing"], ["有效FTD", "—", "待确认", "missing"], ["计佣", "2026-11-03 21:50:23", "已生成", "current"], ["结算", "2026-11-17", "冻结", "blocked"]],
-      events: [["点击", "Tracking", "成功", "2026-11-03 21:44:02", "tr-9b21", "首点击归因已记录"], ["注册", "CRM", "成功", "2026-11-03 21:50:19", "tr-9b21", "客户主档创建"], ["FTD", "CRM", "缺数", "—", "tr-9b21", "CRM事实尚未到达，结算前检查阻断"], ["计佣", "Affiliate", "成功", "2026-11-03 21:50:23", "tr-9b21", "佣金已计算，缺数只阻断结算"]],
-      risks: [["RS-88354-01", "关键事件缺数", "已确认", "2026-11-03 21:50:24", "当前案件 CC-202611-88354-01", "FTD事实缺失"]], clusters: [["CL-118", "设备 + IP + 支付工具", "11", "调查中", "客户是当前集群成员"]], tasks: [["TASK-88354-01", "风险复核", "待认领", "R3风险与缺数需要人工核对"], ["TASK-88354-02", "事件补数", "处理中", "CRM FTD事实同步失败"]], audit: [["2026-11-03 21:50:23", "system", "生成佣金案件", "成功", "tr-9b21"], ["2026-11-03 21:50:24", "risk-engine", "创建风险信号", "已确认", "tr-9b21"]]
+      path: [["点击", "2026-11-03 21:44:02", "完成", "done"], ["注册", "2026-11-03 21:50:19", "完成", "done"], ["首次入金", "—", "缺数", "missing"], ["有效转化", "—", "待确认", "missing"], ["计佣", "2026-11-03 21:50:23", "已生成", "current"], ["结算", "2026-11-17", "冻结", "blocked"]],
+      events: [["点击", "Tracking", "成功", "2026-11-03 21:44:02", "tr-9b21", "首点击归因已记录"], ["注册", "CRM", "成功", "2026-11-03 21:50:19", "tr-9b21", "客户主档创建"], ["首次入金", "CRM", "缺数", "—", "tr-9b21", "CRM事实尚未到达，结算前检查阻断"], ["计佣", "Affiliate", "成功", "2026-11-03 21:50:23", "tr-9b21", "佣金已计算，缺数只阻断结算"]],
+      risks: [["RS-88354-01", "关键事件缺数", "已确认", "2026-11-03 21:50:24", "当前案件 CC-202611-88354-01", "首次入金事实缺失"]], clusters: [["CL-118", "设备 + IP + 支付工具", "11", "调查中", "客户是当前集群成员"]], tasks: [["TASK-88354-01", "风险复核", "待认领", "R3风险与缺数需要人工核对"], ["TASK-88354-02", "事件补数", "处理中", "CRM 首次入金事实同步失败"]], audit: [["2026-11-03 21:50:23", "system", "生成佣金案件", "成功", "tr-9b21"], ["2026-11-03 21:50:24", "risk-engine", "创建风险信号", "已确认", "tr-9b21"]]
     },
     "C-88301": {
       customer_id: "C-88301", country_code: "TH", country_name: "泰国 / Thailand",
@@ -101,7 +101,7 @@
       risk_band: "R0", risk_status: "正常", risk_score: 2, open_tasks: 0, cluster_members: 0,
       ftd_count: 0, ftd_amount: 0, valid_ftd_count: 0, valid_ftd_amount: 0, data_as_of: iso, last_synced_at: "2026-11-08 09:26:03",
       cases: [], attribution: {...defaultAttribution, registration_id: "REG-88301-01", attribution_id: "ATTR-88301-01", link_id: "L-2005", sub_id: "fb_th"},
-      path: [["点击", "2026-11-03 15:58:11", "完成", "done"], ["注册", "2026-11-03 16:05:22", "完成", "done"], ["FTD", "—", "未发生", "missing"], ["有效FTD", "—", "未发生", "missing"], ["计佣", "—", "未生成", "missing"], ["结算", "—", "未生成", "missing"]],
+      path: [["点击", "2026-11-03 15:58:11", "完成", "done"], ["注册", "2026-11-03 16:05:22", "完成", "done"], ["首次入金", "—", "未发生", "missing"], ["有效转化", "—", "未发生", "missing"], ["计佣", "—", "未生成", "missing"], ["结算", "—", "未生成", "missing"]],
       events: [["点击", "Tracking", "成功", "2026-11-03 15:58:11", "tr-2c10", "点击已登记"], ["注册", "CRM", "成功", "2026-11-03 16:05:22", "tr-2c10", "客户主档创建"]], risks: [], clusters: [], tasks: [], audit: []
     }
   };
@@ -159,8 +159,8 @@
           ["合作方", linked(customer.partner_id + " · " + customer.partner_name)], ["归属状态", status(customer.attribution_status)], ["风险档", risk(customer.risk_band)], ["当前案件", selected ? status(selected.settlement_status) : `<span class="c360-status neutral">无案件</span>`]
         ])}</div>
         <div class="c360-summary-block"><div class="c360-summary-title"><strong>关键指标</strong><small>客户全生命周期</small></div><div class="c360-metrics">
-          <div class="c360-metric"><small>FTD</small><strong>${customer.ftd_count} / ${money(customer.ftd_amount)}</strong><em>CRM确认到账</em></div>
-          <div class="c360-metric"><small>有效FTD</small><strong>${customer.valid_ftd_count} / ${money(customer.valid_ftd_amount)}</strong><em>${customer.valid_ftd_count ? "资格已确认" : "待确认"}</em></div>
+          <div class="c360-metric"><small>首次入金</small><strong>${customer.ftd_count} / ${money(customer.ftd_amount)}</strong><em>CRM确认到账</em></div>
+          <div class="c360-metric"><small>有效转化</small><strong>${customer.valid_ftd_count} / ${money(customer.valid_ftd_amount)}</strong><em>${customer.valid_ftd_count ? "资格已确认" : "待确认"}</em></div>
           <div class="c360-metric"><small>佣金案件</small><strong>${customer.cases.length}</strong><em>客户全生命周期</em></div>
           <div class="c360-metric"><small>开放风险任务</small><strong>${customer.open_tasks}</strong><em>open / processing</em></div>
           <div class="c360-metric"><small>集群关联</small><strong>${customer.cluster_members}</strong><em>有效集群成员</em></div>

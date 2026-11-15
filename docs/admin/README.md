@@ -1,5 +1,14 @@
 # Affiliate Admin API Mock
 
+> **English Summary**
+>
+> This directory README is a local index. Read the root README first. This file does not override the authoritative English PRD slices or hard rules.
+>
+> **中文摘要**
+>
+> 本 README 是目录级索引。请先阅读根 README；本文件不覆盖权威英文 PRD 切片或硬规则。
+
+
 This package provides the v0.5 admin-side UI entry, OpenAPI contract, local mock API, and deterministic synthetic fixtures for the partner -> client -> commission -> withdrawal chain.
 
 ```bash

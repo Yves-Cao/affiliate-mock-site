@@ -1,4 +1,26 @@
 :root {
+  /* 1.0 user-portal shell pilot */
+  --shell-header-height: 62px;
+  --shell-sidebar-width: 240px;
+  --shell-sidebar-collapsed-width: 72px;
+  --main-max-width: none;
+  --main-padding-x: 24px;
+  --topbar-action-height: 36px;
+  --topbar-popover-gap: calc((var(--shell-header-height) - var(--topbar-action-height)) / 2 + 1px);
+  --topbar-border: #eef2f6;
+  --topbar-icon-color: #414651;
+  --topbar-icon-hover-bg: #f9fafb;
+  --topbar-divider: #eef2f6;
+  --brand-1-0: #1a5bff;
+  --surface-muted-1-0: #f3f4f6;
+  --surface-soft-1-0: #f9fafb;
+  --border-subtle-1-0: #e3e8ef;
+  --border-strong-1-0: #cdd5df;
+  --text-strong-1-0: #0a0d12;
+  --text-body-1-0: #414651;
+  --text-muted-1-0: #717680;
+  --text-disabled-1-0: #a4a7ae;
+
   /* Figma Color Styles */
   --brand-deep: #00187e;
   --brand: #005bff;
@@ -12,7 +34,7 @@
   --gold-gradient: linear-gradient(135deg, #f7e4cf 0%, #b48755 100%);
 
   /* CRM working surface and semantic colors */
-  --canvas: #f8f9fa;
+  --canvas: #ffffff;
   --surface: #fff;
   --surface-soft: #ecf0f4;
   --surface-accent: #f8fbff;
@@ -50,4 +72,40 @@
   --font-text-18-b: 700 18px/26px var(--font-family-user);
   --font-text-20-b: 700 20px/28px var(--font-family-user);
   --font-text-24-b: 700 24px/32px var(--font-family-user);
+  --font-text-24-semibold: 600 24px/32px var(--font-family-user);
+}
+
+body[data-theme="dark"] {
+  color-scheme: dark;
+  --canvas: #061335;
+  --surface: #061335;
+  --surface-soft: #121f3f;
+  --surface-accent: #1f2b49;
+  --border: #38425d;
+  --control-border: #515a72;
+  --text: #d0d4db;
+  --body-text: #a0a9b5;
+  --muted: #737c8d;
+  --row-hover: #12203f;
+  --ok-bg: #17b26a1a;
+  --warning-bg: #f790091a;
+  --danger-bg: #f044381a;
+  --info-bg: #1a5bff1a;
+  --shadow: 0 12px 30px rgba(0, 0, 0, .28);
+  --table-header-text: #d0d4db;
+  --table-row-border: #38425d;
+
+  --topbar-border: #38425d;
+  --topbar-icon-color: #a0a9b5;
+  --topbar-icon-hover-bg: #121f3f;
+  --topbar-divider: #38425d;
+  --brand-1-0: #1a5bff;
+  --surface-muted-1-0: #1f2b49;
+  --surface-soft-1-0: #121f3f;
+  --border-subtle-1-0: #38425d;
+  --border-strong-1-0: #515a72;
+  --text-strong-1-0: #d0d4db;
+  --text-body-1-0: #a0a9b5;
+  --text-muted-1-0: #737c8d;
+  --text-disabled-1-0: #5f6777;
 }

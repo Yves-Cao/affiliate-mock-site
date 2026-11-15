@@ -44,7 +44,7 @@
 
 | 入口 | 路由 | 页面内承载 |
 |---|---|---|
-| 客户360 | `#/admin-modules/client-list` | 生命周期、客户风险、有效FTD视角、详情抽屉 |
+| 客户360 | `#/admin-modules/client-list` | 生命周期、客户风险、有效转化视角、详情抽屉 |
 | 归属与事件 | `#/admin-modules/attribution-links` | 归属异常视角、隔离边界、事件流水和TraceId链路 |
 
 ### 2.4 推广
@@ -59,7 +59,7 @@
 
 | 入口 | 路由 | 页面内承载 |
 |---|---|---|
-| 佣金与结算 | `#/admin-modules/commission-list` | 佣金构成、结算阻断、结算单和税费 |
+| 佣金与结算 | `#/admin-modules/commission-list` | 佣金构成、结算阻断、结算单 |
 | 提现与对账 | `#/admin-modules/withdrawal-list` | 提现支付状态、冲正追回和内部对账 |
 | 资金异常任务 | `#/admin-review/d-plus-n` | D+N冻结、保证金抵扣、Hold异常和追索 |
 
@@ -84,7 +84,7 @@
 | 入口 | 路由 | 页面内承载 |
 |---|---|---|
 | 经营与转化 | `#/admin-performance/roi` | ROI、转化漏斗、国家和渠道下钻 |
-| 质量与资金分析 | `#/admin-performance/quality` | 质量服务、保证金覆盖和资金趋势 |
+| 质量与资金分析 | `#/admin-performance/quality` | 质量升档、保证金覆盖和资金趋势 |
 
 ### 2.9 权限与审计
 
@@ -96,7 +96,7 @@
 
 | 入口 | 路由 | 页面内承载 |
 |---|---|---|
-| 业务配置 | `#/admin-config/overview` | 首屏展示业务配置版本列表；承载价格、资格、信用、Hold、保证金税费、国家、风控规则和发布 |
+| 业务配置 | `#/admin-config/overview` | 首屏展示业务配置版本列表；承载价格、资格、信用、Hold、保证金国家、风控规则和发布 |
 | 系统配置 | `#/admin-system-config/system` | 运行、通知、界面和集成基础参数；不进入业务版本控制 |
 
 ## 3. 细分能力的承载规则
@@ -120,7 +120,6 @@
 | `client-risk` | `client-list/view=risk` |
 | `attribution-exception` | `attribution-links/view=exception` |
 | `sub-channel` | `link-list/view=channel` |
-| `tax-list` | `statement-list` 的税费视角 |
 | `report-funnel` | `report-roi` 的漏斗视角 |
 
 兼容入口不得重新出现在左侧菜单，也不得复制底层数据和页面。

@@ -111,11 +111,11 @@ async function main() {
     // Quick filter row: select filters apply and sync with the filter drawer state
     await page.evaluate(() => { AFF.reports.state("clients").filters = AFF.reports.range("past30"); render(); });
     const baselineRows = await page.locator(".report-client-table tbody tr").count();
-    await page.selectOption("[data-rp-quick='stage']", "FTD");
+    await page.selectOption("[data-rp-quick='stage']", "首次入金");
     const stageRows = await page.locator(".report-client-table tbody tr").count();
     check(stageRows < baselineRows, "quick stage filter narrows the table");
     const syncedStage = await page.evaluate(() => AFF.reports.state("clients").filters.stage);
-    check(syncedStage === "FTD", "quick filter syncs into the shared filter state");
+    check(syncedStage === "首次入金", "quick filter syncs into the shared filter state");
     check(await page.locator(".report-applied [data-rp-clear='stage']").count() === 1, "quick filter shows as an applied chip");
     await page.selectOption("[data-rp-quick='quality']", "qualified");
     check(await page.evaluate(() => AFF.reports.state("clients").filters.qualityService === "qualified"), "quality filter applies");

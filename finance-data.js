@@ -6,22 +6,11 @@
   const digits = value => Number(String(value || "0").replace(/\D/g, ""));
   const money = cents => Number((cents / 100).toFixed(2));
   const cents = value => Math.round(Number(value || 0) * 100);
-  const taxRates = {
-    T0: { rate: 0, label: "免税/完税证明" },
-    T1: { rate: 0.05, label: "低税档" },
-    T2: { rate: 0.10, label: "默认税档" },
-    T3: { rate: 0.15, label: "高税档" }
-  };
-  const countryTax = {
-    VN: "T1", TH: "T1", ID: "T2", ZA: "T2", NG: "T1",
-    PK: "T1", EG: "T0", KW: "T0", QA: "T0", KZ: "T2",
-    SA: "T0", BD: "T1"
-  };
   const countryHold = { VN: 5, TH: 4, ID: 5, ZA: 7, NG: 7, PK: 6, EG: 6, KW: 2, QA: 2, KZ: 3, SA: 2, BD: 5 };
   const paymentMethods = ["wire", "wallet"];
   const scenarioLabels = {
     normal_l1: "正常L1全链路", normal_l2: "正常L2全链路", tier_downgrade: "档位取低",
-    ftd_only: "仅FTD", qftd_pending: "有效FTD待确认", quality_void: "质量服务未达标",
+    ftd_only: "仅首次入金", qftd_pending: "有效转化待确认", quality_void: "质量升档未达标",
     hold_extended: "动态结算延长", frozen_d30: "结算超时复核", chargeback: "拒付冲正",
     not_new_customer: "非新客户", fraud_hit: "欺诈库命中", appeal_overturned: "申诉改判"
   };
@@ -39,8 +28,6 @@
     guaranteeReleaseDays: 90,
     terminationRetentionDays: 30,
     settlementFreezeThresholdDays: 30,
-    taxRates,
-    countryTax,
     countryHold,
     paymentHold: { wire: 2, wallet: 5, card: 10 },
     feeRules: {
@@ -117,7 +104,7 @@
       const firstAmount = Math.round(row.expected * 0.75);
       const qualityAmount = row.qualityAt ? row.expected - firstAmount : 0;
       row.commissionCases = [
-        { id: `COM-${row.clientId}-QF`, type: "qftd_batch", segments: ["FTD", "QFTD"], confirmedAt: row.effectiveAt, amount: firstAmount, status: row.commissionStatus },
+        { id: `COM-${row.clientId}-QF`, type: "qftd_batch", segments: ["首次入金", "QFTD"], confirmedAt: row.effectiveAt, amount: firstAmount, status: row.commissionStatus },
         { id: `COM-${row.clientId}-QS`, type: "quality_service", segments: ["QUALITY"], confirmedAt: row.qualityAt, amount: qualityAmount, status: row.commissionStatus }
       ].filter(item => item.amount > 0);
     }
@@ -127,7 +114,6 @@
   const clients = new Map(clientRows.map(row => [row.clientId, row]));
   const commissionCases = [];
   const settlements = [];
-  const taxRecords = [];
   const guaranteeRecords = [];
   const availableLots = [];
 
@@ -173,11 +159,8 @@
     const canSettle = ["approved", "paid"].includes(sourceStatus) && item.released && !["frozen", "manual_review"].includes(row.forceFund);
 
     if (canSettle) {
-      const taxTier = row.scenarioCode === "appeal_overturned" ? "T1" : (countryTax[row.country] || "T2");
-      const taxRate = taxRates[taxTier].rate;
-      const taxAmount = Math.round(item.amountCents * taxRate);
       const guaranteeAmount = Math.round(item.amountCents * configuration.guaranteeRate);
-      const availableAmount = item.amountCents - taxAmount - guaranteeAmount;
+      const availableAmount = item.amountCents - guaranteeAmount;
       item.status = "settled";
       item.commissionStatus = "approved";
       item.settlementStatus = "settled";
@@ -187,19 +170,11 @@
         commissionCaseId: item.id,
         settledAt: item.theoreticalReleaseAt,
         grossAmount: item.amountCents,
-        taxAmount,
         guaranteeAmount,
         availableAmount,
-        taxTier,
-        taxRate,
         ruleVersion: configuration.version
       };
       settlements.push(item.settlement);
-      taxRecords.push({
-        id: `TAX-${item.id}`, type: "withheld", clientId: row.clientId, commissionCaseId: item.id,
-        statementId: null, date: item.theoreticalReleaseAt, taxTier, rate: taxRate, amount: taxAmount,
-        status: "withheld", ruleVersion: configuration.version
-      });
       const releaseDate = shiftDate(item.theoreticalReleaseAt, configuration.guaranteeReleaseDays);
       const guarantee = {
         id: `GL-${item.id}`, type: "retained", clientId: row.clientId, commissionCaseId: item.id,
@@ -226,13 +201,7 @@
       item.status = "reversed";
       item.commissionStatus = "reversed";
       item.settlementStatus = "failed";
-      const taxAmount = Math.round(item.amountCents * taxRates[countryTax[row.country] || "T2"].rate);
-      item.reversal = { taxAmount, guaranteeUsed: Math.round(item.amountCents * configuration.guaranteeRate) };
-      taxRecords.push({
-        id: `TAX-${item.id}-RV`, type: "reversal", clientId: row.clientId, commissionCaseId: item.id,
-        date: now, taxTier: countryTax[row.country] || "T2", amount: taxAmount, status: "reversed",
-        ruleVersion: configuration.version
-      });
+      item.reversal = { guaranteeUsed: Math.round(item.amountCents * configuration.guaranteeRate) };
       guaranteeRecords.push({
         id: `GL-${item.id}-USE`, type: "used", clientId: row.clientId, commissionCaseId: item.id,
         date: now, amount: item.reversal.guaranteeUsed, status: "used",
@@ -367,7 +336,6 @@
         commissionCaseIds,
         guaranteeIds,
         grossAmount: batchSettlements.reduce((sum, item) => sum + item.grossAmount, 0),
-        taxAmount: batchSettlements.reduce((sum, item) => sum + item.taxAmount, 0),
         guaranteeAmount: batchSettlements.reduce((sum, item) => sum + item.guaranteeAmount, 0),
         availableAmount: allocations.reduce((sum, item) => sum + item.amount, 0),
         ruleVersion: order.ruleVersion || configuration.version
@@ -583,7 +551,6 @@
       guarantee: sum("guarantee"),
       guaranteeAll: Number(guaranteeAll.toFixed(2)),
       paidGuarantee: Number(paidGuarantee.toFixed(2)),
-      tax: sum("tax"),
       frozen: Number(frozen.toFixed(2)),
       available,
       availableCommission: Number((availableCommissionCents / 100).toFixed(2)),
@@ -602,9 +569,6 @@
       .reduce((sum, item) => sum + item.amountCents / 100, 0);
     row.approved = cases.filter(item => item.status === "settled")
       .reduce((sum, item) => sum + item.settlement.availableAmount / 100, 0);
-    row.tax = cases.filter(item => item.status === "settled")
-      .reduce((sum, item) => sum + item.settlement.taxAmount / 100, 0);
-    row.taxAssessmentStatus = cases.some(item => item.settlement?.taxAmount != null) ? "calculated" : "not_calculated";
     row.guarantee = (row.commissionCases || []).reduce((sum, item) => {
       if (item.guarantee?.status === "retained") return sum + item.guarantee.amount / 100;
       if (item.guarantee?.status === "frozen") return sum + item.guarantee.amount / 100;
@@ -665,12 +629,10 @@
   const originalTotals = AFF.reporting.totals;
   AFF.reporting.metrics.push(
     { key: "settled", label: "已结算佣金", en: "Settled commission", type: "money" },
-    { key: "tax", label: "税费", en: "Tax", type: "money" },
     { key: "guarantee", label: "滚动保证金", en: "Rolling guarantee", type: "money" },
     { key: "available", label: "可提现净额", en: "Available net", type: "money" }
   );
   AFF.reporting.fields.metrics.settled = AFF.reporting.metrics.find(item => item.key === "settled");
-  AFF.reporting.fields.metrics.tax = AFF.reporting.metrics.find(item => item.key === "tax");
   AFF.reporting.fields.metrics.guarantee = AFF.reporting.metrics.find(item => item.key === "guarantee");
   AFF.reporting.fields.metrics.available = AFF.reporting.metrics.find(item => item.key === "available");
   AFF.reporting.totals = sourceRows => {
@@ -700,7 +662,6 @@
       rejected: finance.rejected,
       reversed: finance.reversed,
       guarantee: finance.guarantee,
-      tax: finance.tax,
       available: finance.available,
       inProgress: finance.held,
       registerRate: ratio(finance.registrations, clicks),
@@ -776,7 +737,6 @@
     commissionCases,
     settlements,
     get statementBatches() { return buildStatementBatches(); },
-    taxRecords,
     guaranteeRecords,
     availableLots,
     staticWithdrawals,

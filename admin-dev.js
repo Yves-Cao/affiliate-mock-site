@@ -89,7 +89,7 @@
     recovering:"恢复中", alerting:"仅告警", public:"公开", internal:"内部",
     sensitive:"敏感", restricted:"受限", containing:"处置中", monitoring:"观察中", notified:"已通知",
     applying:"申请中", reviewing:"审核中", onboarded:"已入驻", watching:"观察/暂停", offboarding:"清退中", archived:"已归档",
-    registered:"已注册", ftd:"FTD", valid_ftd:"有效FTD", churned:"流失", paid:"已支付", reversed:"已冲正",
+    registered:"已注册", ftd:"首次入金", valid_ftd:"有效转化", churned:"流失", paid:"已支付", reversed:"已冲正",
     R0:"R0 正常", R1:"R1 关注", R2:"R2 较高", R3:"R3 高",
     manual_review:"人工复核", not_started:"未开始", not_required:"无需审核", passed:"已通过", verified:"已认证",
     click:"点击", registration:"注册", commission:"计佣", hold:"结算中", holding:"结算中", release:"释放",
@@ -116,7 +116,7 @@
   };
   const configDomains = [
     "流量画像门禁", "官方路径库", "价格表", "资格档与里程碑", "信用等级与权益", "动态结算",
-    "保证金与税费", "国家与主体", "审批流", "集群规则", "硬规则", "风险评分规则", "违规规则"
+    "保证金与", "国家与主体", "审批流", "集群规则", "硬规则", "风险评分规则", "违规规则"
   ];
   const roleOwnerNames = {
     operations:"运营/Ops", risk:"风控/Risk", risk_supervisor:"风控主管", risk_reviewer:"风控复核员", finance:"财务/Finance", finance_reviewer:"财务复核员",
@@ -175,7 +175,7 @@
     "partner-list":"export","partner-onboarding":"claim","partner-kyc":"claim","partner-offboarding":"claim","partner-notes":"claim",
     "client-list":"export","attribution-links":"claim","event-stream":"claim","client-risk":"create_review","attribution-exception":"claim",
     "campaign-list":"new_draft","link-list":"new_draft","material-list":"new_draft","sub-channel":"new_draft","postback":"new_draft","tracker":"export",
-    "commission-list":"export","statement-list":"export","withdrawal-list":"claim","tax-list":"export","reversal-list":"claim","reconciliation":"claim",
+    "commission-list":"export","statement-list":"export","withdrawal-list":"claim","reversal-list":"claim","reconciliation":"claim",
     "blacklist":"create_review","support-ticket":"claim",
     "report-funnel":"suggestion","report-channel":"suggestion","report-finance":"suggestion","report-risk":"suggestion",
     "config-dictionary":"new_draft","config-permission":"new_draft"
@@ -203,7 +203,6 @@
     "commission-list":{export:"导出佣金"},
     "statement-list":{export:"导出结算单"},
     "withdrawal-list":{claim:"查看资金核对任务"},
-    "tax-list":{export:"导出税务"},
     "reversal-list":{claim:"认领冲正"},
     "reconciliation":{claim:"处理对账"},
     "blacklist":{create_review:"生成黑名单复核"},
@@ -489,7 +488,7 @@
       overdue:partner.risk === "high",
       impact:`${partner.type} · ${partner.country} · ${partner.crmId}`,
       source:"CRM",
-      linked:partner.performance ? `有效FTD ${partner.performance.validFtd} · 质量${partner.performance.qualityGrade}` : partner.onboard ? `材料${partner.onboard.materials.length}项 · ${partner.onboard.materials.filter(m => m.state !== "submitted").length}项待处理` : "无业绩数据",
+      linked:partner.performance ? `有效转化 ${partner.performance.validFtd} · 质量${partner.performance.qualityGrade}` : partner.onboard ? `材料${partner.onboard.materials.length}项 · ${partner.onboard.materials.filter(m => m.state !== "submitted").length}项待处理` : "无业绩数据",
       traceId:`trace-${partner.id}`,
       partnerRef:partner,
       certs:`${partner.kyc.status}|${partner.kyb.status}`,
@@ -717,9 +716,9 @@
       owner:"财务/Finance",rowKind:"commission",name_full:c.name,note:c.note || "",fundRef:c
     }));
     if (tabId === "statement-list") return f.statements.map(s => ({
-      id:s.id,name:s.name,partner:pn(s.partner),grossLabel:money(s.gross),taxLabel:money(s.tax),
+      id:s.id,name:s.name,partner:pn(s.partner),grossLabel:money(s.gross),
       guaranteeLabel:money(s.guarantee),netLabel:money(s.net),status:s.status,
-      gross:s.gross,tax:s.tax,guarantee:s.guarantee,net:s.net,period:s.period,note:s.note || "",
+      gross:s.gross,guarantee:s.guarantee,net:s.net,period:s.period,note:s.note || "",
       updated:s.updated || s.period.split("~").at(-1),risk:"low",owner:"财务/Finance",rowKind:"statement",name_full:s.name,fundRef:s
     }));
     if (tabId === "withdrawal-list") return f.withdrawals.map(w => ({
@@ -971,7 +970,7 @@
     if (profile === "qualification") {
       const level = 1 + number % 4;
       row.name = `L${level}资格规则`;
-      row.stage = ["FTD","有效FTD","质量服务","多账户合并"][number % 4];
+      row.stage = ["首次入金","有效转化","质量升档","多账户合并"][number % 4];
       row.progress = [35,55,72,88][level-1];
       row.impact = `${[150,250,400,500][level-1]} USD / ${[0.5,1,2,3][level-1]}手`;
       return;
@@ -991,9 +990,9 @@
       row.impact = `理论结算期=${1 + (number%3)*2}天 · D+N=30天`;
       return;
     }
-    if (profile === "guarantee-tax") {
-      row.name = `${["滚动保证金","税费","支付手续费","释放周期","终止保留"][number % 5]}规则`;
-      row.type = ["保证金","税务","支付","释放","终止"][number % 5];
+    if (profile === "guarantee") {
+      row.name = `${["滚动保证金","","支付手续费","释放周期","终止保留"][number % 5]}规则`;
+      row.type = ["保证金","支付","释放","终止","复核"][number % 5];
       row.amount = [1000,1500,35,900,3000][number % 5];
       row.progress = [10,15,20,90,30][number % 5];
       return;
@@ -1344,7 +1343,7 @@
     if (column.key === "lastTestResult") return `<span class="${value.startsWith("成功") ? "dev-status tm-success" : "dev-status tm-danger"}">${h(value)}</span>`;
     if (column.key === "pathSummary") return h(value);
     if (column.key === "settlementBlock") return `<span class="${value === "正常" ? "dev-status tm-success" : "dev-status tm-warning"}">${h(value)}</span>`;
-    if (["grossLabel","taxLabel","guaranteeLabel","netLabel","affiliate","external","diffLabel"].includes(column.key)) return h(value);
+    if (["grossLabel","guaranteeLabel","netLabel","affiliate","external","diffLabel"].includes(column.key)) return h(value);
     if (column.key === "fee") return money(value);
     if (column.key === "hitRate" || column.key === "falseRate" || column.key === "convRate" || column.key === "roiLabel" || column.key === "trend") return h(value);
     if (column.key === "quadrant") return `<span class="dev-status ${value === "高效精准" ? "tm-success" : value === "低频高危" ? "tm-danger" : "tm-warning"}">${h(value)}</span>`;
@@ -1429,11 +1428,11 @@
         return [
           ["客户总数",compact(clients360.length)],
           ["已注册",compact(clients360.filter(c=>c.stage==="registered").length)],
-          ["FTD",compact(clients360.filter(c=>c.stage==="ftd").length)],
-          ["有效FTD",compact(clients360.filter(c=>c.stage==="valid_ftd").length)],
+          ["首次入金",compact(clients360.filter(c=>c.stage==="ftd").length)],
+          ["有效转化",compact(clients360.filter(c=>c.stage==="valid_ftd").length)],
           ["流失",compact(clients360.filter(c=>c.stage==="churned").length)],
           ["高风险(R3)",compact(clients360.filter(c=>["R3"].includes(c.rGrade)).length)],
-          ["累计FTD金额",money(clients360.reduce((sum,c)=>sum+c.ftdAmount,0))],
+          ["累计首次入金金额",money(clients360.reduce((sum,c)=>sum+c.ftdAmount,0))],
           ["累计佣金",money(clients360.reduce((sum,c)=>sum+c.commissionTotal,0))]
         ];
       }
@@ -1665,9 +1664,9 @@
       ["D+N阈值","30天"],["平均天数",`${(rows.reduce((sum,row)=>sum+row.progress,0)/(rows.length||1)).toFixed(1)}天`],
       ["最高天数",`${maxValue(rows,"progress")}天`],["待审批",compact(pending)]
     ];
-    if (profile === "guarantee-tax") return [
+    if (profile === "guarantee") return [
       ["资金规则",compact(rows.length)],["保证金规则",compact(rows.filter(row=>row.type==="保证金").length)],
-      ["税务规则",compact(rows.filter(row=>row.type==="税务").length)],["支付规则",compact(rows.filter(row=>row.type==="支付").length)],
+      ["支付规则",compact(rows.filter(row=>row.type==="支付").length)],
       ["平均金额",money(amount/(rows.length||1))],["最大金额",money(maxValue(rows,"amount"))],
       ["待审批",compact(pending)],["生效规则",compact(rows.filter(row=>row.status==="active").length)]
     ];
@@ -1804,7 +1803,7 @@
       operations:[
         ["新增归属客户",compact(clients.length),range,drill("admin-modules/client-list","attributed")],
         ["已入金客户",compact(ftd.length),cohort,drill("admin-modules/client-list","ftd")],
-        ["有效FTD客户",compact(valid.length),cohort,drill("admin-modules/client-list","valid")],
+        ["有效转化客户",compact(valid.length),cohort,drill("admin-modules/client-list","valid")],
         ["佣金变更金额",money(sum(commissions)),`${range}更新的佣金`,drill("admin-modules/commission-list","commission")],
         ["待审核入驻",compact(onboarding.length),"当前未完成",drill("admin-modules/partner-list","onboarding",false)]
       ],
@@ -1869,7 +1868,7 @@
   function dashboardDrillNotice() {
     const params = new URLSearchParams(location.hash.split("?")[1] || "");
     const metric = params.get("dashboard_metric");
-    const labels = {attributed:"新增归属客户",ftd:"归属客户中的已入金客户",valid:"归属客户中的有效FTD客户",commission:"佣金变更",onboarding:"待审核入驻",reserve:"已确认及已支付结算单的保证金计提",settlement:"结算中佣金",blocked:"结算受阻佣金",withdrawal_pending:"待处理提现",withdrawal_failed:"失败提现",reconciliation:"待处理对账差异"};
+    const labels = {attributed:"新增归属客户",ftd:"归属客户中的已入金客户",valid:"归属客户中的有效转化客户",commission:"佣金变更",onboarding:"待审核入驻",reserve:"已确认及已支付结算单的保证金计提",settlement:"结算中佣金",blocked:"结算受阻佣金",withdrawal_pending:"待处理提现",withdrawal_failed:"失败提现",reconciliation:"待处理对账差异"};
     if (!labels[metric]) return "";
     const from = params.get("dashboard_from"), to = params.get("dashboard_to");
     return `<div class="dash-v2-drill-notice"><span>仪表盘下钻：${h(labels[metric])}${from && to ? ` · ${h(from)} 至 ${h(to)}` : ""}</span><button type="button" class="tm-button secondary compact" data-dashboard-clear-drill>清除下钻筛选</button></div>`;
@@ -1969,10 +1968,10 @@
     const max = Math.max(1,...series.map(item => item.clients));
     const rate = (value,total) => total ? `${(value/total*100).toFixed(1)}%` : "—";
     return `<section class="dash-v2-panel dash-v2-trend">
-      <header class="dash-v2-panel-head"><div><h2>客户归属与转化</h2><p>按归属日期统计同一批客户；入金与有效FTD取客户当前事实。</p></div></header>
-      <div class="dash-v2-legend"><span><i class="click"></i>归属客户</span><span><i class="register"></i>已入金客户</span><span><i class="valid"></i>有效FTD客户</span></div>
-      <div class="dash-v2-chart" aria-label="客户归属与转化趋势">${series.map(item => `<div class="dash-v2-chart-col"><div class="dash-v2-bars">${[["click","归属客户",item.clients],["register","已入金客户",item.ftd],["valid","有效FTD客户",item.valid]].map(([tone,label,value])=>`<i class="${tone}${value ? "" : " is-zero"}" style="height:${value/max*100}%" title="${item.date} ${label} ${value}"></i>`).join("")}</div><small>${h(item.date.slice(5))}</small></div>`).join("")}</div>
-      <div class="dash-v2-mini-table"><div><span>归属客户</span><strong>${compact(totals.clients)}</strong></div><div><span>归属客户→已入金</span><strong>${rate(totals.ftd,totals.clients)}</strong></div><div><span>已入金→有效FTD</span><strong>${rate(totals.valid,totals.ftd)}</strong></div></div>
+      <header class="dash-v2-panel-head"><div><h2>客户归属与转化</h2><p>按归属日期统计同一批客户；入金与有效转化取客户当前事实。</p></div></header>
+      <div class="dash-v2-legend"><span><i class="click"></i>归属客户</span><span><i class="register"></i>已入金客户</span><span><i class="valid"></i>有效转化客户</span></div>
+      <div class="dash-v2-chart" aria-label="客户归属与转化趋势">${series.map(item => `<div class="dash-v2-chart-col"><div class="dash-v2-bars">${[["click","归属客户",item.clients],["register","已入金客户",item.ftd],["valid","有效转化客户",item.valid]].map(([tone,label,value])=>`<i class="${tone}${value ? "" : " is-zero"}" style="height:${value/max*100}%" title="${item.date} ${label} ${value}"></i>`).join("")}</div><small>${h(item.date.slice(5))}</small></div>`).join("")}</div>
+      <div class="dash-v2-mini-table"><div><span>归属客户</span><strong>${compact(totals.clients)}</strong></div><div><span>归属客户→已入金</span><strong>${rate(totals.ftd,totals.clients)}</strong></div><div><span>已入金→有效转化</span><strong>${rate(totals.valid,totals.ftd)}</strong></div></div>
     </section>`;
   }
 
@@ -2142,7 +2141,7 @@
       operation:{
         summary:[
           ["今日点击",compact(18421),"全渠道 · 环比 +6.4%"],
-          ["有效FTD转化",compact(312),"环比 +3.1% · 质量服务达标"],
+          ["有效转化转化",compact(312),"环比 +3.1% · 质量升档达标"],
           ["今日计佣",money(48250),"USD · 环比 +2.8%"],
           ["净ROI趋势","118%","近7日 · 毛陷环比改善"]
         ],
@@ -2210,7 +2209,7 @@
   function cockpitStatistics(rows) {
     const view = activeCockpitView();
     if (view === "operation") return [
-      ["今日点击",compact(18421)],["注册转化","12.4%"],["FTD转化","4.2%"],["有效FTD","1.7%"],
+      ["今日点击",compact(18421)],["注册转化","12.4%"],["首次入金转化","4.2%"],["有效转化","1.7%"],
       ["今日计佣",money(48250)],["毛陷支出",money(5100)],["净支出",money(43150)],["净ROI","118%"]
     ];
     if (view === "risk") return [
@@ -2322,7 +2321,7 @@
     "country-entity":"country-entity",
     hold:"hold-base",
     "d-plus-n":"settlement-freeze",
-    "guarantee-tax":"guarantee-tax",
+    "guarantee":"guarantee",
     "settlement-withdrawal":"settlement-withdrawal",
     "cluster-rule":"cluster-rules",
     "hard-rule":"hard-rules",
@@ -2395,7 +2394,7 @@
     if (!snapshot) return "暂无配置快照";
     if (snapshot.basePricing) {
       const price = snapshot.basePricing;
-      return `L1–L4：${[price.l1,price.l2,price.l3,price.l4].join(" / ")} USD；FTD ${price.ftdRatio}，有效FTD ${price.validFtdRatio}；${snapshot.countries?.length || 0}个国家`;
+      return `L1–L4：${[price.l1,price.l2,price.l3,price.l4].join(" / ")} USD；首次入金 ${price.ftdRatio}，有效转化 ${price.validFtdRatio}；${snapshot.countries?.length || 0}个国家`;
     }
     const rows = snapshot.milestones || snapshot.settings || snapshot.rules || snapshot.finance || snapshot.levels || snapshot.steps || snapshot.rows || [];
     return rows.slice(0,3).map(row => [row.name || row.label || row.event || row.level || row.step || row.key || row.country || row.title, row.value ?? row.netDeposit ?? row.baseDays ?? row.condition ?? row.rule ?? row.action ?? row.entity ?? row.path].filter(value=>value!==undefined&&value!==null&&value!=="").join("：")).filter(Boolean).join("；") || "已保存配置快照";
@@ -2408,7 +2407,7 @@
     if (["l1","l2","l3","l4"].some(key => price[key] === "" || !Number.isFinite(Number(price[key])) || Number(price[key]) < 0)) return "四档基础金额必须填写非负数";
     const ratio = value => /^\d+(?:\.\d+)?%?$/.test(String(value)) ? Number(String(value).replace("%","")) : NaN;
     const ftd = ratio(price.ftdRatio), validFtd = ratio(price.validFtdRatio);
-    if (!Number.isFinite(ftd) || !Number.isFinite(validFtd) || ftd > 100 || validFtd > 100 || Math.abs(ftd + validFtd - 100) > 0.000001) return "FTD与有效FTD基础比例合计必须为100%";
+    if (!Number.isFinite(ftd) || !Number.isFinite(validFtd) || ftd > 100 || validFtd > 100 || Math.abs(ftd + validFtd - 100) > 0.000001) return "首次入金与有效转化基础比例合计必须为100%";
     if ((snapshot.countries || []).some(country => country.coefficient === "" || !Number.isFinite(Number(country.coefficient)) || Number(country.coefficient) < 0)) return "国家系数必须填写非负数";
     return "";
   }
@@ -2418,7 +2417,7 @@
     return businessConfigMenuItems().find(menuItem => menuItem.routeId === "admin-config" && menuItem.tabId === ({
       "item-pricing":"price", "item-qualification":"qualification", "item-quality":"quality-service",
       "item-credit":"credit-benefit", "item-partner-tier":"partner-tier", "item-country":"country-entity",
-      "item-hold":"hold", "item-dn":"d-plus-n", "item-funds":"guarantee-tax",
+      "item-hold":"hold", "item-dn":"d-plus-n", "item-funds":"guarantee",
       "item-settlement-withdrawal":"settlement-withdrawal", "item-cluster":"cluster-rule",
       "item-hard-rule":"hard-rule", "item-risk-score":"risk-score", "item-violation":"violation-rule",
       "item-risk-propagation":"risk-propagation", "item-data":"data-governance",
@@ -2463,15 +2462,15 @@
     };
     if (tabId === "qualification") return {
       kind:"qualification", milestones:[
-        {code:"FTD",name:"FTD",netDeposit:"≥ 100 USD（参考值）",activeDays:"不适用",lots:"不适用",expiry:"30自然日（参考值）"},
-        {code:"有效FTD",name:"有效FTD",netDeposit:"≥ 300 USD（参考值）",activeDays:"≥ 5天（参考值）",lots:"≥ 1手（参考值）",expiry:"60自然日（参考值）"},
-        {code:"质量服务",name:"质量服务",netDeposit:"≥ 500 USD（参考值）",activeDays:"≥ 10天（参考值）",lots:"≥ 3手（参考值）",expiry:"90自然日（参考值）",yieldRate:"≥ 0（参考值）"}
+        {code:"首次入金",name:"首次入金",netDeposit:"≥ 100 USD（参考值）",activeDays:"不适用",lots:"不适用",expiry:"30自然日（参考值）"},
+        {code:"有效转化",name:"有效转化",netDeposit:"≥ 300 USD（参考值）",activeDays:"≥ 5天（参考值）",lots:"≥ 1手（参考值）",expiry:"60自然日（参考值）"},
+        {code:"质量升档",name:"质量升档",netDeposit:"≥ 500 USD（参考值）",activeDays:"≥ 10天（参考值）",lots:"≥ 3手（参考值）",expiry:"90自然日（参考值）",yieldRate:"≥ 0（参考值）"}
       ], ...common
     };
     if (tabId === "quality-service") return {
       kind:"quality", settings:[
-        {id:"QS-01",label:"质量服务开关",value:"按国家单独开启",rule:"不占用FTD与有效FTD基础比例"},
-        {id:"QS-02",label:"净入金额度",value:"≥ 500 USD（参考值）",rule:"达到后进入质量服务判断"},
+        {id:"QS-01",label:"质量升档开关",value:"按国家单独开启",rule:"不占用首次入金与有效转化基础比例"},
+        {id:"QS-02",label:"净入金额度",value:"≥ 500 USD（参考值）",rule:"达到后进入质量升档判断"},
         {id:"QS-03",label:"交易活跃天数",value:"≥ 10自然日（参考值）",rule:"周期内累计"},
         {id:"QS-04",label:"标准交易手数",value:"≥ 3手（参考值）",rule:"按CRM交易事实判断"},
         {id:"QS-05",label:"收益率",value:"≥ 0（参考值）",rule:"不低于配置收益率"},
@@ -2497,19 +2496,19 @@
         {id:"D+N-04",event:"数量护栏",value:"按自然日配置",action:"超过阈值生成风险事件"}
       ], ...common
     };
-    if (tabId === "guarantee-tax") return {
+    if (tabId === "guarantee") return {
       kind:"finance", finance:[
         {label:"保证金计提比例",value:"10%（参考值）",rule:"保证金 = 佣金总额 × 保证金比例"},
         {label:"保证金释放",value:"结算完成后90自然日（参考值）",rule:"每笔佣金独立释放，且无未解决风险事件"},
-        {label:"税费计提比例",value:"10%（参考值）",rule:"税费 = 佣金总额 × 税费比例"},
-        {label:"扣除顺序",value:"佣金总额 → 保证金 → 税费 → 结算净额",rule:"保证金和税费均按整体金额计算"},
+        {label:"计提比例",value:"10%（参考值）",rule:" = 佣金总额 × 比例"},
+        {label:"扣除顺序",value:"佣金总额 → 保证金 →  → 结算净额",rule:"保证金均按整体金额计算"},
         {label:"提现手续费",value:"按收款方式配置",rule:"提现前展示并校验"}
       ], ...common
     };
     if (tabId === "settlement-withdrawal") return {
       kind:"rules", rules:[
-        {id:"SW-01",event:"结算资格",value:"注册用户佣金、有效FTD佣金、质量服务佣金分别判断",action:"按对应里程碑和失效周期进入结算"},
-        {id:"SW-02",event:"首次提现校验",value:"KYC/KYB、受益所有人、收款账户和税务信息",action:"首次提现前必须完成"},
+        {id:"SW-01",event:"结算资格",value:"注册用户佣金、有效转化佣金、质量升档佣金分别判断",action:"按对应里程碑和失效周期进入结算"},
+        {id:"SW-02",event:"首次提现校验",value:"KYC/KYB、受益所有人和收款账户",action:"首次提现前必须完成"},
         {id:"SW-03",event:"提现审批",value:"默认必须审批",action:"审批通过后进入支付"},
         {id:"SW-04",event:"手续费",value:"按收款方式配置",action:"选择方式后展示并校验账户"},
         {id:"SW-05",event:"支付失败",value:"按失败原因重试或转人工",action:"保留账务和审计记录"}
@@ -2564,8 +2563,8 @@
       ],
       points:[
         {event:"完成KYC/KYB",type:"加分",points:"+20（参考值）",window:"立即"},
-        {event:"客户达到有效FTD",type:"加分",points:"+10（参考值）",window:"确认后"},
-        {event:"客户达到质量服务",type:"加分",points:"+20（参考值）",window:"确认后"},
+        {event:"客户达到有效转化",type:"加分",points:"+10（参考值）",window:"确认后"},
+        {event:"客户达到质量升档",type:"加分",points:"+20（参考值）",window:"确认后"},
         {event:"客户拒付或欺诈确认",type:"扣分",points:"-80（参考值）",window:"确认后"},
         {event:"严重违规确认",type:"扣分",points:"-120（参考值）",window:"确认后"}
       ],
@@ -2801,10 +2800,10 @@
   function configPriceContent(snapshot) {
     const pricing = snapshot.basePricing;
     return `<section class="dev-config-snapshot-section">
-      <header><div><h3>四档公用基础价格</h3><p>国家金额 = 公用档位金额 × 国家系数；暂不支持国家自定义金额覆盖，质量服务比例独立于基础100%。</p></div><span class="dev-snapshot-lock">只读快照</span></header>
+      <header><div><h3>四档公用基础价格</h3><p>国家金额 = 公用档位金额 × 国家系数；暂不支持国家自定义金额覆盖，质量升档比例独立于基础100%。</p></div><span class="dev-snapshot-lock">只读快照</span></header>
       <div class="dev-config-value-grid"><article><span>L1基础金额</span><strong>${money(pricing.l1)}</strong><small>${h(pricing.currency)} · 参考值</small></article><article><span>L2基础金额</span><strong>${money(pricing.l2)}</strong><small>${h(pricing.currency)} · 参考值</small></article><article><span>L3基础金额</span><strong>${money(pricing.l3)}</strong><small>${h(pricing.currency)} · 参考值</small></article><article><span>L4基础金额</span><strong>${money(pricing.l4)}</strong><small>${h(pricing.currency)} · 参考值</small></article></div>
-      <div class="dev-config-rule-strip"><span>FTD基础比例：${h(pricing.ftdRatio)}</span><span>有效FTD基础比例：${h(pricing.validFtdRatio)}</span><span>质量服务附加比例：${h(pricing.qualityServiceRatio)}（不占基础100%）</span></div>
-      <div class="tm-table-wrap dev-snapshot-table"><table><thead><tr><th>国家</th><th>国家系数</th><th>L1公式值</th><th>L2公式值</th><th>L3公式值</th><th>L4公式值</th><th>质量服务</th><th>计算方式</th></tr></thead><tbody>${snapshot.countries.map(row => `<tr><td><strong>${h(row.country)}</strong><small>${h(row.code)}</small></td><td>${h(row.coefficient)}</td>${["l1","l2","l3","l4"].map(level => `<td>${money(Number(pricing[level]) * Number(row.coefficient))}</td>`).join("")}<td>${row.qualityEnabled ? `已开启 · ${h(row.qualityRatio)}` : "未开启"}</td><td>公用金额 × 国家系数</td></tr>`).join("")}</tbody></table></div>
+      <div class="dev-config-rule-strip"><span>首次入金基础比例：${h(pricing.ftdRatio)}</span><span>有效转化基础比例：${h(pricing.validFtdRatio)}</span><span>质量升档附加比例：${h(pricing.qualityServiceRatio)}（不占基础100%）</span></div>
+      <div class="tm-table-wrap dev-snapshot-table"><table><thead><tr><th>国家</th><th>国家系数</th><th>L1公式值</th><th>L2公式值</th><th>L3公式值</th><th>L4公式值</th><th>质量升档</th><th>计算方式</th></tr></thead><tbody>${snapshot.countries.map(row => `<tr><td><strong>${h(row.country)}</strong><small>${h(row.code)}</small></td><td>${h(row.coefficient)}</td>${["l1","l2","l3","l4"].map(level => `<td>${money(Number(pricing[level]) * Number(row.coefficient))}</td>`).join("")}<td>${row.qualityEnabled ? `已开启 · ${h(row.qualityRatio)}` : "未开启"}</td><td>公用金额 × 国家系数</td></tr>`).join("")}</tbody></table></div>
     </section>`;
   }
 
@@ -2815,7 +2814,7 @@
   }
 
   function configQualityContent(snapshot) {
-    return `<section class="dev-config-snapshot-section"><header><div><h3>质量服务规则字段</h3><p>每个国家可独立开启质量服务，并单独设置比例；比例不占用FTD与有效FTD的基础100%。</p></div><span class="dev-snapshot-lock">只读快照</span></header>
+    return `<section class="dev-config-snapshot-section"><header><div><h3>质量升档规则字段</h3><p>每个国家可独立开启质量升档，并单独设置比例；比例不占用首次入金与有效转化的基础100%。</p></div><span class="dev-snapshot-lock">只读快照</span></header>
       <div class="tm-table-wrap dev-snapshot-table"><table><thead><tr><th>设置项</th><th>当前值</th><th>规则说明</th></tr></thead><tbody>${snapshot.settings.map(row => `<tr><td><strong>${h(row.label)}</strong><small>${h(row.id)}</small></td><td>${h(row.value)}</td><td>${h(row.rule)}</td></tr>`).join("")}</tbody></table></div>
     </section>`;
   }
@@ -2850,16 +2849,16 @@
       content = `<section class="dev-config-snapshot-section"><header><div><h3>四档公用基础价格</h3><p>直接编辑公用档位和国家系数；国家金额按公用金额乘国家系数计算。</p></div><span class="dev-snapshot-lock">草稿可编辑</span></header>
         <div class="dev-config-edit-grid">${[
           ["basePricing.l1","L1基础金额",pricing.l1],["basePricing.l2","L2基础金额",pricing.l2],["basePricing.l3","L3基础金额",pricing.l3],["basePricing.l4","L4基础金额",pricing.l4],
-          ["basePricing.ftdRatio","FTD基础比例",pricing.ftdRatio],["basePricing.validFtdRatio","有效FTD基础比例",pricing.validFtdRatio],["basePricing.qualityServiceRatio","质量服务附加比例",pricing.qualityServiceRatio]
+          ["basePricing.ftdRatio","首次入金基础比例",pricing.ftdRatio],["basePricing.validFtdRatio","有效转化基础比例",pricing.validFtdRatio],["basePricing.qualityServiceRatio","质量升档附加比例",pricing.qualityServiceRatio]
         ].map(([path,label,value]) => field(path,label,value,/\.l[1-4]$/.test(path) ? "number" : "text",/\.l[1-4]$/.test(path) ? {min:0,step:"0.01"} : {})).join("")}</div>
-        <div class="tm-table-wrap dev-snapshot-table"><table><thead><tr><th>国家</th><th>国家系数</th><th>质量服务开关</th><th>质量服务比例</th></tr></thead><tbody>${(snapshot.countries || []).map((row,index) => `<tr><td><strong>${h(row.country)}</strong><small>${h(row.code)}</small></td><td>${field(`countries.${index}.coefficient`,"国家系数",row.coefficient,"number",{step:"0.01"})}</td><td>${field(`countries.${index}.qualityEnabled`,"质量服务",row.qualityEnabled,"checkbox")}</td><td>${field(`countries.${index}.qualityRatio`,"质量服务比例",row.qualityRatio)}</td></tr>`).join("")}</tbody></table></div>
+        <div class="tm-table-wrap dev-snapshot-table"><table><thead><tr><th>国家</th><th>国家系数</th><th>质量升档开关</th><th>质量升档比例</th></tr></thead><tbody>${(snapshot.countries || []).map((row,index) => `<tr><td><strong>${h(row.country)}</strong><small>${h(row.code)}</small></td><td>${field(`countries.${index}.coefficient`,"国家系数",row.coefficient,"number",{step:"0.01"})}</td><td>${field(`countries.${index}.qualityEnabled`,"质量升档",row.qualityEnabled,"checkbox")}</td><td>${field(`countries.${index}.qualityRatio`,"质量升档比例",row.qualityRatio)}</td></tr>`).join("")}</tbody></table></div>
       </section>`;
     } else if (snapshot.kind === "qualification") {
-      content = `<section class="dev-config-snapshot-section"><header><div><h3>资格阶段字段</h3><p>直接修改FTD、有效FTD和质量服务的达标条件与失效周期。</p></div><span class="dev-snapshot-lock">草稿可编辑</span></header>
+      content = `<section class="dev-config-snapshot-section"><header><div><h3>资格阶段字段</h3><p>直接修改首次入金、有效转化和质量升档的达标条件与失效周期。</p></div><span class="dev-snapshot-lock">草稿可编辑</span></header>
         <div class="tm-table-wrap dev-snapshot-table"><table><thead><tr><th>阶段</th><th>名称</th><th>净入金额度</th><th>活跃天数</th><th>标准交易手数</th><th>失效周期</th><th>收益率</th></tr></thead><tbody>${(snapshot.milestones || []).map((row,index) => `<tr><td><strong>${h(row.code)}</strong></td><td>${field(`milestones.${index}.name`,"名称",row.name)}</td><td>${field(`milestones.${index}.netDeposit`,"净入金额度",row.netDeposit)}</td><td>${field(`milestones.${index}.activeDays`,"活跃天数",row.activeDays)}</td><td>${field(`milestones.${index}.lots`,"标准交易手数",row.lots)}</td><td>${field(`milestones.${index}.expiry`,"失效周期",row.expiry)}</td><td>${field(`milestones.${index}.yieldRate`,"收益率",row.yieldRate || "不适用")}</td></tr>`).join("")}</tbody></table></div>
       </section>`;
     } else if (snapshot.kind === "quality") {
-      content = `<section class="dev-config-snapshot-section"><header><div><h3>质量服务规则字段</h3><p>直接编辑质量服务开关、门槛和失效周期。</p></div><span class="dev-snapshot-lock">草稿可编辑</span></header>
+      content = `<section class="dev-config-snapshot-section"><header><div><h3>质量升档规则字段</h3><p>直接编辑质量升档开关、门槛和失效周期。</p></div><span class="dev-snapshot-lock">草稿可编辑</span></header>
         <div class="dev-config-edit-list">${(snapshot.settings || []).map((row,index) => `<div class="dev-config-edit-row"><div><strong>${h(row.label)}</strong><small>${h(row.id)} · ${h(row.rule)}</small></div>${field(`settings.${index}.value`,"当前值",row.value)}</div>`).join("")}</div>
       </section>`;
     } else if (snapshot.kind === "credit") {
@@ -2869,7 +2868,7 @@
         <h4 class="dev-config-subheading">积分行为</h4><div class="tm-table-wrap dev-snapshot-table"><table><thead><tr><th>行为</th><th>加分/扣分</th><th>分值</th><th>生效时间</th></tr></thead><tbody>${(snapshot.points || []).map((row,index) => `<tr><td>${field(`points.${index}.event`,"行为",row.event)}</td><td>${field(`points.${index}.type`,"加分/扣分",row.type)}</td><td>${field(`points.${index}.points`,"分值",row.points)}</td><td>${field(`points.${index}.window`,"生效时间",row.window)}</td></tr>`).join("")}</tbody></table></div>
       </section>`;
     } else if (snapshot.kind === "finance") {
-      content = `<section class="dev-config-snapshot-section"><header><div><h3>资金与扣除顺序</h3><p>保证金、税费、释放和抵扣顺序直接在草稿中调整。</p></div><span class="dev-snapshot-lock">草稿可编辑</span></header>
+      content = `<section class="dev-config-snapshot-section"><header><div><h3>资金与扣除顺序</h3><p>保证金、释放和抵扣顺序直接在草稿中调整。</p></div><span class="dev-snapshot-lock">草稿可编辑</span></header>
         <div class="dev-config-edit-list">${(snapshot.finance || []).map((row,index) => `<div class="dev-config-edit-row"><div><strong>${h(row.label)}</strong><small>${h(row.rule)}</small></div>${field(`finance.${index}.value`,"当前值",row.value)}</div>`).join("")}</div>
       </section>`;
     } else if (snapshot.kind === "rules" || snapshot.kind === "risk") {
@@ -2900,7 +2899,7 @@
   }
 
   function configFinanceContent(snapshot) {
-    return `<section class="dev-config-snapshot-section"><header><div><h3>资金与扣除顺序</h3><p>保证金、税费和手续费分开展示，扣除顺序与释放条件清晰可查。</p></div><span class="dev-snapshot-lock">只读快照</span></header>
+    return `<section class="dev-config-snapshot-section"><header><div><h3>资金与扣除顺序</h3><p>保证金和手续费分开展示，扣除顺序与释放条件清晰可查。</p></div><span class="dev-snapshot-lock">只读快照</span></header>
       <div class="tm-table-wrap dev-snapshot-table"><table><thead><tr><th>设置项</th><th>当前值</th><th>规则说明</th></tr></thead><tbody>${snapshot.finance.map(row => `<tr><td><strong>${h(row.label)}</strong></td><td>${h(row.value)}</td><td>${h(row.rule)}</td></tr>`).join("")}</tbody></table></div>
     </section>`;
   }
@@ -3120,7 +3119,7 @@
           <button class="tm-button primary" data-config-version-new="1">新建版本</button>
         </div>
       </header>
-      <div class="dev-config-scope-note"><strong>版本控制范围</strong><span>价格、资格、信用、动态结算、保证金/税费、国家主体、审批流和风控规则必须通过版本变更。</span><button class="tm-button secondary" data-config-system-open="1">查看不纳入版本控制的配置</button></div>
+      <div class="dev-config-scope-note"><strong>版本控制范围</strong><span>价格、资格、信用、动态结算、保证金、国家主体、审批流和风控规则必须通过版本变更。</span><button class="tm-button secondary" data-config-system-open="1">查看不纳入版本控制的配置</button></div>
       <div class="dev-config-version-metrics">
         <article><span>版本总数</span><strong>${configVersionItems().length}</strong><small>保留历史版本</small></article>
         <article><span>当前生效</span><strong>${activeCount}</strong><small>生产规则引用中</small></article>
@@ -3836,8 +3835,8 @@
         ["风险边界", `<div class="dev-check-list danger"><span>理论结算期继续累计</span><span>人工排除可提前解除</span><span>解除后必须重检</span></div>`],
         ["版本分布", rows.slice(0,5).map(row => `<div class="dev-timeline-row"><span>${h(row.version)}</span><strong>${h(row.name)}</strong>${statusTag(row.status)}</div>`).join("") || "<p>暂无数据</p>"]
       ],
-      "guarantee-tax": [
-        ["资金口径", `<div class="dev-check-list"><span>保证金按佣金总额计提</span><span>税费独立计算</span><span>提现手续费按支付方式</span><span>失败提现不收费</span></div>`],
+      "guarantee": [
+        ["资金口径", `<div class="dev-check-list"><span>保证金按佣金总额计提</span><span>独立计算</span><span>提现手续费按支付方式</span><span>失败提现不收费</span></div>`],
         ["释放边界", `<div class="dev-check-list"><span>结算后90自然日参考</span><span>终止合作另保留30自然日</span><span>抵扣需财务审批</span></div>`],
         ["规则状态", rows.slice(0,5).map(row => `<div class="dev-timeline-row"><span>${h(row.type)}</span><strong>${h(row.name)}</strong>${statusTag(row.status)}</div>`).join("") || "<p>暂无数据</p>"]
       ],
@@ -4111,7 +4110,7 @@
       partners:["CRM同步","资料校验","风险检查","业务确认","状态同步"],
       attribution:["事件采集","幂等校验","归属判定","异常识别","人工复核"],
       promotion:["创建对象","合规检查","生成官方链接","投放跟踪","效果复盘"],
-      funds:["账务生成","结算检查","税费与保证金","结算检查","支付或重算"],
+      funds:["账务生成","结算检查","与保证金","结算检查","支付或重算"],
       "risk-compliance":["识别事实","证据补齐","风险判断","处置建议","人工结论"],
       processing:["任务生成","认领分工","材料补充","处理审批","结果回写"],
       analytics:["数据抽取","指标计算","维度下钻","生成建议","业务评审"],
@@ -4688,7 +4687,7 @@
       return `<section class="tq-object-page"><header class="tq-object-head"><h1>关联资料无法查看</h1>${back}</header><div class="tq-error" role="alert">${h(error.code || "AFF-50301")} · ${h(error.message || "请稍后重试")}</div></section>`;
     }
     const p=d.profile,missing="来源未提供";
-    const objectLabels={active:"正常",verified:"已认证",pending:"待处理",valid_ftd:"有效FTD",ftd:"FTD",registered:"已注册",churned:"已流失",not_required:"无需认证",sync_failed:"同步失败"};
+    const objectLabels={active:"正常",verified:"已认证",pending:"待处理",valid_ftd:"有效转化",ftd:"首次入金",registered:"已注册",churned:"已流失",not_required:"无需认证",sync_failed:"同步失败"};
     const objectValue=value=>typeof value==="string"&&objectLabels[value]?objectLabels[value]:value;
     const facts=values=>tqFacts(Object.fromEntries(Object.entries(values).map(([key,value])=>[key,objectValue(value)??missing])));
     const table=(columns,rows,empty="暂无关联记录")=>rows.length?`<div class="tq-evidence-table"><table><thead><tr>${columns.map(c=>`<th scope="col">${h(c[1])}</th>`).join("")}</tr></thead><tbody>${rows.map(row=>`<tr>${columns.map(c=>`<td>${c[2]?c[2](row):tqValue(row[c[0]],c[0])}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:`<p class="tq-muted">${h(empty)}</p>`;
@@ -4715,7 +4714,7 @@
     if(state.tabId==="overview"){
       body=section(partner?"合作者资料":"客户资料",basic)+section(partner?"关联客户":"归属合作者",partner?clients:objectLink("partner",p.partner_id,d.partner?.name || p.partner_id))+section("关联案件",cases);
     } else if(state.tabId==="compliance"){
-      body=section("CRM资料与认证",basic)+section("收款与税务资料",facts({"收款主体":null,"受益所有人":null,"收款账户核验":null,"税务资料核验":null}));
+      body=section("CRM资料与认证",basic)+section("收款资料",facts({"收款主体":null,"受益所有人":null,"收款账户核验":null}));
     } else if(state.tabId==="promotion"){
       body=section("关联客户",clients)+section("推广资料",facts({"活动配置":null,"回传配置":null}));
     } else if(state.tabId==="attribution"){
@@ -4723,7 +4722,7 @@
       body=section("归属资料",objectLink("partner",p.partner_id,d.partner?.name || p.partner_id)+facts({"渠道":attr.channel,"推广链接":attr.link_id || attr.linkId,"Sub ID":attr.sub_id || attr.subId,"归属规则":attr.rule,"锁定时间":attr.locked_at || attr.attributedAt}))+section("转化阶段",table([["stage","阶段"],["at","达成时间"]],p.milestones || [],"来源未提供阶段达成时间"))+section("入出金与交易汇总",accountFacts);
     } else if(state.tabId==="finance"){
       body=(!partner?section("入出金与交易汇总",accountFacts):"")+section("佣金与结算案件",cases);
-      if(partner)for(const [key,title] of [["commissions","其他佣金记录"],["statements","结算单"],["withdrawals","提现记录"],["taxRecords","税务记录"],["reversals","冲正与追回"]]){
+      if(partner)for(const [key,title] of [["commissions","其他佣金记录"],["statements","结算单"],["withdrawals","提现记录"],["reversals","冲正与追回"]]){
         body+=section(title,table([["id","编号"],["name","内容"],["amount","金额 / 净额",r=>r.amount??r.net??r.withheld??missing],["status","状态",r=>tqBadge(r.status)]],d.funds[key] || [],"当前来源未提供该合作者的关联记录"));
       }
     } else if(state.tabId==="risk"){
@@ -5322,7 +5321,7 @@
     if (creditLevel === "C0" && !["applying","reviewing"].includes(partner.stage)) blockers.push({code:"CREDIT_C0",label:"信用等级 C0，当前不具备常规结算权益",severity:"blocking",source:"Risk",tab:"risk"});
     if (partner.kyc?.status === "sync_failed") blockers.push({code:"CRM_SYNC",label:"CRM KYC 同步异常，已生成集成任务",severity:"blocking",source:"CRM",tab:"compliance"});
     if (riskBand === "R3") blockers.push({code:"RISK_R3",label:"R3 高风险，结算案件进入人工复核",severity:"blocking",source:"Risk",tab:"risk"});
-    if (partner.stage === "watching") blockers.push({code:"WATCHING",label:partner.watchReason || "观察期内限制质量服务附加",severity:"warning",source:"Affiliate",tab:"overview"});
+    if (partner.stage === "watching") blockers.push({code:"WATCHING",label:partner.watchReason || "观察期内限制质量升档附加",severity:"warning",source:"Affiliate",tab:"overview"});
     if (partner.stage === "reviewing" || partner.stage === "applying") blockers.push({code:"ONBOARDING",label:"入驻资料或认证尚未完成",severity:"warning",source:"CRM",tab:"compliance"});
     if (partner.id === "partner-1017") blockers.push({code:"SETTLEMENT_HOLD",label:"2笔结算案件等待D+N复核",severity:"blocking",source:"Finance",tab:"finance"});
     const clicks = performance.clicks || 0;
@@ -5355,13 +5354,12 @@
         kyb:{type:partner.type === "个人合作方" ? "不适用" : "KYB",status:kybStatus,launchAt:partner.onboard?.submittedAt || "2026-10-12 10:20",completedAt:kybStatus === "verified" ? (partner.kyb?.syncAt || "2026-10-12 10:20") : "—",result:kybStatus === "verified" ? "通过" : kybStatus === "failed" ? "失败" : "待同步",ref:`CRM-KYB-${partner.id.slice(-4)}`},
         agreement:{status:partner.stage === "archived" ? "已终止" : "已接受",version:"v3.2",acceptedAt:"2026-10-12 10:30",expiresAt:partner.stage === "archived" ? "—" : "2027-10-12"},
         payout:{accountType:"银行账户",provider:"受控收款服务",last4:"•••• 4821",status:partner.stage === "archived" ? "已停用" : "已验证",changedAt:"2026-10-28 11:20"},
-        tax:{type:"企业税务资料",country:partner.country,entity:`${partner.country} Legal Entity`,status:partner.stage === "archived" ? "已归档" : "已备案",changedAt:"2026-10-15 09:00"},
         issues:kycStatus === "sync_failed" ? [{id:`sync-${partner.id.slice(-4)}`,type:"CRM KYC同步超时",source:"CRM",code:"CRM-KYC-504",firstSeen:"2026-11-04 20:15",lastRetry:"2026-11-09 10:18",taskId:`task-${partner.id.slice(-4)}-01`}] : []
       },
       promotion:{
         activities:[
           {id:`act-${partner.id.slice(-4)}-01`,name:"Always On Acquisition",type:"常规拉新",period:"2026-10-10 → 2026-12-31",status:partner.stage === "archived" ? "offline" : "active",links:partner.stage === "archived" ? 0 : 3},
-          {id:`act-${partner.id.slice(-4)}-02`,name:"Q4 Quality Boost",type:"质量服务",period:"2026-10-01 → 2026-11-30",status:partner.stage === "watching" ? "paused" : "active",links:2}
+          {id:`act-${partner.id.slice(-4)}-02`,name:"Q4 Quality Boost",type:"质量升档",period:"2026-10-01 → 2026-11-30",status:partner.stage === "watching" ? "paused" : "active",links:2}
         ],
         links:[
           {id:`link-${partner.id.slice(-4)}-01`,campaign:"Always On Acquisition",path:"/official/th/acq-01",status:partner.stage === "archived" ? "expired" : partner.stage === "watching" ? "suspended" : "active",generated:"2026-10-12 10:50",clicks:Math.round(clicks*.46)},
@@ -5376,8 +5374,8 @@
       },
       risk:{
         snapshot:{score:riskBand === "R3" ? 86 : riskBand === "R2" ? 61 : riskBand === "R1" ? 34 : 12,status:riskBand === "R3" ? "investigating" : riskBand === "R2" ? "observing" : "clear",calculated:"2026-11-09 10:28",events:riskBand === "R3" ? 3 : riskBand === "R2" ? 1 : 0},
-        credit:{score:partner.credit?.score || 500,level:creditLevel,dimensions:"转化质量 · 资料完整性 · 结算稳定性 · 事件质量 · 合作时长",benefit:creditLevel === "C0" ? "无附加权益" : "基础结算权益 + 质量服务资格"},
-        events:riskBand === "R3" ? [{id:`risk-${partner.id.slice(-4)}-01`,type:"集群关联",source:"Risk Engine",status:"investigating",hitAt:"2026-11-08 18:20",affected:"2笔佣金案件"},{id:`risk-${partner.id.slice(-4)}-02`,type:"CRM欺诈引用",source:"CRM",status:"confirmed",hitAt:"2026-11-08 18:24",affected:"合作方信用档案"}] : riskBand === "R2" ? [{id:`risk-${partner.id.slice(-4)}-01`,type:"质量波动",source:"Affiliate",status:"observing",hitAt:"2026-11-07 09:20",affected:"质量服务附加"}] : [],
+        credit:{score:partner.credit?.score || 500,level:creditLevel,dimensions:"转化质量 · 资料完整性 · 结算稳定性 · 事件质量 · 合作时长",benefit:creditLevel === "C0" ? "无附加权益" : "基础结算权益 + 质量升档资格"},
+        events:riskBand === "R3" ? [{id:`risk-${partner.id.slice(-4)}-01`,type:"集群关联",source:"Risk Engine",status:"investigating",hitAt:"2026-11-08 18:20",affected:"2笔佣金案件"},{id:`risk-${partner.id.slice(-4)}-02`,type:"CRM欺诈引用",source:"CRM",status:"confirmed",hitAt:"2026-11-08 18:24",affected:"合作方信用档案"}] : riskBand === "R2" ? [{id:`risk-${partner.id.slice(-4)}-01`,type:"质量波动",source:"Affiliate",status:"observing",hitAt:"2026-11-07 09:20",affected:"质量升档附加"}] : [],
         cluster:{id:riskBand === "R3" ? `cluster-${partner.id.slice(-4)}` : "—",relation:riskBand === "R3" ? "同设备/IP聚类" : "无直接集群",feature:"设备指纹••A17 · IP段•••.24/29",members:riskBand === "R3" ? 3 : 0,status:riskBand === "R3" ? "investigating" : "clear"},
         fraud:{id:riskBand === "R3" ? `CRM-FRAUD-${partner.id.slice(-4)}` : "—",conclusion:riskBand === "R3" ? "命中CRM高风险引用" : "未命中",status:riskBand === "R3" ? "confirmed" : "no_hit",synced:"2026-11-08 18:24"},
         propagation:riskBand === "R3" ? [{source:"CRM欺诈引用",delta:-80,target:"C0",result:"已传导",window:"30天复核窗口"}] : []
@@ -5436,12 +5434,12 @@
         ["合作方编号",p.id],["合作方类型",p.type],["国家 / 主体",`${p.country} · ${p.country} Legal Entity`],["CRM主体ID",p.crmId],["联系邮箱","m••••••@example.com"],["联系电话","+66 •••• 4821"],["业务状态",partner360PageTag(p.stage)],["CRM账户状态",partner360PageTag(data.crmStatus)]
       ].map(([label,value])=>`<div class="p360-field"><span>${h(label)}</span><strong>${typeof value === "string" && value.startsWith("<") ? value : h(value)}</strong></div>`).join("")}</div></section>
       <section class="p360-panel"><header><div><h2>状态与阻断</h2><p>资金、风险、合规状态分别计算并保留来源。</p></div><button class="p360-link" data-p360-tab-link="finance">查看财务</button></header><div class="p360-summary-grid"><div><span>结算资格</span><strong>${partner360PageTag(data.riskBand === "R3" || data.creditLevel === "C0" ? "blocked" : "ready")}</strong></div><div><span>提现资格</span><strong>${partner360PageTag(data.partner.stage === "archived" ? "disabled" : "ready")}</strong></div><div><span>开放任务</span><strong>${openTaskCount} 项</strong></div><div><span>阻断数量</span><strong>${data.blockers.length} 项</strong></div></div></section>
-      <section class="p360-panel"><header><div><h2>业务健康摘要</h2><p>近30日摘要，不替代报表和佣金底账。</p></div><button class="p360-link" data-p360-tab-link="promotion">查看推广</button></header><div class="p360-health"><div><span>客户数</span><strong>${h(data.stats.registrations)}</strong></div><div><span>有效FTD率</span><strong>${data.stats.ftd ? percent(data.stats.validFtd/data.stats.ftd*100) : "待同步"}</strong></div><div><span>当前佣金</span><strong>${money(data.stats.commission)}</strong></div><div><span>待结算</span><strong>${money(data.stats.pendingSettlement)}</strong></div></div></section>
+      <section class="p360-panel"><header><div><h2>业务健康摘要</h2><p>近30日摘要，不替代报表和佣金底账。</p></div><button class="p360-link" data-p360-tab-link="promotion">查看推广</button></header><div class="p360-health"><div><span>客户数</span><strong>${h(data.stats.registrations)}</strong></div><div><span>有效转化率</span><strong>${data.stats.ftd ? percent(data.stats.validFtd/data.stats.ftd*100) : "待同步"}</strong></div><div><span>当前佣金</span><strong>${money(data.stats.commission)}</strong></div><div><span>待结算</span><strong>${money(data.stats.pendingSettlement)}</strong></div></div></section>
     </div>`;
   }
 
   function partner360PagePromotion(data) {
-    return `<div class="p360-tab-content"><section class="p360-panel"><header><div><h2>活动与链接</h2><p>活动、链接和Sub ID全部只读；状态跟随合作方业务状态。</p></div></header><div class="p360-section-title">活动</div><div class="p360-table-wrap"><table><thead><tr><th>活动</th><th>类型</th><th>周期</th><th>状态</th><th>链接数</th></tr></thead><tbody>${data.promotion.activities.map(row=>`<tr><td><strong>${h(row.name)}</strong><small>${h(row.id)}</small></td><td>${h(row.type)}</td><td>${h(row.period)}</td><td>${partner360PageTag(row.status)}</td><td>${row.links}</td></tr>`).join("")}</tbody></table></div><div class="p360-section-title">推广链接</div><div class="p360-table-wrap"><table><thead><tr><th>链接</th><th>活动</th><th>官方路径</th><th>状态</th><th>近30日点击</th><th>生成时间</th></tr></thead><tbody>${data.promotion.links.map(row=>`<tr><td><strong>${h(row.id)}</strong><button class="p360-inline-link" data-p360-copy-value="${h(row.id)}">复制</button></td><td>${h(row.campaign)}</td><td><code>${h(row.path)}</code></td><td>${partner360PageTag(row.status)}</td><td>${h(row.clicks)}</td><td>${h(row.generated)}</td></tr>`).join("")}</tbody></table></div></section><section class="p360-panel"><header><div><h2>Sub ID 与回传</h2><p>只读效果摘要；异常跳转统一监控。</p></div></header><div class="p360-table-wrap"><table><thead><tr><th>Sub ID</th><th>创建时间</th><th>点击</th><th>注册</th><th>FTD</th><th>有效FTD</th></tr></thead><tbody>${data.promotion.subIds.map(row=>`<tr>${[row.id,row.created,row.clicks,row.registrations,row.ftd,row.validFtd].map((value,index)=>`<td>${index===0?`<strong>${h(value)}</strong>`:h(value)}</td>`).join("")}</tr>`).join("")}</tbody></table></div><div class="p360-summary-grid p360-summary-grid-5">${[["成功",data.promotion.postback.success],["失败",data.promotion.postback.failed],["重试",data.promotion.postback.retrying],["归属锁定",data.promotion.attribution.locked],["归因冲突",data.promotion.attribution.conflicts]].map(([label,value])=>`<div><span>${h(label)}</span><strong>${h(value)}</strong></div>`).join("")}</div><p class="p360-muted">最近失败：${h(data.promotion.postback.lastFailed)} · 错误码：${h(data.promotion.postback.error)} · IB隔离 ${h(data.promotion.attribution.ibExcluded)} · 缺失 ${h(data.promotion.attribution.missing)}</p></section></div>`;
+    return `<div class="p360-tab-content"><section class="p360-panel"><header><div><h2>活动与链接</h2><p>活动、链接和Sub ID全部只读；状态跟随合作方业务状态。</p></div></header><div class="p360-section-title">活动</div><div class="p360-table-wrap"><table><thead><tr><th>活动</th><th>类型</th><th>周期</th><th>状态</th><th>链接数</th></tr></thead><tbody>${data.promotion.activities.map(row=>`<tr><td><strong>${h(row.name)}</strong><small>${h(row.id)}</small></td><td>${h(row.type)}</td><td>${h(row.period)}</td><td>${partner360PageTag(row.status)}</td><td>${row.links}</td></tr>`).join("")}</tbody></table></div><div class="p360-section-title">推广链接</div><div class="p360-table-wrap"><table><thead><tr><th>链接</th><th>活动</th><th>官方路径</th><th>状态</th><th>近30日点击</th><th>生成时间</th></tr></thead><tbody>${data.promotion.links.map(row=>`<tr><td><strong>${h(row.id)}</strong><button class="p360-inline-link" data-p360-copy-value="${h(row.id)}">复制</button></td><td>${h(row.campaign)}</td><td><code>${h(row.path)}</code></td><td>${partner360PageTag(row.status)}</td><td>${h(row.clicks)}</td><td>${h(row.generated)}</td></tr>`).join("")}</tbody></table></div></section><section class="p360-panel"><header><div><h2>Sub ID 与回传</h2><p>只读效果摘要；异常跳转统一监控。</p></div></header><div class="p360-table-wrap"><table><thead><tr><th>Sub ID</th><th>创建时间</th><th>点击</th><th>注册</th><th>首次入金</th><th>有效转化</th></tr></thead><tbody>${data.promotion.subIds.map(row=>`<tr>${[row.id,row.created,row.clicks,row.registrations,row.ftd,row.validFtd].map((value,index)=>`<td>${index===0?`<strong>${h(value)}</strong>`:h(value)}</td>`).join("")}</tr>`).join("")}</tbody></table></div><div class="p360-summary-grid p360-summary-grid-5">${[["成功",data.promotion.postback.success],["失败",data.promotion.postback.failed],["重试",data.promotion.postback.retrying],["归属锁定",data.promotion.attribution.locked],["归因冲突",data.promotion.attribution.conflicts]].map(([label,value])=>`<div><span>${h(label)}</span><strong>${h(value)}</strong></div>`).join("")}</div><p class="p360-muted">最近失败：${h(data.promotion.postback.lastFailed)} · 错误码：${h(data.promotion.postback.error)} · IB隔离 ${h(data.promotion.attribution.ibExcluded)} · 缺失 ${h(data.promotion.attribution.missing)}</p></section></div>`;
   }
 
   function partner360PageCompliance(data) {
@@ -5449,12 +5447,12 @@
     const sensitive = state.partner360SensitiveFields;
     const payoutVisible = sensitive.has("payout") && (!state.partner360SensitiveExpiry.payout || state.partner360SensitiveExpiry.payout > Date.now());
     const payout = payoutVisible ? "ACCT-0098-4821-7712" : c.payout.last4;
-    return `<div class="p360-tab-content"><section class="p360-panel"><header><div><h2>CRM账户与认证</h2><p>CRM是账户、KYC/KYB和欺诈事实源，Affiliate不重新认证。</p></div><button class="p360-link" data-p360-tab-link="follow-up">查看同步记录</button></header><div class="p360-grid p360-grid-4">${[["CRM主体ID",c.crmSubjectId],["认证提供方",c.authProvider],["最后同步",c.lastSync],["同步状态",partner360PageTag(c.syncStatus)]].map(([label,value])=>`<div class="p360-field"><span>${h(label)}</span><strong>${typeof value === "string" && value.startsWith("<") ? value : h(value)}</strong></div>`).join("")}</div><div class="p360-cert-grid">${[["KYC / KYC状态",c.kyc],["KYB状态",c.kyb]].map(([label,item])=>`<article class="p360-cert-card"><span>${h(label)}</span><strong>${partner360PageTag(item.status)}</strong><small>${h(item.result)} · ${h(item.completedAt)}</small><code>${h(item.ref)}</code></article>`).join("")}</div></section><section class="p360-panel"><header><div><h2>协议、收款与税务资料</h2><p>敏感字段默认脱敏，按字段授权后临时查看并写入审计；60秒后自动恢复脱敏。</p></div></header><div class="p360-grid p360-grid-3"><div class="p360-field"><span>协议</span><strong>${partner360PageTag(c.agreement.status)}</strong><small>${h(c.agreement.version)} · 到期 ${h(c.agreement.expiresAt)}</small></div><div class="p360-field"><span>收款账户</span><strong>${h(payout)}</strong><small>${h(c.payout.provider)} · ${h(c.payout.status)}</small>${payoutVisible ? `<button class="p360-inline-link" data-p360-copy-sensitive="payout">复制已揭示账户</button><button class="p360-inline-link" data-p360-hide-sensitive="payout">立即隐藏</button>` : `<button class="p360-inline-link" data-p360-reveal="payout">申请临时查看</button>`}</div><div class="p360-field"><span>税务资料</span><strong>${h(c.tax.type)}</strong><small>${h(c.tax.country)} · ${h(c.tax.status)}</small><button class="p360-inline-link" data-p360-reveal="tax">查看变更记录</button></div></div></section><section class="p360-panel"><header><div><h2>同步异常</h2><p>冲突、超时和回调乱序只生成任务，不覆盖CRM事实。</p></div></header>${c.issues.length ? `<div class="p360-issue-list">${c.issues.map(issue=>`<article><div><strong>${h(issue.type)}</strong>${partner360PageTag("failed")}</div><p>${h(issue.source)} · ${h(issue.code)} · 首次 ${h(issue.firstSeen)} · 最近重试 ${h(issue.lastRetry)}</p><button class="tm-button secondary compact" data-p360-task-new="crm-sync">发起同步异常任务</button></article>`).join("")}</div>` : `<div class="p360-empty-inline">当前没有CRM同步异常。</div>`}</section></div>`;
+    return `<div class="p360-tab-content"><section class="p360-panel"><header><div><h2>CRM账户与认证</h2><p>CRM是账户、KYC/KYB和欺诈事实源，Affiliate不重新认证。</p></div><button class="p360-link" data-p360-tab-link="follow-up">查看同步记录</button></header><div class="p360-grid p360-grid-4">${[["CRM主体ID",c.crmSubjectId],["认证提供方",c.authProvider],["最后同步",c.lastSync],["同步状态",partner360PageTag(c.syncStatus)]].map(([label,value])=>`<div class="p360-field"><span>${h(label)}</span><strong>${typeof value === "string" && value.startsWith("<") ? value : h(value)}</strong></div>`).join("")}</div><div class="p360-cert-grid">${[["KYC / KYC状态",c.kyc],["KYB状态",c.kyb]].map(([label,item])=>`<article class="p360-cert-card"><span>${h(label)}</span><strong>${partner360PageTag(item.status)}</strong><small>${h(item.result)} · ${h(item.completedAt)}</small><code>${h(item.ref)}</code></article>`).join("")}</div></section><section class="p360-panel"><header><div><h2>协议与收款资料</h2><p>敏感字段默认脱敏，按字段授权后临时查看并写入审计；60秒后自动恢复脱敏。</p></div></header><div class="p360-grid p360-grid-3"><div class="p360-field"><span>协议</span><strong>${partner360PageTag(c.agreement.status)}</strong><small>${h(c.agreement.version)} · 到期 ${h(c.agreement.expiresAt)}</small></div><div class="p360-field"><span>收款账户</span><strong>${h(payout)}</strong><small>${h(c.payout.provider)} · ${h(c.payout.status)}</small>${payoutVisible ? `<button class="p360-inline-link" data-p360-copy-sensitive="payout">复制已揭示账户</button><button class="p360-inline-link" data-p360-hide-sensitive="payout">立即隐藏</button>` : `<button class="p360-inline-link" data-p360-reveal="payout">申请临时查看</button>`}</div></div></section><section class="p360-panel"><header><div><h2>同步异常</h2><p>冲突、超时和回调乱序只生成任务，不覆盖CRM事实。</p></div></header>${c.issues.length ? `<div class="p360-issue-list">${c.issues.map(issue=>`<article><div><strong>${h(issue.type)}</strong>${partner360PageTag("failed")}</div><p>${h(issue.source)} · ${h(issue.code)} · 首次 ${h(issue.firstSeen)} · 最近重试 ${h(issue.lastRetry)}</p><button class="tm-button secondary compact" data-p360-task-new="crm-sync">发起同步异常任务</button></article>`).join("")}</div>` : `<div class="p360-empty-inline">当前没有CRM同步异常。</div>`}</section></div>`;
   }
 
   function partner360PageFinance(data) {
     const s = data.stats;
-    return `<div class="p360-tab-content"><section class="p360-panel"><header><div><h2>业绩与资金摘要</h2><p>当前时间范围：${state.partner360Period === "last_7d" ? "近7日" : state.partner360Period === "this_month" ? "本月" : "近30个自然日"} · USD</p></div><select class="p360-period" data-p360-period><option value="last_7d" ${state.partner360Period === "last_7d" ? "selected" : ""}>近7日</option><option value="last_30d" ${state.partner360Period === "last_30d" ? "selected" : ""}>近30日</option><option value="this_month" ${state.partner360Period === "this_month" ? "selected" : ""}>本月</option></select></header><div class="p360-summary-grid p360-summary-grid-5">${[["点击",s.clicks],["注册",s.registrations],["FTD",s.ftd],["有效FTD",s.validFtd],["佣金",money(s.commission)],["待结算",money(s.pendingSettlement)]].map(([label,value])=>`<div><span>${h(label)}</span><strong>${h(value)}</strong></div>`).join("")}</div></section><section class="p360-panel"><header><div><h2>佣金 / 结算案件</h2><p>冻结绑定 customer_id + commission_case_id + settlement_case_id。</p></div></header><div class="p360-table-wrap"><table><thead><tr><th>客户</th><th>佣金案件</th><th>结算案件</th><th>金额</th><th>佣金状态</th><th>结算状态</th><th>阻断原因</th><th>TraceId</th></tr></thead><tbody>${data.cases.map(row=>`<tr><td><strong>${h(row.customerId)}</strong></td><td>${h(row.commissionCaseId)}</td><td>${h(row.settlementCaseId)}</td><td>${money(row.amount)}</td><td>${partner360PageTag(row.commissionStatus)}</td><td>${partner360PageTag(row.settlementStatus)}</td><td>${h(row.block)}</td><td><code>${h(row.traceId)}</code></td></tr>`).join("")}</tbody></table></div></section><section class="p360-panel"><header><div><h2>提现与保证金</h2><p>资金敏感动作进入任务或审批队列。</p></div><button class="tm-button secondary compact" data-p360-task-new="finance">发起资金核对任务</button></header><div class="p360-grid p360-grid-4"><div class="p360-field"><span>提现摘要</span><strong>${partner360PageTag(data.partner.stage === "archived" ? "disabled" : "ready")}</strong><small>待审核 0 · 处理中 ${money(Math.round(s.pendingSettlement*.2))} · 失败 0</small></div><div class="p360-field"><span>保证金余额</span><strong>${money(Math.round(s.pendingSettlement*.32))}</strong><small>占用 ${money(Math.round(s.pendingSettlement*.18))}</small></div><div class="p360-field"><span>覆盖率</span><strong>${s.pendingSettlement ? percent(132) : "待同步"}</strong><small>安全线 120%</small></div><div class="p360-field"><span>最近提现</span><strong>2026-11-06</strong><small>状态 ${partner360PageTag("success")}</small></div></div></section></div>`;
+    return `<div class="p360-tab-content"><section class="p360-panel"><header><div><h2>业绩与资金摘要</h2><p>当前时间范围：${state.partner360Period === "last_7d" ? "近7日" : state.partner360Period === "this_month" ? "本月" : "近30个自然日"} · USD</p></div><select class="p360-period" data-p360-period><option value="last_7d" ${state.partner360Period === "last_7d" ? "selected" : ""}>近7日</option><option value="last_30d" ${state.partner360Period === "last_30d" ? "selected" : ""}>近30日</option><option value="this_month" ${state.partner360Period === "this_month" ? "selected" : ""}>本月</option></select></header><div class="p360-summary-grid p360-summary-grid-5">${[["点击",s.clicks],["注册",s.registrations],["首次入金",s.ftd],["有效转化",s.validFtd],["佣金",money(s.commission)],["待结算",money(s.pendingSettlement)]].map(([label,value])=>`<div><span>${h(label)}</span><strong>${h(value)}</strong></div>`).join("")}</div></section><section class="p360-panel"><header><div><h2>佣金 / 结算案件</h2><p>冻结绑定 customer_id + commission_case_id + settlement_case_id。</p></div></header><div class="p360-table-wrap"><table><thead><tr><th>客户</th><th>佣金案件</th><th>结算案件</th><th>金额</th><th>佣金状态</th><th>结算状态</th><th>阻断原因</th><th>TraceId</th></tr></thead><tbody>${data.cases.map(row=>`<tr><td><strong>${h(row.customerId)}</strong></td><td>${h(row.commissionCaseId)}</td><td>${h(row.settlementCaseId)}</td><td>${money(row.amount)}</td><td>${partner360PageTag(row.commissionStatus)}</td><td>${partner360PageTag(row.settlementStatus)}</td><td>${h(row.block)}</td><td><code>${h(row.traceId)}</code></td></tr>`).join("")}</tbody></table></div></section><section class="p360-panel"><header><div><h2>提现与保证金</h2><p>资金敏感动作进入任务或审批队列。</p></div><button class="tm-button secondary compact" data-p360-task-new="finance">发起资金核对任务</button></header><div class="p360-grid p360-grid-4"><div class="p360-field"><span>提现摘要</span><strong>${partner360PageTag(data.partner.stage === "archived" ? "disabled" : "ready")}</strong><small>待审核 0 · 处理中 ${money(Math.round(s.pendingSettlement*.2))} · 失败 0</small></div><div class="p360-field"><span>保证金余额</span><strong>${money(Math.round(s.pendingSettlement*.32))}</strong><small>占用 ${money(Math.round(s.pendingSettlement*.18))}</small></div><div class="p360-field"><span>覆盖率</span><strong>${s.pendingSettlement ? percent(132) : "待同步"}</strong><small>安全线 120%</small></div><div class="p360-field"><span>最近提现</span><strong>2026-11-06</strong><small>状态 ${partner360PageTag("success")}</small></div></div></section></div>`;
   }
 
   function partner360PageRisk(data) {
@@ -5483,7 +5481,7 @@
     if (state.scenario === "empty") return `<div class="p360-empty-page"><h2>暂无合作方360数据</h2><p>该合作方没有可展示的聚合事实，请从合作方列表重新选择对象。</p><button class="tm-button secondary" data-p360-back>返回合作方列表</button></div>`;
     const data = partner360PageFixture();
     if (!data) return `<div class="p360-empty-page"><h2>合作方不存在</h2><p>partner_id 无效或对象已被移除。</p><button class="tm-button secondary" data-p360-back>返回合作方列表</button></div>`;
-    return `<div class="p360-page">${partner360PageHeader(data)}${partner360PageBlockers(data)}<section class="p360-metrics">${partner360PageMetric("点击",compact(data.stats.clicks),"近30日 · 有效点击","promotion")}${partner360PageMetric("注册",compact(data.stats.registrations),"近30日 · 保留归因","promotion")}${partner360PageMetric("FTD",compact(data.stats.ftd),"CRM确认首入金","finance")}${partner360PageMetric("有效FTD",compact(data.stats.validFtd),"通过资格与合规校验","finance")}${partner360PageMetric("佣金",money(data.stats.commission),"近30日 · USD","finance")}${partner360PageMetric("待结算",money(data.stats.pendingSettlement),"当前未完成案件","finance")}</section><nav class="p360-tabs" role="tablist" aria-label="合作方360页签">${partner360PageTabs.map(tabItem=>`<button class="${state.tabId===tabItem.id?"active":""}" data-partner360-page-tab="${h(tabItem.id)}" role="tab" aria-selected="${state.tabId===tabItem.id}">${h(tabItem.label)}</button>`).join("")}</nav><div class="p360-workspace"><main class="p360-main">${partner360PageBody(data)}</main>${partner360PageAside(data)}</div></div>${partner360PageActionModal()}`;
+    return `<div class="p360-page">${partner360PageHeader(data)}${partner360PageBlockers(data)}<section class="p360-metrics">${partner360PageMetric("点击",compact(data.stats.clicks),"近30日 · 有效点击","promotion")}${partner360PageMetric("注册",compact(data.stats.registrations),"近30日 · 保留归因","promotion")}${partner360PageMetric("首次入金",compact(data.stats.ftd),"CRM确认首入金","finance")}${partner360PageMetric("有效转化",compact(data.stats.validFtd),"通过资格与合规校验","finance")}${partner360PageMetric("佣金",money(data.stats.commission),"近30日 · USD","finance")}${partner360PageMetric("待结算",money(data.stats.pendingSettlement),"当前未完成案件","finance")}</section><nav class="p360-tabs" role="tablist" aria-label="合作方360页签">${partner360PageTabs.map(tabItem=>`<button class="${state.tabId===tabItem.id?"active":""}" data-partner360-page-tab="${h(tabItem.id)}" role="tab" aria-selected="${state.tabId===tabItem.id}">${h(tabItem.label)}</button>`).join("")}</nav><div class="p360-workspace"><main class="p360-main">${partner360PageBody(data)}</main>${partner360PageAside(data)}</div></div>${partner360PageActionModal()}`;
   }
 
   function partner360PageActionModal() {
@@ -6896,7 +6894,7 @@
     if (key === "size") return String(row[key] ?? "-");
     if (key === "state") return statusLabel(row[key]);
     if (key === "uploadedAt" || key === "clickedAt") return String(row[key] ?? "-");
-    if (["grossLabel","taxLabel","guaranteeLabel","netLabel","affiliate","external","diffLabel","fee","liable","settlementBlock","current","range","reason","value","hitRate","falseRate","convRate","roiLabel","trend","period","quadrant","drill","pages","sensitive","approval","domain"].includes(key)) return String(row[key] ?? "-");
+    if (["grossLabel","guaranteeLabel","netLabel","affiliate","external","diffLabel","fee","liable","settlementBlock","current","range","reason","value","hitRate","falseRate","convRate","roiLabel","trend","period","quadrant","drill","pages","sensitive","approval","domain"].includes(key)) return String(row[key] ?? "-");
     if (key === "creditLabel") return String(row[key] ?? "-");
     if (["status","risk","priority","stage"].includes(key)) return statusLabel(row[key]);
     const column = tab().columns.find(item => item.key === key);
@@ -6984,7 +6982,7 @@
       performance:(partner.performance ? `
         <div class="dev-impact-grid">
           <article><span>累计点击</span><strong>${compact(partner.performance.clicks)}</strong></article>
-          <article><span>有效FTD</span><strong>${compact(partner.performance.validFtd)}</strong></article>
+          <article><span>有效转化</span><strong>${compact(partner.performance.validFtd)}</strong></article>
           <article><span>累计佣金</span><strong>${money(partner.performance.commission)}</strong></article>
           <article><span>质量等级</span><strong>${h(partner.performance.qualityGrade)}</strong></article>
         </div>
@@ -7054,7 +7052,7 @@
           <div><span>国家</span><strong>${h(client.country)}</strong></div>
           <div><span>归属合作方</span><strong>${h(partner?.name || client.partnerId)}</strong></div>
           <div><span>CRM客户ID</span><strong>${h(client.crmId)}</strong></div>
-          <div><span>FTD金额</span><strong>${money(client.ftdAmount)}</strong></div>
+          <div><span>首次入金金额</span><strong>${money(client.ftdAmount)}</strong></div>
           <div><span>累计佣金</span><strong>${money(client.commissionTotal)}</strong></div>
           <div><span>风险等级</span><strong><span class="dev-status ${["R0","R1"].includes(client.rGrade)?"tm-success":client.rGrade==="R2"?"tm-warning":"tm-danger"}">${h(statusLabel(client.rGrade))}</span></strong></div>
           <div><span>更新时间</span><strong>${h(client.updated)}</strong></div>
@@ -7918,11 +7916,11 @@
     "partner-list":"users","partner-onboarding":"user-check","partner-kyc":"shield-check","partner-credit":"award","partner-offboarding":"exit","partner-notes":"message",
     "client-list":"users","attribution-links":"link","event-stream":"list","client-risk":"alert","attribution-exception":"target",
     "campaign-list":"megaphone","link-list":"link","material-list":"image","sub-channel":"nodes","postback":"send","tracker":"crosshair",
-    "commission-list":"dollar","hold-workbench":"clock","statement-list":"file","withdrawal-list":"card","guarantee-workbench":"shield","tax-list":"percent","reversal-list":"repeat","reconciliation":"scale",
+    "commission-list":"dollar","hold-workbench":"clock","statement-list":"file","withdrawal-list":"card","guarantee-workbench":"shield","reversal-list":"repeat","reconciliation":"scale",
     "hard-hit":"zap","risk-event":"alert","cluster-case":"network","violation-event":"ban","crm-fraud":"database","blacklist":"ban","country-compliance":"globe","quality-internal":"check-circle",
     "task-all":"inbox","risk-review":"shield","credit-adjust":"trending","cluster-hold":"timer","d-plus-n":"snowflake","appeal":"message","guarantee-offset":"wallet","cap-breaker":"gauge","integration-task":"plug","support-ticket":"ticket",
     "report-roi":"chart","report-quality":"pie","report-guarantee":"shield","report-funnel":"filter","report-channel":"chart","report-finance":"ledger","report-risk":"alert",
-    "config-overview":"settings","config-price":"tag","config-qualification":"milestone","config-credit":"award","config-hold":"clock","config-guarantee-tax":"percent","config-approval":"check","config-simulation":"package","config-cluster":"network","config-hard-rule":"zap","config-risk-score":"sliders","config-violation":"ban","config-dictionary":"book","config-permission":"lock",
+    "config-overview":"settings","config-price":"tag","config-qualification":"milestone","config-credit":"award","config-hold":"clock","config-guarantee":"percent","config-approval":"check","config-simulation":"package","config-cluster":"network","config-hard-rule":"zap","config-risk-score":"sliders","config-violation":"ban","config-dictionary":"book","config-permission":"lock",
     "audit-operation":"search","audit-self-review":"repeat","export-center":"download","field-auth":"key","deletion":"trash","breach":"alert","retention":"archive"
   };
   const hiddenSidebarItemIds = new Set(["nav-campaigns","nav-risk-review","nav-integrations","nav-quality"]);
@@ -9507,7 +9505,7 @@
       if (actionId === "report_drill") {
         if (target.includes("ROI")) return navigate("admin-performance/roi");
         if (target.includes("保证金")) return navigate("admin-performance/guarantee-coverage");
-        if (target.includes("税费")) return navigate("admin-modules/statement-list");
+        if (target.includes("")) return navigate("admin-modules/statement-list");
         if (target.includes("冲正")) return navigate("admin-modules/reversal-list");
         return navigate("admin-performance/roi");
       }

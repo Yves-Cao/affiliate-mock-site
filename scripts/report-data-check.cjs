@@ -42,15 +42,15 @@ for (const row of data.rows) {
   }
   assert.equal(Boolean(row.expected), Boolean(row.commissionId));
   if (row.effectiveAt) {
-    assert.ok(row.expected > 0 && row.commissionId, `${row.clientId} must generate commission at valid FTD`);
-    assert.match(row.tier, /^L[1-4]$/, `${row.clientId} valid FTD must have a commission tier`);
+    assert.ok(row.expected > 0 && row.commissionId, `${row.clientId} must generate commission at qualified conversion`);
+    assert.match(row.tier, /^L[1-4]$/, `${row.clientId} qualified conversion must have a commission tier`);
     const gross = data.commissionPrice(row.country, row.tier);
     const expected = row.qualityAt ? gross : Math.round(gross * 0.75);
     assert.equal(row.expected, expected, `${row.clientId} commission must match tier, country coefficient, and milestone`);
     assert.ok(row.commissionCases.some(item => item.type === "qftd_batch" && item.amount > 0), `${row.clientId} needs the first two-segment case`);
   }
   if (row.qualityAt) {
-    assert.ok(row.effectiveAt && row.expected > 0, `${row.clientId} quality service cannot precede valid FTD`);
+    assert.ok(row.effectiveAt && row.expected > 0, `${row.clientId} quality upgrade cannot precede qualified conversion`);
     assert.ok(row.commissionCases.some(item => item.type === "quality_service" && item.amount > 0), `${row.clientId} needs the quality-service case`);
   }
   if (["rejected", "reversed"].includes(row.commissionStatus)) {

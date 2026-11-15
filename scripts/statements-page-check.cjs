@@ -35,7 +35,7 @@ for (const marker of [
 assert.ok(page.includes("const expectedChange") && page.includes("Math.abs(netChange - expectedChange)"), "Statement balance is checked against movements");
 assert.ok(page.includes('format === "pdf"') && page.includes("%PDF-1.4"), "PDF download is generated");
 assert.ok(page.includes("text/csv;charset=utf-8"), "CSV download is generated");
-assert.ok(!page.includes("data-route=\"invoices\"") && !page.includes("data-route=\"tax-forms\""), "No invoice or tax-form route");
+assert.ok(!page.includes("data-route=\"invoices\""), "No invoice route");
 assert.ok(page.includes("AUD-"), "Download records carry audit IDs");
 for (const breakpoint of ["991px", "767px"]) assert.ok(css.includes(breakpoint), `Responsive rule at ${breakpoint}`);
 

@@ -1,19 +1,5 @@
 .notice { position: relative; }
-.notice span {
-  position: absolute;
-  top: 3px;
-  right: 3px;
-  min-width: 15px;
-  height: 15px;
-  display: grid;
-  place-items: center;
-  padding: 0 3px;
-  border-radius: 999px;
-  background: #d92d20;
-  color: #fff;
-  font-size: 9px;
-  line-height: 1;
-}
+.notice #message-count[hidden] { display: none; }
 .dashboard-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .finance-page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
 .finance-page > .card { min-width: 0; }

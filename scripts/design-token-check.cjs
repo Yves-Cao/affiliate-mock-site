@@ -7,6 +7,8 @@ const read = file => fs.readFileSync(path.join(root, file), "utf8");
 const tokens = read("design-tokens.css");
 const styles = read("styles.css");
 const html = read("index.html");
+const app = read("app.js");
+const pages = read("pages.js");
 const credit = read("credit-center.css");
 const userStyleFiles = [
   "styles.css", "account-page.css", "clients-page.css", "credit-center.css", "date-range.css",
@@ -16,6 +18,24 @@ const userStyleFiles = [
 ];
 
 const requiredTokens = [
+  ["--shell-header-height", "62px"],
+  ["--shell-sidebar-width", "240px"],
+  ["--shell-sidebar-collapsed-width", "72px"],
+  ["--main-max-width", "none"],
+  ["--main-padding-x", "24px"],
+  ["--topbar-border", "#eef2f6"],
+  ["--topbar-icon-color", "#414651"],
+  ["--topbar-icon-hover-bg", "#f9fafb"],
+  ["--topbar-divider", "#eef2f6"],
+  ["--brand-1-0", "#1a5bff"],
+  ["--surface-muted-1-0", "#f3f4f6"],
+  ["--surface-soft-1-0", "#f9fafb"],
+  ["--border-subtle-1-0", "#e3e8ef"],
+  ["--border-strong-1-0", "#cdd5df"],
+  ["--text-strong-1-0", "#0a0d12"],
+  ["--text-body-1-0", "#414651"],
+  ["--text-muted-1-0", "#717680"],
+  ["--text-disabled-1-0", "#a4a7ae"],
   ["--brand-deep", "#00187e"],
   ["--brand", "#005bff"],
   ["--nav-text", "#6b7897"],
@@ -41,6 +61,43 @@ const textTokens = [
 for (const token of textTokens) assert.ok(tokens.includes(`${token}:`), `Missing typography token ${token}`);
 
 assert.ok(!styles.includes(":root"), "styles.css must not duplicate the design token root block");
+assert.ok(styles.includes("top: var(--shell-header-height);"), "Sidebar follows the 1.0 header height");
+assert.ok(styles.includes("padding-top: var(--shell-header-height);"), "Workspace follows the 1.0 header height");
+assert.ok(styles.includes("height: var(--shell-header-height);"), "Topbar uses the 1.0 header height");
+assert.ok(styles.includes("width: var(--shell-sidebar-width);"), "Sidebar uses the 1.0 width");
+assert.ok(styles.includes("margin-left: var(--shell-sidebar-width);"), "Workspace follows the 1.0 sidebar width");
+assert.ok(app.includes('navGroups: ["仪表盘", "数据总览", "推广管理", "收益中心", "服务中心"]'), "User-side navigation groups default to the expanded portal pattern");
+assert.ok(styles.includes("width: 216px;"), "Navigation items preserve the 1.0 216px hit target");
+assert.ok(styles.includes("min-height: 40px;"), "Navigation items preserve the 1.0 40px height");
+assert.ok(styles.includes("border-radius: 8px;"), "Navigation items use the 1.0 radius");
+assert.ok(html.includes('id="mobile-nav-toggle"'), "Compact viewports keep a header navigation trigger instead of an icon rail");
+assert.ok(styles.includes("transform: translateX(-100%);"), "Compact side navigation starts hidden like the 1.0 shell");
+assert.ok(html.includes('id="theme-toggle"'), "Topbar includes the notifications-style theme switch");
+assert.ok(html.includes('id="avatar-initial"') && html.includes('id="avatar-name"'), "Topbar avatar exposes initials and nickname");
+assert.ok(html.includes('class="topbar-clock mt-time-display"'), "Topbar time uses the notifications-style two-row grid");
+assert.ok(html.includes('class="wallet-tags"') && html.includes('class="wallet-identity"'), "Wallet keeps the notifications-style rich account layout");
+assert.ok(html.includes('class="header-icon-actions"'), "Topbar groups support, language, messages, and theme actions");
+assert.ok(app.includes('theme: "light"') && app.includes("function applyTheme("), "Theme state is explicit and persisted through Mock state");
+assert.ok(app.includes('merged.theme = savedState.theme === "dark" ? "dark" : "light"'), "Saved theme values are validated");
+assert.ok(styles.includes('body[data-theme="dark"]'), "Dark theme has a semantic token layer");
+assert.ok(styles.includes(".theme-switch {"), "Theme switch uses the reference-style capsule");
+assert.ok(styles.includes(".mt-time-display__rows {"), "Time rows use the reference grid");
+assert.ok(styles.includes(".wallet-tags {"), "Wallet uses the reference account-selector rows");
+assert.ok(styles.includes(".header-circle-icon {"), "Topbar actions use the reference circular icon geometry");
+assert.ok(styles.includes("border-bottom: 1px solid var(--topbar-border);"), "Topbar uses the 1.0 hairline border");
+assert.ok(html.includes('class="topbar-divider"'), "Topbar separates account context from icon actions");
+assert.ok(app.includes('document.body.classList.toggle("route-dash", route === "dash")'), "Dashboard owns its user-portal canvas state");
+assert.ok(tokens.includes("--canvas: #ffffff;"), "White canvas trial removes the gray admin-like page background");
+assert.ok(pages.includes('class="page-header dashboard-header"'), "Dashboard renders a 1.0 PageHeader");
+assert.ok(styles.includes(".route-dash .dashboard-metrics,"), "Dashboard metrics use content-first grouping");
+assert.ok(styles.includes(".route-dash .dashboard-credit-row,"), "Dashboard funnel and membership form one continuous surface");
+assert.ok(styles.includes(".route-dash .dashboard-promotion-grid,"), "Dashboard promotion tools form one continuous surface");
+assert.ok(styles.includes(".route-dash .dashboard-support-grid,"), "Dashboard guidance and trackers form one continuous surface");
+assert.ok(styles.includes("box-shadow: none;"), "Dashboard pilot removes tiled card shadows");
+assert.ok(html.includes('class="auth-brand"'), "Login keeps an Affiliate brand lockup");
+assert.ok(styles.includes("font: var(--font-text-24-semibold);"), "Login title uses the 1.0 24px SemiBold style");
+assert.ok(styles.includes("border: 1px solid var(--border-strong-1-0);"), "Login inputs use the 1.0 strong border");
+assert.ok(styles.includes("background: var(--brand-1-0);"), "Login primary action uses the 1.0 brand candidate");
 assert.ok(html.includes('design-tokens.css?v='), "index.html must load design-tokens.css before page styles");
 assert.ok(html.indexOf("design-tokens.css") < html.indexOf("styles.css"), "Design tokens must load before styles.css");
 assert.ok(styles.includes("font: var(--font-text-14-r);"), "Body uses Figma 14px R / 20");

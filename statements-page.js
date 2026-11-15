@@ -65,7 +65,6 @@
     const withdrawalProcessing = withdrawal && ["pending_review", "approved", "processing"].includes(withdrawal.status) ? withdrawal.amount : 0;
     const failedReturned = withdrawal && ["failed", "timeout", "returned", "rejected"].includes(withdrawal.status) ? withdrawal.amount : 0;
     const gross = source.grossAmount / 100;
-    const tax = source.taxAmount / 100;
     const guaranteeRetained = source.guaranteeAmount / 100;
     const guaranteeReleased = 0;
     const reversalUsed = 0;
@@ -80,7 +79,7 @@
       from: source.settledAt, to: source.settledAt,
       status, version: 1,
       opening, closing, netChange, expectedChange,
-      gross, tax, guaranteeRetained, guaranteeReleased, reversalUsed,
+      gross, guaranteeRetained, guaranteeReleased, reversalUsed,
       withdrawalPaid: withdrawalPaid / 100, withdrawalProcessing: withdrawalProcessing / 100,
       failedReturned: failedReturned / 100,
       balanced,
@@ -115,8 +114,8 @@
   }
 
   function csv(row) {
-    const headers = ["Period", "Status", "Version", "Opening", "Gross commission", "Tax", "Guarantee retained", "Guarantee released", "Reversal offset", "Withdrawal paid", "Withdrawal processing", "Closing", "Balance check"];
-    const values = [row.period, row.status, row.version, row.opening, row.gross, row.tax, row.guaranteeRetained, row.guaranteeReleased, row.reversalUsed, row.withdrawalPaid, row.withdrawalProcessing, row.closing, row.balanced ? "balanced" : "check"];
+    const headers = ["Period", "Status", "Version", "Opening", "Gross commission", "Guarantee retained", "Guarantee released", "Reversal offset", "Withdrawal paid", "Withdrawal processing", "Closing", "Balance check"];
+    const values = [row.period, row.status, row.version, row.opening, row.gross, row.guaranteeRetained, row.guaranteeReleased, row.reversalUsed, row.withdrawalPaid, row.withdrawalProcessing, row.closing, row.balanced ? "balanced" : "check"];
     return [headers, values].map(list => list.join(",")).join("\n");
   }
 
@@ -127,7 +126,6 @@
       `Version: ${row.version}`,
       `Opening available: ${row.opening}`,
       `Gross commission: ${row.gross}`,
-      `Tax: ${row.tax}`,
       `Guarantee retained: ${row.guaranteeRetained}`,
       `Guarantee released: ${row.guaranteeReleased}`,
       `Reversal offset: ${row.reversalUsed}`,
@@ -186,7 +184,7 @@
   function statsCard(row) {
     return `<div class="cards statement-cards">
       <article class="card metric"><span>${t("期初可提现", "Opening available")}</span><strong>${money(row.opening)}</strong><small>${row.from}</small></article>
-      <article class="card metric"><span>${t("本期新增可提现", "New available")}</span><strong>${money(row.gross - row.tax - row.guaranteeRetained + row.guaranteeReleased - row.reversalUsed)}</strong><small>${t("结算放行净额", "Net settlement release")}</small></article>
+      <article class="card metric"><span>${t("本期新增可提现", "New available")}</span><strong>${money(row.gross - row.guaranteeRetained + row.guaranteeReleased - row.reversalUsed)}</strong><small>${t("结算放行净额", "Net settlement release")}</small></article>
       <article class="card metric"><span>${t("本期提现", "Withdrawals")}</span><strong>${money(row.withdrawalPaid + row.withdrawalProcessing)}</strong><small>${t("成功与支付中", "Paid and processing")}</small></article>
       <article class="card metric"><span>${t("期末可提现", "Closing available")}</span><strong>${money(row.closing)}</strong><small>${row.to}</small></article>
     </div>`;
@@ -203,9 +201,9 @@
 
   function table(rows) {
     return `<div class="statement-table-wrap"><table>
-      <thead><tr><th>${t("结算单编号", "Statement ID")}</th><th>${t("状态", "Status")}</th><th>${t("期初", "Opening")}</th><th>${t("佣金", "Commission")}</th><th>${t("税费", "Tax")}</th><th>${t("保证金变动", "Guarantee change")}</th><th>${t("冲正", "Reversal")}</th><th>${t("提现", "Withdrawal")}</th><th>${t("期末", "Closing")}</th><th>${t("操作", "Action")}</th></tr></thead>
+      <thead><tr><th>${t("结算单编号", "Statement ID")}</th><th>${t("状态", "Status")}</th><th>${t("期初", "Opening")}</th><th>${t("佣金", "Commission")}</th><th>${t("保证金变动", "Guarantee change")}</th><th>${t("冲正", "Reversal")}</th><th>${t("提现", "Withdrawal")}</th><th>${t("期末", "Closing")}</th><th>${t("操作", "Action")}</th></tr></thead>
       <tbody>${rows.length ? rows.map(row => `<tr>
-        <td>${row.period}</td><td>${tag(row.status)}</td><td class="numeric">${money(row.opening)}</td><td class="numeric">${money(row.gross)}</td><td class="numeric">${money(row.tax)}</td><td class="numeric">${money(row.guaranteeReleased - row.guaranteeRetained)}</td><td class="numeric">${money(row.reversalUsed)}</td><td class="numeric">${money(row.withdrawalPaid + row.withdrawalProcessing)}</td><td class="numeric">${money(row.closing)}</td>
+        <td>${row.period}</td><td>${tag(row.status)}</td><td class="numeric">${money(row.opening)}</td><td class="numeric">${money(row.gross)}</td><td class="numeric">${money(row.guaranteeReleased - row.guaranteeRetained)}</td><td class="numeric">${money(row.reversalUsed)}</td><td class="numeric">${money(row.withdrawalPaid + row.withdrawalProcessing)}</td><td class="numeric">${money(row.closing)}</td>
         <td><div class="wd-row-actions"><button class="button secondary small" type="button" data-statement-detail="${row.period}">${t("详情", "Details")}</button><button class="button secondary small" type="button" data-statement-download="${row.period}" ${["generating", "recalculating", "failed"].includes(row.status) ? "disabled" : ""}>${t("下载", "Download")}</button></div></td>
       </tr>`).join("") : `<tr><td colspan="10" class="finance-empty"><strong>${t("暂无结算单", "No statements")}</strong><p>${t("生成结算单后将在此显示。", "Statements will appear here.")}</p></td></tr>`}</tbody>
     </table></div>`;
@@ -220,7 +218,7 @@
           <section><div class="finance-drawer-amount"><span>${t("期末可提现", "Closing available")}</span><strong>${money(row.closing)}</strong>${tag(row.status)}</div>
             <dl class="finance-detail-grid">
               ${field(t("期初可提现", "Opening"), money(row.opening))}${field(t("本期净变动", "Net change"), money(row.netChange))}
-              ${field(t("佣金总额", "Gross commission"), money(row.gross))}${field(t("结算税费", "Tax"), money(row.tax))}
+              ${field(t("佣金总额", "Gross commission"), money(row.gross))}
               ${field(t("保证金扣留", "Guarantee retained"), money(row.guaranteeRetained))}${field(t("保证金释放", "Guarantee released"), money(row.guaranteeReleased))}
               ${field(t("冲正抵扣", "Reversal offset"), money(row.reversalUsed))}${field(t("提现成功", "Paid withdrawals"), money(row.withdrawalPaid))}
               ${field(t("支付中", "Processing"), money(row.withdrawalProcessing))}${field(t("失败退回", "Failed returned"), money(row.failedReturned))}
@@ -257,10 +255,10 @@
     const rows = records();
     const row = selected();
     return `<div class="statement-page">
-      ${AFF.helpers.pageHeader(t("月度结算单", "Monthly statements"), t("按周期核对佣金、税费、保证金、冲正、提现与余额。", "Reconcile commissions, tax, guarantee, reversals, withdrawals, and balances."))}
+      ${AFF.helpers.pageHeader(t("月度结算单", "Monthly statements"), t("按周期核对佣金、保证金、冲正、提现与余额。", "Reconcile commissions, guarantee, reversals, withdrawals, and balances."))}
       ${AFF.partnerClosure.statementsBanner()}
       ${statsCard(row)}
-      <section class="card"><div class="panel-header"><h2>${t("结算单列表", "Statement list")}</h2><span class="helper">${t("MVP仅提供结算单；发票/税单后置", "MVP provides statements only; invoices and tax forms are deferred")}</span></div>
+      <section class="card"><div class="panel-header"><h2>${t("结算单列表", "Statement list")}</h2><span class="helper">${t("MVP仅提供结算单", "MVP provides statements only")}</span></div>
         ${filters()}${table(rows)}
       </section>
       <section class="card"><div class="panel-header"><h2>${t("下载记录", "Download records")}</h2><span class="helper">${t("24小时过期", "Expires in 24 hours")}</span></div>

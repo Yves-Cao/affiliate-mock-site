@@ -19,7 +19,7 @@ assert.ok(account.includes("AFF.creditCenter.accountPanel()"), "Account center e
 assert.ok(source.includes('data-account-action="credit"') && account.includes('"credit"'), "Account center opens a credit details drawer");
 
 for (const level of ["C0", "C1", "C2", "C3", "C4"]) assert.ok(source.includes(`${level}: `), `Defines ${level}`);
-for (const stage of ["FTD段", "有效FTD段", "质量服务"]) assert.ok(source.includes(stage), `Shows ${stage} benefit`);
+for (const stage of ["首次入金段", "有效转化段", "质量升档"]) assert.ok(source.includes(stage), `Shows ${stage} benefit`);
 /* D-CREDIT-04 (2026-11-07, user-confirmed): levels display 1-5; point progress bar
  * WITHOUT values + hover hint; benefits hidden behind a modal entry. */
 for (const marker of ["原因类别", "恢复方向", "等级提升？", "影响积分", "data-credit-funnel-period", "partner-rail", "credit-card-level", "credit-seg", "data-credit-hint", "data-credit-benefits", "以平台配置为准", "全部等级权益对照", "等级提升？", "客户质量", "业绩规模", "权重与升降级阈值由平台配置", "guaranteeCut", "holdDays", "settleFree", "佣金加成", "保证金减免", "保证金结算天数减免", "免结算额度", "benefitSummaryMarkup", "credit-benefit-summary", "当前等级权益", "下级权益"]) {

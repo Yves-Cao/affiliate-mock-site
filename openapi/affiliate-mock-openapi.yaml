@@ -58,12 +58,11 @@ tags:
       - "hold_payment_extra"
       - "hold_cluster_extend"
     x-aff-req: "D08,E03,I02,K07"
-  - name: "AdminGuaranteeTaxConfig"
-    description: "保证金/税费"
-    x-affiliate-tab: "保证金/税费"
+  - name: "AdminGuaranteeConfig"
+    description: "保证金"
+    x-affiliate-tab: "保证金"
     x-mock-scenarios:
       - "guarantee_normal"
-      - "tax_rule_synced"
       - "payment_fee_synced"
       - "external_sync_failed"
     x-aff-req: "F03-F11,I02,K07"
@@ -2873,17 +2872,16 @@ paths:
      $ref: "#/components/responses/TooManyRequests"
     "500":
      $ref: "#/components/responses/ServerError"
- "/admin/configs/guarantee-tax-rules":
+ "/admin/configs/guarantee-rules":
   get:
    tags:
-    - "AdminGuaranteeTaxConfig"
-   operationId: "listGuaranteeTaxRules"
-   summary: "List 保证金/税费 rules"
-   x-affiliate-tab: "保证金/税费"
+    - "AdminGuaranteeConfig"
+   operationId: "listGuaranteeRules"
+   summary: "List 保证金 rules"
+   x-affiliate-tab: "保证金"
    x-affiliate-route: "#/admin-config"
    x-mock-scenarios:
     - "guarantee_normal"
-    - "tax_rule_synced"
     - "payment_fee_synced"
     - "external_sync_failed"
    parameters:
@@ -2914,17 +2912,16 @@ paths:
      $ref: "#/components/responses/TooManyRequests"
     "500":
      $ref: "#/components/responses/ServerError"
- "/admin/configs/guarantee-tax-drafts":
+ "/admin/configs/guarantee-drafts":
   get:
    tags:
-    - "AdminGuaranteeTaxConfig"
-   operationId: "listGuaranteeTaxDrafts"
-   summary: "List 保证金/税费 drafts"
-   x-affiliate-tab: "保证金/税费"
+    - "AdminGuaranteeConfig"
+   operationId: "listGuaranteeDrafts"
+   summary: "List 保证金 drafts"
+   x-affiliate-tab: "保证金"
    x-affiliate-route: "#/admin-config"
    x-mock-scenarios:
     - "guarantee_normal"
-    - "tax_rule_synced"
     - "payment_fee_synced"
     - "external_sync_failed"
    parameters:
@@ -2957,14 +2954,13 @@ paths:
      $ref: "#/components/responses/ServerError"
   post:
    tags:
-    - "AdminGuaranteeTaxConfig"
-   operationId: "createGuaranteeTaxDraft"
-   summary: "Create a 保证金/税费 draft"
-   x-affiliate-tab: "保证金/税费"
+    - "AdminGuaranteeConfig"
+   operationId: "createGuaranteeDraft"
+   summary: "Create a 保证金 draft"
+   x-affiliate-tab: "保证金"
    x-affiliate-route: "#/admin-config"
    x-mock-scenarios:
     - "guarantee_normal"
-    - "tax_rule_synced"
     - "payment_fee_synced"
     - "external_sync_failed"
    parameters:
@@ -2997,17 +2993,16 @@ paths:
      $ref: "#/components/responses/TooManyRequests"
     "500":
      $ref: "#/components/responses/ServerError"
- "/admin/configs/guarantee-tax-drafts/{draft_id}":
+ "/admin/configs/guarantee-drafts/{draft_id}":
   get:
    tags:
-    - "AdminGuaranteeTaxConfig"
-   operationId: "getGuaranteeTaxDraft"
-   summary: "Get a 保证金/税费 draft"
-   x-affiliate-tab: "保证金/税费"
+    - "AdminGuaranteeConfig"
+   operationId: "getGuaranteeDraft"
+   summary: "Get a 保证金 draft"
+   x-affiliate-tab: "保证金"
    x-affiliate-route: "#/admin-config"
    x-mock-scenarios:
     - "guarantee_normal"
-    - "tax_rule_synced"
     - "payment_fee_synced"
     - "external_sync_failed"
    parameters:
@@ -3036,14 +3031,13 @@ paths:
      $ref: "#/components/responses/ServerError"
   patch:
    tags:
-    - "AdminGuaranteeTaxConfig"
-   operationId: "updateGuaranteeTaxDraft"
-   summary: "Update a 保证金/税费 draft"
-   x-affiliate-tab: "保证金/税费"
+    - "AdminGuaranteeConfig"
+   operationId: "updateGuaranteeDraft"
+   summary: "Update a 保证金 draft"
+   x-affiliate-tab: "保证金"
    x-affiliate-route: "#/admin-config"
    x-mock-scenarios:
     - "guarantee_normal"
-    - "tax_rule_synced"
     - "payment_fee_synced"
     - "external_sync_failed"
    parameters:
@@ -3077,17 +3071,16 @@ paths:
      $ref: "#/components/responses/TooManyRequests"
     "500":
      $ref: "#/components/responses/ServerError"
- "/admin/configs/guarantee-tax-drafts/{draft_id}/validate":
+ "/admin/configs/guarantee-drafts/{draft_id}/validate":
   post:
    tags:
-    - "AdminGuaranteeTaxConfig"
-   operationId: "validateGuaranteeTaxDraft"
-   summary: "Validate a 保证金/税费 draft"
-   x-affiliate-tab: "保证金/税费"
+    - "AdminGuaranteeConfig"
+   operationId: "validateGuaranteeDraft"
+   summary: "Validate a 保证金 draft"
+   x-affiliate-tab: "保证金"
    x-affiliate-route: "#/admin-config"
    x-mock-scenarios:
     - "guarantee_normal"
-    - "tax_rule_synced"
     - "payment_fee_synced"
     - "external_sync_failed"
    parameters:
@@ -3121,17 +3114,16 @@ paths:
      $ref: "#/components/responses/TooManyRequests"
     "500":
      $ref: "#/components/responses/ServerError"
- "/admin/configs/guarantee-tax-drafts/{draft_id}/simulate":
+ "/admin/configs/guarantee-drafts/{draft_id}/simulate":
   post:
    tags:
-    - "AdminGuaranteeTaxConfig"
-   operationId: "simulateGuaranteeTaxDraft"
-   summary: "Simulate a 保证金/税费 draft"
-   x-affiliate-tab: "保证金/税费"
+    - "AdminGuaranteeConfig"
+   operationId: "simulateGuaranteeDraft"
+   summary: "Simulate a 保证金 draft"
+   x-affiliate-tab: "保证金"
    x-affiliate-route: "#/admin-config"
    x-mock-scenarios:
     - "guarantee_normal"
-    - "tax_rule_synced"
     - "payment_fee_synced"
     - "external_sync_failed"
    parameters:
@@ -3165,17 +3157,16 @@ paths:
      $ref: "#/components/responses/TooManyRequests"
     "500":
      $ref: "#/components/responses/ServerError"
- "/admin/configs/guarantee-tax-drafts/{draft_id}/submit":
+ "/admin/configs/guarantee-drafts/{draft_id}/submit":
   post:
    tags:
-    - "AdminGuaranteeTaxConfig"
-   operationId: "submitGuaranteeTaxDraft"
-   summary: "Submit a 保证金/税费 draft"
-   x-affiliate-tab: "保证金/税费"
+    - "AdminGuaranteeConfig"
+   operationId: "submitGuaranteeDraft"
+   summary: "Submit a 保证金 draft"
+   x-affiliate-tab: "保证金"
    x-affiliate-route: "#/admin-config"
    x-mock-scenarios:
     - "guarantee_normal"
-    - "tax_rule_synced"
     - "payment_fee_synced"
     - "external_sync_failed"
    parameters:
@@ -3209,17 +3200,16 @@ paths:
      $ref: "#/components/responses/TooManyRequests"
     "500":
      $ref: "#/components/responses/ServerError"
- "/admin/configs/guarantee-tax-drafts/{draft_id}/approve":
+ "/admin/configs/guarantee-drafts/{draft_id}/approve":
   post:
    tags:
-    - "AdminGuaranteeTaxConfig"
-   operationId: "approveGuaranteeTaxDraft"
-   summary: "Approve a 保证金/税费 draft"
-   x-affiliate-tab: "保证金/税费"
+    - "AdminGuaranteeConfig"
+   operationId: "approveGuaranteeDraft"
+   summary: "Approve a 保证金 draft"
+   x-affiliate-tab: "保证金"
    x-affiliate-route: "#/admin-config"
    x-mock-scenarios:
     - "guarantee_normal"
-    - "tax_rule_synced"
     - "payment_fee_synced"
     - "external_sync_failed"
    parameters:
@@ -3253,17 +3243,16 @@ paths:
      $ref: "#/components/responses/TooManyRequests"
     "500":
      $ref: "#/components/responses/ServerError"
- "/admin/configs/guarantee-tax-drafts/{draft_id}/activate":
+ "/admin/configs/guarantee-drafts/{draft_id}/activate":
   post:
    tags:
-    - "AdminGuaranteeTaxConfig"
-   operationId: "activateGuaranteeTaxDraft"
-   summary: "Activate a 保证金/税费 draft"
-   x-affiliate-tab: "保证金/税费"
+    - "AdminGuaranteeConfig"
+   operationId: "activateGuaranteeDraft"
+   summary: "Activate a 保证金 draft"
+   x-affiliate-tab: "保证金"
    x-affiliate-route: "#/admin-config"
    x-mock-scenarios:
     - "guarantee_normal"
-    - "tax_rule_synced"
     - "payment_fee_synced"
     - "external_sync_failed"
    parameters:
@@ -3297,17 +3286,16 @@ paths:
      $ref: "#/components/responses/TooManyRequests"
     "500":
      $ref: "#/components/responses/ServerError"
- "/admin/configs/guarantee-tax-versions":
+ "/admin/configs/guarantee-versions":
   get:
    tags:
-    - "AdminGuaranteeTaxConfig"
-   operationId: "listGuaranteeTaxVersions"
-   summary: "List 保证金/税费 versions"
-   x-affiliate-tab: "保证金/税费"
+    - "AdminGuaranteeConfig"
+   operationId: "listGuaranteeVersions"
+   summary: "List 保证金 versions"
+   x-affiliate-tab: "保证金"
    x-affiliate-route: "#/admin-config"
    x-mock-scenarios:
     - "guarantee_normal"
-    - "tax_rule_synced"
     - "payment_fee_synced"
     - "external_sync_failed"
    parameters:
@@ -3338,17 +3326,16 @@ paths:
      $ref: "#/components/responses/TooManyRequests"
     "500":
      $ref: "#/components/responses/ServerError"
- "/admin/configs/guarantee-tax/export":
+ "/admin/configs/guarantee/export":
   post:
    tags:
-    - "AdminGuaranteeTaxConfig"
-   operationId: "exportGuaranteeTaxRules"
-   summary: "Export 保证金/税费 rules"
-   x-affiliate-tab: "保证金/税费"
+    - "AdminGuaranteeConfig"
+   operationId: "exportGuaranteeRules"
+   summary: "Export 保证金 rules"
+   x-affiliate-tab: "保证金"
    x-affiliate-route: "#/admin-config"
    x-mock-scenarios:
     - "guarantee_normal"
-    - "tax_rule_synced"
     - "payment_fee_synced"
     - "external_sync_failed"
    parameters:

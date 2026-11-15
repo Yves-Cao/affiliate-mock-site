@@ -38,11 +38,11 @@
     { key: "clicks", label: "点击量", en: "Clicks", type: "count" },
     { key: "visitors", label: "访客数 UV", en: "Visitors UV", type: "count" },
     { key: "registrations", label: "注册客户", en: "Registrations", type: "count" },
-    { key: "ftd", label: "FTD 客户", en: "FTD clients", type: "count" },
-    { key: "effective", label: "有效 FTD", en: "Valid FTD", type: "count" },
-    { key: "quality", label: "质量服务客户", en: "Quality service clients", type: "count" },
+    { key: "ftd", label: "首次入金 客户", en: "First deposit clients", type: "count" },
+    { key: "effective", label: "有效转化", en: "Qualified conversion", type: "count" },
+    { key: "quality", label: "质量升档客户", en: "Quality upgrade clients", type: "count" },
     { key: "traders", label: "开始交易客户", en: "Trading clients", type: "count" },
-    { key: "ftdAmount", label: "首次入金金额", en: "FTD amount", type: "money" },
+    { key: "ftdAmount", label: "首次入金金额", en: "首次入金 amount", type: "money" },
     { key: "expected", label: "预计佣金", en: "Projected commission", type: "money" },
     { key: "held", label: "暂扣佣金", en: "On hold commission", type: "money" },
     { key: "approved", label: "结算净额", en: "Settlement net", type: "money" },
@@ -50,9 +50,9 @@
     { key: "rejected", label: "已拒绝佣金", en: "Rejected commission", type: "money" },
     { key: "reversed", label: "冲正金额", en: "Reversed commission", type: "money" },
     { key: "registerRate", label: "点击→注册", en: "Click → registration", type: "rate" },
-    { key: "ftdRate", label: "注册→FTD", en: "Registration → FTD", type: "rate" },
-    { key: "effectiveRate", label: "FTD→有效 FTD", en: "FTD → valid FTD", type: "rate" },
-    { key: "qualityRate", label: "有效 FTD→质量服务", en: "Valid FTD → quality service", type: "rate" },
+    { key: "ftdRate", label: "注册→首次入金", en: "Registration → 首次入金", type: "rate" },
+    { key: "effectiveRate", label: "首次入金→有效转化", en: "First deposit → qualified conversion", type: "rate" },
+    { key: "qualityRate", label: "有效转化→质量升档", en: "Qualified conversion → quality upgrade", type: "rate" },
     { key: "epc", label: "EPC", en: "EPC", type: "money" }
   ];
   const countries = AFF.partnerProgram.commissionMarkets.map(item => item.code);
@@ -291,7 +291,7 @@
       row.riskHandlingStatus = "released";
       row.riskReasonCategory = "质量待复核";
       row.riskStartedAt = plusDays(row.effectiveAt, 3);
-      row.riskEvidenceScope = "质量服务结果与结算前检查";
+      row.riskEvidenceScope = "质量升档结果与结算前检查";
       row.riskImpactScope = "客户与关联佣金";
       row.riskStatusTime = now;
       row.riskNextStep = "等待结算复核";
@@ -317,7 +317,7 @@
     row.voidedReason = "";
     if (row.registeredAt && !row.ftdAt && row.date < plusDays(now, -60)) {
       row.milestoneStatus = "voided";
-      row.voidedStage = "FTD";
+      row.voidedStage = "首次入金";
       row.voidedReason = "window_expired";
     }
     if (row.effectiveAt && !row.qualityAt && row.effectiveAt < plusDays(now, -60)) {
@@ -332,7 +332,7 @@
       {
         id: `COM-${row.clientId}-QF`,
         type: "qftd_batch",
-        segments: ["FTD", "QFTD"],
+        segments: ["首次入金", "QFTD"],
         confirmedAt: row.effectiveAt,
         amount: firstAmount,
         status: firstAmount ? (row.fundStatus === "paid" ? "paid" : row.commissionStatus) : "not_generated"

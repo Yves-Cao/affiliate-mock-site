@@ -12,19 +12,30 @@
       "kyb_status": "approved",
       "risk_band": "R0",
       "agreement_version": "agr-2026-10",
-      "available_balance": {"currency": "USD", "amount_minor": "184500"},
-      "guarantee_balance": {"currency": "USD", "amount_minor": "42000"},
-      "commission_total": {"currency": "USD", "amount_minor": "642000"},
+      "available_balance": {
+        "currency": "USD",
+        "amount_minor": "184500"
+      },
+      "guarantee_balance": {
+        "currency": "USD",
+        "amount_minor": "42000"
+      },
+      "commission_total": {
+        "currency": "USD",
+        "amount_minor": "642000"
+      },
       "client_count": 128,
       "valid_ftd_count": 39,
       "quality_count": 22,
       "account_manager": "M. Chen",
       "created_at": "2026-08-12T10:20:00+08:00",
       "updated_at": "2026-11-01T09:30:00+08:00",
-      "tax_status": "declared",
       "payout_method": "wire",
       "receiving_account_masked": "******7890",
-      "external_refs": {"crm_contact_id": "crm-contact-8891", "sso_subject": "sso-user-7011"}
+      "external_refs": {
+        "crm_contact_id": "crm-contact-8891",
+        "sso_subject": "sso-user-7011"
+      }
     },
     {
       "partner_id": "partner-1002",
@@ -38,19 +49,30 @@
       "kyb_status": "approved",
       "risk_band": "R2",
       "agreement_version": "agr-2026-10",
-      "available_balance": {"currency": "USD", "amount_minor": "39200"},
-      "guarantee_balance": {"currency": "USD", "amount_minor": "18000"},
-      "commission_total": {"currency": "USD", "amount_minor": "268000"},
+      "available_balance": {
+        "currency": "USD",
+        "amount_minor": "39200"
+      },
+      "guarantee_balance": {
+        "currency": "USD",
+        "amount_minor": "18000"
+      },
+      "commission_total": {
+        "currency": "USD",
+        "amount_minor": "268000"
+      },
       "client_count": 74,
       "valid_ftd_count": 16,
       "quality_count": 6,
       "account_manager": "L. Wang",
       "created_at": "2026-08-25T14:05:00+08:00",
       "updated_at": "2026-10-31T18:12:00+08:00",
-      "tax_status": "pending",
       "payout_method": "wallet",
       "receiving_account_masked": "wallet ***2201",
-      "external_refs": {"crm_contact_id": "crm-contact-9022", "sso_subject": "sso-user-7012"}
+      "external_refs": {
+        "crm_contact_id": "crm-contact-9022",
+        "sso_subject": "sso-user-7012"
+      }
     },
     {
       "partner_id": "partner-1003",
@@ -64,19 +86,30 @@
       "kyb_status": "approved",
       "risk_band": "R1",
       "agreement_version": "agr-2026-10",
-      "available_balance": {"currency": "USD", "amount_minor": "96700"},
-      "guarantee_balance": {"currency": "USD", "amount_minor": "27500"},
-      "commission_total": {"currency": "USD", "amount_minor": "388000"},
+      "available_balance": {
+        "currency": "USD",
+        "amount_minor": "96700"
+      },
+      "guarantee_balance": {
+        "currency": "USD",
+        "amount_minor": "27500"
+      },
+      "commission_total": {
+        "currency": "USD",
+        "amount_minor": "388000"
+      },
       "client_count": 91,
       "valid_ftd_count": 28,
       "quality_count": 15,
       "account_manager": "M. Chen",
       "created_at": "2026-09-02T09:15:00+08:00",
       "updated_at": "2026-11-01T11:40:00+08:00",
-      "tax_status": "declared",
       "payout_method": "wire",
       "receiving_account_masked": "******3345",
-      "external_refs": {"crm_contact_id": "crm-contact-9133", "sso_subject": "sso-user-7013"}
+      "external_refs": {
+        "crm_contact_id": "crm-contact-9133",
+        "sso_subject": "sso-user-7013"
+      }
     },
     {
       "partner_id": "partner-1004",
@@ -90,19 +123,30 @@
       "kyb_status": "pending",
       "risk_band": "R3",
       "agreement_version": "agr-2026-09",
-      "available_balance": {"currency": "USD", "amount_minor": "12500"},
-      "guarantee_balance": {"currency": "USD", "amount_minor": "9800"},
-      "commission_total": {"currency": "USD", "amount_minor": "96000"},
+      "available_balance": {
+        "currency": "USD",
+        "amount_minor": "12500"
+      },
+      "guarantee_balance": {
+        "currency": "USD",
+        "amount_minor": "9800"
+      },
+      "commission_total": {
+        "currency": "USD",
+        "amount_minor": "96000"
+      },
       "client_count": 32,
       "valid_ftd_count": 7,
       "quality_count": 1,
       "account_manager": "L. Wang",
       "created_at": "2026-09-14T16:45:00+08:00",
       "updated_at": "2026-10-30T10:08:00+08:00",
-      "tax_status": "missing",
       "payout_method": "wire",
       "receiving_account_masked": "Not submitted",
-      "external_refs": {"crm_contact_id": "crm-contact-9244", "sso_subject": "sso-user-7014"}
+      "external_refs": {
+        "crm_contact_id": "crm-contact-9244",
+        "sso_subject": "sso-user-7014"
+      }
     },
     {
       "partner_id": "partner-1005",
@@ -116,19 +160,30 @@
       "kyb_status": "approved",
       "risk_band": "R1",
       "agreement_version": "agr-2026-10",
-      "available_balance": {"currency": "USD", "amount_minor": "73000"},
-      "guarantee_balance": {"currency": "USD", "amount_minor": "21000"},
-      "commission_total": {"currency": "USD", "amount_minor": "318000"},
+      "available_balance": {
+        "currency": "USD",
+        "amount_minor": "73000"
+      },
+      "guarantee_balance": {
+        "currency": "USD",
+        "amount_minor": "21000"
+      },
+      "commission_total": {
+        "currency": "USD",
+        "amount_minor": "318000"
+      },
       "client_count": 69,
       "valid_ftd_count": 21,
       "quality_count": 11,
       "account_manager": "S. Lin",
       "created_at": "2026-09-20T13:00:00+08:00",
       "updated_at": "2026-10-31T20:20:00+08:00",
-      "tax_status": "declared",
       "payout_method": "wallet",
       "receiving_account_masked": "wallet ***8802",
-      "external_refs": {"crm_contact_id": "crm-contact-9355", "sso_subject": "sso-user-7015"}
+      "external_refs": {
+        "crm_contact_id": "crm-contact-9355",
+        "sso_subject": "sso-user-7015"
+      }
     },
     {
       "partner_id": "partner-1006",
@@ -142,19 +197,30 @@
       "kyb_status": "approved",
       "risk_band": "R3",
       "agreement_version": "agr-2026-08",
-      "available_balance": {"currency": "USD", "amount_minor": "0"},
-      "guarantee_balance": {"currency": "USD", "amount_minor": "6400"},
-      "commission_total": {"currency": "USD", "amount_minor": "149000"},
+      "available_balance": {
+        "currency": "USD",
+        "amount_minor": "0"
+      },
+      "guarantee_balance": {
+        "currency": "USD",
+        "amount_minor": "6400"
+      },
+      "commission_total": {
+        "currency": "USD",
+        "amount_minor": "149000"
+      },
       "client_count": 43,
       "valid_ftd_count": 11,
       "quality_count": 4,
       "account_manager": "S. Lin",
       "created_at": "2026-08-30T11:30:00+08:00",
       "updated_at": "2026-10-29T15:55:00+08:00",
-      "tax_status": "declared",
       "payout_method": "wire",
       "receiving_account_masked": "******9911",
-      "external_refs": {"crm_contact_id": "crm-contact-9466", "sso_subject": "sso-user-7016"}
+      "external_refs": {
+        "crm_contact_id": "crm-contact-9466",
+        "sso_subject": "sso-user-7016"
+      }
     }
   ],
   "clients": [
@@ -176,11 +242,17 @@
       "ftd_at": "2026-10-03T15:40:00+08:00",
       "valid_ftd_at": "2026-10-08T09:20:00+08:00",
       "quality_service_at": "2026-11-01T12:00:00+08:00",
-      "net_deposit": {"currency": "USD", "amount_minor": "90000"},
+      "net_deposit": {
+        "currency": "USD",
+        "amount_minor": "90000"
+      },
       "trade_lots": 3.4,
       "active_trade_days": 6,
       "risk_band": "R0",
-      "commission_ids": ["comm-3001", "comm-3002"]
+      "commission_ids": [
+        "comm-3001",
+        "comm-3002"
+      ]
     },
     {
       "client_id": "client-2002",
@@ -200,11 +272,16 @@
       "ftd_at": "2026-10-06T09:10:00+08:00",
       "valid_ftd_at": "2026-10-11T14:30:00+08:00",
       "quality_service_at": null,
-      "net_deposit": {"currency": "USD", "amount_minor": "35000"},
+      "net_deposit": {
+        "currency": "USD",
+        "amount_minor": "35000"
+      },
       "trade_lots": 1.2,
       "active_trade_days": 3,
       "risk_band": "R1",
-      "commission_ids": ["comm-3003"]
+      "commission_ids": [
+        "comm-3003"
+      ]
     },
     {
       "client_id": "client-2003",
@@ -224,7 +301,10 @@
       "ftd_at": "2026-10-10T10:00:00+08:00",
       "valid_ftd_at": null,
       "quality_service_at": null,
-      "net_deposit": {"currency": "USD", "amount_minor": "30000"},
+      "net_deposit": {
+        "currency": "USD",
+        "amount_minor": "30000"
+      },
       "trade_lots": 0.6,
       "active_trade_days": 1,
       "risk_band": "R2",
@@ -248,7 +328,10 @@
       "ftd_at": null,
       "valid_ftd_at": null,
       "quality_service_at": null,
-      "net_deposit": {"currency": "USD", "amount_minor": "0"},
+      "net_deposit": {
+        "currency": "USD",
+        "amount_minor": "0"
+      },
       "trade_lots": 0,
       "active_trade_days": 0,
       "risk_band": "R0",
@@ -272,11 +355,16 @@
       "ftd_at": "2026-10-13T10:20:00+08:00",
       "valid_ftd_at": "2026-10-18T11:00:00+08:00",
       "quality_service_at": null,
-      "net_deposit": {"currency": "USD", "amount_minor": "32000"},
+      "net_deposit": {
+        "currency": "USD",
+        "amount_minor": "32000"
+      },
       "trade_lots": 1.1,
       "active_trade_days": 3,
       "risk_band": "R3",
-      "commission_ids": ["comm-3006"]
+      "commission_ids": [
+        "comm-3006"
+      ]
     },
     {
       "client_id": "client-2006",
@@ -296,11 +384,17 @@
       "ftd_at": "2026-09-26T16:10:00+08:00",
       "valid_ftd_at": "2026-10-01T10:30:00+08:00",
       "quality_service_at": "2026-10-28T13:15:00+08:00",
-      "net_deposit": {"currency": "USD", "amount_minor": "160000"},
+      "net_deposit": {
+        "currency": "USD",
+        "amount_minor": "160000"
+      },
       "trade_lots": 5.8,
       "active_trade_days": 7,
       "risk_band": "R0",
-      "commission_ids": ["comm-3007", "comm-3008"]
+      "commission_ids": [
+        "comm-3007",
+        "comm-3008"
+      ]
     },
     {
       "client_id": "client-2007",
@@ -320,11 +414,16 @@
       "ftd_at": "2026-10-16T09:00:00+08:00",
       "valid_ftd_at": "2026-10-21T12:40:00+08:00",
       "quality_service_at": null,
-      "net_deposit": {"currency": "USD", "amount_minor": "82000"},
+      "net_deposit": {
+        "currency": "USD",
+        "amount_minor": "82000"
+      },
       "trade_lots": 3.1,
       "active_trade_days": 5,
       "risk_band": "R1",
-      "commission_ids": ["comm-3009"]
+      "commission_ids": [
+        "comm-3009"
+      ]
     },
     {
       "client_id": "client-2008",
@@ -344,11 +443,16 @@
       "ftd_at": "2026-09-11T11:00:00+08:00",
       "valid_ftd_at": "2026-09-16T09:50:00+08:00",
       "quality_service_at": "2026-10-10T15:30:00+08:00",
-      "net_deposit": {"currency": "USD", "amount_minor": "38000"},
+      "net_deposit": {
+        "currency": "USD",
+        "amount_minor": "38000"
+      },
       "trade_lots": 1.4,
       "active_trade_days": 5,
       "risk_band": "R2",
-      "commission_ids": ["comm-3010"]
+      "commission_ids": [
+        "comm-3010"
+      ]
     }
   ],
   "commissions": [
@@ -360,9 +464,8 @@
       "status": "settled",
       "currency": "USD",
       "gross_amount_minor": "7500",
-      "tax_amount_minor": "375",
       "guarantee_amount_minor": "750",
-      "net_amount_minor": "6375",
+      "net_amount_minor": "6750",
       "config_version": "cfg-2026-10-20",
       "price_version": "price-2026-10-01",
       "hold_started_at": "2026-10-08T09:20:00+08:00",
@@ -382,9 +485,8 @@
       "status": "holding",
       "currency": "USD",
       "gross_amount_minor": "2500",
-      "tax_amount_minor": "125",
       "guarantee_amount_minor": "250",
-      "net_amount_minor": "2125",
+      "net_amount_minor": "2250",
       "config_version": "cfg-2026-10-20",
       "price_version": "price-2026-10-01",
       "hold_started_at": "2026-11-01T12:00:00+08:00",
@@ -404,9 +506,8 @@
       "status": "settled",
       "currency": "USD",
       "gross_amount_minor": "6000",
-      "tax_amount_minor": "300",
       "guarantee_amount_minor": "600",
-      "net_amount_minor": "5100",
+      "net_amount_minor": "5400",
       "config_version": "cfg-2026-10-20",
       "price_version": "price-2026-10-01",
       "hold_started_at": "2026-10-11T14:30:00+08:00",
@@ -426,7 +527,6 @@
       "status": "reversed",
       "currency": "USD",
       "gross_amount_minor": "6000",
-      "tax_amount_minor": "0",
       "guarantee_amount_minor": "600",
       "net_amount_minor": "0",
       "config_version": "cfg-2026-10-20",
@@ -448,9 +548,8 @@
       "status": "paid",
       "currency": "USD",
       "gross_amount_minor": "15000",
-      "tax_amount_minor": "1500",
       "guarantee_amount_minor": "1500",
-      "net_amount_minor": "12000",
+      "net_amount_minor": "13500",
       "config_version": "cfg-2026-10-20",
       "price_version": "price-2026-10-01",
       "hold_started_at": "2026-10-01T10:30:00+08:00",
@@ -470,9 +569,8 @@
       "status": "manual_review",
       "currency": "USD",
       "gross_amount_minor": "5000",
-      "tax_amount_minor": "500",
       "guarantee_amount_minor": "500",
-      "net_amount_minor": "4000",
+      "net_amount_minor": "4500",
       "config_version": "cfg-2026-10-20",
       "price_version": "price-2026-10-01",
       "hold_started_at": "2026-10-28T13:15:00+08:00",
@@ -492,9 +590,8 @@
       "status": "holding",
       "currency": "USD",
       "gross_amount_minor": "9000",
-      "tax_amount_minor": "450",
       "guarantee_amount_minor": "900",
-      "net_amount_minor": "7650",
+      "net_amount_minor": "8100",
       "config_version": "cfg-2026-10-20",
       "price_version": "price-2026-10-01",
       "hold_started_at": "2026-10-21T12:40:00+08:00",
@@ -514,9 +611,8 @@
       "status": "paid",
       "currency": "USD",
       "gross_amount_minor": "6000",
-      "tax_amount_minor": "600",
       "guarantee_amount_minor": "600",
-      "net_amount_minor": "4800",
+      "net_amount_minor": "5400",
       "config_version": "cfg-2026-09-10",
       "price_version": "price-2026-09-01",
       "hold_started_at": "2026-09-16T09:50:00+08:00",
@@ -533,11 +629,20 @@
     {
       "withdrawal_id": "wd-5001",
       "partner_id": "partner-1001",
-      "amount": {"currency": "USD", "amount_minor": "11475"},
+      "amount": {
+        "currency": "USD",
+        "amount_minor": "11475"
+      },
       "method": "wire",
       "status": "pending_review",
-      "fee": {"currency": "USD", "amount_minor": "0"},
-      "received_amount": {"currency": "USD", "amount_minor": "0"},
+      "fee": {
+        "currency": "USD",
+        "amount_minor": "0"
+      },
+      "received_amount": {
+        "currency": "USD",
+        "amount_minor": "0"
+      },
       "kyb_status": "approved",
       "requested_at": "2026-11-01T10:00:00+08:00",
       "reviewed_by": null,
@@ -545,16 +650,34 @@
       "paid_at": null,
       "failure_reason": null,
       "integration_task_id": null,
-      "allocations": [{"settlement_id": "set-4001", "amount_minor": "6375"}, {"settlement_id": "set-4002", "amount_minor": "5100"}]
+      "allocations": [
+        {
+          "settlement_id": "set-4001",
+          "amount_minor": "6375"
+        },
+        {
+          "settlement_id": "set-4002",
+          "amount_minor": "5100"
+        }
+      ]
     },
     {
       "withdrawal_id": "wd-5002",
       "partner_id": "partner-1005",
-      "amount": {"currency": "USD", "amount_minor": "12000"},
+      "amount": {
+        "currency": "USD",
+        "amount_minor": "12000"
+      },
       "method": "wallet",
       "status": "paying",
-      "fee": {"currency": "USD", "amount_minor": "120"},
-      "received_amount": {"currency": "USD", "amount_minor": "11880"},
+      "fee": {
+        "currency": "USD",
+        "amount_minor": "120"
+      },
+      "received_amount": {
+        "currency": "USD",
+        "amount_minor": "11880"
+      },
       "kyb_status": "approved",
       "requested_at": "2026-10-19T09:00:00+08:00",
       "reviewed_by": "finance.user@example.com",
@@ -562,16 +685,30 @@
       "paid_at": null,
       "failure_reason": null,
       "integration_task_id": "int-6001",
-      "allocations": [{"settlement_id": "set-4003", "amount_minor": "12000"}]
+      "allocations": [
+        {
+          "settlement_id": "set-4003",
+          "amount_minor": "12000"
+        }
+      ]
     },
     {
       "withdrawal_id": "wd-5003",
       "partner_id": "partner-1003",
-      "amount": {"currency": "USD", "amount_minor": "8000"},
+      "amount": {
+        "currency": "USD",
+        "amount_minor": "8000"
+      },
       "method": "wire",
       "status": "failed",
-      "fee": {"currency": "USD", "amount_minor": "0"},
-      "received_amount": {"currency": "USD", "amount_minor": "0"},
+      "fee": {
+        "currency": "USD",
+        "amount_minor": "0"
+      },
+      "received_amount": {
+        "currency": "USD",
+        "amount_minor": "0"
+      },
       "kyb_status": "approved",
       "requested_at": "2026-10-24T14:00:00+08:00",
       "reviewed_by": "finance.user@example.com",
@@ -579,16 +716,30 @@
       "paid_at": null,
       "failure_reason": "bank_account_invalid",
       "integration_task_id": "int-6002",
-      "allocations": [{"settlement_id": "set-4005", "amount_minor": "8000"}]
+      "allocations": [
+        {
+          "settlement_id": "set-4005",
+          "amount_minor": "8000"
+        }
+      ]
     },
     {
       "withdrawal_id": "wd-5004",
       "partner_id": "partner-1002",
-      "amount": {"currency": "USD", "amount_minor": "6000"},
+      "amount": {
+        "currency": "USD",
+        "amount_minor": "6000"
+      },
       "method": "wallet",
       "status": "pending_review",
-      "fee": {"currency": "USD", "amount_minor": "0"},
-      "received_amount": {"currency": "USD", "amount_minor": "0"},
+      "fee": {
+        "currency": "USD",
+        "amount_minor": "0"
+      },
+      "received_amount": {
+        "currency": "USD",
+        "amount_minor": "0"
+      },
       "kyb_status": "approved",
       "requested_at": "2026-11-02T08:20:00+08:00",
       "reviewed_by": null,
@@ -596,16 +747,30 @@
       "paid_at": null,
       "failure_reason": null,
       "integration_task_id": null,
-      "allocations": [{"settlement_id": "set-4006", "amount_minor": "6000"}]
+      "allocations": [
+        {
+          "settlement_id": "set-4006",
+          "amount_minor": "6000"
+        }
+      ]
     },
     {
       "withdrawal_id": "wd-5005",
       "partner_id": "partner-1004",
-      "amount": {"currency": "USD", "amount_minor": "10000"},
+      "amount": {
+        "currency": "USD",
+        "amount_minor": "10000"
+      },
       "method": "wire",
       "status": "rejected",
-      "fee": {"currency": "USD", "amount_minor": "0"},
-      "received_amount": {"currency": "USD", "amount_minor": "0"},
+      "fee": {
+        "currency": "USD",
+        "amount_minor": "0"
+      },
+      "received_amount": {
+        "currency": "USD",
+        "amount_minor": "0"
+      },
       "kyb_status": "pending",
       "requested_at": "2026-10-30T09:00:00+08:00",
       "reviewed_by": "finance.user@example.com",
@@ -618,11 +783,20 @@
     {
       "withdrawal_id": "wd-5006",
       "partner_id": "partner-1006",
-      "amount": {"currency": "USD", "amount_minor": "4800"},
+      "amount": {
+        "currency": "USD",
+        "amount_minor": "4800"
+      },
       "method": "wire",
       "status": "paid",
-      "fee": {"currency": "USD", "amount_minor": "124"},
-      "received_amount": {"currency": "USD", "amount_minor": "4676"},
+      "fee": {
+        "currency": "USD",
+        "amount_minor": "124"
+      },
+      "received_amount": {
+        "currency": "USD",
+        "amount_minor": "4676"
+      },
       "kyb_status": "approved",
       "requested_at": "2026-10-08T09:00:00+08:00",
       "reviewed_by": "finance.user@example.com",
@@ -630,7 +804,12 @@
       "paid_at": "2026-10-08T18:00:00+08:00",
       "failure_reason": null,
       "integration_task_id": "int-6003",
-      "allocations": [{"settlement_id": "set-4004", "amount_minor": "4800"}]
+      "allocations": [
+        {
+          "settlement_id": "set-4004",
+          "amount_minor": "4800"
+        }
+      ]
     }
   ],
   "integration_tasks": [

@@ -114,7 +114,6 @@
       { key: "status", label: t("账户状态", "Account status"), value: t(...statusLabels[accountStatus()].slice(0, 2)), hint: t("查看状态摘要", "View status summary") },
       { key: "profile", label: t("资料完整度", "Profile completeness"), value: `${complete.percent}%`, hint: t(`${complete.total - complete.completed} 项待补齐`, `${complete.total - complete.completed} missing`) },
       { key: "finance", label: t("收款账户状态", "Payout account"), value: t(...statusLabels[financeStatus("payout")].slice(0, 2)), hint: t("查看收款资料", "View payout details") },
-      { key: "finance", label: t("税务资料状态", "Tax profile"), value: t(...statusLabels[financeStatus("tax")].slice(0, 2)), hint: t("查看税务资料", "View tax details") }
     ];
   }
 
@@ -200,7 +199,6 @@
 
   function financePanel() {
     const latestPayout = state().financeRequests.find(item => item.type === "payout");
-    const latestTax = state().financeRequests.find(item => item.type === "tax");
     return `
       <div class="account-two-column">
         <section class="account-panel">
@@ -217,19 +215,6 @@
             <button class="button primary" type="button" data-account-finance-form="payout">${t("申请新增 / 变更", "Apply to add / change")}</button>
           </div>
         </section>
-        <section class="account-panel">
-          <header><h3>${t("税务资料", "Tax details")}</h3>${tag(financeStatus("tax"))}</header>
-          <div class="account-field-grid">
-            ${field(t("税务身份", "Tax identity"), t("个人", "Individual"))}
-            ${field(t("税务地区", "Tax region"), "Singapore")}
-            ${field(t("税号摘要", "Tax ID mask"), "S******123A")}
-            ${field(t("资料更新时间", "Updated at"), latestTax?.submittedAt || "2026-11-05 09:32")}
-          </div>
-          <div class="account-actions">
-            <button class="button primary" type="button" data-account-finance-form="tax">${t("提交变更申请", "Submit change request")}</button>
-          </div>
-          <p>${t("账号、税号和证明文件只展示脱敏摘要，不提供明文复制。", "Account, tax ID, and evidence are shown only as masked summaries and cannot be copied in plain text.")}</p>
-        </section>
       </div>
       ${financeRequestTable()}`;
   }
@@ -239,7 +224,6 @@
     const draft = { ...s.financeDraft, type: kind };
     const categories = [
       ["account_change", t("收款账户变更", "Payout account change")],
-      ["tax_change", t("税务资料变更", "Tax profile change")],
       ["document_update", t("证明资料更新", "Document update")],
       ["other", t("其他", "Other")]
     ];
@@ -255,9 +239,7 @@
     if (!rows.length) return "";
     const labels = {
       payout: t("收款资料", "Payout details"),
-      tax: t("税务资料", "Tax details"),
       account_change: t("收款账户变更", "Payout account change"),
-      tax_change: t("税务资料变更", "Tax profile change"),
       document_update: t("证明资料更新", "Document update"),
       other: t("其他", "Other")
     };
@@ -341,7 +323,6 @@
       security: t("安全详情", "Security details"),
       device: t("退出登录设备", "Sign out device"),
       "finance-change:payout": t("收款账户变更申请", "Payout account change request"),
-      "finance-change:tax": t("税务资料变更申请", "Tax profile change request")
     };
     const title = titles[kind] || t("详情", "Details");
     let footerActions = `<button type="button" class="button secondary" data-account-action="close">${t("关闭", "Close")}</button>`;
@@ -406,7 +387,7 @@
       const s = state();
       s.drawer = `finance-change:${financeForm.dataset.accountFinanceForm}`;
       const type = financeForm.dataset.accountFinanceForm;
-      s.financeDraft = { type, category: type === "tax" ? "tax_change" : "account_change", explanation: "" };
+      s.financeDraft = { type, category: "account_change", explanation: "" };
       render();
       return document.querySelector("[data-account-finance-draft='explanation']")?.focus();
     }

@@ -21,8 +21,8 @@
     reversal: ["佣金冲正", "Commission reversal"]
   };
   const caseTypeLabels = {
-    qftd_batch: ["有效FTD", "Valid FTD"],
-    quality_service: ["质量服务", "Quality service"]
+    qftd_batch: ["有效转化", "Qualified conversion"],
+    quality_service: ["质量升档", "Quality upgrade"]
   };
   const riskLabels = {
     none: ["无风险", "No risk", "muted"],
@@ -83,9 +83,9 @@
   }
 
   function segmentLabel(row) {
-    if (row.caseType === "qftd_batch") return t("有效FTD", "Valid FTD");
-    if (row.caseType === "quality_service") return t("质量服务", "Quality service");
-    return row.segments.filter(value => value !== "FTD").map(value => value === "QFTD" ? t("有效FTD", "Valid FTD") : value).join(" + ");
+    if (row.caseType === "qftd_batch") return t("有效转化", "Qualified conversion");
+    if (row.caseType === "quality_service") return t("质量升档", "Quality upgrade");
+    return row.segments.filter(value => value !== "首次入金").map(value => value === "QFTD" ? t("有效转化", "Qualified conversion") : value).join(" + ");
   }
 
   function riskLabel(row) {
@@ -101,9 +101,9 @@
       },
       milestone: {
         pending_attribution: t("注册", "Registration"), pending: t("KYC", "KYC"),
-        ftd_in_progress: t("FTD", "FTD"), ftd: t("FTD", "FTD"),
-        qftd_in_progress: t("有效FTD", "Valid FTD"), qftd_pending: t("有效FTD", "Valid FTD"), qftd: t("有效FTD", "Valid FTD"),
-        quality_in_progress: t("质量服务", "Quality service"), quality_pending: t("质量服务", "Quality service"), quality: t("已完成", "Completed"),
+        ftd_in_progress: t("首次入金", "首次入金"), ftd: t("首次入金", "首次入金"),
+        qftd_in_progress: t("有效转化", "Qualified conversion"), qftd_pending: t("有效转化", "Qualified conversion"), qftd: t("有效转化", "Qualified conversion"),
+        quality_in_progress: t("质量升档", "Quality upgrade"), quality_pending: t("质量升档", "Quality upgrade"), quality: t("已完成", "Completed"),
         voided: t("已作废", "Voided")
       },
       fund: {
@@ -196,11 +196,10 @@
       sum.approved += row.settlement.availableAmount / 100;
       sum.paid += row.paidAmount;
     }
-    sum.tax += row.settlement?.taxAmount ? row.settlement.taxAmount / 100 : 0;
     sum.guarantee += row.settlement?.guaranteeAmount ? row.settlement.guaranteeAmount / 100 : 0;
       if (["investigating", "quarantined"].includes(row.client?.riskHandlingStatus)) sum[row.client.riskHandlingStatus] += amount;
       return sum;
-    }, { expected: 0, held: 0, approved: 0, paid: 0, tax: 0, guarantee: 0, rejected: 0, reversed: 0, investigating: 0, quarantined: 0 });
+    }, { expected: 0, held: 0, approved: 0, paid: 0, guarantee: 0, rejected: 0, reversed: 0, investigating: 0, quarantined: 0 });
   }
 
   function money(value) {
@@ -210,7 +209,7 @@
   function reason(row) {
     if (row.hold) return t(...row.hold.reason);
     if (["rejected", "reversed"].includes(row.status)) return t(row.client.commissionReason, row.client.commissionReasonEn);
-    if (row.status === "settled") return t("佣金已按税费、保证金和可提现余额拆分。", "The commission has been split into tax, guarantee, and available balance.");
+    if (row.status === "settled") return t("佣金已按保证金和可提现余额拆分。", "The commission has been split into guarantee and available balance.");
     if (row.status === "frozen") {
       const threshold = AFF.finance.configuration.settlementFreezeThresholdDays;
       return t(`结算观察超过${threshold}天，等待人工审核。`, `The settlement observation exceeded ${threshold} days and requires manual review.`);
@@ -409,7 +408,7 @@
       { title: t("结算中观察", "In-settlement observation"), done: Boolean(row.hold), date: row.hold?.startedAt, text: row.hold ? `${row.hold.totalDays} ${t("天，预计释放", "days, expected release")} ${row.hold.expectedReleaseAt}` : t("未提供该环节记录", "No record available for this stage") },
       { title: t("佣金审核", "Commission review"), done: ["settled", "approved", "paid", "rejected", "reversed"].includes(row.status), text: row.status === "settled" ? t("结算检查通过", "Settlement checks passed") : row.status === "rejected" ? t("审核拒绝", "Rejected") : row.status === "reversed" ? t("复核结果为冲正", "Review resulted in reversal") : t("尚未完成", "Not completed") }
     ];
-    if (row.status === "settled") steps.push({ title: t("结算分摊", "Settlement split"), done: true, date: row.settlement?.settledAt, text: `${t("可提现")} ${money(row.settlement.availableAmount / 100)} / ${t("税费")} ${money(row.settlement.taxAmount / 100)} / ${t("保证金")} ${money(row.settlement.guaranteeAmount / 100)}` });
+    if (row.status === "settled") steps.push({ title: t("结算分摊", "Settlement split"), done: true, date: row.settlement?.settledAt, text: `${t("可提现")} ${money(row.settlement.availableAmount / 100)} / ${t("保证金")} ${money(row.settlement.guaranteeAmount / 100)}` });
     else if (row.status === "rejected") steps.push({ title: t("佣金拒绝", "Commission rejected"), done: true, text: `${t("不计入结算净额", "Excluded from settlement net")} · ${unavailable}` });
       else if (row.status === "reversed") steps.push({ title: t("佣金冲正", "Commission reversed"), done: true, text: `${money(-Math.abs(row.amount))} · ${t("原入账明细与扣回记录未提供", "Original credit and recovery records unavailable")}` });
     else if (row.status === "frozen") {
@@ -429,7 +428,7 @@
     return `<div class="aff-drawer-overlay" data-earn-action="close"></div><aside class="aff-drawer earn-drawer" role="dialog" aria-modal="true" aria-labelledby="earn-detail-title">
       <header><div><h2 id="earn-detail-title">${t("佣金详情", "Commission details")}</h2><p>${h(row.id)}</p></div><button class="earn-icon-button" type="button" data-earn-action="close" aria-label="${t("关闭", "Close")}">${icon("close")}</button></header>
       <div class="earn-drawer-body">
-        <section class="earn-detail-section"><div class="earn-detail-amount"><strong>${money(row.amount)}</strong>${badge(row.status)}${withdrawalBadge(row)}</div><p>${h(reason(row))}</p><dl class="earn-detail-grid">${field(t("佣金编号", "Commission ID"), row.id)}${field(t("结算单编号", "Settlement ID"), row.withdrawal?.settlementId)}${field(t("佣金分段", "Commission segment"), segmentLabel(row))}${field(t("更新日期", "Updated date"), row.date)}${field(t("本案件金额", "Case amount"), money(Math.abs(row.amount)))}${field(t("已支付分摊", "Paid allocation"), money(row.paidAmount))}${field(t("税费", "Tax"), money(row.settlement?.taxAmount / 100 || 0))}${field(t("保证金", "Guarantee"), money(row.settlement?.guaranteeAmount / 100 || 0))}${field(t("结算入账", "Settlement credit"), money(row.settlement?.availableAmount / 100 || 0))}</dl>
+        <section class="earn-detail-section"><div class="earn-detail-amount"><strong>${money(row.amount)}</strong>${badge(row.status)}${withdrawalBadge(row)}</div><p>${h(reason(row))}</p><dl class="earn-detail-grid">${field(t("佣金编号", "Commission ID"), row.id)}${field(t("结算单编号", "Settlement ID"), row.withdrawal?.settlementId)}${field(t("佣金分段", "Commission segment"), segmentLabel(row))}${field(t("更新日期", "Updated date"), row.date)}${field(t("本案件金额", "Case amount"), money(Math.abs(row.amount)))}${field(t("已支付分摊", "Paid allocation"), money(row.paidAmount))}${field(t("保证金", "Guarantee"), money(row.settlement?.guaranteeAmount / 100 || 0))}${field(t("结算入账", "Settlement credit"), money(row.settlement?.availableAmount / 100 || 0))}</dl>
           <p class="earn-muted">${canAppeal(row) ? h(c.commissionReasonCode) : h(appealAvailability(row))}</p>
         </section>
         ${c.riskHandlingStatus !== "none" ? `<section class="earn-detail-section"><h3>${t("风险处理", "Risk handling")}</h3><dl class="earn-detail-grid">
@@ -444,7 +443,7 @@
           ${field(t("申诉路径", "Appeal path"), c.riskHandlingStatus === "released" ? t("暂无", "None") : t("申诉中心", "Appeal center"))}
         </dl><p>${t("调查或隔离期间佣金保留并留痕，但不自动结算、不可提现；解除后需等待结算前检查，不直接入账。", "During investigation or quarantine, commission is retained and audited but not automatically settled or withdrawable. After release it must pass pre-settlement checks before crediting.")}</p></section>` : ""}
         <section class="earn-detail-section"><h3>${t("关联客户", "Related client")}</h3><dl class="earn-detail-grid">
-          ${field(t("客户编号", "Client ID"), c.clientId)}${field(t("邮箱", "Email"), c.email)}${field(t("国家/地区", "Country / region"), AFF.countryLabel(c.country))}${field(t("注册平台", "Registration platform"), c.platform)}${field(t("注册日期", "Registered on"), c.registeredAt)}${field(t("客户资格状态", "Eligibility status"), clientStatusLabel("eligibility", c.eligibilityStatus))}${field(t("客户里程碑状态", "Milestone status"), clientStatusLabel("milestone", c.milestoneStatus))}${field(t("资金状态", "Fund status"), clientStatusLabel("fund", c.fundStatus))}${field("FTD", c.ftdAt)}${field(t("有效FTD", "Valid FTD"), c.effectiveAt)}${field(t("质量服务", "Quality service"), c.qualityAt)}${field(t("转化活动", "Conversion campaign"), `${c.campaign} · ${c.campaignCode}`)}${field("Sub ID", c.subId)}
+          ${field(t("客户编号", "Client ID"), c.clientId)}${field(t("邮箱", "Email"), c.email)}${field(t("国家/地区", "Country / region"), AFF.countryLabel(c.country))}${field(t("注册平台", "Registration platform"), c.platform)}${field(t("注册日期", "Registered on"), c.registeredAt)}${field(t("客户资格状态", "Eligibility status"), clientStatusLabel("eligibility", c.eligibilityStatus))}${field(t("客户里程碑状态", "Milestone status"), clientStatusLabel("milestone", c.milestoneStatus))}${field(t("资金状态", "Fund status"), clientStatusLabel("fund", c.fundStatus))}${field("首次入金", c.ftdAt)}${field(t("有效转化", "Qualified conversion"), c.effectiveAt)}${field(t("质量升档", "Quality upgrade"), c.qualityAt)}${field(t("转化活动", "Conversion campaign"), `${c.campaign} · ${c.campaignCode}`)}${field("Sub ID", c.subId)}
         </dl></section>
         ${holdSection(row, s)}
         <section class="earn-detail-section"><h3>${t("佣金流向", "Commission flow")}</h3>${flow(row)}</section>

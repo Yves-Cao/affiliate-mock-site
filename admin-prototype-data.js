@@ -16,11 +16,11 @@
       column("name", "价格规则"), column("country", "国家"), column("status", "状态"),
       column("version", "版本"), column("amount", "基础CPA"), column("owner", "责任角色"), column("updated", "更新时间")
     ], {profile:"price", panel:"price"}),
-    tab("qualification", "资格档与里程碑", "资格规则", "配置L1-L4、FTD、有效FTD和质量服务里程碑。", [
+    tab("qualification", "资格档与里程碑", "资格规则", "配置L1-L4、首次入金、有效转化和质量升档里程碑。", [
       column("name", "资格规则"), column("stage", "里程碑"), column("status", "状态"),
       column("progress", "达标阈值", {unit:"%"}), column("version", "版本"), column("owner", "责任角色")
     ], {profile:"qualification", panel:"qualification"}),
-    tab("quality-service", "质量服务规则", "质量服务", "配置有效FTD后的活跃度、观察期、留存和质量服务达标条件。", [
+    tab("quality-service", "质量升档规则", "质量升档", "配置有效转化后的活跃度、观察期、留存和质量升档达标条件。", [
       column("name", "质量规则"), column("stage", "阶段"), column("status", "状态"),
       column("progress", "达标阈值"), column("version", "版本"), column("owner", "责任角色")
     ], {profile:"quality-service"}),
@@ -40,10 +40,10 @@
       column("name", "护栏规则"), column("type", "触发类型"), column("status", "状态"),
       column("progress", "阈值"), column("impact", "处置"), column("owner", "责任角色")
     ], {profile:"d-plus-n"}),
-    tab("guarantee-tax", "保证金/税费", "资金规则", "维护保证金比例、释放周期、税率和手续费口径。", [
+    tab("guarantee", "保证金", "资金规则", "维护保证金比例、释放周期和手续费口径。", [
       column("name", "资金规则"), column("type", "类型"), column("status", "状态"),
       column("amount", "金额/比例"), column("version", "版本"), column("owner", "责任角色")
-    ], {type:"资金", profile:"guarantee-tax", panel:"guarantee-tax"}),
+    ], {type:"资金", profile:"guarantee", panel:"guarantee"}),
     tab("settlement-withdrawal", "结算与提现规则", "结算提现", "配置结算资格、提现校验、扣除顺序和异常处理。", [
       column("name", "资金规则"), column("type", "规则类型"), column("status", "状态"),
       column("progress", "阈值"), column("impact", "处理方式"), column("owner", "责任角色")
@@ -161,11 +161,11 @@
 
   const performanceTabs = [
     tab("roi", "合作方ROI", "ROI维度", "分析合作方、国家和Sub ID的转化与净成本。", [
-      column("name", "维度"), column("country", "国家"), column("progress", "有效FTD"),
+      column("name", "维度"), column("country", "国家"), column("progress", "有效转化"),
       column("amount", "已付佣金"), column("impact", "净ROI"), column("risk", "风险"), column("status", "建议")
     ], {statuses: ["scale_up", "observe", "limit", "review"], type: "报表"}),
     tab("quality", "质量看板", "质量维度", "监控转化质量、留存、拒付、冲正和集群风险。", [
-      column("name", "维度"), column("progress", "有效FTD"), column("amount", "质量服务"),
+      column("name", "维度"), column("progress", "有效转化"), column("amount", "质量升档"),
       column("impact", "留存率"), column("risk", "风险"), column("status", "等级")
     ], {statuses: ["a", "b", "c", "watch"], type: "报表"}),
     tab("guarantee-coverage", "保证金覆盖", "覆盖维度", "监控保证金覆盖率、释放延迟和潜在损失。", [
@@ -237,7 +237,7 @@
         id:"release-3001",name:"D1-D3跨切面配置包",status:"pending_approval",version:"v7.0",owner:"产品/风控",
         effectiveTime:"2026-11-06 10:00",previousVersion:"v6.4",impactAmount:48600,
         domains:["流量画像门禁","官方路径库","点击风险规则"],
-        signoffs:[],blockedReason:"",
+        signoffs:[],blockedReason:null,
         simulation:{hitCount:186,falsePositive:7,blocked:false,fundImpact:48600,summary:"命中186个对象，误伤提示7个，未触发护栏阻断。"},
         diffs:[
           {domain:"流量画像门禁",current:"开启；5个必填字段",next:"开启；5个必填字段 + 关闭需审计",impact:"首个链接门禁更明确"},
@@ -254,7 +254,7 @@
       {
         id:"release-3002",name:"价格与资格档调整包",status:"approved",version:"v8.0",owner:"业务/财务",
         effectiveTime:"2026-11-07 22:00",previousVersion:"v7.8",impactAmount:91200,
-        domains:["价格表","资格档与里程碑"],signoffs:["risk_supervisor","finance"],blockedReason:"",
+        domains:["价格表","资格档与里程碑"],signoffs:["risk_supervisor","finance"],blockedReason:null,
         simulation:{hitCount:326,falsePositive:12,blocked:false,fundImpact:91200,summary:"L2-L4阈值上调后，预计成本上升9.6%。"},
         diffs:[
           {domain:"价格表",current:"TH/ID基准价",next:"TH/ID/PH新基准价",impact:"新客户按新价格锁定"},
@@ -269,7 +269,7 @@
       {
         id:"release-3003",name:"动态结算与D+N调整包",status:"scheduled",version:"v5.2",owner:"风控/财务",
         effectiveTime:"2026-11-06 02:00",previousVersion:"v5.0",impactAmount:27400,
-        domains:["动态结算","D+N阈值"],signoffs:["risk_supervisor","finance","compliance"],blockedReason:"",
+        domains:["动态结算","D+N阈值"],signoffs:["risk_supervisor","finance","compliance"],blockedReason:null,
         simulation:{hitCount:142,falsePositive:3,blocked:false,fundImpact:27400,summary:"R2/R3理论结算延长，D+N保持后台配置。"},
         diffs:[
           {domain:"动态结算",current:"R2=7天；R3=15天",next:"R2=9天；R3=18天",impact:"理论到期日后移"},
@@ -283,7 +283,7 @@
       {
         id:"release-3004",name:"官方路径库紧急修复包",status:"active",version:"v6.4",owner:"合规/系统",
         effectiveTime:"2026-11-04 20:00",previousVersion:"v6.3",impactAmount:15800,
-        domains:["官方路径库","硬规则"],signoffs:["risk_supervisor","compliance"],blockedReason:"",
+        domains:["官方路径库","硬规则"],signoffs:["risk_supervisor","compliance"],blockedReason:null,
         simulation:{hitCount:98,falsePositive:1,blocked:false,fundImpact:15800,summary:"修复5条失效路径并补齐来源校验。"},
         diffs:[
           {domain:"官方路径库",current:"47条启用路径",next:"42条启用路径",impact:"5条失效路径下线"},
@@ -297,11 +297,11 @@
       {
         id:"release-3005",name:"信用权益组合包",status:"activation_failed",version:"v4.1",owner:"系统",
         effectiveTime:"2026-11-04 21:00",previousVersion:"v4.0",impactAmount:36900,
-        domains:["信用等级与权益","保证金/税费"],signoffs:["risk_supervisor","finance"],blockedReason:"依赖的税率外部快照超时，发布包整体回滚。",
-        simulation:{hitCount:214,falsePositive:9,blocked:true,fundImpact:36900,summary:"试算通过但生效时外部税率快照超时。"},
+        domains:["信用等级与权益","保证金"],signoffs:["risk_supervisor","finance"],blockedReason:"依赖的外部快照超时，发布包整体回滚。",
+        simulation:{hitCount:214,falsePositive:9,blocked:true,fundImpact:36900,summary:"试算通过但生效时外部快照超时。"},
         diffs:[
           {domain:"信用等级与权益",current:"C0-C4旧附加",next:"C1-C4附加上调",impact:"权益成本上升"},
-          {domain:"保证金/税费",current:"税费快照v3",next:"税费快照v4",impact:"税费计算依赖外部系统"}
+          {domain:"保证金",current:"快照v3",next:"快照v4",impact:"计算依赖外部系统"}
         ],
         timeline:[
           {time:"2026-11-04 20:40",action:"审批通过",actor:"风控主管/财务",result:"approved"},
@@ -392,38 +392,38 @@
         {id:"notes",label:"备注",hint:"跟进记录时间线"}
       ],
       kycStatusLabels: {verified:"已认证",pending:"同步中",failed:"认证失败",expired:"已过期",sync_failed:"同步异常",not_required:"不适用"},
-      materialsCatalog: ["营业执照","法人证件","地址证明","银行账户证明","流量来源说明","W-8BEN税务表","渠道代理协议"],
+      materialsCatalog: ["营业执照","法人证件","地址证明","银行账户证明","流量来源说明","补充协议","渠道代理协议"],
       partners: [
         {id:"partner-1001",name:"Golden Link Media",type:"机构合作方",country:"TH",stage:"onboarded",status:"active",risk:"low",owner:"运营/Ops",ownerRole:"operations",amount:184600,updated:"2026-11-05 09:40",kyc:{status:"verified",syncAt:"2026-10-12 10:20",source:"CRM"},kyb:{status:"verified",syncAt:"2026-10-12 10:20",source:"CRM"},credit:{grade:"C2",score:720,adjustable:false},performance:{clicks:41200,validFtd:186,commission:184600,qualityGrade:"A",roi:1.32},crmId:"crm-pt-88210"},
         {id:"partner-1002",name:"APAC Traffic Lab",type:"渠道代理",country:"ID",stage:"onboarded",status:"active",risk:"medium",owner:"运营/Ops",ownerRole:"operations",amount:96300,updated:"2026-11-05 08:55",kyc:{status:"verified",syncAt:"2026-10-03 14:10",source:"CRM"},kyb:{status:"verified",syncAt:"2026-10-03 14:10",source:"CRM"},credit:{grade:"C1",score:640,adjustable:false},performance:{clicks:32800,validFtd:102,commission:96300,qualityGrade:"B",roi:1.08},crmId:"crm-pt-88211"},
-        {id:"partner-1003",name:"Northline Affiliates",type:"机构合作方",country:"MY",stage:"offboarding",status:"processing",risk:"low",owner:"合规/Compliance",ownerRole:"compliance",amount:143200,updated:"2026-11-04 16:20",kyc:{status:"verified",syncAt:"2026-09-28 09:30",source:"CRM"},kyb:{status:"verified",syncAt:"2026-09-28 09:30",source:"CRM"},credit:{grade:"C2",score:690,adjustable:false},performance:{clicks:28600,validFtd:141,commission:143200,qualityGrade:"A",roi:1.21},crmId:"crm-pt-88212",offboard:{reason:"协商终止",initiatedBy:"合规/Compliance",initiatedAt:"2026-11-02 11:00",currentStep:3,guaranteeHeld:9800,timeline:[{step:1,label:"发起清退",time:"2026-11-02 11:00",state:"done",actor:"合规/Compliance",note:"协商终止协议已签署"},{step:2,label:"推广链接下线",time:"2026-11-02 11:35",state:"done",actor:"系统/Tech",note:"18条链接停止投放；点击保留404兜底"},{step:3,label:"最终结算生成",time:"2026-11-03 10:10",state:"doing",actor:"财务/Finance",note:"10月结算批次锁定；结算中余额转入清退单"},{step:4,label:"保证金审批",time:"",state:"pending",actor:"财务/Finance",note:"保留保证金 9,800 USD 待审批（跳转资金组处理）"},{step:5,label:"资料归档",time:"",state:"pending",actor:"系统/Tech",note:"CRM资料转归档区；保留期365天"},{step:6,label:"清退完成",time:"",state:"pending",actor:"系统/Tech",note:"状态置为已归档"}]}},
-        {id:"partner-1004",name:"Meridian KOL",type:"个人合作方",country:"TH",stage:"watching",status:"processing",risk:"medium",owner:"风控/Risk",ownerRole:"risk",amount:47800,updated:"2026-11-05 07:30",kyc:{status:"verified",syncAt:"2026-10-18 16:45",source:"CRM"},kyb:{status:"not_required",syncAt:"-",source:"CRM"},credit:{grade:"C1",score:610,adjustable:true},performance:{clicks:15400,validFtd:47,commission:47800,qualityGrade:"C",roi:0.88},crmId:"crm-pt-88213",watchReason:"流量来源与申报渠道不符，观察期内暂停质量服务附加"},
+        {id:"partner-1003",name:"Northline Affiliates",type:"机构合作方",country:"MY",stage:"offboarding",status:"processing",risk:"low",owner:"合规/Compliance",ownerRole:"compliance",amount:143200,updated:"2026-11-04 16:20",kyc:{status:"verified",syncAt:"2026-09-28 09:30",source:"CRM"},kyb:{status:"verified",syncAt:"2026-09-28 09:30",source:"CRM"},credit:{grade:"C2",score:690,adjustable:false},performance:{clicks:28600,validFtd:141,commission:143200,qualityGrade:"A",roi:1.21},crmId:"crm-pt-88212",offboard:{reason:"协商终止",initiatedBy:"合规/Compliance",initiatedAt:"2026-11-02 11:00",currentStep:3,guaranteeHeld:9800,timeline:[{step:1,label:"发起清退",time:"2026-11-02 11:00",state:"done",actor:"合规/Compliance",note:"协商终止协议已签署"},{step:2,label:"推广链接下线",time:"2026-11-02 11:35",state:"done",actor:"系统/Tech",note:"18条链接停止投放；点击保留404兜底"},{step:3,label:"最终结算生成",time:"2026-11-03 10:10",state:"doing",actor:"财务/Finance",note:"10月结算批次锁定；结算中余额转入清退单"},{step:4,label:"保证金审批",time:null,state:"pending",actor:"财务/Finance",note:"保留保证金 9,800 USD 待审批（跳转资金组处理）"},{step:5,label:"资料归档",time:null,state:"pending",actor:"系统/Tech",note:"CRM资料转归档区；保留期365天"},{step:6,label:"清退完成",time:null,state:"pending",actor:"系统/Tech",note:"状态置为已归档"}]}},
+        {id:"partner-1004",name:"Meridian KOL",type:"个人合作方",country:"TH",stage:"watching",status:"processing",risk:"medium",owner:"风控/Risk",ownerRole:"risk",amount:47800,updated:"2026-11-05 07:30",kyc:{status:"verified",syncAt:"2026-10-18 16:45",source:"CRM"},kyb:{status:"not_required",syncAt:"-",source:"CRM"},credit:{grade:"C1",score:610,adjustable:true},performance:{clicks:15400,validFtd:47,commission:47800,qualityGrade:"C",roi:0.88},crmId:"crm-pt-88213",watchReason:"流量来源与申报渠道不符，观察期内暂停质量升档附加"},
         {id:"partner-1005",name:"Bright Bridge Digital",type:"机构合作方",country:"VN",stage:"onboarded",status:"active",risk:"low",owner:"运营/Ops",ownerRole:"operations",amount:78900,updated:"2026-11-04 18:10",kyc:{status:"verified",syncAt:"2026-10-06 11:15",source:"CRM"},kyb:{status:"pending",syncAt:"2026-11-04 08:00",source:"CRM"},credit:{grade:"C1",score:655,adjustable:false},performance:{clicks:22100,validFtd:83,commission:78900,qualityGrade:"B",roi:1.12},crmId:"crm-pt-88214"},
         {id:"partner-1006",name:"Sultan Media Group",type:"机构合作方",country:"ID",stage:"reviewing",status:"pending_review",risk:"medium",owner:"运营/Ops",ownerRole:"operations",amount:0,updated:"2026-11-05 09:05",kyc:{status:"pending",syncAt:"2026-11-05 06:30",source:"CRM"},kyb:{status:"failed",syncAt:"2026-11-04 22:10",source:"CRM"},credit:{grade:"C0",score:500,adjustable:false},performance:null,crmId:"crm-pt-88215",onboard:{submittedAt:"2026-11-04 15:40",materials:[{name:"营业执照",state:"submitted"},{name:"法人证件",state:"submitted"},{name:"地址证明",state:"missing"},{name:"银行账户证明",state:"submitted"},{name:"流量来源说明",state:"returned"}],autoReviewEligible:false,note:"KYB认证失败：企业注册号与CRM档案不一致，需人工核对"}},
         {id:"partner-1007",name:"Riverstone Partners",type:"渠道代理",country:"PH",stage:"applying",status:"pending",risk:"normal",owner:"运营/Ops",ownerRole:"operations",amount:0,updated:"2026-11-05 08:20",kyc:{status:"pending",syncAt:"2026-11-05 08:20",source:"CRM"},kyb:{status:"pending",syncAt:"2026-11-05 08:20",source:"CRM"},credit:{grade:"C0",score:500,adjustable:false},performance:null,crmId:"crm-pt-88216",onboard:{submittedAt:"2026-11-05 08:20",materials:[{name:"营业执照",state:"submitted"},{name:"法人证件",state:"submitted"},{name:"银行账户证明",state:"submitted"}],autoReviewEligible:true,note:"申请材料齐全，可自动预审"}},
         {id:"partner-1008",name:"Zenith Affiliates",type:"机构合作方",country:"TH",stage:"onboarded",status:"active",risk:"low",owner:"运营/Ops",ownerRole:"operations",amount:112400,updated:"2026-11-03 14:00",kyc:{status:"verified",syncAt:"2026-09-20 13:20",source:"CRM"},kyb:{status:"verified",syncAt:"2026-09-20 13:20",source:"CRM"},credit:{grade:"C3",score:780,adjustable:false},performance:{clicks:35700,validFtd:129,commission:112400,qualityGrade:"A",roi:1.26},crmId:"crm-pt-88217"},
         {id:"partner-1009",name:"Orchid Lane Media",type:"个人合作方",country:"MY",stage:"applying",status:"pending",risk:"normal",owner:"运营/Ops",ownerRole:"operations",amount:0,updated:"2026-11-05 06:45",kyc:{status:"pending",syncAt:"2026-11-05 06:45",source:"CRM"},kyb:{status:"not_required",syncAt:"-",source:"CRM"},credit:{grade:"C0",score:500,adjustable:false},performance:null,crmId:"crm-pt-88218",onboard:{submittedAt:"2026-11-05 06:45",materials:[{name:"法人证件",state:"submitted"},{name:"地址证明",state:"submitted"},{name:"流量来源说明",state:"submitted"}],autoReviewEligible:false,note:"个人合作方；无KYB要求"}},
-        {id:"partner-1010",name:"Delta Wave Digital",type:"机构合作方",country:"ZA",stage:"reviewing",status:"pending_review",risk:"low",owner:"合规/Compliance",ownerRole:"compliance",amount:0,updated:"2026-11-05 05:10",kyc:{status:"verified",syncAt:"2026-11-02 09:00",source:"CRM"},kyb:{status:"pending",syncAt:"2026-11-03 07:40",source:"CRM"},credit:{grade:"C0",score:500,adjustable:false},performance:null,crmId:"crm-pt-88219",onboard:{submittedAt:"2026-11-03 07:40",materials:[{name:"营业执照",state:"submitted"},{name:"法人证件",state:"submitted"},{name:"地址证明",state:"submitted"},{name:"银行账户证明",state:"submitted"},{name:"W-8BEN税务表",state:"missing"}],autoReviewEligible:true,note:"KYC已通过；待W-8BEN税务表后可自动审核"}},
+        {id:"partner-1010",name:"Delta Wave Digital",type:"机构合作方",country:"ZA",stage:"reviewing",status:"pending_review",risk:"low",owner:"合规/Compliance",ownerRole:"compliance",amount:0,updated:"2026-11-05 05:10",kyc:{status:"verified",syncAt:"2026-11-02 09:00",source:"CRM"},kyb:{status:"pending",syncAt:"2026-11-03 07:40",source:"CRM"},credit:{grade:"C0",score:500,adjustable:false},performance:null,crmId:"crm-pt-88219",onboard:{submittedAt:"2026-11-03 07:40",materials:[{name:"营业执照",state:"submitted"},{name:"法人证件",state:"submitted"},{name:"地址证明",state:"submitted"},{name:"银行账户证明",state:"submitted"},{name:"补充协议",state:"missing"}],autoReviewEligible:true,note:"KYC已通过；待补充协议后可自动审核"}},
         {id:"partner-1011",name:"Coral Sands Trading",type:"渠道代理",country:"NG",stage:"archived",status:"closed",risk:"high",owner:"合规/Compliance",ownerRole:"compliance",amount:0,updated:"2026-10-20 12:00",kyc:{status:"expired",syncAt:"2026-09-15 08:30",source:"CRM"},kyb:{status:"verified",syncAt:"2026-09-15 08:30",source:"CRM"},credit:{grade:"C0",score:420,adjustable:false},performance:null,crmId:"crm-pt-88220",offboard:{reason:"违规终止",initiatedBy:"风控主管",initiatedAt:"2026-09-28 10:00",currentStep:6,guaranteeHeld:0,timeline:[{step:1,label:"发起清退",time:"2026-09-28 10:00",state:"done",actor:"风控主管",note:"虚假流量违规，案件组结论已确认"},{step:2,label:"推广链接下线",time:"2026-09-28 10:05",state:"done",actor:"系统/Tech",note:"全部链接立即下线"},{step:3,label:"最终结算生成",time:"2026-09-30 09:00",state:"done",actor:"财务/Finance",note:"违规佣金清零；合法部分结算"},{step:4,label:"保证金审批",time:"2026-10-08 14:30",state:"done",actor:"财务/Finance",note:"保证金全额抵扣违规损失"},{step:5,label:"资料归档",time:"2026-10-18 16:40",state:"done",actor:"系统/Tech",note:"保留期365天；取证材料转入合规档案"},{step:6,label:"清退完成",time:"2026-10-20 12:00",state:"done",actor:"系统/Tech",note:"状态置为已归档"}]}},
         {id:"partner-1012",name:"Emerald Reach",type:"机构合作方",country:"TH",stage:"onboarded",status:"active",risk:"normal",owner:"运营/Ops",ownerRole:"operations",amount:56200,updated:"2026-11-04 11:25",kyc:{status:"verified",syncAt:"2026-10-08 10:00",source:"CRM"},kyb:{status:"verified",syncAt:"2026-10-08 10:00",source:"CRM"},credit:{grade:"C1",score:660,adjustable:false},performance:{clicks:18900,validFtd:61,commission:56200,qualityGrade:"B",roi:1.05},crmId:"crm-pt-88221"},
         {id:"partner-1013",name:"Harbor Line Media",type:"渠道代理",country:"VN",stage:"watching",status:"processing",risk:"high",owner:"风控/Risk",ownerRole:"risk",amount:38900,updated:"2026-11-05 06:00",kyc:{status:"sync_failed",syncAt:"2026-11-04 20:15",source:"CRM"},kyb:{status:"verified",syncAt:"2026-10-15 12:00",source:"CRM"},credit:{grade:"C0",score:480,adjustable:true},performance:{clicks:16700,validFtd:39,commission:38900,qualityGrade:"D",roi:0.64},crmId:"crm-pt-88222",watchReason:"集群风险案件组关联（risk-case-5003）；KYC同步异常跳集成任务处理"},
         {id:"partner-1014",name:"Silver Fox Affiliates",type:"个人合作方",country:"ID",stage:"onboarded",status:"active",risk:"low",owner:"运营/Ops",ownerRole:"operations",amount:43100,updated:"2026-11-02 17:45",kyc:{status:"verified",syncAt:"2026-10-22 08:50",source:"CRM"},kyb:{status:"not_required",syncAt:"-",source:"CRM"},credit:{grade:"C2",score:700,adjustable:false},performance:{clicks:12300,validFtd:58,commission:43100,qualityGrade:"A",roi:1.35},crmId:"crm-pt-88223"},
         {id:"partner-1015",name:"Terra Nova Ads",type:"机构合作方",country:"MY",stage:"reviewing",status:"returned",risk:"medium",owner:"运营/Ops",ownerRole:"operations",amount:0,updated:"2026-11-04 19:30",kyc:{status:"pending",syncAt:"2026-11-04 09:10",source:"CRM"},kyb:{status:"pending",syncAt:"2026-11-04 09:10",source:"CRM"},credit:{grade:"C0",score:500,adjustable:false},performance:null,crmId:"crm-pt-88224",onboard:{submittedAt:"2026-11-03 16:00",materials:[{name:"营业执照",state:"returned"},{name:"法人证件",state:"submitted"},{name:"地址证明",state:"submitted"},{name:"银行账户证明",state:"missing"},{name:"流量来源说明",state:"submitted"}],autoReviewEligible:false,note:"营业执照区域与申报国家不一致，已退回修正；等待重新提交"}},
         {id:"partner-1016",name:"Aurora Click Co.",type:"渠道代理",country:"PH",stage:"onboarded",status:"active",risk:"normal",owner:"运营/Ops",ownerRole:"operations",amount:61500,updated:"2026-11-05 04:20",kyc:{status:"verified",syncAt:"2026-10-30 11:05",source:"CRM"},kyb:{status:"verified",syncAt:"2026-10-30 11:05",source:"CRM"},credit:{grade:"C1",score:645,adjustable:false},performance:{clicks:20100,validFtd:66,commission:61500,qualityGrade:"B",roi:1.10},crmId:"crm-pt-88225"},
-        {id:"partner-1017",name:"Mistral Growth",type:"机构合作方",country:"TH",stage:"offboarding",status:"processing",risk:"medium",owner:"财务/Finance",ownerRole:"finance",amount:87400,updated:"2026-11-05 03:15",kyc:{status:"verified",syncAt:"2026-09-10 14:25",source:"CRM"},kyb:{status:"verified",syncAt:"2026-09-10 14:25",source:"CRM"},credit:{grade:"C1",score:600,adjustable:false},performance:{clicks:19800,validFtd:74,commission:87400,qualityGrade:"C",roi:0.92},crmId:"crm-pt-88226",offboard:{reason:"主体迁移",initiatedBy:"运营/Ops",initiatedAt:"2026-11-04 09:30",currentStep:2,guaranteeHeld:12400,timeline:[{step:1,label:"发起清退",time:"2026-11-04 09:30",state:"done",actor:"运营/Ops",note:"主体迁移至新法律实体；历史数据不迁移"},{step:2,label:"推广链接下线",time:"2026-11-04 10:00",state:"doing",actor:"系统/Tech",note:"22条链接切换至新主体白名单"},{step:3,label:"最终结算生成",time:"",state:"pending",actor:"财务/Finance",note:"11月结算批次锁定后生成清退单"},{step:4,label:"保证金审批",time:"",state:"pending",actor:"财务/Finance",note:"保留保证金 12,400 USD 待审批（跳转资金组处理）"},{step:5,label:"资料归档",time:"",state:"pending",actor:"系统/Tech",note:"旧主体资料归档；新主体重新入驻"},{step:6,label:"清退完成",time:"",state:"pending",actor:"系统/Tech",note:"状态置为已归档"}]}},
+        {id:"partner-1017",name:"Mistral Growth",type:"机构合作方",country:"TH",stage:"offboarding",status:"processing",risk:"medium",owner:"财务/Finance",ownerRole:"finance",amount:87400,updated:"2026-11-05 03:15",kyc:{status:"verified",syncAt:"2026-09-10 14:25",source:"CRM"},kyb:{status:"verified",syncAt:"2026-09-10 14:25",source:"CRM"},credit:{grade:"C1",score:600,adjustable:false},performance:{clicks:19800,validFtd:74,commission:87400,qualityGrade:"C",roi:0.92},crmId:"crm-pt-88226",offboard:{reason:"主体迁移",initiatedBy:"运营/Ops",initiatedAt:"2026-11-04 09:30",currentStep:2,guaranteeHeld:12400,timeline:[{step:1,label:"发起清退",time:"2026-11-04 09:30",state:"done",actor:"运营/Ops",note:"主体迁移至新法律实体；历史数据不迁移"},{step:2,label:"推广链接下线",time:"2026-11-04 10:00",state:"doing",actor:"系统/Tech",note:"22条链接切换至新主体白名单"},{step:3,label:"最终结算生成",time:null,state:"pending",actor:"财务/Finance",note:"11月结算批次锁定后生成清退单"},{step:4,label:"保证金审批",time:null,state:"pending",actor:"财务/Finance",note:"保留保证金 12,400 USD 待审批（跳转资金组处理）"},{step:5,label:"资料归档",time:null,state:"pending",actor:"系统/Tech",note:"旧主体资料归档；新主体重新入驻"},{step:6,label:"清退完成",time:null,state:"pending",actor:"系统/Tech",note:"状态置为已归档"}]}},
         {id:"partner-1018",name:"Lotus Peak Media",type:"机构合作方",country:"VN",stage:"onboarded",status:"active",risk:"low",owner:"运营/Ops",ownerRole:"operations",amount:93800,updated:"2026-11-03 09:55",kyc:{status:"verified",syncAt:"2026-10-01 15:35",source:"CRM"},kyb:{status:"verified",syncAt:"2026-10-01 15:35",source:"CRM"},credit:{grade:"C2",score:710,adjustable:false},performance:{clicks:27400,validFtd:97,commission:93800,qualityGrade:"A",roi:1.18},crmId:"crm-pt-88227"},
         {id:"partner-1019",name:"Falcon Crest Ads",type:"个人合作方",country:"ID",stage:"archived",status:"closed",risk:"normal",owner:"运营/Ops",ownerRole:"operations",amount:0,updated:"2026-10-05 10:00",kyc:{status:"expired",syncAt:"2026-09-28 08:00",source:"CRM"},kyb:{status:"not_required",syncAt:"-",source:"CRM"},credit:{grade:"C0",score:500,adjustable:false},performance:null,crmId:"crm-pt-88228",offboard:{reason:"协商终止",initiatedBy:"运营/Ops",initiatedAt:"2026-09-20 11:00",currentStep:6,guaranteeHeld:0,timeline:[{step:1,label:"发起清退",time:"2026-09-20 11:00",state:"done",actor:"运营/Ops",note:"合作方主动退出计划"},{step:2,label:"推广链接下线",time:"2026-09-20 11:10",state:"done",actor:"系统/Tech",note:"9条链接下线"},{step:3,label:"最终结算生成",time:"2026-09-22 09:30",state:"done",actor:"财务/Finance",note:"9月结算已结清"},{step:4,label:"保证金审批",time:"2026-09-25 14:00",state:"done",actor:"财务/Finance",note:"保证金全额释放"},{step:5,label:"资料归档",time:"2026-10-02 16:00",state:"done",actor:"系统/Tech",note:"资料转入归档区"},{step:6,label:"清退完成",time:"2026-10-05 10:00",state:"done",actor:"系统/Tech",note:"状态置为已归档"}]}},
-        {id:"partner-1020",name:"Ironwood Digital",type:"机构合作方",country:"TH",stage:"watching",status:"processing",risk:"medium",owner:"风控/Risk",ownerRole:"risk",amount:71600,updated:"2026-11-05 02:40",kyc:{status:"verified",syncAt:"2026-10-25 09:15",source:"CRM"},kyb:{status:"verified",syncAt:"2026-10-25 09:15",source:"CRM"},credit:{grade:"C1",score:620,adjustable:true},performance:{clicks:24300,validFtd:88,commission:71600,qualityGrade:"C",roi:0.95},crmId:"crm-pt-88229",watchReason:"转化质量连续两周下滑，观察质量服务指标"},
+        {id:"partner-1020",name:"Ironwood Digital",type:"机构合作方",country:"TH",stage:"watching",status:"processing",risk:"medium",owner:"风控/Risk",ownerRole:"risk",amount:71600,updated:"2026-11-05 02:40",kyc:{status:"verified",syncAt:"2026-10-25 09:15",source:"CRM"},kyb:{status:"verified",syncAt:"2026-10-25 09:15",source:"CRM"},credit:{grade:"C1",score:620,adjustable:true},performance:{clicks:24300,validFtd:88,commission:71600,qualityGrade:"C",roi:0.95},crmId:"crm-pt-88229",watchReason:"转化质量连续两周下滑，观察质量升档指标"},
         {id:"partner-1021",name:"Pacific Rim KOL",type:"个人合作方",country:"PH",stage:"onboarded",status:"active",risk:"normal",owner:"运营/Ops",ownerRole:"operations",amount:34700,updated:"2026-11-04 15:05",kyc:{status:"verified",syncAt:"2026-10-28 13:45",source:"CRM"},kyb:{status:"not_required",syncAt:"-",source:"CRM"},credit:{grade:"C1",score:635,adjustable:false},performance:{clicks:9800,validFtd:45,commission:34700,qualityGrade:"B",roi:1.15},crmId:"crm-pt-88230"},
-        {id:"partner-1022",name:"Vantage Point Media",type:"机构合作方",country:"MY",stage:"applying",status:"pending",risk:"low",owner:"运营/Ops",ownerRole:"operations",amount:0,updated:"2026-11-04 21:10",kyc:{status:"pending",syncAt:"2026-11-04 21:10",source:"CRM"},kyb:{status:"pending",syncAt:"2026-11-04 21:10",source:"CRM"},credit:{grade:"C0",score:500,adjustable:false},performance:null,crmId:"crm-pt-88231",onboard:{submittedAt:"2026-11-04 21:10",materials:[{name:"营业执照",state:"submitted"},{name:"法人证件",state:"submitted"},{name:"地址证明",state:"submitted"},{name:"银行账户证明",state:"submitted"},{name:"W-8BEN税务表",state:"submitted"},{name:"渠道代理协议",state:"submitted"}],autoReviewEligible:true,note:"材料齐全且KYC同步通过，命中自动审核条件"}},
+        {id:"partner-1022",name:"Vantage Point Media",type:"机构合作方",country:"MY",stage:"applying",status:"pending",risk:"low",owner:"运营/Ops",ownerRole:"operations",amount:0,updated:"2026-11-04 21:10",kyc:{status:"pending",syncAt:"2026-11-04 21:10",source:"CRM"},kyb:{status:"pending",syncAt:"2026-11-04 21:10",source:"CRM"},credit:{grade:"C0",score:500,adjustable:false},performance:null,crmId:"crm-pt-88231",onboard:{submittedAt:"2026-11-04 21:10",materials:[{name:"营业执照",state:"submitted"},{name:"法人证件",state:"submitted"},{name:"地址证明",state:"submitted"},{name:"银行账户证明",state:"submitted"},{name:"补充协议",state:"submitted"},{name:"渠道代理协议",state:"submitted"}],autoReviewEligible:true,note:"材料齐全且KYC同步通过，命中自动审核条件"}},
         {id:"partner-1023",name:"Stone Harbor Ads",type:"渠道代理",country:"VN",stage:"onboarded",status:"active",risk:"low",owner:"运营/Ops",ownerRole:"operations",amount:49300,updated:"2026-11-03 16:30",kyc:{status:"verified",syncAt:"2026-10-14 10:40",source:"CRM"},kyb:{status:"verified",syncAt:"2026-10-14 10:40",source:"CRM"},credit:{grade:"C2",score:680,adjustable:false},performance:{clicks:17600,validFtd:52,commission:49300,qualityGrade:"A",roi:1.22},crmId:"crm-pt-88232"},
         {id:"partner-1024",name:"Willow Creek KOL",type:"个人合作方",country:"TH",stage:"watching",status:"processing",risk:"medium",owner:"风控/Risk",ownerRole:"risk",amount:22800,updated:"2026-11-04 13:20",kyc:{status:"failed",syncAt:"2026-11-01 09:50",source:"CRM"},kyb:{status:"not_required",syncAt:"-",source:"CRM"},credit:{grade:"C0",score:505,adjustable:false},performance:{clicks:8200,validFtd:24,commission:22800,qualityGrade:"C",roi:0.98},crmId:"crm-pt-88233",watchReason:"KYC认证失败（证件过期）；暂停计佣等待补件"},
-        {id:"partner-1025",name:"Granite Peak Partners",type:"机构合作方",country:"ID",stage:"offboarding",status:"processing",risk:"high",owner:"合规/Compliance",ownerRole:"compliance",amount:110500,updated:"2026-11-04 08:45",kyc:{status:"verified",syncAt:"2026-09-05 10:30",source:"CRM"},kyb:{status:"verified",syncAt:"2026-09-05 10:30",source:"CRM"},credit:{grade:"C0",score:430,adjustable:false},performance:{clicks:26800,validFtd:96,commission:110500,qualityGrade:"D",roi:0.58},crmId:"crm-pt-88234",offboard:{reason:"违规终止",initiatedBy:"风控主管",initiatedAt:"2026-11-01 14:00",currentStep:4,guaranteeHeld:26000,timeline:[{step:1,label:"发起清退",time:"2026-11-01 14:00",state:"done",actor:"风控主管",note:"多层违规叠加；关联案件组risk-case-5001"},{step:2,label:"推广链接下线",time:"2026-11-01 14:02",state:"done",actor:"系统/Tech",note:"全部链接立即下线"},{step:3,label:"最终结算生成",time:"2026-11-02 09:15",state:"done",actor:"财务/Finance",note:"违规佣金冻结；合法部分进入结算"},{step:4,label:"保证金审批",time:"2026-11-04 08:45",state:"doing",actor:"财务/Finance",note:"保留保证金 26,000 USD 抵扣审批中（跳转资金组处理）"},{step:5,label:"资料归档",time:"",state:"pending",actor:"系统/Tech",note:"取证材料保留1095天"},{step:6,label:"清退完成",time:"",state:"pending",actor:"系统/Tech",note:"状态置为已归档"}]}},
+        {id:"partner-1025",name:"Granite Peak Partners",type:"机构合作方",country:"ID",stage:"offboarding",status:"processing",risk:"high",owner:"合规/Compliance",ownerRole:"compliance",amount:110500,updated:"2026-11-04 08:45",kyc:{status:"verified",syncAt:"2026-09-05 10:30",source:"CRM"},kyb:{status:"verified",syncAt:"2026-09-05 10:30",source:"CRM"},credit:{grade:"C0",score:430,adjustable:false},performance:{clicks:26800,validFtd:96,commission:110500,qualityGrade:"D",roi:0.58},crmId:"crm-pt-88234",offboard:{reason:"违规终止",initiatedBy:"风控主管",initiatedAt:"2026-11-01 14:00",currentStep:4,guaranteeHeld:26000,timeline:[{step:1,label:"发起清退",time:"2026-11-01 14:00",state:"done",actor:"风控主管",note:"多层违规叠加；关联案件组risk-case-5001"},{step:2,label:"推广链接下线",time:"2026-11-01 14:02",state:"done",actor:"系统/Tech",note:"全部链接立即下线"},{step:3,label:"最终结算生成",time:"2026-11-02 09:15",state:"done",actor:"财务/Finance",note:"违规佣金冻结；合法部分进入结算"},{step:4,label:"保证金审批",time:"2026-11-04 08:45",state:"doing",actor:"财务/Finance",note:"保留保证金 26,000 USD 抵扣审批中（跳转资金组处理）"},{step:5,label:"资料归档",time:null,state:"pending",actor:"系统/Tech",note:"取证材料保留1095天"},{step:6,label:"清退完成",time:null,state:"pending",actor:"系统/Tech",note:"状态置为已归档"}]}},
         {id:"partner-1026",name:"Bluejay Media House",type:"机构合作方",country:"MY",stage:"archived",status:"closed",risk:"normal",owner:"运营/Ops",ownerRole:"operations",amount:0,updated:"2026-10-12 09:00",kyc:{status:"expired",syncAt:"2026-09-30 10:15",source:"CRM"},kyb:{status:"verified",syncAt:"2026-09-30 10:15",source:"CRM"},credit:{grade:"C0",score:500,adjustable:false},performance:null,crmId:"crm-pt-88235",offboard:{reason:"协商终止",initiatedBy:"运营/Ops",initiatedAt:"2026-09-25 15:00",currentStep:6,guaranteeHeld:0,timeline:[{step:1,label:"发起清退",time:"2026-09-25 15:00",state:"done",actor:"运营/Ops",note:"业务方向调整退出"},{step:2,label:"推广链接下线",time:"2026-09-25 15:30",state:"done",actor:"系统/Tech",note:"14条链接下线"},{step:3,label:"最终结算生成",time:"2026-09-28 10:00",state:"done",actor:"财务/Finance",note:"结清全部佣金"},{step:4,label:"保证金审批",time:"2026-10-01 11:20",state:"done",actor:"财务/Finance",note:"保证金全额释放"},{step:5,label:"资料归档",time:"2026-10-10 14:00",state:"done",actor:"系统/Tech",note:"资料转入归档区"},{step:6,label:"清退完成",time:"2026-10-12 09:00",state:"done",actor:"系统/Tech",note:"状态置为已归档"}]}}
       ],
       noteTemplates: [
         {id:"note-5001",partnerId:"partner-1001",time:"2026-11-04 16:20",author:"运营/Ops",type:"沟通",content:"季度复盘会议：Q4配额上调至240单已确认；素材交付排期同步。",nextFollowUp:"2026-12-01"},
-        {id:"note-5002",partnerId:"partner-1004",time:"2026-11-03 10:15",author:"风控/Risk",type:"风险",content:"观察期第9天：流量来源说明已补交，待下周质量服务指标复核。",nextFollowUp:"2026-11-10"},
+        {id:"note-5002",partnerId:"partner-1004",time:"2026-11-03 10:15",author:"风控/Risk",type:"风险",content:"观察期第9天：流量来源说明已补交，待下周质量升档指标复核。",nextFollowUp:"2026-11-10"},
         {id:"note-5003",partnerId:"partner-1006",time:"2026-11-05 09:05",author:"运营/Ops",type:"沟通",content:"KYB企业注册号不一致已通知补件；审核截止48小时。",nextFollowUp:"2026-11-07"},
         {id:"note-5004",partnerId:"partner-1013",time:"2026-11-04 20:30",author:"系统/Tech",type:"风险",content:"KYC同步连续失败3次，已生成集成任务int-801；归因等待CRM侧恢复。",nextFollowUp:"-"},
         {id:"note-5005",partnerId:"partner-1015",time:"2026-11-04 19:30",author:"合规/Compliance",type:"素材",content:"营业执照区域不符已退回；合作方确认重新提交预计11-06。",nextFollowUp:"2026-11-06"},
@@ -433,14 +433,14 @@
     client360: {
       lifecycleStages: [
         {id:"registered",label:"已注册",hint:"注册完成未入金"},
-        {id:"ftd",label:"FTD",hint:"首次入金完成"},
-        {id:"valid_ftd",label:"有效FTD",hint:"达到有效FTD标准"},
+        {id:"ftd",label:"首次入金",hint:"首次入金完成"},
+        {id:"valid_ftd",label:"有效转化",hint:"达到有效转化标准"},
         {id:"churned",label:"流失",hint:"90日无交易"}
       ],
       views: [
         {id:"all",label:"全部",hint:"全量客户视图"},
         {id:"risk",label:"风险",hint:"高风险客户筛选"},
-        {id:"valid",label:"有效FTD",hint:"有效转化客户"}
+        {id:"valid",label:"有效转化",hint:"有效转化客户"}
       ],
       riskGradeLabels: {R0:"R0 无风险",R1:"R1 低风险",R2:"R2 中风险",R3:"R3 高风险"},
       clients: [
@@ -506,22 +506,22 @@
     },
     eventChainCatalog: {
       searchPlaceholder: "输入 TraceId（如 trace-7a3f）或客户/合作方ID，回车检索全链路",
-      nodeTypeLabels: {click:"点击",registration:"注册",ftd:"FTD",commission:"计佣",hold:"结算中",release:"释放",settlement:"结算",withdrawal:"提现",exception:"异常",gap:"缺数"},
+      nodeTypeLabels: {click:"点击",registration:"注册",ftd:"首次入金",commission:"计佣",hold:"结算中",release:"释放",settlement:"结算",withdrawal:"提现",exception:"异常",gap:"缺数"},
       chains: [
-        {traceId:"trace-7a01",client:"client-2001",partner:"partner-1001",summary:"TH优质客户标准全链路（有效FTD→计佣→结算中→释放→结算）",totalCommission:860,chain:[
+        {traceId:"trace-7a01",client:"client-2001",partner:"partner-1001",summary:"TH优质客户标准全链路（有效转化→计佣→结算中→释放→结算）",totalCommission:860,chain:[
           {seq:1,type:"click",time:"2026-10-12 09:14",label:"TikTok-TH点击lnk-4001",detail:"设备DEV-A31F·IP 27.145.x.x·官方落地页",status:"success",target:"link-list"},
           {seq:2,type:"registration",time:"2026-10-12 09:16",label:"注册完成client-2001",detail:"CRM回调成功·归属判定：首点击归因partner-1001",status:"success",target:"client-list"},
-          {seq:3,type:"ftd",time:"2026-10-14 22:05",label:"FTD 1,200 USD",detail:"VISA*4291入金·支付回调成功",status:"success",target:"client-list"},
-          {seq:4,type:"commission",time:"2026-10-14 22:06",label:"计佣860 USD",detail:"资格档CPA-TH-A·里程碑注册+有效FTD达成",status:"success",target:"commission-list"},
+          {seq:3,type:"ftd",time:"2026-10-14 22:05",label:"首次入金 1,200 USD",detail:"VISA*4291入金·支付回调成功",status:"success",target:"client-list"},
+          {seq:4,type:"commission",time:"2026-10-14 22:06",label:"计佣860 USD",detail:"资格档CPA-TH-A·里程碑注册+有效转化达成",status:"success",target:"commission-list"},
           {seq:5,type:"hold",time:"2026-10-14 22:06",label:"结算中 860 USD（D+14）",detail:"理论结算期7日+质量附加7日",status:"success",target:"hold-workbench"},
           {seq:6,type:"release",time:"2026-10-28 22:10",label:"结算释放",detail:"D+14到期·无风险事件·自动释放",status:"success",target:"commission-list"},
-          {seq:7,type:"settlement",time:"2026-11-01 10:00",label:"进入11月结算批次",detail:"结算单STMT-1101·净额含税费代扣",status:"success",target:"statement-list"},
-          {seq:8,type:"withdrawal",time:"",label:"等待合作方提现",detail:"partner-1001可提现余额已更新",status:"pending",target:"withdrawal-list"}
+          {seq:7,type:"settlement",time:"2026-11-01 10:00",label:"进入11月结算批次",detail:"结算单STMT-1101·净额代扣",status:"success",target:"statement-list"},
+          {seq:8,type:"withdrawal",time:null,label:"等待合作方提现",detail:"partner-1001可提现余额已更新",status:"pending",target:"withdrawal-list"}
         ]},
         {traceId:"trace-7a3f",client:"client-2013",partner:"partner-1025",summary:"VN欺诈链（盗卡→拒付→佣金清零→保证金抵扣）",totalCommission:0,chain:[
           {seq:1,type:"click",time:"2026-08-30 19:38",label:"TikTok-VN点击lnk-4001",detail:"代理IP 27.68.x.x·设备指纹L99H",status:"success",target:"link-list"},
           {seq:2,type:"registration",time:"2026-08-30 19:40",label:"注册完成client-2013",detail:"归属判定：首点击归因partner-1025",status:"success",target:"client-list"},
-          {seq:3,type:"ftd",time:"2026-08-31 09:15",label:"FTD 2,200 USD",detail:"盗刷VISA*7781入金（当时未识别）",status:"success",target:"client-list"},
+          {seq:3,type:"ftd",time:"2026-08-31 09:15",label:"首次入金 2,200 USD",detail:"盗刷VISA*7781入金（当时未识别）",status:"success",target:"client-list"},
           {seq:4,type:"commission",time:"2026-08-31 09:16",label:"计佣1,540 USD",detail:"资格档CPA-VN-A",status:"success",target:"commission-list"},
           {seq:5,type:"hold",time:"2026-08-31 09:16",label:"结算中 1,540 USD（D+21风险附加）",detail:"VN国家风险系数上浮",status:"success",target:"hold-workbench"},
           {seq:6,type:"exception",time:"2026-09-02 11:00",label:"风险事件：盗卡识别R3",detail:"rev-evt-2602·欺诈库crm-fraud-1420命中·集群cluster-8803",status:"failed",target:"client-list"},
@@ -532,22 +532,22 @@
         {traceId:"trace-9c2e",client:"client-2011",partner:"partner-1023",summary:"TH客户事件缺数链（注册回调缺失→Outbox补数中）",totalCommission:1980,chain:[
           {seq:1,type:"click",time:"2026-09-20 10:03",label:"Line-TH点击lnk-4006",detail:"二级渠道链·Sub ID Line-TH",status:"success",target:"link-list"},
           {seq:2,type:"registration",time:"2026-09-20 10:05",label:"注册完成client-2011",detail:"归属判定：首点击归因partner-1023",status:"success",target:"client-list"},
-          {seq:3,type:"ftd",time:"2026-09-22 15:40",label:"FTD 2,800 USD",detail:"银行转账SCB·支付回调成功",status:"success",target:"client-list"},
+          {seq:3,type:"ftd",time:"2026-09-22 15:40",label:"首次入金 2,800 USD",detail:"银行转账SCB·支付回调成功",status:"success",target:"client-list"},
           {seq:4,type:"gap",time:"2026-10-30 09:40",label:"事件缺数exc-6002",detail:"CRM注册回调缺失·Outbox缺口任务gap-801补数中",status:"pending",target:"attribution-links"},
           {seq:5,type:"commission",time:"2026-10-30 09:45",label:"计佣1,980 USD（账务暂挂）",detail:"缺口补齐前账务挂起·幂等键backfill-crm-reg-801",status:"processing",target:"commission-list"},
-          {seq:6,type:"hold",time:"",label:"结算中（待补数后启动）",detail:"账务挂起中，不进入结算放行",status:"pending",target:"hold-workbench"}
+          {seq:6,type:"hold",time:null,label:"结算中（待补数后启动）",detail:"账务挂起中，不进入结算放行",status:"pending",target:"hold-workbench"}
         ]},
         {traceId:"trace-4b8d",client:"client-2017",partner:"partner-1021",summary:"ZA黑名单IP链（来源无效→佣金隔离）",totalCommission:0,chain:[
           {seq:1,type:"click",time:"2026-10-10 15:18",label:"Telegram-ZA点击lnk-4005",detail:"代理IP 154.66.x.x·命中IP段黑名单",status:"failed",target:"link-list"},
           {seq:2,type:"registration",time:"2026-10-10 15:20",label:"注册完成client-2017",detail:"归属判定挂起：来源无效",status:"processing",target:"client-list"},
-          {seq:3,type:"ftd",time:"2026-10-12 08:30",label:"FTD 700 USD",detail:"U卡入金被支付侧拦截2次后成功",status:"warning",target:"client-list"},
+          {seq:3,type:"ftd",time:"2026-10-12 08:30",label:"首次入金 700 USD",detail:"U卡入金被支付侧拦截2次后成功",status:"warning",target:"client-list"},
           {seq:4,type:"commission",time:"2026-10-12 08:31",label:"计佣420 USD（隔离）",detail:"佣金隔离·待人工复核exc-6003",status:"pending",target:"commission-list"},
           {seq:5,type:"exception",time:"2026-11-02 16:40",label:"归属异常exc-6003",detail:"来源无效·IP黑名单引用crm-fraud-1501",status:"pending",target:"attribution-links"}
         ]},
         {traceId:"trace-2e5a",client:"client-2010",partner:"partner-1016",summary:"ZA路径未入库链（落地页版本缺失→等待外部）",totalCommission:420,chain:[
           {seq:1,type:"click",time:"2026-10-15 08:28",label:"WhatsApp-ZA点击lnk-4001",detail:"落地页v2.3未收录官方路径库",status:"success",target:"link-list"},
           {seq:2,type:"registration",time:"2026-10-15 08:30",label:"注册完成client-2010",detail:"归属判定：首点击归因partner-1016（临时）",status:"success",target:"client-list"},
-          {seq:3,type:"ftd",time:"2026-10-16 14:20",label:"FTD 1,000 USD",detail:"银行转账FNB·支付回调成功",status:"success",target:"client-list"},
+          {seq:3,type:"ftd",time:"2026-10-16 14:20",label:"首次入金 1,000 USD",detail:"银行转账FNB·支付回调成功",status:"success",target:"client-list"},
           {seq:4,type:"commission",time:"2026-10-16 14:21",label:"计佣420 USD（账务暂挂）",detail:"路径入库后自动重算·exc-6004",status:"waiting_external",target:"commission-list"},
           {seq:5,type:"gap",time:"2026-10-28 11:15",label:"路径入库任务",detail:"官方路径库v2.3入库审批中（配置中心）",status:"processing",target:"attribution-links"}
         ]},
@@ -561,7 +561,7 @@
         {traceId:"trace-6f0b",client:"client-2019",partner:"partner-1001",summary:"MY回调延迟链（支付延迟2小时→补数恢复）",totalCommission:470,chain:[
           {seq:1,type:"click",time:"2026-10-25 12:33",label:"Line-MY点击lnk-4001",detail:"住宅IP 60.48.x.x",status:"success",target:"link-list"},
           {seq:2,type:"registration",time:"2026-10-25 12:35",label:"注册完成client-2019",detail:"归属判定：首点击归因partner-1001",status:"success",target:"client-list"},
-          {seq:3,type:"ftd",time:"2026-10-26 10:00",label:"FTD 1,100 USD",detail:"Touch n Go入金·回调延迟2小时",status:"warning",target:"client-list"},
+          {seq:3,type:"ftd",time:"2026-10-26 10:00",label:"首次入金 1,100 USD",detail:"Touch n Go入金·回调延迟2小时",status:"warning",target:"client-list"},
           {seq:4,type:"gap",time:"2026-10-18 15:00",label:"事件缺数exc-6006（历史）",detail:"支付回调延迟·已补数恢复",status:"success",target:"attribution-links"},
           {seq:5,type:"commission",time:"2026-10-26 12:10",label:"计佣470 USD",detail:"补数完成·账务恢复正常",status:"success",target:"commission-list"},
           {seq:6,type:"hold",time:"2026-10-26 12:10",label:"结算中 470 USD（D+14）",detail:"理论结算期7日+质量附加7日",status:"success",target:"hold-workbench"},
@@ -630,7 +630,7 @@
       testEvents: [
         {event:"install",hint:"模拟注册事件回传"},
         {event:"ftd",hint:"模拟首次入金回传"},
-        {event:"valid_ftd",hint:"模拟有效FTD回传"}
+        {event:"valid_ftd",hint:"模拟有效转化回传"}
       ]
     },
     trackerCatalog: {
@@ -640,90 +640,85 @@
           {seq:1,time:"2026-10-12 09:14",label:"点击官方落地页",detail:"IP 27.145.x.x · 落地页停留42秒",status:"success"},
           {seq:2,time:"2026-10-12 09:15",label:"跳转注册页",detail:"utm参数完整 · Sub ID TikTok-TH",status:"success"},
           {seq:3,time:"2026-10-12 09:16",label:"注册完成",detail:"client-2001 · CRM回调成功",status:"success"},
-          {seq:4,time:"2026-10-14 22:05",label:"FTD 1,200 USD",detail:"VISA*4291 · 归因判定成功",status:"success"},
+          {seq:4,time:"2026-10-14 22:05",label:"首次入金 1,200 USD",detail:"VISA*4291 · 归因判定成功",status:"success"},
           {seq:5,time:"2026-10-14 22:06",label:"计佣860 USD",detail:"资格档CPA-TH-A · 进入结算",status:"success"}
         ]},
         {id:"clk-2b7c",linkId:"lnk-4007",subId:"Google-BR",partner:"partner-1014",country:"BR",device:"iOS·DEV-P44L",source:"Google搜索广告",traceId:"trace-7a09",clickedAt:"2026-09-15 08:03",path:[
           {seq:1,time:"2026-09-15 08:03",label:"点击BR落地页v2",detail:"IP 191.32.x.x · 落地页v2.3",status:"success"},
           {seq:2,time:"2026-09-15 08:05",label:"注册完成",detail:"client-2018 · 官方路径直连",status:"success"},
-          {seq:3,time:"2026-09-15 08:07",label:"FTD 2,600 USD",detail:"Pix入金 · 归因待路径入库",status:"processing"},
+          {seq:3,time:"2026-09-15 08:07",label:"首次入金 2,600 USD",detail:"Pix入金 · 归因待路径入库",status:"processing"},
           {seq:4,time:"2026-09-15 08:08",label:"计佣1,780 USD（暂挂）",detail:"exc-6004：路径入库后重算",status:"pending"}
         ]},
         {id:"clk-9e1d",linkId:"lnk-4008",subId:"Telegram-ZA",partner:"partner-1021",country:"ZA",device:"Android·DEV-O33K",source:"Telegram频道",traceId:"trace-4b8d",clickedAt:"2026-10-10 15:18",path:[
           {seq:1,time:"2026-10-10 15:18",label:"点击KOL专属链",detail:"IP 154.66.x.x · 命中IP段黑名单",status:"failed"},
           {seq:2,time:"2026-10-10 15:20",label:"注册完成",detail:"client-2017 · 归属判定挂起",status:"processing"},
-          {seq:3,time:"2026-10-12 08:31",label:"FTD 700 USD",detail:"佣金隔离 · exc-6003",status:"failed"}
+          {seq:3,time:"2026-10-12 08:31",label:"首次入金 700 USD",detail:"佣金隔离 · exc-6003",status:"failed"}
         ]},
         {id:"clk-4c8a",linkId:"lnk-4003",subId:"YouTube-TH",partner:"partner-1008",country:"TH",device:"Desktop·DEV-E22A",source:"YouTube频道简介",traceId:"trace-7a04",clickedAt:"2026-09-28 13:44",path:[
           {seq:1,time:"2026-09-28 13:44",label:"点击注册直链",detail:"IP 171.101.x.x · Web端",status:"success"},
           {seq:2,time:"2026-09-28 13:45",label:"注册完成",detail:"client-2005 · 归因成功",status:"success"},
-          {seq:3,time:"2026-09-30 20:10",label:"FTD 3,500 USD",detail:"银行转账 · 归因确认",status:"success"},
+          {seq:3,time:"2026-09-30 20:10",label:"首次入金 3,500 USD",detail:"银行转账 · 归因确认",status:"success"},
           {seq:4,time:"2026-09-30 20:11",label:"计佣2,600 USD",detail:"质量A级 · 进入结算",status:"success"}
         ]},
         {id:"clk-6d2f",linkId:"lnk-4002",subId:"YouTube-ID",partner:"partner-1002",country:"ID",device:"Android·DEV-B7C2",source:"YouTube广告",traceId:"trace-7a02",clickedAt:"2026-10-18 16:39",path:[
           {seq:1,time:"2026-10-18 16:39",label:"点击注册直链",detail:"IP 113.161.x.x · 广告位 banner",status:"success"},
           {seq:2,time:"2026-10-18 16:40",label:"注册完成",detail:"client-2002 · 归因成功",status:"success"},
-          {seq:3,time:"2026-10-19 09:20",label:"FTD 500 USD",detail:"Neteller入金",status:"success"},
+          {seq:3,time:"2026-10-19 09:20",label:"首次入金 500 USD",detail:"Neteller入金",status:"success"},
           {seq:4,time:"2026-10-19 09:21",label:"计佣210 USD",detail:"入金出金间隔48h · 风险观察标记",status:"processing"}
         ]},
         {id:"clk-1a5e",linkId:"lnk-4005",subId:"Facebook-PH",partner:"partner-1021",country:"PH",device:"iOS·DEV-H55D",source:"Facebook帖文",traceId:"trace-7a06",clickedAt:"2026-10-08 11:49",path:[
           {seq:1,time:"2026-10-08 11:49",label:"点击KOL专属链",detail:"IP 112.198.x.x · 指纹H55D",status:"success"},
           {seq:2,time:"2026-10-08 11:50",label:"注册完成",detail:"client-2008 · 归因成功",status:"success"},
-          {seq:3,time:"2026-10-10 15:30",label:"FTD 1,500 USD",detail:"GCash · 归因确认",status:"success"},
+          {seq:3,time:"2026-10-10 15:30",label:"首次入金 1,500 USD",detail:"GCash · 归因确认",status:"success"},
           {seq:4,time:"2026-10-10 15:31",label:"计佣980 USD",detail:"指纹变更1次已核实（系统升级）",status:"success"}
         ]},
         {id:"clk-7f3b",linkId:"lnk-4004",subId:"TikTok-ID",partner:"partner-1014",country:"ID",device:"Android·DEV-G44C",source:"TikTok短视频",traceId:"-",clickedAt:"2026-11-02 10:13",path:[
           {seq:1,time:"2026-11-02 10:13",label:"点击素材参数链",detail:"IP 120.188.x.x · 素材mat-511",status:"success"},
           {seq:2,time:"2026-11-02 10:14",label:"注册完成",detail:"client-2007 · 归因成功",status:"success"},
-          {seq:3,time:"",label:"等待FTD",detail:"注册后48小时内未入金",status:"pending"}
+          {seq:3,time:null,label:"等待首次入金",detail:"注册后48小时内未入金",status:"pending"}
         ]},
         {id:"clk-8c9d",linkId:"lnk-4006",subId:"Line-TH",partner:"partner-1023",country:"TH",device:"iOS·DEV-J77F",source:"Line群组分享",traceId:"trace-9c2e",clickedAt:"2026-09-20 10:03",path:[
           {seq:1,time:"2026-09-20 10:03",label:"点击二级渠道链",detail:"IP 1.46.x.x · Sub ID Line-TH",status:"success"},
           {seq:2,time:"2026-09-20 10:05",label:"注册完成",detail:"client-2011 · 回调缺数（gap-801）",status:"processing"},
-          {seq:3,time:"2026-09-22 15:40",label:"FTD 2,800 USD",detail:"计佣1,980暂挂 · 补数中",status:"processing"}
+          {seq:3,time:"2026-09-22 15:40",label:"首次入金 2,800 USD",detail:"计佣1,980暂挂 · 补数中",status:"processing"}
         ]},
         {id:"clk-3e6g",linkId:"lnk-4001",subId:"WhatsApp-ZA",partner:"partner-1016",country:"ZA",device:"Android·DEV-I66E",source:"WhatsApp状态",traceId:"trace-2e5a",clickedAt:"2026-10-15 08:28",path:[
           {seq:1,time:"2026-10-15 08:28",label:"点击官方落地页",detail:"IP 105.186.x.x · 落地页v2.3未入库",status:"success"},
           {seq:2,time:"2026-10-15 08:30",label:"注册完成",detail:"client-2010 · 临时归因",status:"success"},
-          {seq:3,time:"2026-10-16 14:21",label:"FTD 1,000 USD",detail:"计佣420暂挂 · 等路径入库",status:"processing"}
+          {seq:3,time:"2026-10-16 14:21",label:"首次入金 1,000 USD",detail:"计佣420暂挂 · 等路径入库",status:"processing"}
         ]},
         {id:"clk-5h1i",linkId:"lnk-4002",subId:"Instagram-MY",partner:"partner-1002",country:"MY",device:"iOS·DEV-K88G",source:"Instagram快拍",traceId:"trace-8d1c-0",clickedAt:"2026-08-20 14:24",path:[
           {seq:1,time:"2026-08-20 14:24",label:"点击注册直链",detail:"IP 175.136.x.x",status:"success"},
           {seq:2,time:"2026-08-20 14:25",label:"注册完成",detail:"client-2012 · 归因成功",status:"success"},
-          {seq:3,time:"2026-08-22 09:00",label:"FTD 400 USD",detail:"30日后零登录流失",status:"failed"},
+          {seq:3,time:"2026-08-22 09:00",label:"首次入金 400 USD",detail:"30日后零登录流失",status:"failed"},
           {seq:4,time:"2026-10-15 09:30",label:"客户流失确认",detail:"佣金120已结算不追回",status:"confirmed"}
         ]}
       ]
     },
     funds360: {
       commissions: [
-        {id:"comm-3001",name:"注册+有效FTD佣金",partner:"partner-1001",type:"基础",amount:860,status:"released",settlementBlock:"正常",updated:"2026-10-14 22:06",traceId:"trace-7a01"},
-        {id:"comm-3002",name:"质量服务佣金",partner:"partner-1001",type:"质量",amount:240,status:"released",settlementBlock:"正常",updated:"2026-10-20 10:00",traceId:"trace-7a01"},
-        {id:"comm-3201",name:"注册+有效FTD佣金",partner:"partner-1004",type:"基础",amount:470,status:"pending",settlementBlock:"正常",updated:"2026-10-26 12:10",traceId:"trace-6f0b"},
-        {id:"comm-3301",name:"注册+有效FTD佣金",partner:"partner-1025",type:"基础",amount:1540,status:"blocked",settlementBlock:"案件组阻断",updated:"2026-09-02 11:05",traceId:"trace-7a3f",note:"risk-case-5003集群案件；计佣正常、结算阻断"},
+        {id:"comm-3001",name:"注册+有效转化佣金",partner:"partner-1001",type:"基础",amount:860,status:"released",settlementBlock:"正常",updated:"2026-10-14 22:06",traceId:"trace-7a01"},
+        {id:"comm-3002",name:"质量升档佣金",partner:"partner-1001",type:"质量",amount:240,status:"released",settlementBlock:"正常",updated:"2026-10-20 10:00",traceId:"trace-7a01"},
+        {id:"comm-3201",name:"注册+有效转化佣金",partner:"partner-1004",type:"基础",amount:470,status:"pending",settlementBlock:"正常",updated:"2026-10-26 12:10",traceId:"trace-6f0b"},
+        {id:"comm-3301",name:"注册+有效转化佣金",partner:"partner-1025",type:"基础",amount:1540,status:"blocked",settlementBlock:"案件组阻断",updated:"2026-09-02 11:05",traceId:"trace-7a3f",note:"risk-case-5003集群案件；计佣正常、结算阻断"},
         {id:"comm-3003",name:"附加佣金",partner:"partner-1008",type:"附加",amount:620,status:"released",settlementBlock:"正常",updated:"2026-10-05 09:30",traceId:"trace-7a04"},
-        {id:"comm-3302",name:"质量服务佣金",partner:"partner-1025",type:"质量",amount:0,status:"failed",settlementBlock:"违规清零",updated:"2026-09-02 11:05",traceId:"trace-7a3f"},
-        {id:"comm-3401",name:"注册+有效FTD佣金",partner:"partner-1023",type:"基础",amount:1980,status:"pending",settlementBlock:"缺数挂起",updated:"2026-10-30 09:45",traceId:"trace-9c2e",note:"gap-801补数中，账务暂挂"},
+        {id:"comm-3302",name:"质量升档佣金",partner:"partner-1025",type:"质量",amount:0,status:"failed",settlementBlock:"违规清零",updated:"2026-09-02 11:05",traceId:"trace-7a3f"},
+        {id:"comm-3401",name:"注册+有效转化佣金",partner:"partner-1023",type:"基础",amount:1980,status:"pending",settlementBlock:"缺数挂起",updated:"2026-10-30 09:45",traceId:"trace-9c2e",note:"gap-801补数中，账务暂挂"},
         {id:"comm-3501",name:"保证金前净额",partner:"partner-1016",type:"冲正前",amount:420,status:"pending",settlementBlock:"路径入库",updated:"2026-10-16 14:21",traceId:"trace-2e5a"}
       ],
       statements: [
-        {id:"STMT-1101",name:"11月结算批次W1",partner:"partner-1001",gross:1100,tax:110,guarantee:220,net:770,status:"confirmed",period:"2026-11-01~07"},
-        {id:"STMT-1102",name:"10月结算批次M",partner:"partner-1008",gross:3220,tax:322,guarantee:644,net:2254,status:"paid",period:"2026-10"},
-        {id:"STMT-1103",name:"11月结算批次W1",partner:"partner-1014",gross:260,tax:26,guarantee:52,net:182,status:"draft",period:"2026-11-01~07"},
-        {id:"STMT-1104",name:"清退最终结算",partner:"partner-1003",gross:14300,tax:1430,guarantee:980,net:11890,status:"confirmed",period:"清退",note:"清退单：结算中余额转入"},
-        {id:"STMT-1105",name:"补发结算9月",partner:"partner-1021",gross:700,tax:70,guarantee:140,net:490,status:"pending_approval",period:"2026-09"},
-        {id:"STMT-1106",name:"11月结算批次W1",partner:"partner-1018",gross:1780,tax:178,guarantee:356,net:1246,status:"confirmed",period:"2026-11-01~07"}
-      ],
-      taxRecords: [
-        {id:"tax-201",name:"W-8BEN登记",partner:"partner-1001",rate:10,withheld:110,status:"confirmed",period:"2026-10"},
-        {id:"tax-202",name:"代扣重算",partner:"partner-1008",rate:10,withheld:322,status:"confirmed",period:"2026-10"},
-        {id:"tax-203",name:"税务信息更新待确认",partner:"partner-1016",rate:15,withheld:63,status:"pending",period:"2026-11",note:"税率档变更待财务确认"}
+        {id:"STMT-1101",name:"11月结算批次W1",partner:"partner-1001",gross:1100,guarantee:220,net:880,status:"confirmed",period:"2026-11-01~07"},
+        {id:"STMT-1102",name:"10月结算批次M",partner:"partner-1008",gross:3220,guarantee:644,net:2576,status:"paid",period:"2026-10"},
+        {id:"STMT-1103",name:"11月结算批次W1",partner:"partner-1014",gross:260,guarantee:52,net:208,status:"draft",period:"2026-11-01~07"},
+        {id:"STMT-1104",name:"清退最终结算",partner:"partner-1003",gross:14300,guarantee:980,net:13320,status:"confirmed",period:"清退",note:"清退单：结算中余额转入"},
+        {id:"STMT-1105",name:"补发结算9月",partner:"partner-1021",gross:700,guarantee:140,net:560,status:"pending_approval",period:"2026-09"},
+        {id:"STMT-1106",name:"11月结算批次W1",partner:"partner-1018",gross:1780,guarantee:356,net:1424,status:"confirmed",period:"2026-11-01~07"}
       ],
       withdrawals: [
         {id:"wd-401",name:"银行提现",partner:"partner-1001",amount:5000,fee:25,status:"success",updated:"2026-11-01 10:00",steps:[{t:"2026-11-01 10:00",s:"申请提交",d:"运营审核通过"},{t:"2026-11-01 10:05",s:"账户校验",d:"收款账户与CRM一致"},{t:"2026-11-01 10:10",s:"支付下发",d:"银行渠道"},{t:"2026-11-01 14:30",s:"到账确认",d:"成功"}]},
         {id:"wd-402",name:"电子钱包提现",partner:"partner-1014",amount:1200,fee:12,status:"processing",updated:"2026-11-04 15:00",steps:[{t:"2026-11-04 15:00",s:"申请提交",d:"自动审核通过"},{t:"2026-11-04 15:02",s:"账户校验",d:"钱包校验通过"},{t:"2026-11-04 15:05",s:"支付下发",d:"钱包渠道处理中"}]},
         {id:"wd-403",name:"高风险复核提现",partner:"partner-1013",amount:800,fee:8,status:"manual_required",updated:"2026-11-02 09:00",steps:[{t:"2026-11-02 09:00",s:"申请提交",d:"命中风控：客户R3关联"},{t:"2026-11-02 09:01",s:"人工复核",d:"等待风控确认"}]},
-        {id:"wd-404",name:"失败重试",partner:"partner-1021",amount:600,fee:6,status:"failed",updated:"2026-11-03 16:00",paymentOrderId:"PAY-WD404",channel:"电子钱包",maskedAccount:"wallet-****-4821",failureCode:"CHANNEL_TIMEOUT",failureReason:"支付通道两次响应超时，当前无法确认外部是否已出款。",externalResult:"unknown",balanceState:"申请金额仍占用，未确认最终扣账",reconciliationState:"待人工查证原支付单",attempts:2,maxAttempts:3,receiptId:null,steps:[{t:"2026-11-03 11:00",s:"申请提交",d:"审核通过"},{t:"2026-11-03 11:05",s:"支付下发",d:"渠道超时，外部结果未知"},{t:"2026-11-03 16:00",s:"自动重试",d:"第二次超时，停止自动重试并转人工查证"},{t:"",s:"人工查证",d:"待核对原支付单，不可直接再次出款"}]}
+        {id:"wd-404",name:"失败重试",partner:"partner-1021",amount:600,fee:6,status:"failed",updated:"2026-11-03 16:00",paymentOrderId:"PAY-WD404",channel:"电子钱包",maskedAccount:"wallet-****-4821",failureCode:"CHANNEL_TIMEOUT",failureReason:"支付通道两次响应超时，当前无法确认外部是否已出款。",externalResult:"unknown",balanceState:"申请金额仍占用，未确认最终扣账",reconciliationState:"待人工查证原支付单",attempts:2,maxAttempts:3,receiptId:null,steps:[{t:"2026-11-03 11:00",s:"申请提交",d:"审核通过"},{t:"2026-11-03 11:05",s:"支付下发",d:"渠道超时，外部结果未知"},{t:"2026-11-03 16:00",s:"自动重试",d:"第二次超时，停止自动重试并转人工查证"},{t:null,s:"人工查证",d:"待核对原支付单，不可直接再次出款"}]}
       ],
       reversals: [
         {id:"rev-501",name:"盗卡拒付冲正",partner:"partner-1025",type:"拒付",amount:1540,liable:"合作方全责",status:"executed",updated:"2026-09-02 11:05",path:["拒付识别R3","佣金冲正-1540","保证金抵扣26,000","追索剩余损失"]},
@@ -765,7 +760,7 @@
       ],
       financeReports: [
         {id:"fin-01",name:"佣金支出",period:"2026-10",amount:328900,trend:"+12%",status:"observe",drill:"报表中心/ROI"},
-        {id:"fin-02",name:"税费代扣汇总",period:"2026-10",amount:32890,trend:"+12%",status:"observe",drill:"结算与税费"},
+        {id:"fin-02",name:"代扣汇总",period:"2026-10",amount:32890,trend:"+12%",status:"observe",drill:"结算与"},
         {id:"fin-03",name:"保证金覆盖",period:"2026-11",amount:70400,trend:"-6%",status:"review",drill:"保证金覆盖页签",note:"覆盖率108%（安全线120%示例）"},
         {id:"fin-04",name:"冲正损失",period:"2026-10",amount:1470,trend:"-38%",status:"observe",drill:"冲正与追回"}
       ],
@@ -779,15 +774,15 @@
     },
     configSeeds: {
       configItems: [
-        {id:"item-pricing",name:"价格与佣金档",category:"奖励与资格",currentSummary:"公用四档基础价格；国家仅配置系数；FTD与有效FTD基础比例合计100%",status:"active",owner:"业务/财务",updated:"2026-11-08 09:10",parameters:["四档基础金额","FTD基础比例","有效FTD基础比例","质量服务附加比例","国家系数","币种USD"]},
-        {id:"item-qualification",name:"资格档与里程碑",category:"奖励与资格",currentSummary:"L1-L4档位及FTD、有效FTD、质量服务达标条件",status:"active",owner:"运营/Ops",updated:"2026-11-08 09:12",parameters:["L1-L4阈值","FTD净入金额度/失效周期","有效FTD净入金额度/活跃天数/手数/失效周期","质量服务净入金额度/活跃天数/手数/收益率/失效周期"]},
-        {id:"item-quality",name:"质量服务规则",category:"奖励与资格",currentSummary:"质量服务独立计算，不占FTD与有效FTD基础比例",status:"active",owner:"风控/Risk",updated:"2026-11-08 09:15",parameters:["质量服务开关","净入金额度","交易活跃天数","标准交易手数","收益率","失效周期"]},
+        {id:"item-pricing",name:"价格与佣金档",category:"奖励与资格",currentSummary:"公用四档基础价格；国家仅配置系数；首次入金与有效转化基础比例合计100%",status:"active",owner:"业务/财务",updated:"2026-11-08 09:10",parameters:["四档基础金额","首次入金基础比例","有效转化基础比例","质量升档附加比例","国家系数","币种USD"]},
+        {id:"item-qualification",name:"资格档与里程碑",category:"奖励与资格",currentSummary:"L1-L4档位及首次入金、有效转化、质量升档达标条件",status:"active",owner:"运营/Ops",updated:"2026-11-08 09:12",parameters:["L1-L4阈值","首次入金净入金额度/失效周期","有效转化净入金额度/活跃天数/手数/失效周期","质量升档净入金额度/活跃天数/手数/收益率/失效周期"]},
+        {id:"item-quality",name:"质量升档规则",category:"奖励与资格",currentSummary:"质量升档独立计算，不占首次入金与有效转化基础比例",status:"active",owner:"风控/Risk",updated:"2026-11-08 09:15",parameters:["质量升档开关","净入金额度","交易活跃天数","标准交易手数","收益率","失效周期"]},
         {id:"item-credit",name:"信用等级与权益",category:"奖励与资格",currentSummary:"C0-C4积分信用体系；90天滚动周期；信用等级影响基础结算中天数、保证金和额度",status:"active",owner:"风控/财务",updated:"2026-11-08 09:20",parameters:["等级积分上下限","90天周期","积分加分规则","积分扣分规则","基础结算中天数","保证金调整","结算额度","恢复条件"]},
         {id:"item-partner-tier",name:"合作者等级与个人附加",category:"奖励与资格",currentSummary:"P1扩展：合作时间和客户数量提升合作者等级，逐步减少基础结算中天数",status:"active",owner:"运营/Ops",updated:"2026-11-08 09:22",parameters:["等级条件","合作时间","有效客户数量","基础结算中减免","个人附加比例","启用开关"]},
         {id:"item-country",name:"国家与主体",category:"奖励与资格",currentSummary:"开放国家、法律主体、国家默认系数和合规限制",status:"active",owner:"合规/Compliance",updated:"2026-11-08 09:25",parameters:["国家代码","法律主体","国家系数","支付方式","开放状态","限制说明"]},
         {id:"item-hold",name:"动态结算中规则",category:"结算规则",currentSummary:"基础结算中天数与国家、主体、支付方式、D1-D10、R0-R3、集群附加天数相加，不重置且暂不设累计上限",status:"active",owner:"风控/财务",updated:"2026-11-08 09:30",parameters:["R0-R3基础天数","国家附加","主体附加","支付方式附加","D1-D10附加","R0-R3附加","集群/案件附加","重复事件上限次数"]},
         {id:"item-dn",name:"D+N与熔断护栏",category:"结算规则",currentSummary:"D+N冻结阈值、自动放行和金额/数量护栏均为后台可配置参考值",status:"active",owner:"风控主管",updated:"2026-11-08 09:35",parameters:["冻结阈值自然日","自动放行开关","金额护栏","数量护栏","超阈值处理","审批开关"]},
-        {id:"item-funds",name:"保证金与税费",category:"结算与资金",currentSummary:"保证金和税费均按佣金总额计算；顺序为佣金总额→保证金→税费→结算净额",status:"active",owner:"财务/Finance",updated:"2026-11-08 09:40",parameters:["保证金比例","税费比例","释放自然日","无未决风险条件","抵扣规则","税费说明"]},
+        {id:"item-funds",name:"保证金与",category:"结算与资金",currentSummary:"保证金均按佣金总额计算；顺序为佣金总额→保证金→→结算净额",status:"active",owner:"财务/Finance",updated:"2026-11-08 09:40",parameters:["保证金比例","比例","释放自然日","无未决风险条件","抵扣规则","说明"]},
         {id:"item-settlement-withdrawal",name:"结算与提现规则",category:"结算与资金",currentSummary:"结算资格、提现审批、账户校验、手续费展示和异常处理",status:"active",owner:"财务/Finance",updated:"2026-11-08 09:42",parameters:["可提现条件","首次提现校验","提现审批","手续费展示","收款账户要求","失败重试"]},
         {id:"item-cluster",name:"集群识别与集群结算中",category:"风控规则",currentSummary:"CRM/风控提供集群事实；Affiliate配置命中后的结算中延长、隔离和审批动作",status:"active",owner:"风控/Risk",updated:"2026-11-08 09:45",parameters:["特征类型","识别窗口","最少关联数","集群处置","结算中延长","人工上限"]},
         {id:"item-hard-rule",name:"D1-D10硬规则",category:"风控规则",currentSummary:"每条D规则独立配置事件、阈值、附加结算中天数、审批和超时处理",status:"active",owner:"风控/Risk",updated:"2026-11-08 09:50",parameters:["D1-D10事件目录","触发条件","附加结算中天数","是否审批","审批人","复核人","审核周期","超时处理"]},
@@ -800,36 +795,36 @@
         {id:"item-content",name:"官方路径治理",category:"流程与治理",currentSummary:"官方路径和落地页由系统生成；合作者不可自建路径，素材由素材管理菜单维护",status:"active",owner:"合规/Compliance",updated:"2026-11-08 10:08",parameters:["官方域名","国家适用范围","注册平台","上下线时间","审核方式"]}
       ],
       versions: [
-        {id:"cfg-v8.0",version:"20261107113001",name:"价格与资格档调整",domains:["价格表","资格档与里程碑"],status:"active",locked:true,owner:"业务/财务",createdBy:"业务/财务",created:"2026-11-05 08:20",publishedAt:"2026-11-05 09:10",updated:"2026-11-05 09:10",effectiveTime:"2026-11-07 22:00",previousVersion:"20261030184500",basedOn:"20261030184500",notificationType:"重要",publishMode:"双人确认",lockTime:"2026-11-07 22:00",lockReason:"生效完成",changeSummary:"新增PH国家基准价并上调L2-L4阈值。",impact:"预计佣金成本 +9.6%",traceId:"trace-config-v80",parameters:"价格档、资格档和质量服务附加已完成试算。"},
+        {id:"cfg-v8.0",version:"20261107113001",name:"价格与资格档调整",domains:["价格表","资格档与里程碑"],status:"active",locked:true,owner:"业务/财务",createdBy:"业务/财务",created:"2026-11-05 08:20",publishedAt:"2026-11-05 09:10",updated:"2026-11-05 09:10",effectiveTime:"2026-11-07 22:00",previousVersion:"20261030184500",basedOn:"20261030184500",notificationType:"重要",publishMode:"双人确认",lockTime:"2026-11-07 22:00",lockReason:"生效完成",changeSummary:"新增PH国家基准价并上调L2-L4阈值。",impact:"预计佣金成本 +9.6%",traceId:"trace-config-v80",parameters:"价格档、资格档和质量升档附加已完成试算。"},
         {id:"cfg-v7.0",version:"20261105095200",name:"流量门禁与官方路径",domains:["D1-D10硬规则","官方路径库","点击风险规则"],status:"pending_approval",locked:false,owner:"产品/风控",createdBy:"产品/风控",created:"2026-11-05 09:20",publishedAt:"2026-11-05 09:52",updated:"2026-11-05 09:52",effectiveTime:"待审批",previousVersion:"20261104200000",basedOn:"20261104200000",notificationType:"一般",publishMode:"双人确认",changeSummary:"补齐5条官方路径并增加代理、重复点击过滤。",impact:"命中186个对象",traceId:"trace-config-v70",parameters:"D1-1、D2-1、D3-1规则草稿。"},
         {id:"cfg-v6.4",version:"20261104200000",name:"官方路径库紧急修复",domains:["官方路径库","硬规则"],status:"active",locked:true,owner:"合规/系统",createdBy:"合规/系统",created:"2026-11-04 19:20",publishedAt:"2026-11-04 19:40",updated:"2026-11-04 20:00",effectiveTime:"2026-11-04 20:00",previousVersion:"20261103180000",basedOn:"20261103180000",notificationType:"重要",publishMode:"多人会签",lockTime:"2026-11-04 20:00",lockReason:"生效完成",changeSummary:"修复失效路径并补齐来源校验。",impact:"5条路径下线",traceId:"trace-config-v64",parameters:"42条官方路径生效。"},
         {id:"cfg-v5.2",version:"20261104023000",name:"动态结算与D+N调整",domains:["动态Hold","D+N冻结与熔断"],status:"scheduled",locked:false,owner:"风控/财务",createdBy:"风控/财务",created:"2026-11-04 15:40",publishedAt:"2026-11-04 16:30",updated:"2026-11-04 16:30",effectiveTime:"2026-11-06 02:00",previousVersion:"20261101110000",basedOn:"20261101110000",notificationType:"重要",publishMode:"多人会签",changeSummary:"上调R2/R3基础结算期，D+N阈值调整为后台参数。",impact:"理论结算期后移",traceId:"trace-config-v52",parameters:"R2 +9天、R3 +18天；D+N参考30自然日。"},
-        {id:"cfg-v4.1",version:"20261104210000",name:"信用权益组合",domains:["信用等级与权益","保证金/税费"],status:"activation_failed",locked:true,owner:"系统/Tech",createdBy:"系统/Tech",created:"2026-11-04 20:20",publishedAt:"2026-11-04 20:40",updated:"2026-11-04 21:00",effectiveTime:"2026-11-04 21:00",previousVersion:"20261028141000",basedOn:"20261028141000",notificationType:"重要",publishMode:"双人确认",lockTime:"2026-11-04 21:00",lockReason:"生效失败保留原版本",changeSummary:"税率外部快照超时，发布包回滚。",impact:"影响金额 USD 36,900",traceId:"trace-config-v41",parameters:"税率快照v4加载失败。"},
+        {id:"cfg-v4.1",version:"20261104210000",name:"信用权益组合",domains:["信用等级与权益","保证金"],status:"activation_failed",locked:true,owner:"系统/Tech",createdBy:"系统/Tech",created:"2026-11-04 20:20",publishedAt:"2026-11-04 20:40",updated:"2026-11-04 21:00",effectiveTime:"2026-11-04 21:00",previousVersion:"20261028141000",basedOn:"20261028141000",notificationType:"重要",publishMode:"双人确认",lockTime:"2026-11-04 21:00",lockReason:"生效失败保留原版本",changeSummary:"外部快照超时，发布包回滚。",impact:"影响金额 USD 36,900",traceId:"trace-config-v41",parameters:"快照v4加载失败。"},
         {id:"cfg-v3.8",version:"20261030182000",name:"审批流与自审规则",domains:["审批流","业务通知模板"],status:"active",locked:true,owner:"系统/Tech",createdBy:"系统/Tech",created:"2026-10-30 17:30",publishedAt:"2026-10-30 18:20",updated:"2026-10-30 18:20",effectiveTime:"2026-10-30 18:20",previousVersion:"20261028120000",basedOn:"20261028120000",notificationType:"一般",publishMode:"多人会签",lockTime:"2026-10-30 18:20",lockReason:"生效完成",changeSummary:"统一申请人具备审批权限时的自动审核提示和双审计。",impact:"覆盖7个角色",traceId:"trace-config-v38",parameters:"自审双审计、审批SLA和业务通知模板。"},
         {id:"cfg-v2.6",version:"20261028141000",name:"国家与主体限制",domains:["国家与主体","归属与归因规则"],status:"withdrawn",locked:false,owner:"合规/Compliance",createdBy:"合规/Compliance",created:"2026-10-28 13:40",publishedAt:"2026-10-28 14:10",updated:"2026-10-28 15:00",effectiveTime:"已撤回",previousVersion:"20261025120000",basedOn:"20261025120000",notificationType:"一般",publishMode:"双人确认",changeSummary:"更新开放国家、法律主体和禁投地区，因主体资料变更撤回。",impact:"覆盖7个国家",traceId:"trace-config-v26",parameters:"国家主体映射草稿。"},
         {id:"cfg-v1.9",version:"20261020113000",name:"风险评分与违规规则",domains:["R0-R3风险评分","违规规则","集群规则"],status:"voided",locked:false,owner:"风控主管",createdBy:"风控主管",created:"2026-10-20 10:50",publishedAt:"2026-10-20 11:30",updated:"2026-10-20 11:30",effectiveTime:"已作废",previousVersion:"20261018100000",basedOn:"20261018100000",notificationType:"一般",publishMode:"多人会签",changeSummary:"试算误报率超过护栏，版本作废并保留审计。",impact:"阻断发布",traceId:"trace-config-v19",parameters:"R0-R3评分与违规动作草稿。"}
         ,
-        {id:"cfg-v62",version:"20261102120000",name:"质量服务观察期规则",domains:["质量服务"],status:"active",locked:true,owner:"风控/Risk",createdBy:"风控/Risk",created:"2026-11-02 11:30",publishedAt:"2026-11-02 12:00",updated:"2026-11-02 12:00",effectiveTime:"2026-11-02 12:00",previousVersion:"20261015150000",basedOn:"20261015150000",notificationType:"一般",publishMode:"双人确认",lockTime:"2026-11-02 12:00",lockReason:"生效完成",changeSummary:"明确有效FTD后的活跃度、留存和质量服务观察期。",impact:"影响质量服务结算",traceId:"trace-config-v62",parameters:"活跃交易日、净入金保留率、观察期和达标条件。"},
+        {id:"cfg-v62",version:"20261102120000",name:"质量升档观察期规则",domains:["质量升档"],status:"active",locked:true,owner:"风控/Risk",createdBy:"风控/Risk",created:"2026-11-02 11:30",publishedAt:"2026-11-02 12:00",updated:"2026-11-02 12:00",effectiveTime:"2026-11-02 12:00",previousVersion:"20261015150000",basedOn:"20261015150000",notificationType:"一般",publishMode:"双人确认",lockTime:"2026-11-02 12:00",lockReason:"生效完成",changeSummary:"明确有效转化后的活跃度、留存和质量升档观察期。",impact:"影响质量升档结算",traceId:"trace-config-v62",parameters:"活跃交易日、净入金保留率、观察期和达标条件。"},
         {id:"cfg-v43",version:"20261103142000",name:"归属与归因窗口",domains:["归属与归因规则"],status:"active",locked:true,owner:"运营/Ops",createdBy:"运营/Ops",created:"2026-11-03 13:50",publishedAt:"2026-11-03 14:20",updated:"2026-11-03 14:20",effectiveTime:"2026-11-03 14:20",previousVersion:"20261020110000",basedOn:"20261020110000",notificationType:"一般",publishMode:"单人发布",lockTime:"2026-11-03 14:20",lockReason:"生效完成",changeSummary:"统一30天归因窗口和首点击优先规则。",impact:"影响新注册归属",traceId:"trace-config-v43",parameters:"30天窗口、首点击优先、重复归属和跨设备处理。"},
         {id:"cfg-v40",version:"20261104204000",name:"信用等级与权益规则",domains:["信用等级与权益"],status:"active",locked:true,owner:"风控/财务",createdBy:"风控/财务",created:"2026-11-04 20:10",publishedAt:"2026-11-04 20:40",updated:"2026-11-04 20:40",effectiveTime:"2026-11-04 20:40",previousVersion:"20261028141000",basedOn:"20261028141000",notificationType:"重要",publishMode:"双人确认",lockTime:"2026-11-04 20:40",lockReason:"生效完成",changeSummary:"维护C0-C4权益及信用等级对结算和保证金的调整。",impact:"影响结算资格",traceId:"trace-config-v40",parameters:"C0-C4阈值、附加比例、信用结算期和保证金比例。"},
         {id:"cfg-v50",version:"20261101110000",name:"动态结算基础规则",domains:["动态结算"],status:"active",locked:true,owner:"风控/财务",createdBy:"风控/财务",created:"2026-11-01 10:30",publishedAt:"2026-11-01 11:00",updated:"2026-11-01 11:00",effectiveTime:"2026-11-01 11:00",previousVersion:"20261025120000",basedOn:"20261025120000",notificationType:"重要",publishMode:"多人会签",lockTime:"2026-11-01 11:00",lockReason:"生效完成",changeSummary:"保留R0-R3基础结算期并允许国家、支付方式和信用叠加。",impact:"影响结算到期日",traceId:"trace-config-v50",parameters:"R0-R3基础天数、国家附加、支付方式附加和叠加优先级。"},
         {id:"cfg-v31",version:"20261103102000",name:"D+N冻结护栏",domains:["D+N冻结与熔断"],status:"active",locked:true,owner:"风控主管",createdBy:"风控主管",created:"2026-11-03 09:50",publishedAt:"2026-11-03 10:20",updated:"2026-11-03 10:20",effectiveTime:"2026-11-03 10:20",previousVersion:"20261020100000",basedOn:"20261020100000",notificationType:"重要",publishMode:"多人会签",lockTime:"2026-11-03 10:20",lockReason:"生效完成",changeSummary:"配置结算超时冻结阈值、自动放行和金额数量熔断。",impact:"影响超时案件",traceId:"trace-config-v31",parameters:"冻结阈值、自动放行开关、金额护栏和数量护栏。"},
         {id:"cfg-v110",version:"20261105090000",name:"D1-D10与R0-R3风险基线",domains:["D1-D10硬规则","R0-R3风险评分","违规规则","集群规则"],status:"active",locked:true,owner:"风控/Risk",createdBy:"风控/Risk",created:"2026-11-05 08:30",publishedAt:"2026-11-05 09:00",updated:"2026-11-05 09:00",effectiveTime:"2026-11-05 09:00",previousVersion:"20261020113000",basedOn:"20261020113000",notificationType:"重要",publishMode:"多人会签",lockTime:"2026-11-05 09:00",lockReason:"生效完成",changeSummary:"启用D1-D10硬规则、R0-R3评分和违规处置基线。",impact:"影响风险识别与处置",traceId:"trace-config-v110",parameters:"D1-D10事件目录、风险权重、R档阈值和处置映射。"},
-        {id:"cfg-v40-funds",version:"20261028141001",name:"保证金与税费基础规则",domains:["保证金/税费"],status:"active",locked:true,owner:"财务/Finance",createdBy:"财务/Finance",created:"2026-10-28 13:40",publishedAt:"2026-10-28 14:10",updated:"2026-10-28 14:10",effectiveTime:"2026-10-28 14:10",previousVersion:"20261025120000",basedOn:"20261025120000",notificationType:"重要",publishMode:"双人确认",lockTime:"2026-10-28 14:10",lockReason:"生效完成",changeSummary:"保证金释放、税费扣除和提现抵扣顺序基础规则。",impact:"影响结算净额",traceId:"trace-config-funds40",parameters:"保证金比例、释放周期、税率、手续费和抵扣顺序。"},
+        {id:"cfg-v40-funds",version:"20261028141001",name:"保证金与基础规则",domains:["保证金"],status:"active",locked:true,owner:"财务/Finance",createdBy:"财务/Finance",created:"2026-10-28 13:40",publishedAt:"2026-10-28 14:10",updated:"2026-10-28 14:10",effectiveTime:"2026-10-28 14:10",previousVersion:"20261025120000",basedOn:"20261025120000",notificationType:"重要",publishMode:"双人确认",lockTime:"2026-10-28 14:10",lockReason:"生效完成",changeSummary:"保证金释放扣除和提现抵扣顺序基础规则。",impact:"影响结算净额",traceId:"trace-config-funds40",parameters:"保证金比例、释放周期、手续费和抵扣顺序。"},
         {id:"cfg-v22",version:"20261102173000",name:"数据治理基础规则",domains:["数据治理"],status:"active",locked:true,owner:"合规/Compliance",createdBy:"合规/Compliance",created:"2026-11-02 17:00",publishedAt:"2026-11-02 17:30",updated:"2026-11-02 17:30",effectiveTime:"2026-11-02 17:30",previousVersion:"20261020120000",basedOn:"20261020120000",notificationType:"一般",publishMode:"多人会签",lockTime:"2026-11-02 17:30",lockReason:"生效完成",changeSummary:"统一数据分级、脱敏、保留删除和事件质量规则。",impact:"影响数据访问与留存",traceId:"trace-config-v22",parameters:"敏感等级、脱敏、保留期、补数窗口和Breach SLA。"}
       ],
       system: [
-        {id:"sys-001",key:"export.file_expiry_hours",name:"导出文件过期时间",domain:"文件与导出",value:"24小时",pendingValue:"",defaultValue:"24小时",range:"1-168小时",typeLabel:"整数",sensitive:false,controlType:"system",status:"active",owner:"系统/Tech",updated:"2026-10-20",description:"异步导出文件自动过期时间，不进入业务规则版本。",inputType:"number",unit:"小时",impact:"控制导出文件自动清理。"},
-        {id:"sys-009",key:"access.attribution_rate_limit",name:"归属查询次数",domain:"归属查询",value:"5次/小时",pendingValue:"",defaultValue:"5次/小时",range:"1-100次/小时",typeLabel:"整数",sensitive:true,controlType:"system",status:"active",owner:"风控主管",updated:"2026-10-04",description:"每小时允许的归属精准查询次数，超限后暂停查询。",inputType:"number",unit:"次/小时",impact:"调整归属查询访问次数，需要二次确认。"},
-        {id:"sys-010",key:"access.attribution_cooldown",name:"归属查询过期时间",domain:"归属查询",value:"6小时",pendingValue:"",defaultValue:"6小时",range:"1-72小时",typeLabel:"整数",sensitive:true,controlType:"system",status:"active",owner:"风控主管",updated:"2026-10-04",description:"归属查询超限后的等待时长，到期后恢复查询。",inputType:"number",unit:"小时",impact:"调整查询限制的过期时间，需要二次确认。"}
+        {id:"sys-001",key:"export.file_expiry_hours",name:"导出文件过期时间",domain:"文件与导出",value:"24小时",pendingValue:null,defaultValue:"24小时",range:"1-168小时",typeLabel:"整数",sensitive:false,controlType:"system",status:"active",owner:"系统/Tech",updated:"2026-10-20",description:"异步导出文件自动过期时间，不进入业务规则版本。",inputType:"number",unit:"小时",impact:"控制导出文件自动清理。"},
+        {id:"sys-009",key:"access.attribution_rate_limit",name:"归属查询次数",domain:"归属查询",value:"5次/小时",pendingValue:null,defaultValue:"5次/小时",range:"1-100次/小时",typeLabel:"整数",sensitive:true,controlType:"system",status:"active",owner:"风控主管",updated:"2026-10-04",description:"每小时允许的归属精准查询次数，超限后暂停查询。",inputType:"number",unit:"次/小时",impact:"调整归属查询访问次数，需要二次确认。"},
+        {id:"sys-010",key:"access.attribution_cooldown",name:"归属查询过期时间",domain:"归属查询",value:"6小时",pendingValue:null,defaultValue:"6小时",range:"1-72小时",typeLabel:"整数",sensitive:true,controlType:"system",status:"active",owner:"风控主管",updated:"2026-10-04",description:"归属查询超限后的等待时长，到期后恢复查询。",inputType:"number",unit:"小时",impact:"调整查询限制的过期时间，需要二次确认。"}
       ],
       dictionary: [
         {id:"prm-01",name:"基础结算期天数",domain:"资金",current:"D+7",range:"5-14",state:"confirmed",updated:"2026-10-01"},
-        {id:"prm-02",name:"质量服务附加结算期",domain:"资金",current:"D+7",range:"5-14",state:"confirmed",updated:"2026-10-01"},
+        {id:"prm-02",name:"质量升档附加结算期",domain:"资金",current:"D+7",range:"5-14",state:"confirmed",updated:"2026-10-01"},
         {id:"prm-03",name:"集群延长N",domain:"风控",current:"待确认",range:"14-30",state:"pending_confirm",updated:"-",note:"集群案件结算延长时间，风控方案v1.2待评审"},
         {id:"prm-04",name:"保证金安全线",domain:"资金",current:"待确认",range:"100-150%",state:"pending_confirm",updated:"-",note:"报表中心保证金覆盖趋势安全线；120%为示例口径"},
         {id:"prm-05",name:"国家风险系数VN",domain:"风控",current:"1.4",range:"1.2-1.6",state:"confirmed",updated:"2026-09-15"},
-        {id:"prm-06",name:"质量服务阈值",domain:"质量",current:"D+30",range:"30-60",state:"confirmed",updated:"2026-10-10"},
+        {id:"prm-06",name:"质量升档阈值",domain:"质量",current:"D+30",range:"30-60",state:"confirmed",updated:"2026-10-10"},
         {id:"prm-07",name:"导出文件过期",domain:"治理",current:"24h",range:"12-48",state:"confirmed",updated:"2026-10-20"}
       ],
       permissions: [
@@ -844,9 +839,9 @@
     },
     reportPackets: [
       {
-        id:"report-roi",tab:"roi",title:"合作方ROI经营分析",summary:"点击、注册、FTD、有效FTD、质量服务与净成本同源分析。",
+        id:"report-roi",tab:"roi",title:"合作方ROI经营分析",summary:"点击、注册、首次入金、有效转化、质量升档与净成本同源分析。",
         charts:[
-          {title:"转化漏斗",type:"bar",points:[["点击",18600],["注册",4120],["FTD",980],["有效FTD",620],["质量服务",360]]},
+          {title:"转化漏斗",type:"bar",points:[["点击",18600],["注册",4120],["首次入金",980],["有效转化",620],["质量升档",360]]},
           {title:"已付佣金趋势",type:"line",points:[["W1",8200],["W2",9600],["W3",11400],["W4",12800]]},
           {title:"冲正损失趋势",type:"bar",points:[["W1",320],["W2",510],["W3",380],["W4",260]]}
         ],
@@ -857,7 +852,7 @@
         ]
       },
       {
-        id:"report-quality",tab:"quality",title:"客户质量与健康分析",summary:"FTD转化、质量服务、留存、拒付、冲正、欺诈与集群风险同源监控。",
+        id:"report-quality",tab:"quality",title:"客户质量与健康分析",summary:"首次入金转化、质量升档、留存、拒付、冲正、欺诈与集群风险同源监控。",
         charts:[
           {title:"质量等级分布",type:"bar",points:[["A级",320],["B级",180],["C级",90],["关注",60]]},
           {title:"30/60/90日留存",type:"line",points:[["30日",68],["60日",54],["90日",46]]},
@@ -985,7 +980,7 @@
         id:"attribution",title:"客户与归因",items:[
           {id:"client-list",label:"客户360",stage:"P1",summary:"客户全生命周期宿主页：业务列+生命周期筛选；风险档案降为抽屉「风险」页签（R档/风险事件/关联特征/欺诈库引用），唯一出口「生成风险复核」。",objects:["客户","转化阶段","风险档案"],actions:["查看客户360","生成风险复核"],dependency:["CRM客户API","事件服务"]},
           {id:"attribution-links",label:"归属关系",stage:"P1",summary:"归属判定主页：常驻IB/Affiliate隔离边界面板（双栏+互斥规则+通过率+越界拦截），归因异常吸收为「异常」视角。",objects:["点击","注册","客户","归属记录"],actions:["查看归属链路","复核归属"],dependency:["归因引擎","CRM"]},
-          {id:"event-stream",label:"事件流水",stage:"P1",summary:"全链路事实底账：TraceId优先检索+事件链抽屉（点击→注册→FTD→计佣→结算中→释放→结算→提现）。",objects:["事件","TraceId","回传记录"],actions:["查询","补数","导出"],dependency:["事件Outbox","IMC"]},
+          {id:"event-stream",label:"事件流水",stage:"P1",summary:"全链路事实底账：TraceId优先检索+事件链抽屉（点击→注册→首次入金→计佣→结算中→释放→结算→提现）。",objects:["事件","TraceId","回传记录"],actions:["查询","补数","导出"],dependency:["事件Outbox","IMC"]},
           {id:"client-risk",label:"客户风险档案",stage:"P1",routeId:"admin-modules",tabId:"client-list",view:"risk",summary:"客户360风险视角：直达高风险客户筛选与抽屉「风险」页签（R档+设备/IP/支付关联+欺诈库引用）。",objects:["客户风险","风险事件","关联特征"],actions:["查看证据","生成风险复核"],dependency:["风控服务","CRM欺诈库"]},
           {id:"attribution-exception",label:"归因异常",stage:"P1",routeId:"admin-modules",tabId:"attribution-links",view:"exception",summary:"归属关系异常视角：重复归属、事件缺数、来源异常和官方路径异常，隔离面板越界拦截直达。",objects:["异常事件","缺口任务"],actions:["重算归属","补数","标记误报"],dependency:["归因引擎","Outbox"]}
         ]
@@ -1004,10 +999,9 @@
         id:"funds",title:"佣金与资金",items:[
           {id:"commission-list",label:"佣金记录",stage:"P1",summary:"查看每笔佣金的资格档、里程碑、金额、结算状态、结算和TraceId。",objects:["佣金","客户","资格档"],actions:["查看计算过程","冲正","追回"],dependency:["账务服务"]},
           {id:"hold-workbench",label:"结算管理",stage:"MVP",routeId:"admin-review",tabId:"d-plus-n",summary:"处理理论基础结算期、风险附加、集群延长和D+N冻结复核。",objects:["结算中","佣金","冻结案件"],actions:["复核","解除","继续冻结"],dependency:["动态结算引擎"]},
-          {id:"statement-list",label:"结算单",stage:"P1",summary:"管理结算批次、明细、税费、保证金、净额和下载。",objects:["结算单","佣金批次","合作方"],actions:["生成","确认","下载","重算"],dependency:["账务服务","文件服务"]},
+          {id:"statement-list",label:"结算单",stage:"P1",summary:"管理结算批次、明细、保证金、净额和下载。",objects:["结算单","佣金批次","合作方"],actions:["生成","确认","下载","重算"],dependency:["账务服务","文件服务"]},
           {id:"withdrawal-list",label:"提现管理",stage:"P1",summary:"处理提现申请、账户校验、手续费、支付状态和失败重试。",objects:["提现","收款账户","支付订单"],actions:["审核","重试","驳回"],dependency:["支付系统"]},
           {id:"guarantee-workbench",label:"保证金管理",stage:"MVP",routeId:"admin-review",tabId:"guarantee-offset",summary:"查看保证金余额、覆盖率、抵扣、释放和追索任务。",objects:["保证金","抵扣任务","潜在损失"],actions:["抵扣审批","释放","追索"],dependency:["账务服务"]},
-          {id:"tax-list",label:"税费管理",stage:"P1",routeId:"admin-modules",tabId:"statement-list",view:"tax",summary:"结算与税费「税费」视角：税率、代扣状态、税单留痕与结算明细同源展示。",objects:["税务信息","税率","税单"],actions:["查看","核对","导出"],dependency:["财务服务"]},
           {id:"reversal-list",label:"冲正与追回",stage:"P1",summary:"处理拒付、冲正、追回、责任认定和账务重算。",objects:["冲正","追回","佣金"],actions:["发起","审批","重算"],dependency:["支付系统","账务服务"]},
           {id:"reconciliation",label:"资金对账",stage:"P1",summary:"对账Affiliate账务、支付结果和财务报表差异。",objects:["对账批次","差异记录"],actions:["自动对账","人工处理","导出"],dependency:["三方系统对账文件"]}
         ]
@@ -1021,7 +1015,7 @@
           {id:"crm-fraud",label:"CRM欺诈库",stage:"MVP",routeId:"admin-risk",tabId:"fraud",summary:"查看CRM欺诈库结论、本地引用状态和同步记录。",objects:["欺诈记录","引用对象"],actions:["查询","引用","同步记录"],dependency:["CRM欺诈库API"]},
           {id:"blacklist",label:"黑名单管理",stage:"P1",summary:"管理设备、IP、支付工具、客户和合作方黑名单。",objects:["黑名单","风险对象"],actions:["加入","移出","审批"],dependency:["风控服务","审计"]},
           {id:"country-compliance",label:"国家与合规限制",stage:"MVP",routeId:"admin-config",tabId:"country-entity",summary:"维护开放国家、法律主体、禁投地区和合规条件。",objects:["国家","主体","合规限制"],actions:["配置","审批","生效"],dependency:["配置中心"]},
-          {id:"quality-internal",label:"质量服务内部规则",stage:"MVP",routeId:"admin-config",tabId:"qualification",summary:"维护有效FTD后的质量判断、规则版本和证据口径。",objects:["质量规则","里程碑","证据"],actions:["配置","试算","审批"],dependency:["质量服务引擎"]}
+          {id:"quality-internal",label:"质量升档内部规则",stage:"MVP",routeId:"admin-config",tabId:"qualification",summary:"维护有效转化后的质量判断、规则版本和证据口径。",objects:["质量规则","里程碑","证据"],actions:["配置","试算","审批"],dependency:["质量升档引擎"]}
         ]
       },
       {
@@ -1045,7 +1039,7 @@
           {id:"report-guarantee",label:"保证金覆盖",stage:"MVP",routeId:"admin-performance",tabId:"guarantee-coverage",summary:"监控保证金、潜在损失、覆盖率和释放延迟。",objects:["保证金","潜在损失"],actions:["下钻","生成建议","导出"],dependency:["账务API"]},
           {id:"report-funnel",label:"转化漏斗",stage:"P1",routeId:"admin-performance",tabId:"roi",summary:"转化漏斗并入合作方ROI：可点击交互漏斗（点击任意级展开分层转化率与瓶颈定位）。",objects:["事件","客户","里程碑"],actions:["分层分析","下钻","导出"],dependency:["事件服务"]},
           {id:"report-channel",label:"渠道分析",stage:"P1",summary:"分析活动、链接、Sub ID、国家、设备和平台效果。",objects:["活动","链接","渠道"],actions:["对比","下钻","导出"],dependency:["推广数据"]},
-          {id:"report-finance",label:"财务报表",stage:"P1",summary:"分析佣金、税费、保证金、提现、冲正和净支出。",objects:["账务","提现","冲正"],actions:["对账查询","导出"],dependency:["财务API"]},
+          {id:"report-finance",label:"财务报表",stage:"P1",summary:"分析佣金、保证金、提现、冲正和净支出。",objects:["账务","提现","冲正"],actions:["对账查询","导出"],dependency:["财务API"]},
           {id:"report-risk",label:"风控报表",stage:"P1",summary:"分析命中率、误报率、阻断金额、案件处理时效和损失回收。",objects:["风险事件","案件","损失"],actions:["趋势分析","下钻","导出"],dependency:["风控API"]}
         ]
       },
@@ -1053,10 +1047,10 @@
         id:"config-release",title:"配置与发布",items:[
           {id:"config-overview",label:"配置总览",stage:"MVP",routeId:"admin-config",tabId:"overview",summary:"按业务配置域快速进入价格、资格、结算、资金和风控规则页面。",objects:["业务配置","规则域","审批"],actions:["查看配置域","进入配置","发起变更"],dependency:["配置中心","审批流"]},
           {id:"config-price",label:"价格表",stage:"MVP",routeId:"admin-config",tabId:"price",summary:"维护国家、渠道、资格档和基础CPA价格版本。",objects:["价格规则","国家","资格档"],actions:["草稿","校验","试算","提交审批"],dependency:["配置审批"]},
-          {id:"config-qualification",label:"资格档与里程碑",stage:"MVP",routeId:"admin-config",tabId:"qualification",summary:"配置L1-L4、FTD、有效FTD和质量服务里程碑。",objects:["资格规则","里程碑"],actions:["配置","试算","审批"],dependency:["质量服务"]},
+          {id:"config-qualification",label:"资格档与里程碑",stage:"MVP",routeId:"admin-config",tabId:"qualification",summary:"配置L1-L4、首次入金、有效转化和质量升档里程碑。",objects:["资格规则","里程碑"],actions:["配置","试算","审批"],dependency:["质量升档"]},
           {id:"config-credit",label:"信用等级与权益",stage:"MVP",routeId:"admin-config",tabId:"credit-benefit",summary:"配置C0-C4权益、附加比例、结算期、保证金和额度。",objects:["信用权益","等级"],actions:["配置","试算","审批"],dependency:["信用服务"]},
           {id:"config-hold",label:"动态结算规则",stage:"MVP",routeId:"admin-config",tabId:"hold",summary:"配置基础R档、国家附加、支付附加、信用调整和D+N。",objects:["结算期规则","风险档"],actions:["配置","组合试算","审批"],dependency:["动态结算"]},
-          {id:"config-guarantee-tax",label:"保证金与税费规则",stage:"MVP",routeId:"admin-config",tabId:"guarantee-tax",summary:"配置保证金比例、释放周期、税率和手续费口径。",objects:["保证金","税费","手续费"],actions:["配置","审批","生效"],dependency:["财务规则"]},
+          {id:"config-guarantee",label:"保证金与规则",stage:"MVP",routeId:"admin-config",tabId:"guarantee",summary:"配置保证金比例、释放周期和手续费口径。",objects:["保证金","手续费"],actions:["配置","审批","生效"],dependency:["财务规则"]},
           {id:"config-approval",label:"审批流配置",stage:"MVP",routeId:"admin-config",tabId:"approval",summary:"配置审批节点、角色、自审、SLA和流转规则。",objects:["审批流","节点","角色"],actions:["配置","试运行","审批"],dependency:["工作流引擎"]},
           {id:"config-simulation",label:"规则试算",stage:"MVP",routeId:"admin-config",tabId:"simulation",summary:"查看新旧规则差异、命中对象、资金影响和护栏结果。",objects:["试算任务","规则差异"],actions:["试算","查看结果","导出"],dependency:["配置中心","试算服务"]},
           {id:"config-cluster",label:"集群规则",stage:"MVP",routeId:"admin-config",tabId:"cluster-rule",summary:"配置强弱特征、窗口、阈值和人工上限。",objects:["集群规则","特征"],actions:["配置","试算","审批"],dependency:["集群引擎"]},
@@ -1107,7 +1101,7 @@
       },
       {
         id:"funds", title:"资金", match:{routeId:"admin-modules",tabIds:["commission-list","statement-list","withdrawal-list","reversal-list","reconciliation"], routeTabs:{"admin-review":["d-plus-n","guarantee-offset"]}}, items:[
-          {id:"nav-commissions",label:"佣金与结算",stage:"MVP",routeId:"admin-modules",tabId:"commission-list",summary:"佣金构成、计佣状态、结算阻断和结算单明细统一查看。",objects:["佣金","结算单","税费","保证金"],actions:["查看计算过程","查看结算单","导出"],dependency:["账务服务","动态结算","财务规则"]},
+          {id:"nav-commissions",label:"佣金与结算",stage:"MVP",routeId:"admin-modules",tabId:"commission-list",summary:"佣金构成、计佣状态、结算阻断和结算单明细统一查看。",objects:["佣金","结算单","保证金"],actions:["查看计算过程","查看结算单","导出"],dependency:["账务服务","动态结算","财务规则"]},
           {id:"nav-withdrawals",label:"提现与对账",stage:"MVP",routeId:"admin-modules",tabId:"withdrawal-list",summary:"提现申请、支付状态、冲正追回和内部对账统一查看。",objects:["提现","支付订单","冲正","对账"],actions:["审核提现","重试支付","处理差异"],dependency:["支付系统","账务服务"]},
           {id:"nav-funds-review",label:"资金异常任务",stage:"MVP",routeId:"admin-review",tabId:"d-plus-n",summary:"处理D+N冻结、保证金抵扣、Hold异常和账务追索任务。",objects:["冻结案件","保证金","Hold","追索"],actions:["复核","解除","抵扣","重算"],dependency:["动态结算","账务服务","任务中心"]}
         ]
@@ -1127,16 +1121,16 @@
       },
       {
         id:"reports", title:"报表", match:{routeId:"admin-performance",tabIds:["roi","quality","guarantee-coverage"], routeTabs:{"admin-modules":["report-channel","report-finance","report-risk"]}}, items:[
-          {id:"nav-performance",label:"经营与转化",stage:"MVP",routeId:"admin-performance",tabId:"roi",summary:"经营ROI、转化漏斗、国家和渠道表现统一分析。",objects:["合作方","国家","渠道","有效FTD"],actions:["下钻","生成建议","导出"],dependency:["报表API","事件服务"]},
-          {id:"nav-quality",label:"质量与资金分析",stage:"MVP",routeId:"admin-performance",tabId:"quality",summary:"质量服务、保证金覆盖、资金趋势和风险损失统一分析。",objects:["质量服务","保证金","损失","风险"],actions:["下钻","导出","生成建议"],dependency:["IMC","账务API","风控API"]}
+          {id:"nav-performance",label:"经营与转化",stage:"MVP",routeId:"admin-performance",tabId:"roi",summary:"经营ROI、转化漏斗、国家和渠道表现统一分析。",objects:["合作方","国家","渠道","有效转化"],actions:["下钻","生成建议","导出"],dependency:["报表API","事件服务"]},
+          {id:"nav-quality",label:"质量与资金分析",stage:"MVP",routeId:"admin-performance",tabId:"quality",summary:"质量升档、保证金覆盖、资金趋势和风险损失统一分析。",objects:["质量升档","保证金","损失","风险"],actions:["下钻","导出","生成建议"],dependency:["IMC","账务API","风控API"]}
         ]
       },
       {
         id:"config-reward", title:"业务配置 · 奖励与资格", match:{routeId:"admin-config",tabIds:["price","qualification","quality-service","credit-benefit","partner-tier","country-entity"]}, items:[
           {id:"nav-config-overview",label:"配置总览",stage:"MVP",routeId:"admin-config",tabId:"overview",summary:"按业务配置域快速进入价格、资格、信用和国家主体规则。",objects:["业务配置","奖励规则"],actions:["查看配置域","进入配置","发起变更"],dependency:["配置中心","审批流"]},
           {id:"nav-config-price",label:"价格表",stage:"MVP",routeId:"admin-config",tabId:"price",summary:"维护国家、渠道、资格档和基础CPA价格。",objects:["价格规则","国家","资格档"],actions:["配置","试算","提交审批"],dependency:["配置中心"]},
-          {id:"nav-config-qualification",label:"资格档与里程碑",stage:"MVP",routeId:"admin-config",tabId:"qualification",summary:"配置L1-L4、FTD、有效FTD和质量服务里程碑。",objects:["资格规则","里程碑"],actions:["配置","试算","审批"],dependency:["质量服务"]},
-          {id:"nav-config-quality",label:"质量服务规则",stage:"MVP",routeId:"admin-config",tabId:"quality-service",summary:"配置有效FTD后的活跃度、留存、观察期和质量服务条件。",objects:["质量服务","观察期"],actions:["配置","试算","审批"],dependency:["质量服务"]},
+          {id:"nav-config-qualification",label:"资格档与里程碑",stage:"MVP",routeId:"admin-config",tabId:"qualification",summary:"配置L1-L4、首次入金、有效转化和质量升档里程碑。",objects:["资格规则","里程碑"],actions:["配置","试算","审批"],dependency:["质量升档"]},
+          {id:"nav-config-quality",label:"质量升档规则",stage:"MVP",routeId:"admin-config",tabId:"quality-service",summary:"配置有效转化后的活跃度、留存、观察期和质量升档条件。",objects:["质量升档","观察期"],actions:["配置","试算","审批"],dependency:["质量升档"]},
           {id:"nav-config-credit",label:"信用等级与权益",stage:"MVP",routeId:"admin-config",tabId:"credit-benefit",summary:"维护C0-C4信用权益及其对结算、保证金的调整。",objects:["信用权益","等级"],actions:["配置","试算","审批"],dependency:["信用服务"]},
           {id:"nav-config-partner-tier",label:"合作者等级与个人附加",stage:"P1",routeId:"admin-config",tabId:"partner-tier",summary:"P1扩展：根据合作时间和有效客户数量提升等级并减少基础结算中天数。",objects:["合作者等级","合作时间","客户数量"],actions:["配置","试算","审批"],dependency:["合作者档案"]},
           {id:"nav-config-country",label:"国家与主体",stage:"MVP",routeId:"admin-config",tabId:"country-entity",summary:"维护开放国家、法律主体、国家系数和合规限制。",objects:["国家","法律主体","国家系数"],actions:["配置","审核","审批"],dependency:["合规服务"]}
@@ -1149,8 +1143,8 @@
         ]
       },
       {
-        id:"config-funds", title:"业务配置 · 结算与资金", match:{routeId:"admin-config",tabIds:["guarantee-tax","settlement-withdrawal"]}, items:[
-          {id:"nav-config-funds",label:"保证金与税费",stage:"MVP",routeId:"admin-config",tabId:"guarantee-tax",summary:"维护保证金比例、释放周期、税率、手续费和抵扣口径。",objects:["保证金","税费","手续费"],actions:["配置","试算","审批"],dependency:["财务规则"]},
+        id:"config-funds", title:"业务配置 · 结算与资金", match:{routeId:"admin-config",tabIds:["guarantee","settlement-withdrawal"]}, items:[
+          {id:"nav-config-funds",label:"保证金与",stage:"MVP",routeId:"admin-config",tabId:"guarantee",summary:"维护保证金比例、释放周期、手续费和抵扣口径。",objects:["保证金","手续费"],actions:["配置","试算","审批"],dependency:["财务规则"]},
           {id:"nav-config-settlement-withdrawal",label:"结算与提现规则",stage:"MVP",routeId:"admin-config",tabId:"settlement-withdrawal",summary:"配置结算资格、提现审批、账户校验、手续费展示和失败处理。",objects:["结算资格","提现","收款账户"],actions:["配置","试算","审批"],dependency:["账务系统","支付系统"]}
         ]
       },
@@ -1197,7 +1191,7 @@
   const businessConfigGroups = adminPrototype.menuBlueprint.filter(group => businessConfigGroupIds.has(group.id));
   adminPrototype.businessConfigMenuSections = businessConfigGroups.map(group => ({
     id: group.id,
-    title: group.title.replace(/^业务配置\s*·\s*/, ""),
+    title: group.title.replace(/^业务配置\s*·\s*/, ),
     // 配置总览是业务配置下的独立入口，不属于奖励与资格分组的子菜单。
     items: group.items.filter(item => item.id !== "nav-config-overview")
   }));
@@ -1308,7 +1302,7 @@
     "partner-list":{entity:"合作方",prefix:"Partner",profile:"partner360"},
     "client-list":{entity:"客户",prefix:"Client",profile:"client360",columns:[
       {key:"name",label:"客户"},{key:"partner",label:"合作方"},{key:"source",label:"归属来源"},{key:"country",label:"国家"},
-      {key:"stage",label:"生命周期"},{key:"ftdAmount",label:"FTD金额",numeric:true},{key:"riskGrade",label:"风险等级"},{key:"attributedAt",label:"归属时间"}
+      {key:"stage",label:"生命周期"},{key:"ftdAmount",label:"首次入金金额",numeric:true},{key:"riskGrade",label:"风险等级"},{key:"attributedAt",label:"归属时间"}
     ],statuses:["registered","ftd","valid_ftd","churned"]},
     "attribution-links":{entity:"归属记录",prefix:"ATTR",profile:"attribution360",columns:[
       {key:"client",label:"客户"},{key:"partner",label:"合作方"},{key:"channel",label:"渠道"},{key:"subId",label:"Sub ID"},
@@ -1335,12 +1329,12 @@
       {key:"id",label:"点击ID"},{key:"linkName",label:"链接"},{key:"subId",label:"Sub ID"},{key:"country",label:"国家"},
       {key:"device",label:"设备"},{key:"pathSummary",label:"转化进度"},{key:"clickedAt",label:"点击时间"}
     ],statuses:[]},
-    "commission-list":{entity:"佣金",prefix:"COMM",names:["注册+有效FTD佣金","质量服务佣金","附加佣金","保证金前净额","违规清零佣金"],types:["基础","附加","质量","冲正前"],sources:["账务服务"],columns:[
+    "commission-list":{entity:"佣金",prefix:"COMM",names:["注册+有效转化佣金","质量升档佣金","附加佣金","保证金前净额","违规清零佣金"],types:["基础","附加","质量","冲正前"],sources:["账务服务"],columns:[
       {key:"name",label:"佣金对象"},{key:"partner",label:"合作方"},{key:"type",label:"构成"},{key:"amount",label:"金额",numeric:true},
       {key:"status",label:"计佣状态"},{key:"settlementBlock",label:"结算"},{key:"updated",label:"时间"}
     ],statuses:["pending","processing","failed","blocked","released"]},
     "statement-list":{entity:"结算单",prefix:"STMT",names:["周结算批次","月结算批次","补发结算","重算结算"],types:["周结","月结","补发","重算"],sources:["账务服务"],columns:[
-      {key:"name",label:"结算批次"},{key:"partner",label:"合作方"},{key:"grossLabel",label:"佣金合计"},{key:"taxLabel",label:"税费代扣"},
+      {key:"name",label:"结算批次"},{key:"partner",label:"合作方"},{key:"grossLabel",label:"佣金合计"},
       {key:"guaranteeLabel",label:"保证金"},{key:"netLabel",label:"净额"},{key:"status",label:"状态"}
     ],statuses:["draft","pending_approval","confirmed","paid"]},
     "withdrawal-list":{entity:"提现",prefix:"WD",names:["银行提现","电子钱包提现","失败重试","高风险复核"],types:["银行","钱包","重试","复核"],sources:["支付系统"],columns:[
@@ -1367,7 +1361,7 @@
       {key:"name",label:"渠道"},{key:"country",label:"主国家"},{key:"clicks30d",label:"点击",numeric:true},
       {key:"convRate",label:"转化率"},{key:"roiLabel",label:"ROI"},{key:"risk",label:"风险"}
     ],statuses:["scale_up","observe","review","limit"]},
-    "report-finance":{entity:"财务报表",prefix:"FIN",names:["佣金支出","税费汇总","保证金覆盖","冲正损失"],types:["佣金","税费","保证金","冲正"],sources:["财务API"],columns:[
+    "report-finance":{entity:"财务报表",prefix:"FIN",names:["佣金支出","汇总","保证金覆盖","冲正损失"],types:["佣金","保证金","冲正"],sources:["财务API"],columns:[
       {key:"name",label:"科目"},{key:"period",label:"周期"},{key:"amount",label:"金额",numeric:true},
       {key:"trend",label:"环比"},{key:"status",label:"结论"},{key:"drill",label:"下钻"}
     ],statuses:["observe","review","limit"]},
@@ -1375,7 +1369,7 @@
       {key:"name",label:"规则"},{key:"hitRate",label:"命中率"},{key:"falseRate",label:"误报率"},
       {key:"amount",label:"阻断金额",numeric:true},{key:"quadrant",label:"象限"},{key:"risk",label:"建议"}
     ],statuses:["observe","review","limit"]},
-    "config-dictionary":{entity:"参数",prefix:"PRM",names:["基础结算期天数","国家风险系数","保证金比例","质量服务阈值","集群延长N"],types:["风控","价格","资金","质量"],sources:["配置中心"],columns:[
+    "config-dictionary":{entity:"参数",prefix:"PRM",names:["基础结算期天数","国家风险系数","保证金比例","质量升档阈值","集群延长N"],types:["风控","价格","资金","质量"],sources:["配置中心"],columns:[
       {key:"name",label:"参数"},{key:"domain",label:"域"},{key:"current",label:"当前值"},{key:"range",label:"参考范围"},
       {key:"state",label:"状态"},{key:"updated",label:"确认时间"}
     ],statuses:["confirmed","pending_confirm","pending_approval"]},
@@ -1866,7 +1860,7 @@
     store.messages.push(message);
     if (visibility === "partner") {
       ticket.last_public_message_at = now();
-      ticket.last_public_message_preview = [...params.body].slice(0,80).join("");
+      ticket.last_public_message_preview = [...params.body].slice(0,80).join();
       if (message.sender_type === "support" && !ticket.first_response_at) {
         ticket.first_response_at = now();
         if (ticket.sla.policy_status !== "missing") ticket.sla.first_response_status = Date.parse(now()) > Date.parse(ticket.sla.first_response_due_at) ? "breached" : "met";
@@ -2496,7 +2490,7 @@
     }
   }
   function fail(code,message,details={}) { const e=new Error(message); Object.assign(e,{code,message,display_message:message,trace_id:`DEMO-TRACE-${++sequence}`,retryable:false,details}); throw e; }
-  function cents(value) { if(typeof value!=="string"||!/^[0-9]{1,18}\.[0-9]{2}$/.test(value)) fail("AFF-42201","金额必须是最多18位整数和两位小数的USD字符串"); return BigInt(value.replace(".","")); }
+  function cents(value) { if(typeof value!=="string"||!/^[0-9]{1,18}\.[0-9]{2}$/.test(value)) fail("AFF-42201","金额必须是最多18位整数和两位小数的USD字符串"); return BigInt(value.replace(".")); }
   const roleFor=t => t.source_type==="partner_followup" ? t.fields?.responsible_role || "operations" : ["guarantee_offset","chargeback","commission_exception"].includes(t.source_type)?"finance":["integration","data_backfill"].includes(t.source_type)?"system_admin":["attribution_review","offboarding_step"].includes(t.source_type)?"operations":"risk";
   const domain=(t,role)=>roleFor(t)===role||(["risk_supervisor","risk_reviewer"].includes(role)&&roleFor(t)==="risk")||(role==="finance_reviewer"&&roleFor(t)==="finance");
   const visible=(t,role)=>["system_admin","audit","compliance"].includes(role)||domain(t,role)||t.created_by?.user_id===actor(role).user_id||t.requester_ids?.includes(actor(role).user_id);
@@ -2866,7 +2860,7 @@
     crm_status:"active",kyc_status:"verified",registered_at:`2026-09-${String(index+10).padStart(2,"0")}T08:00:00.000Z`,
     lifecycle:"valid_ftd",attribution:{channel:"官方落地页",link_id:`LINK-${partner_id}`,sub_id:`APAC-${country}`,rule:"注册时锁定归属",locked_at:`2026-09-${String(index+10).padStart(2,"0")}T08:00:00.000Z`},
     account_facts:{deposit,withdrawal,net_deposit:(Number(deposit)-Number(withdrawal)).toFixed(2),active_days,standard_lots:lots,currency:"USD",period:"2026-09-01 至 2026-11-08"},
-    milestones:[{stage:"注册",at:`2026-09-${String(index+10).padStart(2,"0")}T08:00:00.000Z`},{stage:"FTD",at:`2026-09-${String(index+11).padStart(2,"0")}T09:20:00.000Z`},{stage:"有效FTD",at:`2026-09-${String(index+17).padStart(2,"0")}T12:00:00.000Z`}]
+    milestones:[{stage:"注册",at:`2026-09-${String(index+10).padStart(2,"0")}T08:00:00.000Z`},{stage:"首次入金",at:`2026-09-${String(index+11).padStart(2,"0")}T09:20:00.000Z`},{stage:"有效转化",at:`2026-09-${String(index+17).padStart(2,"0")}T12:00:00.000Z`}]
   }));
   const reviewPartners = [
     {id:"DEMO-P1",name:"Aurora Partner Network",country:"TH",type:"institution",risk_band:"R2",credit_level:"C2",crm_id:"CRM-DEMO-P1",email_masked:"au***@example.invalid",phone_masked:"+66 *** *** 4801",crm_status:"active",kyc_status:"verified",kyb_status:"pending",registered_at:"2026-08-12T08:00:00.000Z"},
@@ -2954,7 +2948,7 @@
     });
     const ownTasks=tasks.filter(item=>visible(item,ctx.role||"risk")&&taskObjectRefs(item).some(ref=>ref.type===type&&ref.id===id));
     const events=(prototype.riskWorkbench.events||[]).filter(e=>e.primary===id||(e.related||[]).includes(id)||(e.caseRefs||[]).some(ref=>type==="customer"?ref.customer===id:ref.partner===id));
-    const funds=type==="partner"?Object.fromEntries(["commissions","statements","withdrawals","taxRecords","reversals"].map(key=>[key,copy((prototype.funds360[key]||[]).filter(item=>item.partner===id))])):{};
+    const funds=type==="partner"?Object.fromEntries(["commissions","statements","withdrawals","reversals"].map(key=>[key,copy((prototype.funds360[key]||[]).filter(item=>item.partner===id))])):{};
     return copy({type,profile,task_id:taskId,as_of:clock,customers:customers.map(c=>({id:c.id,name:c.name,country:c.country,lifecycle:c.lifecycle,risk_band:c.risk_band})),partner:type==="customer"?reviewProfile("partner",profile.partner_id):null,cases,events:events.map(e=>({id:e.id,type:e.typeLabel,reason:e.reason,determination:e.determination,occurred:e.occurred,rule:e.rule,rule_version:e.ruleVersion,case_refs:e.caseRefs})),tasks:ownTasks.map(item=>({task_id:item.task_id,title:item.title,status:item.workflow_state,owner:item.owner?.display_name,updated_at:item.updated_at})),history:ownTasks.flatMap(item=>item.history.items.map(entry=>({...entry,task_id:item.task_id}))),funds});
   }
   function detail(id,ctx={}) {
@@ -3161,7 +3155,7 @@
     if(v.expires_at&&(!Number.isFinite(Date.parse(v.expires_at))||v.expires_at<=clock))fail("AFF-42201","名单失效时间必须是未来有效时间");
     if(v.member_ids&&(v.member_ids.some(x=>!t.fields.members?.includes(x))||new Set(v.member_ids).size!==v.member_ids.length))fail("AFF-42201","成员不在当前集群范围或重复");
     if(!strict)return;
-    if(!d.conclusion||[...(d.reason||"").trim()].length<10||[...d.reason].length>1000||!d.reason_code)fail("AFF-42201","请填写结论、原因码及10至1000字符说明");
+    if(!d.conclusion||[...(d.reason|| "").trim()].length<10||[...d.reason].length>1000||!d.reason_code)fail("AFF-42201","请填写结论、原因码及10至1000字符说明");
     if(!d.checklist.some(x=>x.key==="source_verified"&&x.checked))fail("AFF-42201","请完成来源与逐案范围核验");
     if(!d.action_plan.length)fail("AFF-42201","当前模板不支持提交方案");
     if(d.conclusion==="observe"&&(!d.next_review_at||!Number.isFinite(Date.parse(d.next_review_at))||d.next_review_at<=clock))fail("AFF-42201","继续观察必须选择未来复查时间");
@@ -3316,7 +3310,7 @@
         const removedRows = (cluster.memberRows || []).filter(row => memberIds.includes(row[0]));
         cluster.memberRows = (cluster.memberRows || []).filter(row => !memberIds.includes(row[0]));
         cluster.members = cluster.memberRows.length;
-        cluster.version = `v${Number(String(beforeVersion).replace(/^v/,"")) + 1}`;
+        cluster.version = `v${Number(String(beforeVersion).replace(/^v/)) + 1}`;
         const correction = params.correction || "remove_to_unassigned";
         let newCluster = null;
         if (correction === "split_new_cluster") {
@@ -3373,7 +3367,7 @@
       if(a.status!=="pending_approval"||a.version!==body.expected_version)fail("AFF-40901","审批版本或状态已变化");
       const n=a.nodes[a.current_node_index];if(a.applicant.user_id===actor(role).user_id||n.role_code!==role)fail("AFF-40301","敏感审批禁止自审或越级审批");
       if(body.node_id!==n.node_id||body.expected_node_version!==n.version)fail("AFF-40901","审批节点已变化");
-      if([...(body.reason||"").trim()].length<10)fail("AFF-42201","审批说明至少10字符");
+      if([...(body.reason|| "").trim()].length<10)fail("AFF-42201","审批说明至少10字符");
       t=a.task_id?tasks.find(item=>item.task_id===a.task_id):null;
       if(action==="approve"&&t)validate(t,a.draft,true);
       n.status=action==="approve"?"approved":action==="reject"?"rejected":"returned";n.reviewer=actor(role);n.reason=body.reason.trim();n.decided_at=clock;n.version="n2";a.version=`a${Number(a.version.slice(1))+1}`;
@@ -3400,7 +3394,7 @@
       record(t,`approval_${action}`,role,{approval_id:id,node_id:n.node_id,reason:n.reason,decided_at:clock});result.approval=copy(a);
     } else if(action==="export") {
       if(!options(role).permissions.includes("tasks.export"))fail("AFF-40301","当前角色无导出申请权限");
-      const purpose=(body.purpose||body.reason||"").trim();
+      const purpose=(body.purpose||body.reason|| "").trim();
       if([...purpose].length<10||[...purpose].length>1000)fail("AFF-42201","导出用途必须为10至1000字符");
       const legacyTaskExport = body.source_page !== "risk-workbench";
       const query=legacyTaskExport ? (body.applied_filter||body.query||body.filters||{}) : {};
@@ -3420,7 +3414,7 @@
       exportsList.push(ex);record(null,"export_request",role,{export_id:exid,purpose,scope:ex.scope,snapshot_id:snap.id,approval_required:!skipsReview()});result.export={...copy(ex),rows:undefined};
     } else if(action==="download_export") {
       const ex=exportsList.find(x=>x.export_id===id);if(!ex||ex.applicant.user_id!==actor(role).user_id)fail("AFF-40301","无当前导出下载权限");if(ex.status!=="ready")fail("AFF-42201","导出尚未批准");
-      const cell=v=>`"${String(v??"").replace(/^[=+@\t\r-]/,"'$&").replace(/"/g,'""')}"`;
+      const cell=v=>`"${String(v?? "").replace(/^[=+@\t\r-]/,"'$&").replace(/"/g,'""')}"`;
       const names={task_id:"任务编号",title:"标题",source_type:"类型",workflow_state:"工作流状态",owner:"责任人",impact_amount:"USD影响金额",task:"任务",type:"类型",source:"来源对象",priority:"优先级",status:"状态",sla:"处理时限",team:"责任团队",risk:"风险档",amount:"影响金额",updated:"更新时间",created:"创建时间",system:"来源系统",reason:"来源原因",approval:"审批状态",credit:"信用等级",trace:"TraceId"};
       const value=(t,c)=>({task_id:t.task_id,title:t.title,source_type:labels[t.source_type],workflow_state:stateLabels[t.workflow_state],owner:t.owner?.display_name||"",impact_amount:t.impact?.amount||"",task:`${t.task_id} ${t.title}`,type:labels[t.source_type],source:t.source_ref.id,priority:t.priority,status:stateLabels[t.workflow_state],sla:t.sla?.due_at||"",team:t.team.name,risk:t.risk_level||"",amount:t.impact?.amount||"",updated:t.updated_at,created:t.created_at,system:t.external_system||"",reason:t.reason_codes.join(" / "),approval:approvals.find(a=>a.task_id===t.task_id)?.status||"",credit:t.credit_level||"",trace:`DEMO-TRACE-${t.task_id}`})[c];
       result.csv="\uFEFF"+[ex.columns.map(c=>names[c]),...ex.rows.map(t=>ex.columns.map(c=>value(t,c)))].map(line=>line.map(cell).join(",")).join("\r\n");result.filename=ex.filename;record(null,"export_download",role,{export_id:id});
@@ -3527,7 +3521,7 @@
       const ability=availability(t,role).find(x=>x.action===action);if(!ability?.enabled)fail("AFF-40301",ability?.disabled_reason||"当前入口不允许此操作");
       if(action==="claim"){t.owner=actor(role);bump(t,"processing");}
       if(action==="assign"||action==="return_pool"){
-        if([...(body.reason||"").trim()].length<10)fail("AFF-42201","转办说明至少10字符");
+        if([...(body.reason|| "").trim()].length<10)fail("AFF-42201","转办说明至少10字符");
         if(action==="return_pool"||body.mode==="return_pool"){if(!["open","processing"].includes(t.workflow_state)||!own(t,role))fail("AFF-40301","仅当前责任人在允许状态可退回责任池");t.owner=null;bump(t,"open");}
         else {if(t.workflow_state!=="open"&&!body.target_user_id)fail("AFF-42201","处理中任务转办必须选择具体处理人");const choices=assignees(id,{role,team_id:body.target_team_id});const user=choices.users.find(x=>x.user_id===body.target_user_id);if(!user&&body.target_user_id)fail("AFF-40301","目标人员不在授权责任池");if(body.target_team_id&&body.target_team_id!==t.team.id)fail("AFF-40301","目标团队不在授权责任池");t.owner=user?{user_id:user.user_id,display_name:user.display_name,role_code:user.role_code}:null;bump(t,t.owner?"processing":"open");}
       }
@@ -3539,7 +3533,7 @@
         validate(t,d,false);t.draft_version=`d${Number(t.draft_version.slice(1))+1}`;d.draft_version=t.draft_version;t.draft=d;bump(t);result.draft=copy(d);
       }
       if(action==="complete_followup"){
-        if(t.source_type!=="partner_followup"||!t.draft||!["recorded","referred"].includes(t.draft.conclusion)||[...(t.draft.reason||"").trim()].length<10)fail("AFF-42201","请先保存明确的核对结论及至少10字说明");
+        if(t.source_type!=="partner_followup"||!t.draft||!["recorded","referred"].includes(t.draft.conclusion)||[...(t.draft.reason|| "").trim()].length<10)fail("AFF-42201","请先保存明确的核对结论及至少10字说明");
         validate(t,t.draft,false);
         t.result=t.draft.conclusion;
         bump(t,"done");
@@ -3572,7 +3566,7 @@
         }
       }
       if(action==="resume_without_review"){
-        if(!skipsReview()||body.impact_confirmation!==true||[...(body.reason||"").trim()].length<10)fail("AFF-42201","请确认执行影响并填写至少10字说明");
+        if(!skipsReview()||body.impact_confirmation!==true||[...(body.reason|| "").trim()].length<10)fail("AFF-42201","请确认执行影响并填写至少10字说明");
         if(!t.draft)fail("AFF-42201","原任务缺少可执行方案，请先补齐任务资料");
         validate(t,t.draft,true);
         approvals.filter(a=>a.task_id===id&&a.status==="pending_approval").forEach(a=>{
@@ -3583,10 +3577,10 @@
         prepareWithoutReview(t,role,result);
       }
       if(action==="request_material"){
-        if(!body.material_keys?.length||!body.recipient?.ref||!body.due_at||!Number.isFinite(Date.parse(body.due_at))||body.due_at<=clock||[...(body.public_message||"").trim()].length<10||[...body.public_message].length>2000)fail("AFF-42201","补件需材料项、接收人、未来期限和10至2000字符说明");t.material_request={material_request_id:`DEMO-MATERIAL-${++sequence}`,...copy(body)};bump(t,"waiting_material");result.material_request_id=t.material_request.material_request_id;
+        if(!body.material_keys?.length||!body.recipient?.ref||!body.due_at||!Number.isFinite(Date.parse(body.due_at))||body.due_at<=clock||[...(body.public_message|| "").trim()].length<10||[...body.public_message].length>2000)fail("AFF-42201","补件需材料项、接收人、未来期限和10至2000字符说明");t.material_request={material_request_id:`DEMO-MATERIAL-${++sequence}`,...copy(body)};bump(t,"waiting_material");result.material_request_id=t.material_request.material_request_id;
       }
       if(action==="close"){
-        if(!["duplicate","source_withdrawn","object_invalidated"].includes(body.reason_code)||[...(body.reason||"").trim()].length<10)fail("AFF-42201","关闭原因或说明无效");
+        if(!["duplicate","source_withdrawn","object_invalidated"].includes(body.reason_code)||[...(body.reason|| "").trim()].length<10)fail("AFF-42201","关闭原因或说明无效");
         if(body.reason_code==="duplicate"){const other=tasks.find(x=>x.task_id===body.replaced_by_task_id);if(!other||other.task_id===id||other.source_type!==t.source_type||terminal(other))fail("AFF-42201","重复关闭必须指定同类型活动替代任务");}else if(!body.source_receipt_ref)fail("AFF-42201","来源撤销或失效必须提供来源回执");
         t.result=({duplicate:"duplicate",source_withdrawn:"withdrawn",object_invalidated:"invalidated"})[body.reason_code];t.replaced_by_task_id=body.replaced_by_task_id||null;bump(t,"closed");
       }
@@ -3616,7 +3610,7 @@
   function approvalsFor(ctx={}) {const role=context(ctx).role||"risk";return copy(approvals.filter(a=>a.applicant.user_id===actor(role).user_id||a.nodes.some(n=>n.role_code===role)||["audit","system_admin"].includes(role)));}
   function exportsFor(ctx={}) {const role=context(ctx).role||"risk";return copy(exportsList.filter(e=>e.applicant.user_id===actor(role).user_id).map(({rows,...metadata})=>metadata));}
   function queueDisplayTime(value) {
-    return new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Shanghai",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(new Date(value)).replace(",","");
+    return new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Shanghai",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(new Date(value)).replace(",");
   }
   function applyDemoPolicy() {
     if (!skipsReview()) return;
@@ -3671,7 +3665,7 @@
       if(trusted.status!=="frozen"||!["confirmed","rejected"].includes(trusted.signal_status)||trusted.appeal_in_progress||Date.parse(trusted.appeal_window_ends_at)>Date.parse(clock))fail("AFF-42201","信号、冻结或申诉门禁不允许解除重检");
       const origin=get(body.source_task_id,role);
       if(!["hold_extend","settlement_overdue"].includes(origin.source_type)||!origin.case_refs.some(refEqual))fail("AFF-42201","发起任务不是此案件的风险复核来源");
-      if([...(body.reason||"").trim()].length<10)fail("AFF-42201","发起说明至少10字符");
+      if([...(body.reason|| "").trim()].length<10)fail("AFF-42201","发起说明至少10字符");
       let t=tasks.find(item=>item.source_ref.kind==="settlement_case"&&item.source_ref.id===source.id&&item.task_purpose===purpose&&!terminal(item));
       const reused=!!t;
       if(!t){
@@ -3690,7 +3684,7 @@
     const original=catalogs[source.kind]?.find(item=>source.kind==="settlement_case" ? item.settlement===source.id : item.id===source.id);if(!original)fail("AFF-42201","来源不在当前可信风险对象目录");
     const allowed=source.kind==="settlement_case"?["settlement_recheck"]:source.kind==="event"?(original.type==="settlement_overdue"?["signal_review"]:original.type==="cluster_detected"?["cluster_determination","risk_investigation"]:["risk_investigation"]):source.kind==="cluster"?["cluster_determination","cluster_member_correction"]:source.kind==="blacklist"?["blacklist_remove"]:["risk_investigation","blacklist_add"];
     if(!allowed.includes(purpose)||source.kind==="blacklist"&&original.source!=="affiliate")fail("AFF-42201","任务目的与来源不匹配或来源仅为只读引用");
-    if([...(body.reason||"").trim()].length<10)fail("AFF-42201","发起说明至少10字符");
+    if([...(body.reason|| "").trim()].length<10)fail("AFF-42201","发起说明至少10字符");
     let t=tasks.find(item=>item.source_ref.kind===source.kind&&item.source_ref.id===source.id&&item.task_purpose===purpose&&!terminal(item));
     const reused=!!t;
     if(!t) {

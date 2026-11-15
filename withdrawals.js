@@ -151,7 +151,7 @@
   function feeTip() {
     return `<div class="wd-fee-tip"><strong>${t("手续费规则", "Fee rule")}</strong>
       <span>${t("银行电汇：$3 + 0.5%；电子钱包：1%；最低$1，最高$30。", "Bank transfer: $3 + 0.5%; e-wallet: 1%; minimum $1, maximum $30.")}</span>
-      <small>${t("演示参考值，可配置。申请金额从余额扣减，手续费从申请金额内扣除；税费已在佣金结算时扣缴，保证金释放后提现不重复扣税。失败或超时不收费。", "Demo reference, configurable. The request debits the balance; the fee is deducted from it. Tax was withheld at settlement and is not charged again. Failures and timeouts are free.")}</small>
+      <small>${t("演示参考值，可配置。申请金额从余额扣减，手续费从申请金额内扣除；失败或超时不收费。", "Demo reference, configurable. The request debits the balance; the fee is deducted from it. Failures and timeouts are free.")}</small>
     </div>`;
   }
 

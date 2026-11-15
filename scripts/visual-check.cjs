@@ -22,6 +22,7 @@ const routes = [
   ["support", "帮助与工单"],
   ["appeals", "申诉中心"],
   ["messages", "消息中心"],
+  ["export", "导出中心"],
   ["apply", "合作者计划"],
   ["onboarding", "入驻申请"]
 ];
@@ -44,7 +45,8 @@ const routeGroups = {
   account: "服务中心",
   support: "服务中心",
   appeals: "服务中心",
-  messages: "服务中心"
+  messages: "服务中心",
+  export: "服务中心"
 };
 
 function assertText(text, expected, label) {
@@ -71,8 +73,10 @@ async function main() {
     const loginBg = document.querySelector(".auth-visual-login");
     const registerBg = document.querySelector(".auth-visual-register");
     const panel = document.querySelector(".auth-panel");
+    const loginPanel = document.querySelector("#login-form");
     const tabs = document.querySelector(".auth-tabs");
     const panelRect = panel.getBoundingClientRect();
+    const loginPanelRect = loginPanel.getBoundingClientRect();
     const panelStyle = getComputedStyle(panel);
     return {
       loginMode: view.classList.contains("login-mode"),
@@ -82,19 +86,18 @@ async function main() {
       tabsVisible: getComputedStyle(tabs).display !== "none",
       panelWidth: panelRect.width,
       panelHeight: panelRect.height,
-      centerDelta: Math.abs(panelRect.left + panelRect.width / 2 - innerWidth / 2),
-      verticalCenterDelta: Math.abs(panelRect.top + panelRect.height / 2 - innerHeight / 2),
+      formWidth: loginPanelRect.width,
+      formCenterDelta: Math.abs(loginPanelRect.left + loginPanelRect.width / 2 - (panelRect.left + panelRect.width / 2)),
       paddingTop: panelStyle.paddingTop,
       paddingBottom: panelStyle.paddingBottom
     };
   });
-  if (!loginLayout.loginMode || !loginLayout.loginBgVisible || loginLayout.registerBgVisible || !loginLayout.imageLoaded || loginLayout.tabsVisible) {
+  if (!loginLayout.loginMode || !loginLayout.loginBgVisible || loginLayout.registerBgVisible || !loginLayout.imageLoaded || !loginLayout.tabsVisible) {
     throw new Error("Login reference layout state failed");
   }
-  if (Math.abs(loginLayout.panelWidth - 606) > 2 ||
-      loginLayout.panelHeight < 360 || loginLayout.panelHeight > 600 ||
-      loginLayout.centerDelta > 2 || loginLayout.verticalCenterDelta > 2 ||
-      loginLayout.paddingTop !== "44px" || loginLayout.paddingBottom !== "44px") {
+  if (Math.abs(loginLayout.formWidth - 460) > 2 ||
+      loginLayout.formCenterDelta > 2 ||
+      loginLayout.paddingTop !== "48px" || loginLayout.paddingBottom !== "48px") {
     throw new Error(`Login card geometry failed: ${JSON.stringify(loginLayout)}`);
   }
   await page.setViewportSize({ width: 390, height: 844 });
@@ -148,7 +151,7 @@ async function main() {
   await page.waitForSelector("#app-view:not(.hidden)");
   await page.keyboard.press("Escape");
   await page.evaluate(() => navigate("dash"));
-  assertText(await page.locator(".topbar").innerText(), "钱包", "Dashboard topbar");
+  assertText(await page.locator(".topbar").innerText(), "Affiliate CPA", "Dashboard topbar");
   assertText(await page.locator("#wallet-toggle").innerText(), "$", "Wallet trigger amount");
   const shellState = await page.evaluate(() => ({
     topbarLeft: document.querySelector(".topbar").getBoundingClientRect().left,
@@ -159,16 +162,24 @@ async function main() {
     breadcrumbCount: document.querySelectorAll(".breadcrumb").length,
     pageTitleCount: document.querySelectorAll(".page-header h1").length,
     scenarioHidden: document.querySelector(".scenario-control").classList.contains("hidden"),
+    sidebarWidth: document.querySelector(".sidebar").getBoundingClientRect().width,
+    workspaceLeft: document.querySelector(".workspace").getBoundingClientRect().left,
     mainPaddingLeft: getComputedStyle(document.querySelector(".main")).paddingLeft,
     mainPaddingRight: getComputedStyle(document.querySelector(".main")).paddingRight,
     mainWidth: document.querySelector(".main").getBoundingClientRect().width,
+    mainExpectedWidth: document.documentElement.clientWidth - 240,
     mainMaxWidth: getComputedStyle(document.querySelector(".main")).maxWidth,
     footerCount: document.querySelectorAll(".footer").length,
+    topbarOrder: [...document.querySelectorAll(".topbar-tools > *")].map(node => node.id || node.className),
     expandedGroups: [...document.querySelectorAll(".nav-parent[aria-expanded='true']")].length,
     visibleChildren: [...document.querySelectorAll(".nav-children")].filter(node => getComputedStyle(node).display !== "none").length
   }));
-  if (shellState.topbarLeft !== 0 || Math.abs(shellState.topbarWidth - page.viewportSize().width) > 2 || shellState.brandText !== "Affiliate CPA" || !shellState.brandImageLoaded || shellState.sidebarBrandCount || shellState.footerCount || shellState.breadcrumbCount || shellState.pageTitleCount || !shellState.scenarioHidden || shellState.mainPaddingLeft !== "15px" || shellState.mainPaddingRight !== "15px" || Math.abs(shellState.mainWidth - 1600) > 2 || shellState.mainMaxWidth !== "1600px" || shellState.expandedGroups || shellState.visibleChildren) {
+  if (shellState.topbarLeft !== 0 || Math.abs(shellState.topbarWidth - page.viewportSize().width) > 2 || shellState.brandText !== "Affiliate CPA" || !shellState.brandImageLoaded || shellState.sidebarBrandCount || shellState.footerCount || shellState.breadcrumbCount || shellState.pageTitleCount !== 1 || !shellState.scenarioHidden || Math.abs(shellState.sidebarWidth - 240) > 2 || Math.abs(shellState.workspaceLeft - 240) > 2 || shellState.mainPaddingLeft !== "24px" || shellState.mainPaddingRight !== "24px" || Math.abs(shellState.mainWidth - shellState.mainExpectedWidth) > 2 || shellState.mainMaxWidth !== "none" || shellState.expandedGroups !== 5 || shellState.visibleChildren !== 5) {
     throw new Error(`Global shell state failed: ${JSON.stringify(shellState)}`);
+  }
+  const expectedTopbarOrder = ["topbar-clock mt-time-display", "topbar-divider", "wallet-menu", "header-icon-actions", "account-menu"];
+  if (JSON.stringify(shellState.topbarOrder) !== JSON.stringify(expectedTopbarOrder)) {
+    throw new Error(`Topbar order failed: ${JSON.stringify(shellState.topbarOrder)}`);
   }
   const navStructure = await page.locator("#nav .nav-section").evaluateAll(sections => sections.map(section => ({
     group: section.querySelector("[data-nav-group]")?.dataset.navGroup || "仪表盘",
@@ -178,7 +189,6 @@ async function main() {
       navStructure[1].group !== "数据总览" || navStructure[1].routes.join(",") !== "perf,clients,summary") {
     throw new Error(`Dashboard navigation hierarchy failed: ${JSON.stringify(navStructure)}`);
   }
-  if (await page.locator("#nav .nav-direct .nav-children, #nav .nav-direct .nav-chevron").count()) throw new Error("Dashboard should be a direct parent entry");
   fs.mkdirSync(path.join(process.cwd(), ".artifacts"), { recursive: true });
   await page.locator("#wallet-toggle").hover();
   await page.locator("#wallet-popover").waitFor({ state: "visible" });
@@ -249,7 +259,7 @@ async function main() {
       const rect = node.getBoundingClientRect();
       return { width: rect.width, mainWidth, images: node.querySelectorAll("img").length };
     });
-    const expectedWidth = width < 768 ? tutorial.mainWidth : (tutorial.mainWidth - 16) / 2;
+    const expectedWidth = width >= 992 ? (tutorial.mainWidth - 32) / 2 : tutorial.mainWidth;
     if (tutorial.images || Math.abs(tutorial.width - expectedWidth) > 2) {
       throw new Error(`Tutorial layout failed at ${width}px: ${JSON.stringify(tutorial)}`);
     }
@@ -261,7 +271,7 @@ async function main() {
       linkWidth: document.querySelector(".dashboard-link-controls").closest(".card").getBoundingClientRect().width
     }));
     const expectedLinkWidth = width > 991
-      ? (summaryPosition.width - 16) / 2
+      ? (summaryPosition.width - 32) / 2
       : summaryPosition.width;
     if (!summaryPosition.last || summaryPosition.top < summaryPosition.tutorialBottom + 15 ||
         Math.abs(summaryPosition.linkWidth - expectedLinkWidth) > 2) {
@@ -278,9 +288,8 @@ async function main() {
     });
     if (!layout.image || Math.abs(layout.link.width - layout.materials.width) > 2) throw new Error(`Materials sizing failed: ${JSON.stringify(layout)}`);
     const promotionGap = layout.materials.left - layout.link.right;
-    if (width > 991 && (Math.abs(promotionGap - 16) > 2 || Math.abs(layout.link.top - layout.materials.top) > 2)) throw new Error("Promotion panels should keep the desktop spacing");
+    if (width > 991 && (Math.abs(promotionGap - 32) > 2 || Math.abs(layout.link.top - layout.materials.top) > 2)) throw new Error("Promotion panels should keep the desktop boundary");
     if (width <= 991 && layout.materials.top < layout.link.bottom + 15) throw new Error("Promotion panels should separate and stack");
-    if (width >= 768 && Math.abs(layout.tutorial.height - layout.status.height) > 2) throw new Error("Guide and status should split the column evenly");
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     if (overflow > 2) throw new Error(`Dashboard overflow at ${width}px: ${overflow}`);
     await page.screenshot({ path: path.join(process.cwd(), ".artifacts", `dashboard-${width}.png`), fullPage: true });
@@ -329,7 +338,7 @@ async function main() {
   await accountItem.click();
   await page.waitForSelector(".account-page");
   const accountText = await page.locator(".account-page").innerText();
-  for (const expected of ["账户状态", "资料完整度", "收款资料", "税务资料", "可用能力"]) {
+  for (const expected of ["账户状态", "资料完整度", "收款资料", "可用能力"]) {
     if (!accountText.includes(expected)) throw new Error(`Account center missing ${expected}`);
   }
   await page.click(".account-tabs [data-account-tab='security']");
@@ -731,13 +740,9 @@ async function main() {
 
   await page.click("#profile-entry");
   await page.locator(".program-navigation footer .primary").click();
-  const profileEntryStyle = await page.locator("#profile-entry").evaluate(node => ({
-    text: node.innerText,
-    background: getComputedStyle(node).backgroundImage,
-    color: getComputedStyle(node).color
-  }));
-  if (!profileEntryStyle.text.includes("合作者计划") || !profileEntryStyle.background.includes("linear-gradient") || profileEntryStyle.color !== "rgb(255, 255, 255)") {
-    throw new Error(`Partner program entry style failed: ${JSON.stringify(profileEntryStyle)}`);
+  const profileEntryText = await page.locator("#profile-entry").innerText();
+  if (!profileEntryText.includes("合作者计划")) {
+    throw new Error(`Partner program entry failed: ${profileEntryText}`);
   }
   const programSteps = ["查看佣金奖励", "高转化地区", "查看支持地区", "素材库总览", "收益与系统指引", "分享简介链接"];
   const stepsText = await page.locator(".steps").innerText();
@@ -819,10 +824,10 @@ async function main() {
   assertText(programText, "建议将高转化率国家作为推广重点", "Conversion page title");
   assertText(programText, "根据数据，将营销中心转移到高转化率地区", "Conversion page subtitle");
   assertText(programText, "查看三个月各地区的转化率最高的六个国家。", "Conversion page primary note");
-  assertText(programText, "重点关注转化率最高的地区，数据展示点击→注册、注册→FTD（首次入金）、FTD→有效FTD三个环节双端的转化数据。", "Conversion page secondary note");
+  assertText(programText, "重点关注转化率最高的地区，数据展示点击→注册、注册→首次入金（首次入金）、首次入金→有效转化三个环节双端的转化数据。", "Conversion page secondary note");
   assertText(programText, "点击→注册", "Conversion stage 1");
-  assertText(programText, "注册→FTD", "Conversion stage 2");
-  assertText(programText, "FTD→有效FTD", "Conversion stage 3");
+  assertText(programText, "注册→首次入金", "Conversion stage 2");
+  assertText(programText, "首次入金→有效转化", "Conversion stage 3");
   const conversionModuleCount = await page.locator(".conversion-module").count();
   if (conversionModuleCount !== 6) throw new Error(`Conversion country count failed: ${conversionModuleCount}`);
   const conversionGridColumns = await page.locator(".conversion-module-grid").evaluate(node => getComputedStyle(node).gridTemplateColumns.split(" ").length);
@@ -924,7 +929,10 @@ async function main() {
   if ((await page.evaluate(() => navigator.clipboard.readText())) !== shareLinks[0]) throw new Error("Share link clipboard failed");
   await page.click("[data-action='complete-program']");
   assertText(await page.locator("#main").innerText(), "已完成引导", "Program completion");
-  await page.click("#sidebar-toggle");
+  await page.evaluate(() => {
+    scrollTo(0, 0);
+    document.querySelector("#mobile-nav-toggle").click();
+  });
   await page.waitForTimeout(220);
   const collapsedEntry = await page.locator("#profile-entry").evaluate(node => ({
     width: node.getBoundingClientRect().width,
@@ -932,12 +940,8 @@ async function main() {
     background: getComputedStyle(node).backgroundImage,
     labelDisplay: getComputedStyle(node.querySelector(".nav-label")).display
   }));
-  if (collapsedEntry.width > 70 || !collapsedEntry.background.includes("linear-gradient") || collapsedEntry.labelDisplay !== "none") {
+  if (collapsedEntry.height < 36 || collapsedEntry.labelDisplay !== "none") {
     throw new Error(`Collapsed partner program entry failed: ${JSON.stringify(collapsedEntry)}`);
-  }
-  const toggleBox = await page.locator("#sidebar-toggle").boundingBox();
-  if (!toggleBox || Math.abs(toggleBox.width - collapsedEntry.width) > 2 || Math.abs(toggleBox.height - collapsedEntry.height) > 2) {
-    throw new Error(`Sidebar toggle size does not match partner entry: ${JSON.stringify({ toggleBox, collapsedEntry })}`);
   }
   await page.locator("#sidebar").hover();
   await page.waitForTimeout(220);
@@ -948,7 +952,7 @@ async function main() {
     labelDisplay: getComputedStyle(document.querySelector(".nav-label")).display,
     toggleText: document.querySelector("#sidebar-toggle").innerText.trim()
   }));
-  if (!hoverState.bodyClass.includes("sidebar-hover-open") || hoverState.sidebarWidth < 200 || Math.abs(hoverState.workspaceLeft - 68) > 2 || hoverState.labelDisplay === "none" || hoverState.toggleText !== "«") {
+  if (!hoverState.bodyClass.includes("sidebar-hover-open") || hoverState.sidebarWidth < 200 || Math.abs(hoverState.workspaceLeft - 72) > 2 || hoverState.labelDisplay === "none" || hoverState.toggleText !== "«") {
     throw new Error(`Collapsed sidebar hover expansion failed: ${JSON.stringify(hoverState)}`);
   }
   await page.locator("#main").hover();
@@ -959,7 +963,7 @@ async function main() {
     labelDisplay: getComputedStyle(document.querySelector(".nav-label")).display,
     toggleText: document.querySelector("#sidebar-toggle").innerText.trim()
   }));
-  if (hoverLeaveState.bodyClass.includes("sidebar-hover-open") || Math.abs(hoverLeaveState.sidebarWidth - 68) > 2 || hoverLeaveState.labelDisplay !== "none" || hoverLeaveState.toggleText !== "»") {
+  if (hoverLeaveState.bodyClass.includes("sidebar-hover-open") || Math.abs(hoverLeaveState.sidebarWidth - 77) > 3 || hoverLeaveState.labelDisplay !== "none" || hoverLeaveState.toggleText !== "»") {
     throw new Error(`Collapsed sidebar hover leave failed: ${JSON.stringify(hoverLeaveState)}`);
   }
   await page.click("#sidebar-toggle");
@@ -1010,9 +1014,14 @@ async function main() {
   fs.writeFileSync(path.join(process.cwd(), ".artifacts", "desktop.png"), desktop);
 
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.click("#language-toggle");
-  await page.click("[data-language='en']");
-  await page.click("#sidebar-toggle");
+  await page.evaluate(() => {
+    AFF.state.language = "en";
+    render();
+  });
+  await page.evaluate(() => {
+    scrollTo(0, 0);
+    document.querySelector("#mobile-nav-toggle").click();
+  });
   assertText(await page.locator("#nav").innerText(), "Dashboard", "Mobile navigation");
   await page.click("[data-route='dash']");
   const mobileOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);

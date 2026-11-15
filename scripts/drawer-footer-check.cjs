@@ -72,7 +72,7 @@ async function main() {
 
     await page.evaluate(() => navigate("account"));
     await page.click("[data-account-tab='finance']");
-    await page.click("[data-account-finance-form='tax']");
+    await page.click("[data-account-finance-form='payout']");
     await page.waitForSelector(".finance-drawer");
     const accountFooter = await footerStyle(page, ".finance-drawer > footer");
     assert.ok((await page.locator(".finance-drawer > footer").innerText()).includes("提交申请"), "Finance change submit lives in the drawer footer");

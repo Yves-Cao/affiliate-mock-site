@@ -20,7 +20,7 @@ for (const marker of ["data-export-action='create'", "data-export-action='downlo
   assert.ok(source.includes(marker), `Export task flow includes ${marker}`);
 }
 assert.ok(source.includes("Exports all matched rows, not only the current page"), "Export scope is not limited to the visible page");
-assert.ok(source.includes("Contact data stays masked"), "Export note preserves contact masking");
+assert.ok(source.includes("contact data stays masked"), "Export note preserves contact masking");
 assert.ok(reports.includes("if (/^[=+\\-@\\t\\r]/.test(text))"), "CSV keeps formula-injection protection");
 for (const breakpoint of ["991px", "767px"]) assert.ok(css.includes(breakpoint), `Responsive rule at ${breakpoint}`);
 

@@ -37,7 +37,7 @@ async function main() {
     check(await page.locator(".program-reward-stages li").count() === 3, "Three earning stages");
     let text = await page.locator("#main").innerText();
     check(text.includes("尚不能获得可提现佣金") && text.includes("基础比例合计100%") &&
-      text.includes("三个阶段不代表分三次付款"), "FTD and three-stage payment boundaries are explicit");
+      text.includes("三个阶段不代表分三次付款"), "First deposit and three-stage payment boundaries are explicit");
     check(text.includes("基础CPA之外的额外奖励") && text.includes("不影响已经成立"), "Quality reward is additional");
     const details = page.locator(".program-settlement-summary details");
     check(await details.evaluate(node => node.open), "Settlement detail is initially expanded");
@@ -50,10 +50,9 @@ async function main() {
     const calculation = await page.evaluate(() => AFF.programCalculatorResult());
     const displayedSettlement = await page.locator(".program-settlement-amount strong").innerText();
     check(displayedSettlement === `$${(calculation.gross - calculation.guarantee).toFixed(2)}` &&
-      calculation.tax > 0 && calculation.available === calculation.gross - calculation.guarantee - calculation.tax,
-      "Inclusive settlement display does not change after-tax wallet calculation");
-    check(await page.locator(".program-amount-details").count() === 0 &&
-      !/税费|结算入账/.test(await page.locator(".calculator-result").innerText()), "Calculator omits tax rows and explanations");
+      calculation.available === calculation.gross - calculation.guarantee,
+      "Settlement display subtracts only the guarantee");
+    check(await page.locator(".program-amount-details").count() === 0, "Calculator omits amount breakdown rows");
     await page.selectOption("[data-calculator-field='payment']", "card");
     check(await page.locator(".calculator-result").isVisible(), "Calculator remains interactive");
     for (let step = 2; step <= 5; step += 1) {
@@ -70,7 +69,6 @@ async function main() {
     const ruleDetails = page.locator(".program-rule-example");
     await ruleDetails.locator("summary").click();
     const ruleText = await ruleDetails.innerText();
-    check(!ruleText.includes("税费"), "Expanded guide omits tax explanation");
     check(ruleText.includes("10%") && ruleText.includes("90天") && ruleText.includes("试算示例"), "Existing parameters labelled illustrative");
     for (const [field, value, expected] of [
       ["guaranteeRate", 0.125, "12.5%"],

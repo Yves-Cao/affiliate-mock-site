@@ -154,7 +154,6 @@ function commissionDetail(data, id) {
   detail.client = data.clients.find(row => row.client_id === commission.client_id) || null;
   detail.calculation = [
     {"step": "gross_amount", ...money(commission)},
-    {"step": "tax", ...money({currency: commission.currency, amount_minor: commission.tax_amount_minor})},
     {"step": "rolling_guarantee", ...money({currency: commission.currency, amount_minor: commission.guarantee_amount_minor})},
     {"step": "net_amount", ...money({currency: commission.currency, amount_minor: commission.net_amount_minor})}
   ];
@@ -433,7 +432,7 @@ function dashboard(data, role) {
   return {
     metrics: [
       {"key": "active_partners", "label": "活跃合作方", "value": data.partners.filter(row => row.status === "active").length},
-      {"key": "valid_ftd", "label": "有效FTD客户", "value": data.clients.filter(row => ["valid_ftd", "quality_service"].includes(row.conversion_stage)).length},
+      {"key": "valid_ftd", "label": "有效转化客户", "value": data.clients.filter(row => ["valid_ftd", "quality_service"].includes(row.conversion_stage)).length},
       {"key": "holding_cases", "label": "暂扣佣金案件", "value": holding},
       {"key": "commission_gross", "label": "佣金总额", "value": {"currency": "USD", "amount_minor": String(commissionTotal)}}
     ],

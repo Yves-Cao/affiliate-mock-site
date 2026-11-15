@@ -37,7 +37,6 @@ The current admin prototype already provides:
 | Case group split/merge | Group conclusion and per-case financial action are not visually separated | P0 |
 | Unified quarantine queue | Missing source tag, waiting days, blocked amount, and recheck flow | P0 |
 | Investigation SLA | Missing reminder, escalation, and tiered link restriction view | P0 |
-| Financial reconciliation view | Commission, tax, guarantee, withdrawal, and reversal are not connected | P0/P1 |
 | Report charts | Report tabs remain generic tables | P0 |
 | Report drilldown | Cannot drill from dimension to client, commission, or risk case | P0 |
 | Audit center | Only local mock audit sections; no global audit search | P0 |

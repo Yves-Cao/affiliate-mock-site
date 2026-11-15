@@ -14,8 +14,8 @@
     used: ["抵扣", "Used"]
   };
   const caseTypeLabels = {
-    qftd_batch: ["注册+有效FTD佣金", "Registration + valid FTD commission"],
-    quality_service: ["质量服务佣金", "Quality service commission"]
+    qftd_batch: ["注册+有效转化佣金", "Registration + qualified conversion commission"],
+    quality_service: ["质量升档佣金", "Quality upgrade commission"]
   };
   const reasonLabels = {
     "DEPOSIT-REFUNDED": ["首次入金退款", "First deposit refunded"],
@@ -65,18 +65,14 @@
       Number(input.netDeposit) >= item.netDeposit && Number(input.volume) >= item.volume && Number(input.days) >= item.days) ||
       { tier: "未达标", basePrice: 0, netDeposit: 300, volume: 1, days: 3 };
     const gross = tier.basePrice * country.coefficient;
-    // 税档与Hold天数按ISO码查询，与finance.configuration键一致
-    const taxTier = AFF.finance.configuration.countryTax[country.code] || "T2";
-    const taxRate = AFF.finance.configuration.taxRates[taxTier].rate;
     const guaranteeRate = AFF.finance.configuration.guaranteeRate;
-    const tax = gross * taxRate;
     const guarantee = gross * guaranteeRate;
-    const available = gross - tax - guarantee;
+    const available = gross - guarantee;
     const holdDays = 1 + (AFF.finance.configuration.countryHold[country.code] || 3) +
       (AFF.finance.configuration.paymentHold[input.payment] || 0);
     const releaseDate = new Date(Date.parse(`${AFF.finance.asOf}T00:00:00Z`) + holdDays * 86400000).toISOString().slice(0, 10);
     const guaranteeDate = new Date(Date.parse(`${releaseDate}T00:00:00Z`) + AFF.finance.configuration.guaranteeReleaseDays * 86400000).toISOString().slice(0, 10);
-    return { country, countryName, tier, gross, taxTier, taxRate, tax, guarantee, available, holdDays, releaseDate, guaranteeDate, payment: input.payment };
+    return { country, countryName, tier, gross, guarantee, available, holdDays, releaseDate, guaranteeDate, payment: input.payment };
   };
 
   function records() {
@@ -277,7 +273,7 @@
               <div><span>${t("扣留比例", "Rate")}</span><strong>${guaranteeRate}</strong><small>${t("佣金通过结算检查时扣留", "Retained after settlement checks")}</small></div>
               <div><span>${t("正常释放", "Normal release")}</span><strong>${guaranteeReleaseDays}</strong><small>${t("无未结风险自动释放", "Automatic when no open risk")}</small></div>
               <div><span>${t("终止合作保留", "Termination retention")}</span><strong>${terminationRetentionDays}</strong><small>${t("与正常释放期取更晚", "Uses the later date")}</small></div>
-              <div><span>${t("释放去向", "Release target")}</span><strong>${t("可提现余额", "Available balance")}</strong><small>${t("不自动打款，不重复扣税", "No auto payout or duplicate tax")}</small></div>
+              <div><span>${t("释放去向", "Release target")}</span><strong>${t("可提现余额", "Available balance")}</strong><small>${t("不自动打款", "No auto payout")}</small></div>
             </div>
           </div>
         </section>

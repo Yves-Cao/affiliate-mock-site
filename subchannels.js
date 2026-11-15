@@ -129,7 +129,7 @@
         ${filters()}
         <div class="table-wrap sc-table-scroll"><table class="sc-table"><thead><tr>
           ${heading("id", "Sub ID", "Sub ID")}${heading("status", "状态 / 来源", "Status / source")}${heading("updatedAt", "更新时间", "Updated at")}
-          <th scope="col" class="numeric">${t("注册数", "Registrations")}</th><th scope="col" class="numeric">${t("有效FTD达成率", "Valid FTD rate")}</th><th scope="col" class="numeric">${t("冲正率", "Reversal rate")}</th>
+          <th scope="col" class="numeric">${t("注册数", "Registrations")}</th><th scope="col" class="numeric">${t("有效转化达成率", "Qualified conversion rate")}</th><th scope="col" class="numeric">${t("冲正率", "Reversal rate")}</th>
           <th scope="col">${t("二级链接", "Subchannel link")}</th><th scope="col">${t("操作", "Actions")}</th>
         </tr></thead><tbody>${visible.length ? visible.map(row => `<tr>
           <td><strong>${h(row.id)}</strong><small>${h(AFF.dataText(row.name || ""))}</small></td><td>${status(row)}</td><td>${h(row.updatedAt)}</td>
@@ -171,7 +171,7 @@
     const groups = AFF.reporting.aggregate(source, [s.breakdown]);
     const metrics = [
       ["clicks", t("点击量", "Clicks")], ["registrations", t("注册客户", "Registrations")],
-      ["ftd", "FTD"], ["effective", t("有效 FTD", "Valid FTD")],
+      ["ftd", "首次入金"], ["effective", t("有效转化", "Qualified conversion")],
       ["expected", t("预计佣金", "Projected commission"), "money"],
       ["approved", t("结算净额", "Settlement net"), "money"]
     ];
@@ -185,13 +185,13 @@
           <dl class="sc-detail-metrics">${metrics.map(([key, label, type]) => field(label, format(totals[key], type))).join("")}</dl>
           <h3>${t("转化率", "Conversion rates")}</h3>
           <dl class="sc-detail-rates">${[
-            ["registerRate", t("点击→注册", "Click → registration")], ["ftdRate", t("注册→FTD", "Registration → FTD")],
-            ["effectiveRate", t("FTD→有效 FTD", "FTD → valid FTD")]
+            ["registerRate", t("点击→注册", "Click → registration")], ["ftdRate", t("注册→首次入金", "Registration → 首次入金")],
+            ["effectiveRate", t("首次入金→有效转化", "First deposit → qualified conversion")]
           ].map(([key, label]) => field(label, format(totals[key], "rate"))).join("")}</dl>
           <div class="sc-detail-section-head"><h3>${t("数据明细", "Breakdown")}</h3><select data-sc-breakdown aria-label="${t("明细维度", "Breakdown dimension")}">
             <option value="platform" ${s.breakdown === "platform" ? "selected" : ""}>${t("按平台", "By platform")}</option><option value="country" ${s.breakdown === "country" ? "selected" : ""}>${t("按国家/地区", "By country / region")}</option>
           </select></div>
-          <div class="table-wrap"><table class="sc-breakdown-table"><thead><tr><th>${s.breakdown === "platform" ? t("平台", "Platform") : t("国家/地区", "Country / region")}</th><th class="numeric">${t("点击", "Clicks")}</th><th class="numeric">${t("注册", "Registrations")}</th><th class="numeric">FTD</th><th class="numeric">${t("有效 FTD", "Valid FTD")}</th><th class="numeric">${t("预计佣金", "Projected commission")}</th></tr></thead>
+          <div class="table-wrap"><table class="sc-breakdown-table"><thead><tr><th>${s.breakdown === "platform" ? t("平台", "Platform") : t("国家/地区", "Country / region")}</th><th class="numeric">${t("点击", "Clicks")}</th><th class="numeric">${t("注册", "Registrations")}</th><th class="numeric">首次入金</th><th class="numeric">${t("有效转化", "Qualified conversion")}</th><th class="numeric">${t("预计佣金", "Projected commission")}</th></tr></thead>
             <tbody>${groups.length ? groups.map(group => `<tr><td>${h(AFF.dataText(group.values[0]))}</td>${["clicks", "registrations", "ftd", "effective", "expected"].map(key => `<td class="numeric">${format(group.metrics[key], key === "expected" ? "money" : "count")}</td>`).join("")}</tr>`).join("") : `<tr><td colspan="6" class="sc-empty">${t("暂无推广数据", "No promotion data yet")}</td></tr>`}</tbody>
           </table></div>
         </div><footer><button class="button secondary" type="button" data-sc-action="close">${t("关闭", "Close")}</button></footer>

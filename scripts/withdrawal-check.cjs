@@ -26,7 +26,7 @@ async function main() {
     await page.click("[data-withdraw-action='complete-kyc']");
     await page.waitForSelector("[data-withdraw-amount]");
     const feeTip = await page.locator(".wd-fee-tip").innerText();
-    assert.ok(feeTip.includes("$3 + 0.5%") && feeTip.includes("不重复扣税"));
+    assert.ok(feeTip.includes("$3 + 0.5%"));
 
     const before = await page.evaluate(() => AFF.finance.balance());
     await page.fill("[data-withdraw-amount]", "100");

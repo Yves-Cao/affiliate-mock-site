@@ -150,7 +150,7 @@ async function main() {
     check(await logRow.locator("[data-action='postback-retry']").isDisabled(), "Old-version record cannot retry after configuration changes");
     await configs();
     await configRow().locator("[data-action='postback-test']").click();
-    check(new URL(await page.locator(".postback-preview code").innerText()).searchParams.get("amount") === "100.00", "Quality service event uses commission sample amount");
+    check(new URL(await page.locator(".postback-preview code").innerText()).searchParams.get("amount") === "100.00", "Quality upgrade event uses commission sample amount");
     await action("postback-run-test").click();
     check((await page.locator("#postback-test-output").innerText()).includes("200"), "Success produces HTTP 200");
     await close();

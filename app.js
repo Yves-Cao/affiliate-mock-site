@@ -2,8 +2,9 @@ const defaultState = {
   route: "dash",
   sidebarCollapsed: false,
   mobileNavOpen: false,
-  navGroups: [],
+  navGroups: ["仪表盘", "数据总览", "推广管理", "收益中心", "服务中心"],
   language: "zh",
+  theme: "light",
   account: {
     displayName: "Affiliate Partner",
     country: "新加坡",
@@ -265,12 +266,13 @@ function initializeElements() {
   for (const id of [
     "login-view", "login-form", "login-error", "register-form", "register-error",
     "login-tab", "register-tab", "app-view", "sidebar", "nav",
-    "profile-entry", "sidebar-toggle", "language-toggle", "language-menu",
+    "profile-entry", "sidebar-toggle", "mobile-nav-toggle", "language-toggle", "language-menu",
     "kyc-banner", "dismiss-kyc", "main", "modal-root", "toast", "scenario-select",
     "account-menu", "avatar-button", "account-dropdown", "wallet-menu", "wallet-toggle",
     "wallet-popover", "wallet-balance", "wallet-total-revenue", "wallet-available-commission", "wallet-available-guarantee", "message-count",
     "wallet-processing",
-    "server-time", "server-time-zone", "local-time", "local-time-zone"
+    "server-time", "server-date", "server-time-zone", "local-time", "local-date", "local-time-zone",
+    "wallet-system", "wallet-category", "wallet-account-name", "theme-toggle", "avatar-initial", "avatar-name"
   ]) elements[id] = document.getElementById(id);
 }
 
@@ -282,12 +284,14 @@ function updateTopbarClocks() {
   const time = formatAccountTime(now, timezone);
   const zoneLabel = accountTimezoneLabel(timezone);
   const offsetLabel = accountTimezoneOffset(timezone);
-  elements["server-time"].textContent = time;
-  elements["local-time"].textContent = time;
+  elements["server-time"].textContent = time.slice(11);
+  elements["server-date"].textContent = time.slice(0, 10);
+  elements["local-time"].textContent = time.slice(11);
+  elements["local-date"].textContent = time.slice(0, 10);
   elements["server-time-zone"].textContent = offsetLabel;
   elements["local-time-zone"].textContent = offsetLabel;
-  elements["server-time"].title = `服务器时间 · ${zoneLabel}`;
-  elements["local-time"].title = `本地时间 · ${zoneLabel}`;
+  elements["server-date"].title = `服务器时间 · ${zoneLabel}`;
+  elements["local-date"].title = `本地时间 · ${zoneLabel}`;
 }
 
 function currentState() {
@@ -296,7 +300,8 @@ function currentState() {
     if (!saved) return structuredClone(defaultState);
     const savedState = JSON.parse(saved);
     const merged = { ...structuredClone(defaultState), ...savedState };
-    merged.navGroups = [];
+    merged.navGroups = ["仪表盘", "数据总览", "推广管理", "收益中心", "服务中心"];
+    merged.theme = savedState.theme === "dark" ? "dark" : "light";
     if (merged.reports?.clients?.filters?.commissionStatus && ["payable", "paid"].includes(merged.reports.clients.filters.commissionStatus)) {
       merged.reports.clients.filters.commissionStatus = "settled_partial";
     }
@@ -385,6 +390,7 @@ function currentState() {
 }
 
 AFF.state = currentState();
+applyTheme(AFF.state.theme);
 AFF.state.scenario = AFF.simulation.state().scenarioId;
 AFF.state.settlementRuns = AFF.simulation.state().settlementRuns;
 if (Array.isArray(AFF.state.createdCampaigns)) {
@@ -422,31 +428,15 @@ function routeLabel(route) {
 
 function renderNav() {
   const groups = [...new Set(AFF.routes.filter(route => !route.hidden && !["account", "apply", "onboarding"].includes(route.id)).map(route => route.group))];
-  const groupIcons = {
-    "仪表盘": "dashboard",
-    "数据总览": "overview",
-    "推广管理": "megaphone",
-    "收益中心": "wallet",
-    "服务中心": "clients"
-  };
   elements.nav.innerHTML = groups.map(group => {
     const routes = AFF.routes.filter(route => !route.hidden && !["account", "apply", "onboarding"].includes(route.id) && route.group === group);
     const groupLabel = AFF.state.language === "en" ? (englishGroupLabels[group] || group) : group;
     const open = AFF.state.navGroups.includes(group) || (AFF.state.route === "account" && group === "服务中心");
-    if (group === "仪表盘") {
-      return `
-        <section class="nav-section nav-direct">
-          <button class="nav-parent ${AFF.state.route === "dash" ? "active" : ""}" type="button" data-route="dash" ${AFF.state.route === "dash" ? 'aria-current="page"' : ""} title="${AFF.helpers.h(groupLabel)}">
-            <span class="nav-icon" aria-hidden="true">${navIcon("dashboard")}</span>
-            <span class="nav-label">${AFF.helpers.h(groupLabel)}</span>
-          </button>
-        </section>`;
-    }
     return `
       <section class="nav-section ${open ? "open" : ""}">
         <div class="nav-parent-row">
           <button class="nav-parent" type="button" data-nav-group="${AFF.helpers.h(group)}" aria-expanded="${open}" title="${AFF.helpers.h(groupLabel)}">
-            <span class="nav-icon" aria-hidden="true">${navIcon(groupIcons[group])}</span>
+            <span class="nav-icon nav-group-icon" aria-hidden="true">${navIcon(group === "仪表盘" ? "dashboard" : group === "数据总览" ? "overview" : group === "推广管理" ? "megaphone" : group === "收益中心" ? "wallet" : "clients")}</span>
             <span class="nav-label">${AFF.helpers.h(groupLabel)}</span>
             <span class="nav-chevron" aria-hidden="true">›</span>
           </button>
@@ -512,15 +502,19 @@ function render() {
   AFF.state.route = route;
   renderNav();
   const reportMoney = value => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
-  elements["wallet-balance"].textContent = reportMoney(AFF.finance.balance() / 100);
+  elements["wallet-balance"].textContent = `${reportMoney(AFF.finance.balance() / 100)} USD`;
   const walletAvailability = AFF.fundsAvailability.walletSummary();
   elements["wallet-total-revenue"].textContent = reportMoney(walletAvailability.totalRevenue);
   elements["wallet-available-commission"].textContent = reportMoney(walletAvailability.availableCommission);
   elements["wallet-available-guarantee"].textContent = reportMoney(walletAvailability.availableGuarantee);
   elements["wallet-processing"].textContent = reportMoney(walletAvailability.inSettlement);
-  elements["message-count"].textContent = (AFF.messages?.allMessages() || AFF.finance.messages)
+  const unreadCount = (AFF.messages?.allMessages() || AFF.finance.messages)
     .filter(message => message.status === "unread").length;
-  elements["avatar-button"].textContent = accountInitial();
+  elements["message-count"].textContent = unreadCount;
+  elements["message-count"].hidden = unreadCount === 0;
+  elements["avatar-initial"].textContent = accountInitial();
+  elements["avatar-name"].textContent = AFF.state.account.displayName;
+  elements["wallet-account-name"].textContent = AFF.state.account.displayName;
   elements["avatar-button"].setAttribute("aria-label", `${AFF.state.account.displayName} 个人中心菜单`);
   elements["scenario-select"].value = AFF.state.scenario;
   elements.main.innerHTML = ["normal-flow", "closure-flow"].includes(AFF.state.scenario)
@@ -535,6 +529,7 @@ function render() {
   document.body.classList.toggle("collapsed", AFF.state.sidebarCollapsed);
   document.body.classList.toggle("mobile-nav-open", AFF.state.mobileNavOpen);
   document.body.classList.toggle("route-apply", route === "apply");
+  document.body.classList.toggle("route-dash", route === "dash");
   syncSidebarToggle();
   elements["language-toggle"].setAttribute("aria-expanded", String(elements["language-menu"].classList.contains("open")));
   elements["language-menu"].querySelectorAll("[data-language]").forEach(button => {
@@ -552,6 +547,8 @@ function syncSidebarToggle() {
   elements["sidebar-toggle"].textContent = sidebarExpanded ? "«" : "»";
   elements["sidebar-toggle"].setAttribute("aria-expanded", String(sidebarExpanded));
   elements["sidebar-toggle"].setAttribute("aria-label", sidebarExpanded ? "收起侧栏" : "展开侧栏");
+  elements["mobile-nav-toggle"]?.setAttribute("aria-expanded", String(AFF.state.mobileNavOpen));
+  elements["mobile-nav-toggle"]?.setAttribute("aria-label", AFF.state.mobileNavOpen ? "关闭导航" : "打开导航");
 }
 
 function syncTopbarLanguage() {
@@ -560,10 +557,11 @@ function syncTopbarLanguage() {
     ? "Demo environment · synthetic data · reference values"
     : "演示环境 · 虚构数据 · 参数为参考值";
   document.querySelector(".demo-note-compact").textContent = english ? "Demo data" : "演示数据";
-  const clockLabels = document.querySelectorAll(".topbar-clock > div > span");
-  if (clockLabels[0]) clockLabels[0].textContent = english ? "Server time" : "服务器时间";
-  if (clockLabels[1]) clockLabels[1].textContent = english ? "Local time" : "本地时间";
-  document.querySelector("#wallet-toggle > span").textContent = english ? "Wallet" : "钱包";
+  const clockLabels = document.querySelectorAll(".mt-time-display__name");
+  if (clockLabels[0]) clockLabels[0].textContent = english ? "Server" : "服务器";
+  if (clockLabels[1]) clockLabels[1].textContent = english ? "Local" : "本地";
+  elements["wallet-system"].textContent = "Affiliate CPA";
+  elements["wallet-category"].textContent = english ? "Partner" : "合作方";
   const accountLabels = document.querySelectorAll("#account-dropdown .account-menu-item span:last-child");
   if (accountLabels[0]) accountLabels[0].textContent = english ? "Personal center" : "个人中心";
   if (accountLabels[1]) accountLabels[1].textContent = english ? "Sign out" : "退出登录";
@@ -572,6 +570,23 @@ function syncTopbarLanguage() {
     : "您的账户资料未完善，部分功能可能受限。";
   elements["dismiss-kyc"].textContent = english ? "Dismiss" : "知道了";
   elements["kyc-banner"].querySelector("button.button.primary").textContent = english ? "Complete now" : "去完成";
+  syncThemeTrigger();
+}
+
+function applyTheme(theme) {
+  const dark = theme === "dark";
+  document.body.dataset.theme = dark ? "dark" : "light";
+  syncThemeTrigger();
+}
+
+function syncThemeTrigger() {
+  const trigger = elements["theme-toggle"];
+  if (!trigger) return;
+  const dark = AFF.state?.theme === "dark";
+  trigger.setAttribute("aria-checked", String(dark));
+  trigger.setAttribute("aria-label", AFF.state?.language === "en"
+    ? (dark ? "Switch to light mode" : "Switch to dark mode")
+    : (dark ? "切换到浅色模式" : "切换到深色模式"));
 }
 
 function statePage(route) {
@@ -847,6 +862,7 @@ function logout() {
   sessionStorage.removeItem("affiliate-user-session");
   sessionStorage.removeItem("affiliate-user-mock");
   AFF.state = structuredClone(defaultState);
+  applyTheme(AFF.state.theme);
   elements["app-view"].classList.add("hidden");
   elements["login-view"].classList.remove("hidden");
   elements["login-error"].hidden = true;
@@ -890,13 +906,13 @@ function openCampaignData(code, period = "past30", focusPeriod = false) {
   const number = AFF.campaignNumber;
   const metrics = [
     ["clicks", t("点击量", "Clicks")], ["registrations", t("注册客户", "Registrations")],
-    ["ftd", t("FTD 客户", "FTD clients")], ["effective", t("有效客户", "Valid FTD clients")],
-    ["quality", t("质量服务客户", "Quality service clients")], ["expected", t("预计佣金", "Projected commission"), "money"]
+    ["ftd", t("首次入金 客户", "First deposit clients")], ["effective", t("有效客户", "Qualified conversion clients")],
+    ["quality", t("质量升档客户", "Quality upgrade clients")], ["expected", t("预计佣金", "Projected commission"), "money"]
   ];
   const breakdown = (key, title) => {
     const grouped = AFF.reporting.aggregate(rows, [key]).sort((a, b) => b.metrics.clicks - a.metrics.clicks);
     return `<section class="campaign-breakdown"><h3>${title}</h3>${grouped.length ? AFF.helpers.table({
-      columns: [title, t("点击", "Clicks"), t("注册客户", "Registrations"), t("FTD客户", "FTD clients"), t("有效客户", "Valid FTD clients"), t("质量服务客户", "Quality service clients"), t("预计佣金", "Projected commission")],
+      columns: [title, t("点击", "Clicks"), t("注册客户", "Registrations"), t("首次入金客户", "First deposit clients"), t("有效客户", "Qualified conversion clients"), t("质量升档客户", "Quality upgrade clients"), t("预计佣金", "Projected commission")],
       rows: grouped.map(row => [AFF.helpers.h(row.values[0]), number(row.metrics.clicks), ...["registrations", "ftd", "effective", "quality"].map(metric => AFF.campaignMetric(campaign, metric, row.metrics[metric], period, key, row.values[0])), number(row.metrics.expected, "money")])
     }) : `<div class="campaign-empty">${t("当前周期暂无数据", "No data for this period")}</div>`}</section>`;
   };
@@ -906,7 +922,7 @@ function openCampaignData(code, period = "past30", focusPeriod = false) {
     <div class="campaign-data-body">
       <div class="campaign-data-period"><label for="campaign-period">${t("时间范围", "Date range")}</label><select id="campaign-period">${periods.map(([value, zh, en]) => `<option value="${value}" ${value === period ? "selected" : ""}>${t(zh, en)}</option>`).join("")}</select><span>${range.from} — ${range.to}</span></div>
       <section class="campaign-data-metrics">${metrics.map(([key, label, type]) => `<div><span>${label}</span>${["registrations", "ftd", "effective", "quality"].includes(key) ? AFF.campaignMetric(campaign, key, totals[key], period) : `<strong>${number(totals[key], type)}</strong>`}</div>`).join("")}</section>
-      <section class="campaign-data-rates">${[["registerRate", t("点击→注册", "Click → registration")], ["ftdRate", t("注册→FTD", "Registration → FTD")], ["effectiveRate", t("FTD→有效 FTD", "FTD → valid FTD")]].map(([key, label]) => `<div><span>${label}</span><strong>${number(totals[key], "rate")}</strong></div>`).join("")}</section>
+      <section class="campaign-data-rates">${[["registerRate", t("点击→注册", "Click → registration")], ["ftdRate", t("注册→首次入金", "Registration → 首次入金")], ["effectiveRate", t("首次入金→有效转化", "First deposit → qualified conversion")]].map(([key, label]) => `<div><span>${label}</span><strong>${number(totals[key], "rate")}</strong></div>`).join("")}</section>
       ${breakdown("country", t("国家/地区", "Country / region"))}
       ${breakdown("platform", t("平台", "Platform"))}
     </div>
@@ -972,8 +988,8 @@ function openClientInfo(clientId) {
   if (!row) return;
   showModal(modalShell(`客户 ${row.clientId}`, `
     <div class="info-grid">
-      <div class="info-item"><span>资格链</span><strong>注册 → KYC → FTD → 有效FTD → 质量服务</strong></div>
-      <div class="info-item"><span>佣金链</span><strong>未生成 → 前两段合并 → 质量服务单独 → 动态结算 → 可提现</strong></div>
+      <div class="info-item"><span>资格链</span><strong>注册 → KYC → 首次入金 → 有效转化 → 质量升档</strong></div>
+      <div class="info-item"><span>佣金链</span><strong>未生成 → 前两段合并 → 质量升档单独 → 动态结算 → 可提现</strong></div>
       <div class="info-item"><span>动态结算</span><strong>初始1天，按风险分递增</strong></div>
       <div class="info-item"><span>结算</span><strong>日度结算</strong></div>
       <div class="info-item"><span>归因</span><strong>${AFF.helpers.h(row.source)} / ${AFF.helpers.h(row.medium)} / ${AFF.helpers.h(row.campaign)}</strong></div>
@@ -1829,7 +1845,7 @@ function initialize() {
   initializeAuthForms();
   elements["login-form"].addEventListener("submit", handleLogin);
   elements["register-form"].addEventListener("submit", handleRegister);
-  elements["sidebar-toggle"].addEventListener("click", () => {
+  const toggleSidebar = () => {
     if (window.innerWidth <= 991) {
       AFF.state.mobileNavOpen = !AFF.state.mobileNavOpen;
     } else {
@@ -1837,6 +1853,19 @@ function initialize() {
     }
     setSidebarHover(false);
     render();
+  };
+  elements["sidebar-toggle"].addEventListener("click", toggleSidebar);
+  elements["mobile-nav-toggle"].addEventListener("click", toggleSidebar);
+  const toggleTheme = () => {
+    AFF.state.theme = AFF.state.theme === "dark" ? "light" : "dark";
+    applyTheme(AFF.state.theme);
+    persist();
+  };
+  elements["theme-toggle"].addEventListener("click", toggleTheme);
+  elements["theme-toggle"].addEventListener("keydown", event => {
+    if (!["Enter", " "].includes(event.key)) return;
+    event.preventDefault();
+    toggleTheme();
   });
   const sidebarHoverMedia = window.matchMedia("(hover: hover) and (pointer: fine)");
   const setSidebarHover = open => {

@@ -26,8 +26,8 @@ assert.equal(finance.commissionCases.filter(item => item.type === "quality_servi
 const financeClients = finance.clients ? [...finance.clients.values()] : [];
 for (const row of financeClients) {
   if (row.effectiveAt) {
-    assert.ok(row.expected > 0, `${row.clientId} valid FTD must have commission`);
-    assert.match(row.tier, /^L[1-4]$/, `${row.clientId} valid FTD must have a tier`);
+    assert.ok(row.expected > 0, `${row.clientId} qualified conversion must have commission`);
+    assert.match(row.tier, /^L[1-4]$/, `${row.clientId} qualified conversion must have a tier`);
     const gross = aff.partnerProgram.commissionPrice(row.country, row.tier);
     const expected = row.qualityAt ? gross : Math.round(gross * 0.75);
     assert.equal(row.expected, expected, `${row.clientId} commission must match tier, country coefficient, and milestone`);
@@ -39,18 +39,16 @@ for (const row of financeClients) {
   const settledCases = (row.commissionCases || []).filter(item => item.settlement);
   if (settledCases.length) {
     const gross = Math.round(settledCases.reduce((sum, item) => sum + item.settlement.grossAmount, 0));
-    const tax = Math.round(settledCases.reduce((sum, item) => sum + item.settlement.taxAmount, 0));
     const guarantee = Math.round(settledCases.reduce((sum, item) => sum + item.settlement.guaranteeAmount, 0));
-    assert.equal(Math.round(row.approved * 100), gross - tax - guarantee, `${row.clientId} settlement split must reconcile`);
+    assert.equal(Math.round(row.approved * 100), gross - guarantee, `${row.clientId} settlement split must reconcile`);
   }
 }
 for (const settlement of finance.settlements) {
-  assert.equal(settlement.grossAmount, settlement.taxAmount + settlement.guaranteeAmount + settlement.availableAmount);
+  assert.equal(settlement.grossAmount, settlement.guaranteeAmount + settlement.availableAmount);
 }
 assert.equal(finance.configuration.guaranteeRate, 0.10);
 assert.equal(finance.configuration.guaranteeReleaseDays, 90);
 assert.equal(finance.configuration.terminationRetentionDays, 30);
-assert.deepEqual(Object.keys(finance.configuration.taxRates), ["T0", "T1", "T2", "T3"]);
 assert.ok(finance.guaranteeRecords.some(item => item.status === "retained"));
 assert.ok(finance.guaranteeRecords.some(item => item.status === "released"));
 assert.ok(finance.guaranteeRecords.some(item => item.status === "used"));
@@ -73,7 +71,6 @@ assert.equal(order.fee, 0);
 assert.equal(order.received, 0);
 
 const summary = finance.summary(aff.reporting.rows);
-assert.ok(summary.tax > 0);
 assert.ok(summary.guarantee > 0);
 assert.ok(summary.available > 0);
 assert.ok(summary.paid > 0);
@@ -88,7 +85,6 @@ console.log(JSON.stringify({
   settlements: finance.settlements.length,
   guaranteeRecords: finance.guaranteeRecords.length,
   withdrawals: finance.staticWithdrawals.length,
-  tax: summary.tax,
   guarantee: summary.guarantee,
   available: summary.available,
   paid: summary.paid,

@@ -253,7 +253,7 @@ async function main() {
     const clientHeaders = await page.locator(".report-client-table thead").innerText();
     assert.ok(clientHeaders.includes("KYC状态") && clientHeaders.includes("注册信息"), "Client headers use the updated labels");
     assert.equal(await page.locator("[data-rp-column-help='registration']").count(), 1, "Registration column has an explanation");
-    assert.equal(await page.locator("[data-rp-column-help='quality']").count(), 1, "Quality service column has an explanation");
+    assert.equal(await page.locator("[data-rp-column-help='quality']").count(), 1, "Quality upgrade column has an explanation");
     assert.equal(await page.locator("[data-rp-column-help='expected']").count(), 1, "Expected commission column has an explanation");
     assert.equal(await page.locator("[data-rp-sort='campaign']").count(), 0, "Campaign source is not sortable");
     assert.equal(await page.locator("[data-rp-sort='kyc']").count(), 0, "KYC is not sortable");
@@ -264,7 +264,7 @@ async function main() {
     assert.ok(!(await page.locator(".report-expected-cell").first().innerText()).includes("参考值"), "Expected commission does not show reference-value label");
     await page.click("[data-rp-column-help='stage']");
     const stageHelp = await page.locator("#rp-floating-help").innerText();
-    for (const stage of ["注册", "KYC", "FTD", "有效FTD", "质量服务", "已完成", "已作废"]) {
+    for (const stage of ["注册", "KYC", "首次入金", "有效转化", "质量升档", "已完成", "已作废"]) {
       assert.ok(stageHelp.includes(stage), `Conversion-stage explanation includes ${stage}`);
     }
     await page.mouse.click(12, 12);
@@ -362,7 +362,7 @@ async function main() {
     const commissionTotals = await page.evaluate(() => AFF.reporting.totals(AFF.reporting.rows));
     await page.locator("[data-rp-column-help='expected']").click({ force: true });
     assert.ok(await page.locator("#rp-floating-help").isVisible());
-    assert.match(await page.locator("#rp-floating-help").innerText(), /基础佣金段|质量服务佣金段/);
+    assert.match(await page.locator("#rp-floating-help").innerText(), /基础佣金段|质量升档佣金段/);
     await page.mouse.click(12, 12);
     assert.ok(await page.locator("#rp-floating-help").isHidden());
     for (const [commissionStatus, settlementStatus] of [["rejected", "blocked"]]) {
@@ -441,10 +441,10 @@ async function main() {
         assert.ok(overflow <= 2, `${id} page overflows viewport at ${width}px by ${overflow}px`);
         if (width < 768) {
           const bounds = await page.evaluate(() => ({
-            sidebar: document.querySelector("#sidebar").getBoundingClientRect().width,
+            sidebar: document.querySelector("#sidebar").getBoundingClientRect().right,
             mainLeft: document.querySelector("#main").getBoundingClientRect().left
           }));
-          assert.ok(Math.abs(bounds.sidebar - 68) < 2 && bounds.mainLeft >= 68, `${id} sidebar overlaps mobile content: ${JSON.stringify(bounds)}`);
+          assert.ok(bounds.sidebar <= 0 && bounds.mainLeft >= 0, `${id} sidebar overlaps mobile content: ${JSON.stringify(bounds)}`);
         }
         assert.ok(await page.locator(".report-table").isVisible());
         if (id === "clients") {

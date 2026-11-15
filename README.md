@@ -1,6 +1,5 @@
 # Affiliate CPA Mock
 
-Public P0 demo for the Affiliate program. The site implements twenty Affiliate user-side pages defined by the product page specifications. All account names, client IDs, campaigns, commissions, taxes, guarantees, withdrawals, assets, and amounts are synthetic.
 
 ## Pages
 
@@ -19,7 +18,6 @@ Public P0 demo for the Affiliate program. The site implements twenty Affiliate u
 - `#/wd` Withdrawal
 - `#/guarantee` Rolling guarantee balance, retention, release, and deduction ledger
   - `#/support` Help tasks and general support tickets
-  - `#/account` Account status, verification, agreements, payout/tax profile, security, and notification preferences
 
 The dashboard and account center include a partner-facing credit summary. It shows only the current level, its position, the three commission-stage bonus ratio and fixed amount, a reason category, and a recovery direction; internal scores, score ledgers, weights, thresholds, and cluster rules remain hidden.
 
@@ -49,11 +47,10 @@ The simulation console remains visible in the online Mock for cross-team testing
 
 ## Reporting
 
-Performance and general statistics share 20 selectable dimensions, with at most two selected at a time. Date/week/month/year are mutually exclusive. The source contains 1,440 deterministic synthetic visit records, including 960 unique clients over 90 days. The conversion chain is `registration -> FTD -> valid FTD -> quality service`. Commission records split into a first case for `FTD + valid FTD` and a second case for `quality service`. All groupings, filters, totals, rates, sorting, pagination, milestone drilldowns, and CSV exports use this source. Email addresses stay masked in views and exports.
+Performance and general statistics share 20 selectable dimensions, with at most two selected at a time. Date/week/month/year are mutually exclusive. The source contains 1,440 deterministic synthetic visit records, including 960 unique clients over 90 days. The conversion chain is `registration -> first deposit -> qualified conversion -> quality upgrade`. Commission records split into a first case for `first deposit + qualified conversion` and a second case for `quality upgrade`. All groupings, filters, totals, rates, sorting, pagination, milestone drilldowns, and CSV exports use this source. Email addresses stay masked in views and exports.
 
 Date filters select click-attribution cohorts; subsequent conversion milestones are observed through October 27, 2026, in UTC+08:00. These are cohort results, not counts of conversion events occurring in the selected dates. Commission statuses and attributed device/source fields demonstrate interaction only; production field mappings and event ingestion remain subject to the approved backend contracts.
 
-The P0 finance model separates commission cases, settlement allocations, tax records, rolling-guarantee ledgers, available-balance lots, withdrawal orders, and FIFO withdrawal allocations. Tax and the 10% rolling guarantee are calculated from gross commission at settlement. A withdrawal debits the available balance; payment-channel fees are confirmed only after successful payment, and failures/timeout return the full amount without a fee. Dashboard cards and the wallet popover use this shared finance source rather than static values. Twelve deterministic scenarios cover normal L1/L2 flow, tier downgrade, FTD-only, valid-FTD pending review, quality-service void, extended hold, D+30 freeze, chargeback, non-new-customer, fraud hit, and appeal overturn.
 
 ```bash
 npm run test:reports-data
@@ -127,3 +124,13 @@ Tests are local simulations. They render synthetic requests and responses withou
 - No real customer data or credentials are stored in this repository.
 - Email addresses and phone numbers are always masked in displayed CRM-derived data; precise matching must happen only in a controlled backend service.
 - Business parameters remain synthetic; pending values must not be treated as approved policy.
+# Bilingual Entry
+
+> **English Summary**
+>
+> This directory contains the Affiliate browser prototype, fixtures, Mock API, Mock OpenAPI artifacts, and focused local checks. It proves prototype behavior only and is not production backend implementation.
+>
+> **中文摘要**
+>
+> 本目录包含 Affiliate 浏览器原型、示例数据、Mock API、Mock OpenAPI 和本地专项检查。它仅证明原型行为，不代表生产后端实现。
+

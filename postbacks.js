@@ -14,9 +14,9 @@ AFF.postbacks = (() => {
   const events = [
     ["registration", "注册", "Registration"],
     ["kyc_completed", "KYC完成", "KYC completed"],
-    ["ftd_reached", "FTD达成", "FTD reached"],
-    ["qualified_ftd", "有效FTD确认", "Valid FTD confirmed"],
-    ["quality_service", "质量服务确认", "Quality service confirmed"],
+    ["ftd_reached", "首次入金达成", "首次入金 reached"],
+    ["qualified_ftd", "有效转化确认", "Qualified conversion confirmed"],
+    ["quality_service", "质量升档确认", "Quality upgrade confirmed"],
     ["commission_status", "佣金状态变更", "Commission status changed"],
     ["commission_rejected", "佣金拒付", "Commission rejected"],
     ["commission_clawback", "佣金冲正", "Commission clawback"]

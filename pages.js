@@ -96,7 +96,12 @@ AFF.pages.dash = () => {
       </div>
     </div>`;
   return `
-    ${AFF.helpers.pageHeader("仪表盘", "查看资金状态与本月里程碑；所有金额与资金流水同源。")}
+    <header class="page-header dashboard-header">
+      <div>
+        <h1>${t("仪表盘", "Dashboard")}</h1>
+        <p>${t("查看本月进展、资金状态与推广准备情况；金额与资金流水同源。", "Track monthly progress, funds, and promotion readiness; amounts share the funds source.")}</p>
+      </div>
+    </header>
     <div class="cards dashboard-metrics">
       <article class="card metric">
         <span>${t("本月注册客户", "Registrations this month")}</span>
@@ -104,18 +109,18 @@ AFF.pages.dash = () => {
         <small>${AFF.reporting.now.slice(0, 7)}</small>
       </article>
       <article class="card metric">
-        <span>${t("本月FTD", "FTD this month")}</span>
-        ${clientButton("ftd", number(monthClients.ftd), "month", t("查看本月FTD", "View FTD"))}
+        <span>${t("本月首次入金", "首次入金 this month")}</span>
+        ${clientButton("ftd", number(monthClients.ftd), "month", t("查看本月首次入金", "View 首次入金"))}
         <small>${AFF.reporting.now.slice(0, 7)}</small>
       </article>
       <article class="card metric">
-        <span>${t("本月有效FTD", "Valid FTD this month")}</span>
-        ${clientButton("effective", number(monthClients.effective), "month", t("查看本月有效FTD", "View this month's valid FTD"))}
+        <span>${t("本月有效转化", "Qualified conversion this month")}</span>
+        ${clientButton("effective", number(monthClients.effective), "month", t("查看本月有效转化", "View this month's qualified conversion"))}
         <small>${AFF.reporting.now.slice(0, 7)}</small>
       </article>
       <article class="card metric">
-        <span>${t("本月质量服务", "Quality service this month")}</span>
-        ${clientButton("quality", number(monthClients.quality), "month", t("查看本月质量服务", "View quality service"))}
+        <span>${t("本月质量升档", "Quality upgrade this month")}</span>
+        ${clientButton("quality", number(monthClients.quality), "month", t("查看本月质量升档", "View quality upgrade"))}
         <small>${AFF.reporting.now.slice(0, 7)}</small>
       </article>
     </div>
@@ -181,7 +186,7 @@ AFF.pages.dash = () => {
             <thead><tr><th>${t("数据项", "Metric")}</th><th>${t("合计数量", "Total")}</th></tr></thead>
             <tbody>
               <tr><td>${t("注册量", "Registrations")}</td><td>${clientButton("registrations", number(summary.registrations), summaryPeriod, t("查看注册客户", "View registered clients"))}</td></tr>
-              <tr><td>${t("有效FTD数量", "Valid FTD clients")}</td><td>${clientButton("effective", number(summary.effective), summaryPeriod, t("查看有效FTD客户", "View valid FTD clients"))}</td></tr>
+              <tr><td>${t("有效转化数量", "Qualified conversion clients")}</td><td>${clientButton("effective", number(summary.effective), summaryPeriod, t("查看有效转化客户", "View qualified conversion clients"))}</td></tr>
               <tr><td>${t("已入账收入", "Credited revenue")}</td><td>${clientButton("revenue", money(summary.approved), summaryPeriod, t("查看收入对应客户", "View clients contributing to revenue"))}</td></tr>
             </tbody>
           </table>
@@ -282,7 +287,7 @@ AFF.pages.promo = () => {
       <strong>${t("活动", "Campaigns")}</strong>
       <span class="helper">${t("过去30天", "Last 30 days")} · ${AFF.reports.range("past30").from} — ${AFF.reporting.now}</span>
     </div>
-    <section class="card campaign-list">${AFF.helpers.table({ columns: [t("活动", "Campaign"), t("链接", "Link"), t("状态", "Status"), t("点击", "Clicks"), t("注册客户", "Registrations"), t("FTD客户", "FTD clients"), t("有效客户", "Valid FTD clients"), t("质量服务客户", "Quality service clients"), t("预计佣金", "Projected commission"), t("操作", "Action")], rows: campaignRows, footer: AFF.pagination.component({ page, pageSize: 10, total: AFF.campaigns.length, channel: "promo", sizes: false }) })}</section>
+    <section class="card campaign-list">${AFF.helpers.table({ columns: [t("活动", "Campaign"), t("链接", "Link"), t("状态", "Status"), t("点击", "Clicks"), t("注册客户", "Registrations"), t("首次入金客户", "First deposit clients"), t("有效客户", "Qualified conversion clients"), t("质量升档客户", "Quality upgrade clients"), t("预计佣金", "Projected commission"), t("操作", "Action")], rows: campaignRows, footer: AFF.pagination.component({ page, pageSize: 10, total: AFF.campaigns.length, channel: "promo", sizes: false }) })}</section>
     </div>`;
 };
 
@@ -1120,11 +1125,11 @@ AFF.pages.applyStep = () => {
       <section class="program-reward-overview" aria-labelledby="program-reward-title">
         <h3 id="program-reward-title">佣金如何产生</h3>
         <ol class="program-reward-stages">
-          <li><span class="program-stage-label">首次入金</span><h4>FTD</h4><p>客户完成首次入金，进入后续资格确认阶段。仅完成首次入金，尚不能获得可提现佣金。</p></li>
-          <li><span class="program-stage-label">确认基础奖励</span><h4>有效FTD</h4><p>达到相应资格要求后，确认基础CPA佣金。FTD与有效FTD两段共同构成完整的基础奖励。</p></li>
-          <li><span class="program-stage-label">获得额外奖励</span><h4>质量服务</h4><p>进一步达到质量服务要求，可获得基础CPA之外的额外奖励；未达成不影响已经成立的基础佣金。</p></li>
+          <li><span class="program-stage-label">首次入金</span><h4>首次入金</h4><p>客户完成首次入金，进入后续资格确认阶段。仅完成首次入金，尚不能获得可提现佣金。</p></li>
+          <li><span class="program-stage-label">确认基础奖励</span><h4>有效转化</h4><p>达到相应资格要求后，确认基础CPA佣金。首次入金与有效转化两段共同构成完整的基础奖励。</p></li>
+          <li><span class="program-stage-label">获得额外奖励</span><h4>质量升档</h4><p>进一步达到质量升档要求，可获得基础CPA之外的额外奖励；未达成不影响已经成立的基础佣金。</p></li>
         </ol>
-        <p class="program-rule-note">FTD与有效FTD两段的基础比例合计100%；三个阶段不代表分三次付款，质量服务奖励不占用基础CPA比例。</p>
+        <p class="program-rule-note">首次入金与有效转化两段的基础比例合计100%；三个阶段不代表分三次付款，质量升档奖励不占用基础CPA比例。</p>
       </section>
       <div class="country-picker ${state.programCountryPickerOpen ? "open" : ""}">
         <span class="field-label">${AFF.helpers.h(countryLabel)}</span>
@@ -1221,7 +1226,7 @@ AFF.pages.applyStep = () => {
           <p>根据数据，将营销中心转移到高转化率地区</p>
           <div class="conversion-page-notes">
             <p>查看三个月各地区的转化率最高的六个国家。</p>
-            <p><strong>重点关注转化率最高的地区，数据展示点击→注册、注册→FTD（首次入金）、FTD→有效FTD三个环节双端的转化数据。</strong></p>
+            <p><strong>重点关注转化率最高的地区，数据展示点击→注册、注册→首次入金（首次入金）、首次入金→有效转化三个环节双端的转化数据。</strong></p>
           </div>
         </div>
       </div>
@@ -1244,8 +1249,8 @@ AFF.pages.applyStep = () => {
               <thead><tr><th>环节</th><th>电脑端</th><th>移动端</th></tr></thead>
               <tbody>
                 <tr><td>点击→注册</td><td>${percent(country.desktop[0])}</td><td>${percent(country.mobile[0])}</td></tr>
-                <tr><td>注册→FTD</td><td>${percent(country.desktop[1])}</td><td>${percent(country.mobile[1])}</td></tr>
-                <tr><td>FTD→有效FTD</td><td>${percent(country.desktop[2])}</td><td>${percent(country.mobile[2])}</td></tr>
+                <tr><td>注册→首次入金</td><td>${percent(country.desktop[1])}</td><td>${percent(country.mobile[1])}</td></tr>
+                <tr><td>首次入金→有效转化</td><td>${percent(country.desktop[2])}</td><td>${percent(country.mobile[2])}</td></tr>
               </tbody>
             </table>
           </section>`).join("")}
@@ -1354,7 +1359,7 @@ AFF.pages.applyStep = () => {
     <section class="program-funds-flow" aria-labelledby="program-funds-title">
       <h3 id="program-funds-title">从佣金确认到提现</h3>
       <ol class="program-funds-timeline">
-        <li><span>01</span><strong>佣金确认</strong><p>达到有效FTD或质量服务要求，确认对应奖励。</p></li>
+        <li><span>01</span><strong>佣金确认</strong><p>达到有效转化或质量升档要求，确认对应奖励。</p></li>
         <li><span>02</span><strong>结算中</strong><p>经过适用的观察与核验周期，符合条件后参与每日自动结算。</p></li>
         <li><span>03</span><strong>可提现佣金</strong><p>完成结算后，符合提现条件的佣金进入可提现余额。</p></li>
         <li><span>04</span><strong>申请提现</strong><p>完成所需资料并满足提现条件后，申请提取可提现余额。</p></li>
@@ -1430,7 +1435,7 @@ AFF.pages.applyStep = () => {
       <section class="program-share-recap" aria-labelledby="program-recap-title">
         <h3 id="program-recap-title">推广前，再记住这三点</h3>
         <ul>
-          <li>达到有效FTD要求后确认基础佣金，质量服务可带来额外奖励。</li>
+          <li>达到有效转化要求后确认基础佣金，质量升档可带来额外奖励。</li>
           <li>佣金符合条件并完成结算后，才进入可提现余额。</li>
           <li>保证金单独记录，符合释放条件后可提现。</li>
         </ul>

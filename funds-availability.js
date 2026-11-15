@@ -38,8 +38,7 @@
     push({ id: "quarantine", order: 2, group: t("待复核", "Pending review"), label: t("隔离中", "Quarantined"), amount: sumCases(quarantined), time: t("隔离复核阶段", "Quarantine review"), impact: `${quarantined.length} ${t("个佣金对象", "commission objects")}`, next: t("查看申诉或消息", "View appeals or messages"), route: "appeals", active: quarantined.length > 0 });
     push({ id: "manual-review", order: 3, group: t("待复核", "Pending review"), label: t("人工复核", "Manual review"), amount: sumCases(manual), time: t("等待复核结论", "Awaiting review"), impact: `${manual.length} ${t("个佣金对象", "commission objects")}`, next: t("查看关联对象", "View related objects"), route: "pay", active: manual.length > 0 });
     push({ id: "kyc", order: 4, group: t("待补齐", "Information required"), label: t("KYC/KYB未完成", "KYC/KYB incomplete"), amount: null, time: t("资料完成度待确认", "Profile completeness pending"), impact: t("新提现申请", "New withdrawal requests"), next: t("前往个人中心", "Go to personal center"), route: "account", active: !AFF.state.kybCompleted });
-    push({ id: "payout-account", order: 5, group: t("待补齐", "Information required"), label: t("收款账户未验证", "Payout account unverified"), amount: null, time: t("收款资料待复核", "Payout profile pending"), impact: t("新提现申请", "New withdrawal requests"), next: t("前往财务税务", "Go to finance profile"), route: "account", active: !AFF.state.kybCompleted });
-    push({ id: "tax-profile", order: 6, group: t("待补齐", "Information required"), label: t("税务资料未验证", "Tax profile unverified"), amount: null, time: t("税务资料待复核", "Tax profile pending"), impact: t("新提现申请", "New withdrawal requests"), next: t("前往财务税务", "Go to finance profile"), route: "account", active: !AFF.state.kybCompleted });
+    push({ id: "payout-account", order: 5, group: t("待补齐", "Information required"), label: t("收款账户未验证", "Payout account unverified"), amount: null, time: t("收款资料待复核", "Payout profile pending"), impact: t("新提现申请", "New withdrawal requests"), next: t("前往收款资料", "Go to finance profile"), route: "account", active: !AFF.state.kybCompleted });
     push({ id: "dynamic-hold", order: 7, group: t("待释放", "Pending release"), label: t("动态Hold", "Dynamic hold"), amount: sumCases(held), time: releaseStage(held), impact: `${held.length} ${t("个佣金对象", "commission objects")}`, next: t("查看佣金详情", "View commission details"), route: "pay", active: held.length > 0 });
     push({ id: "guarantee", order: 8, group: t("待释放", "Pending release"), label: t("滚动保证金", "Rolling guarantee"), amount: finance.guarantee, time: releaseStage(retainedGuarantee, "estimatedReleaseAt"), impact: `${retainedGuarantee.length} ${t("条保留记录", "retained records")}`, next: t("查看保证金", "View guarantee"), route: "guarantee", active: retainedGuarantee.length > 0 });
     push({ id: "negative-balance", order: 9, group: t("待处理", "Processing"), label: t("挂负余额", "Negative balance"), amount: Math.abs(finance.available), time: t("抵扣或补足阶段", "Offset or repayment"), impact: t("合作方账户", "Partner account"), next: t("查看资金详情", "View fund details"), route: "pay", active: finance.available < 0 });
@@ -94,7 +93,6 @@
       [t("拒绝佣金", "Rejected"), -finance.rejected, "minus"],
       [t("冲正金额", "Reversed"), -finance.reversed, "minus"],
       [t("动态Hold", "Dynamic hold"), -finance.held, "minus"],
-      [t("结算税费", "Tax"), -finance.tax, "minus"],
       [t("保证金扣留", "Guarantee retained"), -finance.guarantee, "minus"],
       [t("可提现已生成", "Available generated"), info.generatedAvailable, "total"],
       [t("已支付", "Paid"), -finance.paid, "minus"],

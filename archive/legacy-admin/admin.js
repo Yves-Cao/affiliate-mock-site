@@ -8,7 +8,7 @@
   const tabs = {
     "admin-config": [
       ["overview", "配置总览"], ["price", "价格表"], ["tiers", "资格档与里程碑"],
-      ["hold", "动态结算"], ["finance", "保证金 / 税费"], ["country", "国家与主体"],
+      ["hold", "动态结算"], ["finance", "保证金 / "], ["country", "国家与主体"],
       ["approval", "审批流"], ["trial", "试算结果"]
     ],
     "admin-risk": [["hard", "硬规则"], ["scored", "评分规则"], ["violation", "违规事件"], ["fraud", "CRM欺诈库"]],
@@ -80,9 +80,9 @@
       {key: "tier", label: "资格档"}, {key: "netDeposit", label: "净入金", numeric: true},
       {key: "volume", label: "交易量", numeric: true}, {key: "days", label: "交易日", numeric: true},
       {key: "basePrice", label: "基础价", numeric: true, render: row => money(row.basePrice)},
-      {key: "ftdRate", label: "FTD段", render: row => `${row.ftdRate}%`},
-      {key: "qftdRate", label: "有效FTD段", render: row => `${row.qftdRate}%`},
-      {key: "qualityRate", label: "质量服务段", render: row => `${row.qualityRate}%`}
+      {key: "ftdRate", label: "首次入金段", render: row => `${row.ftdRate}%`},
+      {key: "qftdRate", label: "有效转化段", render: row => `${row.qftdRate}%`},
+      {key: "qualityRate", label: "质量升档段", render: row => `${row.qualityRate}%`}
     ], AFF_ADMIN.tiers, "tier");
     if (state.tab === "hold") return table([
       {key: "band", label: "风险档"}, {key: "baseDays", label: "基础天数", numeric: true},
@@ -101,12 +101,12 @@
       {key: "flow", label: "会签流"}, {key: "status", label: "状态", render: row => tag(row.status, statusTone(row.status))}, {key: "note", label: "说明"}
     ], AFF_ADMIN.approvals, "id");
     if (state.tab === "trial") return `${stats([
-      ["草稿影响", "合格客户 -2.6%", "当前版本对比v1.2草稿"], ["佣金影响", "-$10,200", "有效FTD+质量服务"], ["护栏命中", "3", "国家ZA数量上限"]
+      ["草稿影响", "合格客户 -2.6%", "当前版本对比v1.2草稿"], ["佣金影响", "-$10,200", "有效转化+质量升档"], ["护栏命中", "3", "国家ZA数量上限"]
     ])}${table([
       {key: "metric", label: "指标"}, {key: "current", label: "当前版本"}, {key: "draft", label: "草稿版本"}, {key: "change", label: "变化"}
     ], AFF_ADMIN.trials)}`;
     return `${stats([
-      ["当前版本", "v2026.10.27-P0", "含保证金与税费"], ["待审批草稿", "2", "国家系数与协议"], ["待公告变更", "1", "协议v4"], ["本月变更", "6", "不含未生效草稿"]
+      ["当前版本", "v2026.10.27-P0", "含保证金与"], ["待审批草稿", "2", "国家系数与协议"], ["待公告变更", "1", "协议v4"], ["本月变更", "6", "不含未生效草稿"]
     ])}${table([
       {key: "id", label: "配置ID"}, {key: "group", label: "配置组"}, {key: "current", label: "当前值"},
       {key: "draft", label: "草稿值"}, {key: "status", label: "状态", render: row => tag(row.status, statusTone(row.status))},
@@ -141,13 +141,13 @@
 
   function performancePage() {
     return `${stats([
-      ["有效客户获客成本", money(178), "目标值后台配置"], ["有效FTD达成率", "72.4%", "有效FTD / FTD"],
-      ["质量服务达成率", "81.6%", "质量服务 / 有效FTD"], ["保证金覆盖率", "18%", "滚动保证金 / 近90日佣金"]
+      ["有效客户获客成本", money(178), "目标值后台配置"], ["有效转化达成率", "72.4%", "有效转化 / 首次入金"],
+      ["质量升档达成率", "81.6%", "质量升档 / 有效转化"], ["保证金覆盖率", "18%", "滚动保证金 / 近90日佣金"]
     ])}${table([
       {key: "partner", label: "合作方"}, {key: "country", label: "国家"}, {key: "subId", label: "Sub ID"},
       {key: "clicks", label: "点击", numeric: true}, {key: "registrations", label: "注册", numeric: true},
-      {key: "ftd", label: "FTD", numeric: true}, {key: "effective", label: "有效FTD", numeric: true},
-      {key: "quality", label: "质量服务", numeric: true}, {key: "paid", label: "已付佣金", numeric: true, render: row => money(row.paid)},
+      {key: "ftd", label: "首次入金", numeric: true}, {key: "effective", label: "有效转化", numeric: true},
+      {key: "quality", label: "质量升档", numeric: true}, {key: "paid", label: "已付佣金", numeric: true, render: row => money(row.paid)},
       {key: "cac", label: "获客成本", numeric: true, render: row => money(row.cac)},
       {key: "reversal", label: "冲正率"}, {key: "guaranteeCoverage", label: "保证金覆盖"},
       {key: "band", label: "风险带", render: row => tag(row.band, riskTone(row.band))}
@@ -179,7 +179,7 @@
       <aside class="tm-sidebar"><strong>Affiliate Ops</strong><nav>${routes.map(([id, name]) => `<button class="${id === route ? "active" : ""}" data-route="${id}">${h(name)}</button>`).join("")}</nav><small>Mock Console</small></aside>
       <main class="tm-main"><header class="tm-topbar"><div><button class="tm-nav-button" data-nav aria-label="打开导航">≡</button><span>${h(group)}</span><strong>${h(label)}</strong></div><div class="tm-top-actions"><span class="tm-delay">延迟 42ms</span><span class="tm-user">OP</span></div></header>
       <div class="tm-tabs">${tabs[route].map(([key, name]) => `<button class="${key === state.tab ? "active" : ""}" data-tab="${key}">${h(name)}</button>`).join("")}</div>
-      <section class="tm-content"><div class="tm-page-head"><div><h1>${h(label)}</h1><p>P0配置、保证金、税费、审批与风控闭环演示；参数均为参考值。</p></div><div class="tm-head-actions"><button class="tm-button secondary" data-action="draft">保存草稿</button><button class="tm-button primary" data-action="approve">提交审批</button></div></div>${pages[route]()}</section></main>
+      <section class="tm-content"><div class="tm-page-head"><div><h1>${h(label)}</h1><p>P0配置、保证金、审批与风控闭环演示；参数均为参考值。</p></div><div class="tm-head-actions"><button class="tm-button secondary" data-action="draft">保存草稿</button><button class="tm-button primary" data-action="approve">提交审批</button></div></div>${pages[route]()}</section></main>
       ${detail()}`;
   }
 

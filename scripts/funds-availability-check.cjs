@@ -13,7 +13,7 @@ const withdrawals = read("withdrawals.js");
 
 const reasons = [
   "investigation", "quarantine", "manual-review", "kyc", "payout-account",
-  "tax-profile", "dynamic-hold", "guarantee", "negative-balance"
+  "dynamic-hold", "guarantee", "negative-balance"
 ];
 for (const reason of reasons) assert.ok(moduleSource.includes(`id: "${reason}"`), `Covers ${reason}`);
 for (const label of ["数量上限", "熔断", "关键事件缺数"]) {

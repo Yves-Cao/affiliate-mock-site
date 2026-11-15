@@ -82,10 +82,9 @@
 |---|---|---|---|
 | 佣金记录 | P1 | 资格档、里程碑、金额、Hold、结算、TraceId | `#/admin-modules/commission-list` |
 | Hold管理 | MVP | 理论Hold、风险附加、集群延长、D+N | `#/admin-review/d-plus-n` |
-| 结算单 | P1 | 结算批次、明细、税费、保证金、净额 | `#/admin-modules/statement-list` |
+| 结算单 | P1 | 结算批次、明细、保证金、净额 | `#/admin-modules/statement-list` |
 | 提现管理 | P1 | 提现、账户校验、手续费、支付状态、重试 | `#/admin-modules/withdrawal-list` |
 | 保证金管理 | MVP | 余额、覆盖率、抵扣、释放、追索 | `#/admin-review/guarantee-offset` |
-| 税费管理 | P1 | 税务信息、税率、代扣、税单 | `#/admin-modules/tax-list` |
 | 冲正与追回 | P1 | 拒付、冲正、追回、责任、账务重算 | `#/admin-modules/reversal-list` |
 | 资金对账 | P1 | Affiliate账务、支付、财务报表三方对账 | `#/admin-modules/reconciliation` |
 
@@ -100,7 +99,7 @@
 | CRM欺诈库 | MVP | CRM欺诈结论、本地引用、同步记录 | `#/admin-risk/fraud` |
 | 黑名单管理 | P1 | 设备、IP、支付、客户、合作方黑名单 | `#/admin-modules/blacklist` |
 | 国家与合规限制 | MVP | 开放国家、法律主体、禁投地区 | `#/admin-config/country-entity` |
-| 质量服务内部规则 | MVP | 有效FTD后的质量判定、规则版本、证据 | `#/admin-config/qualification` |
+| 质量升档内部规则 | MVP | 有效转化后的质量判定、规则版本、证据 | `#/admin-config/qualification` |
 
 ### 3.7 处理中心
 
@@ -124,9 +123,9 @@
 | 合作方ROI | MVP | 合作方、国家、渠道、Sub ID转化与净成本 | `#/admin-performance/roi` |
 | 质量看板 | MVP | 质量趋势、留存、拒付、冲正、欺诈、集群 | `#/admin-performance/quality` |
 | 保证金覆盖 | MVP | 保证金、潜在损失、覆盖率、释放延迟 | `#/admin-performance/guarantee-coverage` |
-| 转化漏斗 | P1 | 点击、注册、FTD、有效FTD、质量服务 | `#/admin-modules/report-funnel` |
+| 转化漏斗 | P1 | 点击、注册、首次入金、有效转化、质量升档 | `#/admin-modules/report-funnel` |
 | 渠道分析 | P1 | 活动、链接、Sub ID、国家、设备、平台 | `#/admin-modules/report-channel` |
-| 财务报表 | P1 | 佣金、税费、保证金、提现、冲正、净支出 | `#/admin-modules/report-finance` |
+| 财务报表 | P1 | 佣金、保证金、提现、冲正、净支出 | `#/admin-modules/report-finance` |
 | 风控报表 | P1 | 命中率、误报率、阻断金额、处理时效、损失回收 | `#/admin-modules/report-risk` |
 
 ### 3.9 配置与发布
@@ -138,7 +137,7 @@
 | 资格档与里程碑 | MVP | `#/admin-config/qualification` |
 | 信用等级与权益 | MVP | `#/admin-config/credit-benefit` |
 | 动态Hold规则 | MVP | `#/admin-config/hold` |
-| 保证金与税费规则 | MVP | `#/admin-config/guarantee-tax` |
+| 保证金与规则 | MVP | `#/admin-config/guarantee` |
 | 审批流配置 | MVP | `#/admin-config/approval` |
 | 试算与发布 | MVP | `#/admin-config/simulation` |
 | 集群规则 | MVP | `#/admin-config/cluster-rule` |

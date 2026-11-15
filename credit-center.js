@@ -19,8 +19,8 @@
   const order = Object.keys(levels);
   /* D-CREDIT-14: metrics that influence the level score — scope only, no values. */
   const HINT_METRICS = [
-    [["客户质量", "有效FTD占比、拒付与冲正率"], ["Client quality", "valid-FTD share, chargeback and reversal rates"]],
-    [["业绩规模", "FTD与有效FTD数量、活跃客户数"], ["Volume", "FTD and valid-FTD counts, active clients"]],
+    [["客户质量", "有效转化占比、拒付与冲正率"], ["Client quality", "qualified-conversion share, chargeback and reversal rates"]],
+    [["业绩规模", "首次入金与有效转化数量、活跃客户数"], ["Volume", "first-deposit and qualified-conversion counts, active clients"]],
     [["合作稳定性", "合作时长、违规事件记录"], ["Stability", "partnership duration, violation records"]],
     [["资料完备度", "KYB认证与财务资料状态"], ["Profile completeness", "KYB and finance info"]],
     [["交易行为", "客户交易活跃度与留存"], ["Trading behavior", "client activity and retention"]]
@@ -40,7 +40,7 @@
   function summary() {
     let level = "C0";
     let reason = t("新合作方观察期", "New-partner observation");
-    let nextStep = t("完成资料认证并持续获得有效FTD", "Complete verification and keep generating valid FTD");
+    let nextStep = t("完成资料认证并持续获得有效转化", "Complete verification and keep generating qualified conversion");
     if (AFF.state.kybCompleted) {
       level = "C2";
       reason = t("客户质量与稳定性表现稳定", "Stable client quality and performance");
@@ -74,9 +74,9 @@
       effectiveAt: simulated?.effectiveAt || AFF.finance.asOf,
       version: AFF.finance.configuration.version,
       stages: [
-        ["ftd", t("FTD段", "FTD")],
-        ["qftd", t("有效FTD段", "Valid FTD")],
-        ["quality", t("质量服务", "Quality service")]
+        ["ftd", t("首次入金段", "首次入金")],
+        ["qftd", t("有效转化段", "Qualified conversion")],
+        ["quality", t("质量升档", "Quality upgrade")]
       ].map(([key, label]) => ({ key, label, ratio: benefit.ratio, fixed: benefit.fixed }))
     };
   }
@@ -155,9 +155,9 @@
     const totals = AFF.dashboardData(period).totals;
     const bars = [
       { key: "registrations", label: t("注册客户", "Registrations"), value: totals.registrations },
-      { key: "ftd", label: t("FTD客户", "FTD clients"), value: totals.ftd },
-      { key: "effective", label: t("有效FTD客户", "Valid-FTD clients"), value: totals.effective },
-      { key: "quality", label: t("质量服务客户", "Quality-service clients"), value: totals.quality }
+      { key: "ftd", label: t("首次入金客户", "First deposit clients"), value: totals.ftd },
+      { key: "effective", label: t("有效转化客户", "Valid-First deposit clients"), value: totals.effective },
+      { key: "quality", label: t("质量升档客户", "Quality-upgrade clients"), value: totals.quality }
     ];
     const max = Math.max(1, ...bars.map(bar => bar.value));
     return `<section class="card partner-funnel-card" aria-label="${t("客户转化漏斗", "Client conversion funnel")}">

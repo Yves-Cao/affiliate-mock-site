@@ -18,7 +18,6 @@ const requiredPageMarkers = [
   'data-account-action="status"',
   'data-account-action="payout"',
   'data-account-finance-form="payout"',
-  'data-account-finance-form="tax"',
   'data-account-finance-draft="explanation"',
   'data-account-finance-submit=',
   'data-account-pref=',
@@ -36,17 +35,16 @@ assert.match(app, /account: '<circle cx="12" cy="8" r="3\.5"\/>/, "Account route
 assert.match(html, /account-page\.css/, "Account stylesheet is loaded");
 assert.match(html, /account-page\.js/, "Account module is loaded");
 assert.match(html, /data-route="account"/, "Avatar menu opens the account center");
-assert.match(app, /route => !route\.hidden && !\["apply", "onboarding"\]\.includes\(route\.id\)/, "Sidebar respects route visibility");
+assert.match(app, /route => !route\.hidden && !\["account", "apply", "onboarding"\]\.includes\(route\.id\)/, "Sidebar respects route visibility");
 assert.doesNotMatch(html, /data-action="open-account"/, "Avatar menu no longer opens only the timezone modal");
 
 assert.ok(page.includes("**** **** **** 4821"), "Payout account is masked");
-assert.ok(page.includes("S******123A"), "Tax ID is masked");
-assert.ok(page.includes("financeRequests"), "Finance and tax change requests are tracked");
-assert.ok(page.includes("accountRequestId"), "Finance and tax changes notify Messages");
+assert.ok(page.includes("financeRequests"), "Finance change requests are tracked");
+assert.ok(page.includes("accountRequestId"), "Finance changes notify Messages");
 assert.ok(page.includes("资料已确认，受保护字段不可直接修改"), "Profile locks after confirmation");
 assert.ok(page.includes("可用能力"), "Account status includes available capabilities");
 assert.ok(page.includes("CRM SSO"), "Account security reflects the CRM source of truth");
-assert.doesNotMatch(page, /资料与认证|发起KYC\/KYB|限制与恢复|待办列表|当前生效协议|协议留痕/, "Removed legacy account modules are absent");
+assert.doesNotMatch(page, /<h3>资料与认证<\/h3>|<h3>限制与恢复<\/h3>|<h3>待办列表<\/h3>|<h3>当前生效协议<\/h3>/, "Removed legacy account modules are absent");
 
 for (const breakpoint of ["991px", "767px"]) {
   assert.ok(css.includes(breakpoint), `Account page has ${breakpoint} responsive rules`);
@@ -56,6 +54,6 @@ assert.ok(css.includes("grid-template-columns: 1fr"), "Mobile layout collapses t
 console.log(JSON.stringify({
   route: "account",
   tabs: 4,
-  checks: requiredPageMarkers.length + 14,
+  checks: requiredPageMarkers.length + 12,
   result: "Account center static contract checks passed"
 }, null, 2));

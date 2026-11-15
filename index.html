@@ -8,15 +8,15 @@
   <link rel="icon" type="image/svg+xml" href="./assets/affiliate-icon.svg">
   <link rel="alternate icon" type="image/png" sizes="32x32" href="./assets/affiliate-icon-32.png">
   <link rel="apple-touch-icon" href="./assets/affiliate-icon-180.png">
-  <link rel="stylesheet" href="./design-tokens.css?v=p0-20261105-1">
-  <link rel="stylesheet" href="./styles.css?v=program-navigation-20261112-1">
+  <link rel="stylesheet" href="./design-tokens.css?v=design-1-0-20261115-2">
+  <link rel="stylesheet" href="./styles.css?v=design-1-0-20261115-5">
   <link rel="stylesheet" href="./postbacks.css?v=p0-20261030">
   <link rel="stylesheet" href="./reports.css?v=summary-cards-20261109">
   <link rel="stylesheet" href="./clients-page.css?v=p0-20261108-1">
   <link rel="stylesheet" href="./subchannels.css?v=p0-20261030">
   <link rel="stylesheet" href="./earnings.css?v=p0-20261108-3">
   <link rel="stylesheet" href="./withdrawals.css?v=p0-20261030-2">
-  <link rel="stylesheet" href="./finance.css?v=appeal-supplement-20261110">
+  <link rel="stylesheet" href="./finance.css?v=design-1-0-20261115-2">
   <link rel="stylesheet" href="./account-page.css?v=p0-20261105-1">
   <link rel="stylesheet" href="./profile-select.css?v=profile-controls-20261109">
   <link rel="stylesheet" href="./funds-availability.css?v=p0-20261105-1">
@@ -45,6 +45,10 @@
       <img src="./assets/auth-visual.jpg" alt="" role="presentation">
     </aside>
     <div class="auth-panel">
+      <div class="auth-brand">
+        <img src="./assets/affiliate-icon.svg" alt="" width="36" height="36">
+        <span>Affiliate CPA</span>
+      </div>
       <div class="auth-tabs" role="tablist" aria-label="登录或注册">
         <button id="login-tab" class="auth-tab active" type="button" role="tab" aria-selected="true" aria-controls="login-form">登录</button>
         <button id="register-tab" class="auth-tab" type="button" role="tab" aria-selected="false" aria-controls="register-form">注册</button>
@@ -120,6 +124,11 @@
 
     <div class="workspace">
       <header class="topbar">
+        <button id="mobile-nav-toggle" class="icon-button circular mobile-nav-toggle" type="button" aria-label="打开导航" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
         <div class="brand topbar-brand">
           <img class="brand-mark" src="./assets/affiliate-icon.svg" alt="A" width="28" height="28">
           <span class="brand-text"><strong>Affiliate CPA</strong></span>
@@ -127,22 +136,45 @@
         </div>
         <div class="topbar-spacer" aria-hidden="true"></div>
         <div class="topbar-tools">
-          <div class="topbar-clock" aria-label="服务器时间与本地时间">
-            <div>
-              <span>服务器时间</span>
-              <strong id="server-time">YYYY-MM-DD HH:mm:ss</strong>
-              <small id="server-time-zone">UTC+8</small>
-            </div>
-            <div>
-              <span>本地时间</span>
-              <strong id="local-time">YYYY-MM-DD HH:mm:ss</strong>
-              <small id="local-time-zone">UTC+8</small>
+          <div class="topbar-clock mt-time-display" aria-label="服务器时间与本地时间">
+            <div class="mt-time-display__rows">
+              <div class="mt-time-display__row">
+                <span class="mt-time-display__label">
+                  <span class="mt-time-display__name">服务器</span>
+                  <span class="mt-time-display__offset" id="server-time-zone">UTC+8</span>
+                </span>
+                <span class="mt-time-display__value">
+                  <span class="mt-time-display__date" id="server-date">YYYY-MM-DD</span>
+                  <span class="mt-time-display__clock" id="server-time">HH:mm:ss</span>
+                </span>
+              </div>
+              <div class="mt-time-display__row">
+                <span class="mt-time-display__label">
+                  <span class="mt-time-display__name">本地</span>
+                  <span class="mt-time-display__offset" id="local-time-zone">UTC+8</span>
+                </span>
+                <span class="mt-time-display__value">
+                  <span class="mt-time-display__date" id="local-date">YYYY-MM-DD</span>
+                  <span class="mt-time-display__clock" id="local-time">HH:mm:ss</span>
+                </span>
+              </div>
             </div>
           </div>
+          <span class="topbar-divider" aria-hidden="true"></span>
           <div class="wallet-menu" id="wallet-menu" data-aff-popover="wallet">
             <button class="wallet" id="wallet-toggle" type="button" aria-expanded="false" aria-controls="wallet-popover" data-aff-popover-trigger>
-              <span>钱包</span>
-              <strong id="wallet-balance">$19,343.40</strong>
+              <span class="wallet-tags">
+                <span id="wallet-system">Affiliate CPA</span>
+                <i aria-hidden="true"></i>
+                <span id="wallet-category">合作方</span>
+                <i aria-hidden="true"></i>
+                <span>AFF1001</span>
+              </span>
+              <span class="wallet-identity">
+                <span class="wallet-account-name" id="wallet-account-name">Affiliate Partner</span>
+                <strong id="wallet-balance">$19,343.40 USD</strong>
+                <span class="wallet-chevron" aria-hidden="true"></span>
+              </span>
             </button>
             <section class="wallet-popover" id="wallet-popover" aria-label="钱包概览" hidden data-aff-popover-panel>
               <div class="wallet-popover-hero">
@@ -160,13 +192,33 @@
               </div>
             </section>
           </div>
-          <button class="icon-button circular" type="button" data-help-open="assistant" aria-label="帮助中心" aria-controls="help-assistant-panel">
-            <span aria-hidden="true">?</span>
+          <div class="header-icon-actions">
+          <button class="icon-button circular support-center" type="button" data-help-open="assistant" aria-label="帮助中心" aria-controls="help-assistant-panel">
+            <span class="header-circle-icon">
+              <svg class="header-circle-icon__glyph" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path fill="#A4A7AE" d="M17.505 6.673c.92 0 1.666.747 1.666 1.667l-.002 3.334c0 .92-.746 1.666-1.667 1.666h-.885A6.67 6.67 0 0 1 10 19.17v-1.666a5 5 0 0 0 5.002-4.999l.002-5a5 5 0 1 0-10-.003l-.002 5.833h-2.5c-.92 0-1.666-.747-1.666-1.668l.001-3.333c0-.92.747-1.666 1.668-1.666h.884a6.668 6.668 0 0 1 13.23.005zM6.469 13.157l.883-1.414c.769.482 1.677.76 2.65.76.974.001 1.883-.277 2.651-.758l.883 1.414a6.64 6.64 0 0 1-3.534 1.011 6.63 6.63 0 0 1-3.533-1.013"/>
+              </svg>
+            </span>
           </button>
-          <button class="icon-button circular notice" type="button" data-route="messages" aria-label="消息中心">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M4 6h16v10H8l-4 4z"/><path d="M8 10h8M8 13h5"/>
-            </svg>
+          <div class="topbar-menu" id="language-menu" data-aff-popover="language">
+            <button id="language-toggle" class="icon-button circular language-selector" type="button" aria-label="选择语言" aria-haspopup="menu" aria-expanded="false" data-aff-popover-trigger>
+              <span class="header-circle-icon">
+                <svg class="header-circle-icon__glyph header-circle-icon__glyph--lang" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+                  <path fill="#828A9A" d="M7.337 0A7.336 7.336 0 0 0 0 7.34a7.336 7.336 0 0 0 7.337 7.341A7.342 7.342 0 1 0 7.337 0m5.084 4.404h-2.166a11.7 11.7 0 0 0-1.013-2.613 5.88 5.88 0 0 1 3.178 2.613m-5.08-2.91c.613.88 1.09 1.86 1.402 2.91H5.939c.312-1.05.789-2.03 1.402-2.91M1.659 8.809a6 6 0 0 1-.19-1.468c0-.507.069-.999.19-1.468h2.477c-.058.48-.099.969-.099 1.468s.04.987.103 1.468zm.598 1.468h2.166c.238.918.572 1.798 1.013 2.617a5.89 5.89 0 0 1-3.179-2.617m2.166-5.873H2.257a5.89 5.89 0 0 1 3.179-2.617c-.44.819-.775 1.7-1.013 2.617m2.918 8.784c-.61-.881-1.087-1.861-1.402-2.911h2.804a10.4 10.4 0 0 1-1.402 2.91m1.717-4.38H5.623a10 10 0 0 1-.117-1.467c0-.5.047-.988.117-1.468h3.435c.07.48.118.969.118 1.468s-.048.987-.118 1.468m.188 4.082a11.7 11.7 0 0 0 1.013-2.613h2.165a5.9 5.9 0 0 1-3.178 2.613M10.54 8.81c.059-.481.103-.97.103-1.468 0-.5-.04-.988-.103-1.468h2.478c.12.47.194.961.194 1.468 0 .506-.07.998-.194 1.468z"/>
+                </svg>
+              </span>
+            </button>
+            <div class="topbar-dropdown" role="menu" aria-label="语言" data-aff-popover-panel>
+              <button type="button" role="menuitemradio" aria-checked="true" data-language="zh">简体中文</button>
+              <button type="button" role="menuitemradio" aria-checked="false" data-language="en">English</button>
+            </div>
+          </div>
+          <button class="icon-button circular notice message-icon" type="button" data-route="messages" aria-label="消息中心">
+            <span class="header-circle-icon">
+              <svg class="header-circle-icon__glyph" viewBox="0 0 13 16" fill="none" aria-hidden="true">
+                <path fill="#828A9A" d="M6.208 15.554c-.381.001-.756-.099-1.086-.29a2.04 2.04 0 0 1-1.033-1.85H5.22a.94.94 0 0 0 .273.705 1.01 1.01 0 0 0 1.427.001.94.94 0 0 0 .273-.704h1.129a2.04 2.04 0 0 1-1.028 1.849c-.33.19-.705.29-1.086.29m5.663-2.995H.545a.55.55 0 0 1-.466-.254.52.52 0 0 1-.011-.531L.843 9.92V6.85A5.4 5.4 0 0 1 2.2 3.21a5.38 5.38 0 0 1 3.443-1.784V.571A.62.62 0 0 1 6.208 0a.61.61 0 0 1 .564.57v.856a5.45 5.45 0 0 1 3.424 1.8A5.48 5.48 0 0 1 11.57 6.85v3.068l.776 1.856a.52.52 0 0 1-.012.531.55.55 0 0 1-.463.255M6.208 2.64a4.27 4.27 0 0 0-2.995 1.268 4.3 4.3 0 0 0-1.239 3.014v3.14a.3.3 0 0 1-.035.107.3.3 0 0 0-.035.106l-.494 1.142h9.596l-.494-1.142a.26.26 0 0 1-.07-.214v-3.14a4.3 4.3 0 0 0-1.239-3.013A4.27 4.27 0 0 0 6.208 2.64"/>
+              </svg>
+            </span>
             <span id="message-count">0</span>
           </button>
           <label class="scenario-control hidden" for="scenario-select">
@@ -179,21 +231,25 @@
               <option value="api-error">异常</option>
             </select>
           </label>
-          <div class="topbar-menu" id="language-menu" data-aff-popover="language">
-            <button id="language-toggle" class="icon-button circular" type="button" aria-label="选择语言" aria-haspopup="menu" aria-expanded="false" data-aff-popover-trigger>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="12" cy="12" r="9"/>
-                <path d="M3 12h18"/>
-                <path d="M12 3a15 15 0 0 1 4 9 15 15 0 0 1-4 9 15 15 0 0 1-4-9 15 15 0 0 1 4-9z"/>
+          <div id="theme-toggle" class="theme-switch" role="switch" aria-checked="false" aria-label="切换到深色模式" tabindex="0">
+            <span class="theme-switch__body" aria-hidden="true">
+              <span class="theme-switch__track"></span>
+              <span class="theme-switch__knob"></span>
+              <svg class="theme-switch__moon" viewBox="0 0 15 15" fill="none">
+                <path fill="#828A9A" d="M2.299 1.599a7.853 7.853 0 0 0 0 11.102 7.854 7.854 0 0 0 11.103 0A7.8 7.8 0 0 0 15 10.373a7.84 7.84 0 0 1-8.774-1.598C3.852 6.402 3.326 2.891 4.624 0A7.8 7.8 0 0 0 2.3 1.599"/>
               </svg>
-            </button>
-            <div class="topbar-dropdown" role="menu" aria-label="语言" data-aff-popover-panel>
-              <button type="button" role="menuitemradio" aria-checked="true" data-language="zh">简体中文</button>
-              <button type="button" role="menuitemradio" aria-checked="false" data-language="en">English</button>
-            </div>
+              <svg class="theme-switch__sun" viewBox="0 0 16 16" fill="none">
+                <path fill="#fff" d="m3.705 11.594-1.05 1.05a.497.497 0 0 0 0 .701.497.497 0 0 0 .7 0l1.05-1.05a.497.497 0 0 0 0-.7.497.497 0 0 0-.7 0M3.404 4.11a.5.5 0 0 0 .706-.706l-1.06-1.06a.5.5 0 0 0-.707.706zM2 7.5H.5a.499.499 0 1 0 0 1H2a.499.499 0 1 0 0-1m6-5c.277 0 .5-.223.5-.5V.5a.499.499 0 1 0-1 0V2a.5.5 0 0 0 .5.5m4.811 1.39 1.05-1.05a.497.497 0 0 0 0-.701.497.497 0 0 0-.7 0l-1.05 1.05a.497.497 0 0 0 0 .7.493.493 0 0 0 .7 0M15.5 7.5H14a.499.499 0 1 0 0 1h1.5a.499.499 0 1 0 0-1m-2.904 4.39a.5.5 0 0 0-.706.706l1.06 1.06a.5.5 0 0 0 .707-.706zM8 3.498a4.503 4.503 0 1 0 0 9.008 4.503 4.503 0 1 0 0-9.008M8 13.5c-.277 0-.5.223-.5.5v1.5a.499.499 0 1 0 1 0V14a.5.5 0 0 0-.5-.5"/>
+              </svg>
+            </span>
+          </div>
           </div>
           <div class="account-menu" id="account-menu" data-aff-popover="account">
-            <button class="avatar" id="avatar-button" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="个人中心菜单" data-aff-popover-trigger>M</button>
+            <button class="avatar" id="avatar-button" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="个人中心菜单" data-aff-popover-trigger>
+              <span class="avatar-mark" id="avatar-initial">M</span>
+              <span class="avatar-name" id="avatar-name">Affiliate Partner</span>
+              <span class="avatar-arrow" aria-hidden="true"></span>
+            </button>
             <div class="account-dropdown" id="account-dropdown" role="menu" aria-label="个人中心操作" data-aff-popover-panel>
               <button class="account-menu-item" type="button" role="menuitem" data-route="account">
                 <span class="account-menu-icon" aria-hidden="true">
@@ -245,7 +301,7 @@
   <script src="./finance-data.js?v=20261112-1"></script>
   <script src="./api-adapter.js?v=mock-api-v1-20261109"></script>
   <script src="./partner-closure.js?v=p0-20261105-1"></script>
-  <script src="./pages.js?v=program-navigation-20261112-1"></script>
+  <script src="./pages.js?v=design-1-0-20261114-1"></script>
   <script src="./program-navigation.js?v=20261112-1"></script>
   <script src="./profile-select.js?v=profile-controls-20261109"></script>
   <script src="./date-range.js?v=p0-20261030-2"></script>
@@ -268,7 +324,7 @@
   <script src="./popover.js?v=p0-20261106-1"></script>
   <script src="./tooltip.js?v=p0-20261106-1"></script>
   <script src="./tabs.js?v=p0-20261106-1"></script>
-  <script src="./app.js?v=program-login-dashboard-20261112-2"></script>
+  <script src="./app.js?v=design-1-0-20261115-7"></script>
   <script src="./drawer.js?v=p0-20261106-1"></script>
   <script src="./dropdown.js?v=p0-20261106-1"></script>
   <script src="./simulation-console.js?v=20261112-1"></script>

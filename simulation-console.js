@@ -103,8 +103,8 @@
         <label><span>${t("活动", "Campaign")}</span><select data-sim-record="campaignCode">${campaigns.map(([code, name]) => `<option value="${h(code)}" ${code === draft.campaignCode ? "selected" : ""}>${h(name)} · ${h(code)}</option>`).join("")}</select></label>
         <label><span>${t("来源", "Source")}</span><input data-sim-record="source" value="${h(draft.source)}" placeholder="${t("例如：YouTube自然流", "e.g. YouTube organic")}"></label>
         <label><span>${t("KYC", "KYC")}</span><select data-sim-record="kyc">${["通过", "审核中", "未提交", "失败"].map(value => `<option ${value === draft.kyc ? "selected" : ""}>${value}</option>`).join("")}</select></label>
-        <label><span>${t("转化阶段", "Milestone")}</span><select data-sim-record="milestone">${[["registered", "注册"], ["ftd", "FTD"], ["effective", "有效FTD"], ["quality", "质量服务"]].map(([value, label]) => `<option value="${value}" ${value === draft.milestone ? "selected" : ""}>${label}</option>`).join("")}</select></label>
-        <label><span>${t("首次入金", "FTD amount")}</span><input type="number" min="0" step="50" data-sim-record="ftdAmount" value="${h(draft.ftdAmount)}"></label>
+        <label><span>${t("转化阶段", "Milestone")}</span><select data-sim-record="milestone">${[["registered", "注册"], ["ftd", "首次入金"], ["effective", "有效转化"], ["quality", "质量升档"]].map(([value, label]) => `<option value="${value}" ${value === draft.milestone ? "selected" : ""}>${label}</option>`).join("")}</select></label>
+        <label><span>${t("首次入金", "首次入金 amount")}</span><input type="number" min="0" step="50" data-sim-record="ftdAmount" value="${h(draft.ftdAmount)}"></label>
         <label><span>${t("净入金", "Net deposit")}</span><input type="number" min="0" step="50" data-sim-record="netDeposit" value="${h(draft.netDeposit)}"></label>
         <label><span>${t("交易量（手）", "Volume")}</span><input type="number" min="0" step="0.1" data-sim-record="volume" value="${h(draft.volume)}"></label>
         <label><span>${t("交易日", "Trading days")}</span><input type="number" min="0" data-sim-record="tradingDays" value="${h(draft.tradingDays)}"></label>

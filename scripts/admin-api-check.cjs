@@ -41,7 +41,6 @@ async function request(base, path, options = {}) {
     const commission = await request(base, "/commissions/comm-3001");
     assert.equal(
       Number(commission.body.data.gross_amount_minor) -
-      Number(commission.body.data.tax_amount_minor) -
       Number(commission.body.data.guarantee_amount_minor),
       Number(commission.body.data.net_amount_minor)
     );

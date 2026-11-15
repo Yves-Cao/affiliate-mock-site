@@ -1,5 +1,14 @@
 # 旧管理页面归档
 
+> **English Summary**
+>
+> This directory README is a local index. Read the root README first. This file does not override the authoritative English PRD slices or hard rules.
+>
+> **中文摘要**
+>
+> 本 README 是目录级索引。请先阅读根 README；本文件不覆盖权威英文 PRD 切片或硬规则。
+
+
 归档日期：2026-11-11
 
 这里保留曾经作为独立入口的管理端页面，供版本对照和历史追溯。它们不属于当前发布入口，也不应继续被业务链接引用。

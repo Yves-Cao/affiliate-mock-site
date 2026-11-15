@@ -50,11 +50,10 @@
       ]
     },
     {
-      "name": "AdminGuaranteeTaxConfig",
-      "tab": "保证金/税费",
+      "name": "AdminGuaranteeConfig",
+      "tab": "保证金",
       "scenarios": [
         "guarantee_normal",
-        "tax_rule_synced",
         "payment_fee_synced",
         "external_sync_failed"
       ]
@@ -1042,157 +1041,145 @@
       ]
     },
     {
-      "path": "/admin/configs/guarantee-tax-rules",
+      "path": "/admin/configs/guarantee-rules",
       "method": "GET",
-      "tag": "AdminGuaranteeTaxConfig",
-      "operationId": "listGuaranteeTaxRules",
-      "summary": "List 保证金/税费 rules",
+      "tag": "AdminGuaranteeConfig",
+      "operationId": "listGuaranteeRules",
+      "summary": "List 保证金 rules",
       "scenarios": [
         "guarantee_normal",
-        "tax_rule_synced",
         "payment_fee_synced",
         "external_sync_failed"
       ]
     },
     {
-      "path": "/admin/configs/guarantee-tax-drafts",
+      "path": "/admin/configs/guarantee-drafts",
       "method": "GET",
-      "tag": "AdminGuaranteeTaxConfig",
-      "operationId": "listGuaranteeTaxDrafts",
-      "summary": "List 保证金/税费 drafts",
+      "tag": "AdminGuaranteeConfig",
+      "operationId": "listGuaranteeDrafts",
+      "summary": "List 保证金 drafts",
       "scenarios": [
         "guarantee_normal",
-        "tax_rule_synced",
         "payment_fee_synced",
         "external_sync_failed"
       ]
     },
     {
-      "path": "/admin/configs/guarantee-tax-drafts",
+      "path": "/admin/configs/guarantee-drafts",
       "method": "POST",
-      "tag": "AdminGuaranteeTaxConfig",
-      "operationId": "createGuaranteeTaxDraft",
-      "summary": "Create a 保证金/税费 draft",
+      "tag": "AdminGuaranteeConfig",
+      "operationId": "createGuaranteeDraft",
+      "summary": "Create a 保证金 draft",
       "scenarios": [
         "guarantee_normal",
-        "tax_rule_synced",
         "payment_fee_synced",
         "external_sync_failed"
       ]
     },
     {
-      "path": "/admin/configs/guarantee-tax-drafts/{draft_id}",
+      "path": "/admin/configs/guarantee-drafts/{draft_id}",
       "method": "GET",
-      "tag": "AdminGuaranteeTaxConfig",
-      "operationId": "getGuaranteeTaxDraft",
-      "summary": "Get a 保证金/税费 draft",
+      "tag": "AdminGuaranteeConfig",
+      "operationId": "getGuaranteeDraft",
+      "summary": "Get a 保证金 draft",
       "scenarios": [
         "guarantee_normal",
-        "tax_rule_synced",
         "payment_fee_synced",
         "external_sync_failed"
       ]
     },
     {
-      "path": "/admin/configs/guarantee-tax-drafts/{draft_id}",
+      "path": "/admin/configs/guarantee-drafts/{draft_id}",
       "method": "PATCH",
-      "tag": "AdminGuaranteeTaxConfig",
-      "operationId": "updateGuaranteeTaxDraft",
-      "summary": "Update a 保证金/税费 draft",
+      "tag": "AdminGuaranteeConfig",
+      "operationId": "updateGuaranteeDraft",
+      "summary": "Update a 保证金 draft",
       "scenarios": [
         "guarantee_normal",
-        "tax_rule_synced",
         "payment_fee_synced",
         "external_sync_failed"
       ]
     },
     {
-      "path": "/admin/configs/guarantee-tax-drafts/{draft_id}/validate",
+      "path": "/admin/configs/guarantee-drafts/{draft_id}/validate",
       "method": "POST",
-      "tag": "AdminGuaranteeTaxConfig",
-      "operationId": "validateGuaranteeTaxDraft",
-      "summary": "Validate a 保证金/税费 draft",
+      "tag": "AdminGuaranteeConfig",
+      "operationId": "validateGuaranteeDraft",
+      "summary": "Validate a 保证金 draft",
       "scenarios": [
         "guarantee_normal",
-        "tax_rule_synced",
         "payment_fee_synced",
         "external_sync_failed"
       ]
     },
     {
-      "path": "/admin/configs/guarantee-tax-drafts/{draft_id}/simulate",
+      "path": "/admin/configs/guarantee-drafts/{draft_id}/simulate",
       "method": "POST",
-      "tag": "AdminGuaranteeTaxConfig",
-      "operationId": "simulateGuaranteeTaxDraft",
-      "summary": "Simulate a 保证金/税费 draft",
+      "tag": "AdminGuaranteeConfig",
+      "operationId": "simulateGuaranteeDraft",
+      "summary": "Simulate a 保证金 draft",
       "scenarios": [
         "guarantee_normal",
-        "tax_rule_synced",
         "payment_fee_synced",
         "external_sync_failed"
       ]
     },
     {
-      "path": "/admin/configs/guarantee-tax-drafts/{draft_id}/submit",
+      "path": "/admin/configs/guarantee-drafts/{draft_id}/submit",
       "method": "POST",
-      "tag": "AdminGuaranteeTaxConfig",
-      "operationId": "submitGuaranteeTaxDraft",
-      "summary": "Submit a 保证金/税费 draft",
+      "tag": "AdminGuaranteeConfig",
+      "operationId": "submitGuaranteeDraft",
+      "summary": "Submit a 保证金 draft",
       "scenarios": [
         "guarantee_normal",
-        "tax_rule_synced",
         "payment_fee_synced",
         "external_sync_failed"
       ]
     },
     {
-      "path": "/admin/configs/guarantee-tax-drafts/{draft_id}/approve",
+      "path": "/admin/configs/guarantee-drafts/{draft_id}/approve",
       "method": "POST",
-      "tag": "AdminGuaranteeTaxConfig",
-      "operationId": "approveGuaranteeTaxDraft",
-      "summary": "Approve a 保证金/税费 draft",
+      "tag": "AdminGuaranteeConfig",
+      "operationId": "approveGuaranteeDraft",
+      "summary": "Approve a 保证金 draft",
       "scenarios": [
         "guarantee_normal",
-        "tax_rule_synced",
         "payment_fee_synced",
         "external_sync_failed"
       ]
     },
     {
-      "path": "/admin/configs/guarantee-tax-drafts/{draft_id}/activate",
+      "path": "/admin/configs/guarantee-drafts/{draft_id}/activate",
       "method": "POST",
-      "tag": "AdminGuaranteeTaxConfig",
-      "operationId": "activateGuaranteeTaxDraft",
-      "summary": "Activate a 保证金/税费 draft",
+      "tag": "AdminGuaranteeConfig",
+      "operationId": "activateGuaranteeDraft",
+      "summary": "Activate a 保证金 draft",
       "scenarios": [
         "guarantee_normal",
-        "tax_rule_synced",
         "payment_fee_synced",
         "external_sync_failed"
       ]
     },
     {
-      "path": "/admin/configs/guarantee-tax-versions",
+      "path": "/admin/configs/guarantee-versions",
       "method": "GET",
-      "tag": "AdminGuaranteeTaxConfig",
-      "operationId": "listGuaranteeTaxVersions",
-      "summary": "List 保证金/税费 versions",
+      "tag": "AdminGuaranteeConfig",
+      "operationId": "listGuaranteeVersions",
+      "summary": "List 保证金 versions",
       "scenarios": [
         "guarantee_normal",
-        "tax_rule_synced",
         "payment_fee_synced",
         "external_sync_failed"
       ]
     },
     {
-      "path": "/admin/configs/guarantee-tax/export",
+      "path": "/admin/configs/guarantee/export",
       "method": "POST",
-      "tag": "AdminGuaranteeTaxConfig",
-      "operationId": "exportGuaranteeTaxRules",
-      "summary": "Export 保证金/税费 rules",
+      "tag": "AdminGuaranteeConfig",
+      "operationId": "exportGuaranteeRules",
+      "summary": "Export 保证金 rules",
       "scenarios": [
         "guarantee_normal",
-        "tax_rule_synced",
         "payment_fee_synced",
         "external_sync_failed"
       ]

@@ -9,11 +9,11 @@
   const presetDays = { today: 1, past7: 7, past30: 30, past90: 90 };
   const previousMetricDefaults = {
     perf: ["clicks", "visitors", "registrations", "ftd", "effective", "quality", "ftdRate", "qualityRate", "expected", "held"],
-    summary: ["registrations", "ftd", "effective", "quality", "ftdRate", "qualityRate", "expected", "tax", "guarantee", "available", "paid"]
+    summary: ["registrations", "ftd", "effective", "quality", "ftdRate", "qualityRate", "expected", "guarantee", "available", "paid"]
   };
   const metricDefaults = {
     perf: ["clicks", "visitors", "registrations", "ftd", "effective", "quality", "ftdRate", "effectiveRate", "qualityRate", "expected", "held"],
-    summary: ["registrations", "ftd", "effective", "quality", "ftdRate", "effectiveRate", "qualityRate", "expected", "settled", "tax", "guarantee", "available", "paid"]
+    summary: ["registrations", "ftd", "effective", "quality", "ftdRate", "effectiveRate", "qualityRate", "expected", "settled", "guarantee", "available", "paid"]
   };
   let returnFocus = null;
   let holdHelpTimer = null;
@@ -113,13 +113,13 @@
     const map = {
       pending_attribution: ["注册", "Registration", "muted"],
       pending: ["KYC", "KYC", "muted"],
-      ftd_in_progress: ["FTD", "FTD", "warning"],
-      ftd: ["FTD", "FTD", "info"],
-      qftd_in_progress: ["有效FTD", "Valid FTD", "warning"],
-      qftd_pending: ["有效FTD", "Valid FTD", "warning"],
-      qftd: ["有效FTD", "Valid FTD", "info"],
-      quality_in_progress: ["质量服务", "Quality service", "warning"],
-      quality_pending: ["质量服务", "Quality service", "warning"],
+      ftd_in_progress: ["首次入金", "首次入金", "warning"],
+      ftd: ["首次入金", "首次入金", "info"],
+      qftd_in_progress: ["有效转化", "Qualified conversion", "warning"],
+      qftd_pending: ["有效转化", "Qualified conversion", "warning"],
+      qftd: ["有效转化", "Qualified conversion", "info"],
+      quality_in_progress: ["质量升档", "Quality upgrade", "warning"],
+      quality_pending: ["质量升档", "Quality upgrade", "warning"],
       quality: ["已完成", "Completed", "ok"],
       voided: ["已作废", "Voided", "danger"]
     };
@@ -178,8 +178,8 @@
   function heldStatusTooltip(row) {
     const heldCases = (row.commissionCases || []).filter(item => item.status === "held");
     const caseNames = {
-      qftd_batch: t("注册+有效FTD佣金", "Registration + valid FTD commission"),
-      quality_service: t("质量服务佣金", "Quality service commission")
+      qftd_batch: t("注册+有效转化佣金", "Registration + qualified conversion commission"),
+      quality_service: t("质量升档佣金", "Quality upgrade commission")
     };
     return [
       t("结算中", "On hold"),
@@ -255,7 +255,7 @@
     if (!row.effectiveAt || !row.tier || row.tier === "-") {
       return [
         t("资格档待确认", "Tier pending confirmation"),
-        t("当前客户尚未满足有效FTD确认条件，暂不能确认资格档。", "The client has not met the valid FTD confirmation conditions, so the tier cannot be confirmed yet."),
+        t("当前客户尚未满足有效转化确认条件，暂不能确认资格档。", "The client has not met the qualified conversion confirmation conditions, so the tier cannot be confirmed yet."),
         ...tiers
       ].join("\n");
     }
@@ -270,13 +270,13 @@
   function expectedTooltip(row) {
     if (!row.effectiveAt) {
       return [
-        t("有效FTD未达成", "Valid FTD not reached"),
+        t("有效转化未达成", "Qualified conversion not reached"),
         t("尚未生成佣金案件，预计佣金$0.00。", "No commission case has been generated; expected commission is $0.00.")
       ].join("\n");
     }
     const gross = AFF.partnerProgram.commissionPrice(row.country, row.tier);
     const rateText = row.qualityAt ? "100%" : "75%";
-    const qualityText = row.qualityAt ? t("质量服务已达标，按100%计入", "Quality service qualified; 100% included") : t("质量服务未达标，前两段合并佣金按75%计入", "Quality service not qualified; the first merged segment includes 75%");
+    const qualityText = row.qualityAt ? t("质量升档已达标，按100%计入", "Quality upgrade qualified; 100% included") : t("质量升档未达标，前两段合并佣金按75%计入", "Quality upgrade not qualified; the first merged segment includes 75%");
     return [
       `${t("国家/地区", "Country / region")}：${AFF.countryLabel(row.country)}`,
       `${t("资格档", "Tier")}：${row.tier}`,
@@ -404,7 +404,7 @@
   function filterChips(s) {
     const extraLabels = {
       search: t("客户编号", "Client ID"), kyc: "KYC", stage: t("转化阶段", "Conversion stage"),
-      commissionStatus: t("佣金状态", "Commission status"), qualityService: t("质量服务", "Quality service"),
+      commissionStatus: t("佣金状态", "Commission status"), qualityService: t("质量升档", "Quality upgrade"),
       riskStatus: t("风险处理状态", "Risk handling status"), riskReason: t("原因类别", "Reason category"),
       registeredFrom: t("注册开始", "Registered from"), registeredTo: t("注册结束", "Registered to")
     };
@@ -423,9 +423,9 @@
         quarantined: t("隔离中", "Quarantined"), released: t("已解除", "Released")
       }[value] || value;
       if (key === "stage") return {
-        Registration: t("注册", "Registration"), KYC: "KYC", FTD: "FTD",
-        "Valid FTD": t("有效FTD", "Valid FTD"),
-        "Quality service": t("质量服务", "Quality service"), Completed: t("已完成", "Completed"),
+        Registration: t("注册", "Registration"), KYC: "KYC", 首次入金: "首次入金",
+        "Qualified conversion": t("有效转化", "Qualified conversion"),
+        "Quality upgrade": t("质量升档", "Quality upgrade"), Completed: t("已完成", "Completed"),
         Voided: t("已作废", "Voided")
       }[value] || value;
       if (key === "qualityService") return {
@@ -507,15 +507,15 @@
   function columnHelpContent(key) {
     const contents = {
       registration: `<strong>${t("注册信息", "Registration information")}</strong><p>${t("包含注册时间、注册地址（国家/地区）和注册平台类型，用于核对客户来源与归属。", "Includes the registration time, registration address (country/region), and registration platform type for checking client source and attribution.")}</p>`,
-      quality: `<strong>${t("质量服务", "Quality service")}</strong><p>${t("通常会综合观察客户后续的交易活跃度、持续性、账户行为和结算前复核结果，判断是否达到质量服务阶段。", "Quality service generally considers ongoing trading activity, continuity, account behavior, and pre-settlement review outcomes.")}</p>`,
-      expected: `<strong>${t("预计佣金", "Expected commission")}</strong><p>${t("由基础佣金段（注册与有效FTD）和质量服务佣金段构成。", "Composed of the base commission segments (registration and valid FTD) plus the quality-service segment.")}</p>`,
+      quality: `<strong>${t("质量升档", "Quality upgrade")}</strong><p>${t("通常会综合观察客户后续的交易活跃度、持续性、账户行为和结算前复核结果，判断是否达到质量升档阶段。", "Quality upgrade generally considers ongoing trading activity, continuity, account behavior, and pre-settlement review outcomes.")}</p>`,
+      expected: `<strong>${t("预计佣金", "Expected commission")}</strong><p>${t("由基础佣金段（注册与有效转化）和质量升档佣金段构成。", "Composed of the base commission segments (registration and qualified conversion) plus the quality-service segment.")}</p>`,
       settled: `<strong>${t("已结算佣金", "Settled commission")}</strong><p>${t("统计已完成结算检查的佣金金额，仍处于结算中、被拒绝或已冲正的金额不计入此列。", "Shows commissions that have completed settlement checks. Amounts still on hold, rejected, or reversed are excluded.")}</p>`,
       stage: `<strong>${t("转化阶段", "Conversion stage")}</strong><dl>
         <div><dt>${t("注册", "Registration")}</dt><dd>${t("已创建客户账户，等待身份或入金进展。", "A client account exists and awaits identity or funding progress.")}</dd></div>
         <div><dt>KYC</dt><dd>${t("身份资料已通过，进入入金阶段。", "Identity details are approved and the client can move to funding.")}</dd></div>
-        <div><dt>FTD</dt><dd>${t("已完成首次入金，等待有效性确认。", "The first deposit is complete and awaits validity confirmation.")}</dd></div>
-        <div><dt>${t("有效FTD", "Valid FTD")}</dt><dd>${t("首次入金已满足有效客户条件。", "The first deposit meets valid-client conditions.")}</dd></div>
-        <div><dt>${t("质量服务", "Quality service")}</dt><dd>${t("客户已达到质量服务阶段。", "The client has reached the quality-service stage.")}</dd></div>
+        <div><dt>首次入金</dt><dd>${t("已完成首次入金，等待有效性确认。", "The first deposit is complete and awaits validity confirmation.")}</dd></div>
+        <div><dt>${t("有效转化", "Qualified conversion")}</dt><dd>${t("首次入金已满足有效客户条件。", "The first deposit meets valid-client conditions.")}</dd></div>
+        <div><dt>${t("质量升档", "Quality upgrade")}</dt><dd>${t("客户已达到质量升档阶段。", "The client has reached the quality-service stage.")}</dd></div>
         <div><dt>${t("已完成", "Completed")}</dt><dd>${t("转化链路完成，等待后续结算处理。", "The conversion path is complete and awaits settlement processing.")}</dd></div>
         <div><dt>${t("已作废", "Voided")}</dt><dd>${t("资格窗口超时或资格已失效。", "The qualification window expired or eligibility became invalid.")}</dd></div>
       </dl>`,
@@ -527,7 +527,7 @@
         <div><dt>${t("已解除", "Released")}</dt><dd>${t("风险处置结束，等待结算前检查。", "Risk handling ended and pre-settlement checks are pending.")}</dd></div>
       </dl>`,
       commissionStatus: `<strong>${t("结算状态", "Settlement status")}</strong><dl>
-        <dt>${t("未生成", "Not generated")}</dt><dd>${t("有效FTD未达成，暂无佣金案件。", "Valid FTD is not reached, so no commission case exists.")}</dd>
+        <dt>${t("未生成", "Not generated")}</dt><dd>${t("有效转化未达成，暂无佣金案件。", "Qualified conversion is not reached, so no commission case exists.")}</dd>
         <dt>${t("待检查", "Pending review")}</dt><dd>${t("佣金已生成，等待系统检查。", "A commission exists and awaits system checks.")}</dd>
         <dt>${t("结算中", "On hold")}</dt><dd>${t("处于动态结算观察期，暂不可提现。", "In dynamic hold and not yet withdrawable.")}</dd>
         <dt>${t("人工确认中", "Manual review")}</dt><dd>${t("命中人工复核条件，需风控处理。", "Manual review is required by risk controls.")}</dd>
@@ -588,7 +588,7 @@
     const heads = [
       ["clientId", t("客户", "Client")], ["registeredAt", t("注册信息", "Registration information"), false, "registration"],
       ["campaign", t("活动 / 来源", "Campaign / Source"), false, "", false], ["kyc", t("KYC状态", "KYC status"), false, "", false], ["stage", t("转化阶段", "Conversion stage"), false, "stage"],
-      ["quality", t("质量服务", "Quality service"), false, "quality"],
+      ["quality", t("质量升档", "Quality upgrade"), false, "quality"],
       ["expected", t("预计佣金", "Expected commission"), true, "expected", false],
       ["settled", t("已结算佣金", "Settled commission"), true, "settled", false],
       ["progress", t("资格档", "Tier"), false, "progress"],
@@ -623,7 +623,7 @@
         <td class="report-campaign-cell" data-client-cell="${t("活动 / 来源", "Campaign / Source")}"><div class="report-campaign-inner"><strong>${h(AFF.dataText(row.campaign))}</strong><small>${h(AFF.dataText(row.mediaSource))} · ${h(AFF.dataText(row.source))}</small></div></td>
         <td data-client-cell="${t("KYC状态", "KYC status")}"><span class="tag tag-${row.kyc === "通过" ? "ok" : row.kyc === "失败" ? "danger" : row.kyc === "审核中" ? "warning" : "muted"}">${h(AFF.dataText(row.kyc))}</span></td>
         <td class="client-stage-cell" data-client-cell="${t("转化阶段", "Conversion stage")}"><div class="client-stage-inner">${badge(status(row))}<small>${t("最近", "Latest")} ${h(latestMilestone(row))}</small></div></td>
-        <td data-client-cell="${t("质量服务", "Quality service")}">${badge(qualityService(row))}</td>
+        <td data-client-cell="${t("质量升档", "Quality upgrade")}">${badge(qualityService(row))}</td>
         <td class="numeric report-expected-cell" data-client-cell="${t("预计佣金", "Expected commission")}" data-rp-expected-tooltip="${h(expectedTooltip(row))}" tabindex="0" aria-label="${t("预计佣金计算说明", "Expected commission calculation")}"><div class="report-expected-inner"><strong>${format(row.expected, "money")}</strong></div></td>
         <td class="numeric report-settled-cell" data-client-cell="${t("已结算佣金", "Settled commission")}"><div class="report-settled-inner"><strong>${format(row.settled, "money")}</strong></div></td>
         <td class="report-progress" data-client-cell="${t("资格档", "Tier")}" data-rp-tier-tooltip="${h(tierTooltip(row))}" tabindex="0" aria-label="${h(row.kyc !== "通过" ? t("资格档暂无法确认", "Tier cannot be confirmed yet") : t("资格档条件", "Tier requirements"))}"><strong>${h(progress(row))}</strong></td>
@@ -652,7 +652,7 @@
       const option = Array.isArray(item) ? item : [item, item];
       return `<option value="${h(option[0])}" ${s.filters[key] === option[0] ? "selected" : ""}>${h(option[1])}</option>`;
     }).join("")}</select></label>`;
-    const stages = [["Registration", t("注册", "Registration")], ["KYC", "KYC"], ["FTD", "FTD"], ["Valid FTD", t("有效FTD", "Valid FTD")], ["Quality service", t("质量服务", "Quality service")], ["Completed", t("已完成", "Completed")], ["Voided", t("已作废", "Voided")]];
+    const stages = [["Registration", t("注册", "Registration")], ["KYC", "KYC"], ["首次入金", "首次入金"], ["Qualified conversion", t("有效转化", "Qualified conversion")], ["Quality upgrade", t("质量升档", "Quality upgrade")], ["Completed", t("已完成", "Completed")], ["Voided", t("已作废", "Voided")]];
     const funds = [["not_generated", t("未生成", "Not generated")], ["processing", t("结算中", "In settlement")], ["blocked", t("结算受阻", "Settlement blocked")], ["frozen", t("结算中", "In settlement")], ["settled", t("已结算", "Settled")], ["failed", t("结算失败", "Settlement failed")]];
     const risks = [["none", t("无风险", "No risk")], ["investigating", t("调查中", "Investigating")], ["quarantined", t("隔离中", "Quarantined")], ["released", t("已解除", "Released")]];
     return `<div class="client-quick-filters">
@@ -663,7 +663,7 @@
         <input type="hidden" data-rp-quick="campaign" value="${h(s.filters.campaign || "")}">
       </div>
       ${quickSelect("stage", t("转化阶段", "Conversion stage"), stages)}
-      ${quickSelect("quality", t("质量服务", "Quality service"), [["qualified", t("已达标", "Qualified")], ["unqualified", t("未达标", "Not qualified")]])}
+      ${quickSelect("quality", t("质量升档", "Quality upgrade"), [["qualified", t("已达标", "Qualified")], ["unqualified", t("未达标", "Not qualified")]])}
       ${quickSelect("commissionStatus", t("资金状态", "Fund status"), funds)}
       ${quickSelect("riskStatus", t("风险处理", "Risk handling"), risks)}
     </div>`;
@@ -729,7 +729,7 @@
           ${isClients ? `<fieldset class="report-fieldset"><legend>${t("客户条件", "Client filters")}</legend><div class="report-filter-grid">
             <label class="field"><span>${t("客户编号", "Client ID")}</span><input data-rp-filter="search" value="${h(draft.search || "")}" placeholder="C-100001"></label>
             ${selectField("kyc", draft.kyc, "KYC", ["通过", "未提交", "审核中", "失败"])}
-            ${selectField("stage", draft.stage, t("转化阶段", "Conversion stage"), [["Registration", t("注册", "Registration")], ["KYC", "KYC"], ["FTD", "FTD"], ["Valid FTD", t("有效FTD", "Valid FTD")], ["Quality service", t("质量服务", "Quality service")], ["Completed", t("已完成", "Completed")], ["Voided", t("已作废", "Voided")]])}
+            ${selectField("stage", draft.stage, t("转化阶段", "Conversion stage"), [["Registration", t("注册", "Registration")], ["KYC", "KYC"], ["首次入金", "首次入金"], ["Qualified conversion", t("有效转化", "Qualified conversion")], ["Quality upgrade", t("质量升档", "Quality upgrade")], ["Completed", t("已完成", "Completed")], ["Voided", t("已作废", "Voided")]])}
             ${selectField("commissionStatus", draft.commissionStatus, t("结算状态", "Settlement status"), [["not_generated", t("未生成", "Not generated")], ["processing", t("结算中", "In settlement")], ["blocked", t("结算受阻", "Settlement blocked")], ["frozen", t("结算中", "In settlement")], ["settled", t("已结算", "Settled")], ["failed", t("结算失败", "Settlement failed")]])}
             ${selectField("riskStatus", draft.riskStatus, t("风险处理状态", "Risk handling status"), [["none", t("无风险", "No risk")], ["investigating", t("调查中", "Investigating")], ["quarantined", t("隔离中", "Quarantined")], ["released", t("已解除", "Released")]])}
             ${selectField("riskReason", draft.riskReason, t("原因类别", "Reason category"), ["资料待核验", "行为待说明", "质量待复核", "支付风险", "集群风险", "其他"])}
@@ -754,7 +754,7 @@
     const helpField = (name, value, help, id) => `<div><dt>${h(name)} <button class="report-help-button" type="button" data-rp-detail-help="${h(help)}" aria-label="${h(help)}" aria-describedby="${id}">?</button></dt><dd>${h(format(value, "money"))}</dd></div>`;
     const steps = [
       [t("注册", "Registration"), row.registeredAt], ["KYC", row.kycAt],
-      ["FTD", row.ftdAt], [t("有效FTD", "Valid FTD"), row.effectiveAt]
+      ["首次入金", row.ftdAt], [t("有效转化", "Qualified conversion"), row.effectiveAt]
     ];
     const mergedCommission = Number(row.commissionCases?.find(item => item.type === "qftd_batch")?.amount || 0);
     const hasCommissionBreakdown = mergedCommission > 0;
@@ -767,14 +767,13 @@
           const totalDays = Number(item.holdDays || 0);
           const elapsed = Math.max(0, Math.min(totalDays, Math.floor((Date.parse(`${data.now}T00:00:00Z`) - Date.parse(`${startedAt}T00:00:00Z`)) / 86400000) + 1));
           return {
-            name: item.type === "qftd_batch" ? t("注册+有效FTD佣金", "Registration + valid FTD commission") : t("质量服务佣金", "Quality service commission"),
+            name: item.type === "qftd_batch" ? t("注册+有效转化佣金", "Registration + qualified conversion commission") : t("质量升档佣金", "Quality upgrade commission"),
             totalDays, elapsed
           };
         })
       : [];
     const settledCases = (row.commissionCases || []).filter(item => item.settlement);
     const settledGross = settledCases.reduce((sum, item) => sum + item.settlement.grossAmount / 100, 0);
-    const settledTax = settledCases.reduce((sum, item) => sum + item.settlement.taxAmount / 100, 0);
     const settledGuarantee = settledCases.reduce((sum, item) => sum + item.settlement.guaranteeAmount / 100, 0);
     const releasedGuarantee = settledCases.reduce((sum, item) => sum + (item.guarantee?.status === "released" ? item.guarantee.amount / 100 : 0), 0);
     const unsettledGross = (row.commissionCases || [])
@@ -782,8 +781,8 @@
       .reduce((sum, item) => sum + item.amountCents / 100, 0);
     const unsettledCases = (row.commissionCases || []).filter(item => !item.settlement);
     const caseName = item => item.type === "qftd_batch"
-      ? t("注册+有效FTD佣金", "Registration + valid FTD commission")
-      : t("质量服务佣金", "Quality service commission");
+      ? t("注册+有效转化佣金", "Registration + qualified conversion commission")
+      : t("质量升档佣金", "Quality upgrade commission");
     const caseStatusLabels = {
       pending: t("待检查", "Pending review"),
       held: t("结算中", "On hold"),
@@ -799,24 +798,12 @@
     };
     const creditedHelp = settledCases.length
       ? [
-          t("结算净额 = 已结算佣金总额 − 税费 − 结算时扣留保证金", "Settlement net = settled gross − tax − guarantee withheld at settlement"),
-          `${format(settledGross, "money")} − ${format(settledTax, "money")} − ${format(settledGuarantee, "money")} = ${format(row.approved, "money")}`,
+          t("结算净额 = 已结算佣金总额 − 结算时扣留保证金", "Settlement net = settled gross − guarantee withheld at settlement"),
+          `${format(settledGross, "money")} − ${format(settledGuarantee, "money")} = ${format(row.approved, "money")}`,
           releasedGuarantee > 0 ? `${t("已释放保证金", "Released guarantee")}：${format(releasedGuarantee, "money")}${t("，不再计入当前滚动保证金。", "; it is excluded from the current rolling guarantee.")}` : "",
           unsettledGross > 0 ? `${t("预计佣金另含尚未结算金额", "Expected commission also includes unsettled amount")}：${format(unsettledGross, "money")}` : ""
         ].filter(Boolean).join("\n")
       : t("佣金完成结算检查后，才生成结算净额。", "Settlement net is generated after settlement checks.");
-    const taxHelp = settledCases.length
-      ? [
-          t("税费在佣金结算时按税档税率计提并扣缴；提现时不重复收取。", "Tax is calculated and withheld at settlement by tax tier; it is not charged again at withdrawal."),
-          ...settledCases.map(item => {
-            const caseName = item.type === "qftd_batch"
-              ? t("注册+有效FTD佣金", "Registration + valid FTD commission")
-              : t("质量服务佣金", "Quality service commission");
-            const rate = item.settlement.taxRate * 100;
-            return `${caseName}：${format(item.settlement.grossAmount / 100, "money")} × ${item.settlement.taxTier} ${rate}% = ${format(item.settlement.taxAmount / 100, "money")}`;
-          })
-        ].join("\n")
-      : t("佣金完成结算检查后，才生成税费。", "Tax is generated after settlement checks.");
     const currentGuaranteeHelp = [
       t("当前滚动保证金 = 仍处于保留或结算中状态的保证金合计。", "Current rolling guarantee equals retained or in-settlement guarantee amounts."),
       releasedGuarantee > 0 ? `${t("本行已释放", "Released in this row")} ${format(releasedGuarantee, "money")}${t("，已进入可提现余额，不再计入当前滚动保证金。", "; it has entered the available balance and is excluded here.")}` : "",
@@ -846,7 +833,7 @@
           ${field(t("申诉路径", "Appeal path"), row.riskHandlingStatus === "released" ? t("暂无", "None") : t("申诉中心", "Appeal center"))}
         </dl><p>${t("调查或隔离期间佣金保留并留痕，但不自动结算、不可提现；解除后需等待结算前检查，不直接入账。", "During investigation or quarantine, commission is retained and audited but not automatically settled or withdrawable. After release it must pass pre-settlement checks before crediting.")}</p></section>` : ""}
         <section class="report-detail-section"><h3>${t("转化阶段", "Conversion stage")}</h3><ol class="report-timeline">${steps.map(([name, value]) => `<li class="${value ? "complete" : ""}"><span>${h(name)}</span><time>${h(value || t("尚未完成", "Not completed"))}</time></li>`).join("")}</ol></section>
-        <section class="report-detail-section"><h3>${t("质量服务", "Quality service")}</h3><dl class="report-detail-grid">
+        <section class="report-detail-section"><h3>${t("质量升档", "Quality upgrade")}</h3><dl class="report-detail-grid">
           ${field(t("达标状态", "Qualification"), qualityService(row)[0])}
           ${row.qualityAt ? field(t("达标时间", "Qualified at"), row.qualityAt) : ""}
         </dl></section>
@@ -856,9 +843,9 @@
         <section class="report-detail-section"><h3>${t("佣金信息", "Commission information")}</h3>
           ${AFF.fundsStageChain(row.withdrawalStatus === "paid" ? "paid" : settledCases.length ? "available" : "settling")}
           ${hasCommissionBreakdown ? `<div class="report-commission-summary">
-            <div><span>${t("注册用户佣金", "Registration commission")} <span class="report-inline-help"><button class="report-help-button" type="button" aria-label="${t("注册用户佣金说明", "Registration commission explanation")}" aria-describedby="rp-register-commission-help">?</button><span class="report-inline-tooltip" id="rp-register-commission-help" role="tooltip" hidden>${t("完成有效FTD后才开始结算此佣金；完成前仅作参考。", "Settlement starts only after valid FTD; before then it is reference-only.")}</span></span></span><strong>${format(registerCommission, "money")}</strong></div>
-            <div><span>${t("有效FTD佣金", "Valid FTD commission")}</span><strong>${format(validFtdCommission, "money")}</strong></div>
-            <div><span>${t("质量服务佣金", "Quality service commission")}</span><strong>${format(qualityCommission, "money")}</strong></div>
+            <div><span>${t("注册用户佣金", "Registration commission")} <span class="report-inline-help"><button class="report-help-button" type="button" aria-label="${t("注册用户佣金说明", "Registration commission explanation")}" aria-describedby="rp-register-commission-help">?</button><span class="report-inline-tooltip" id="rp-register-commission-help" role="tooltip" hidden>${t("完成有效转化后才开始结算此佣金；完成前仅作参考。", "Settlement starts only after qualified conversion; before then it is reference-only.")}</span></span></span><strong>${format(registerCommission, "money")}</strong></div>
+            <div><span>${t("有效转化佣金", "Qualified conversion commission")}</span><strong>${format(validFtdCommission, "money")}</strong></div>
+            <div><span>${t("质量升档佣金", "Quality upgrade commission")}</span><strong>${format(qualityCommission, "money")}</strong></div>
           </div>` : ""}
           ${settledCases.length && unsettledCases.length ? `<div class="report-unsettled-commissions" aria-label="${t("未结算佣金", "Unsettled commissions")}">
             ${unsettledCases.map(item => `<div>
@@ -872,7 +859,6 @@
           </div>` : ""}
           ${holdHelp(row)}<dl class="report-detail-grid">
           ${moneyField(label("expected"), row.expected)}
-          ${settledCases.length ? helpField(label("tax"), row.tax, taxHelp, "rp-tax-help") : ""}
           ${helpField(t("当前滚动保证金", "Current rolling guarantee"), row.guarantee, currentGuaranteeHelp, "rp-guarantee-help")}
           ${settledCases.length ? helpField(label("approved"), row.approved, creditedHelp, "rp-credited-help") : moneyField(label("approved"), row.approved)}
           ${row.commissionStatus === "rejected" ? moneyField(label("rejected"), row.rejected) : ""}
@@ -920,9 +906,9 @@
     const s = state();
     const clients = AFF.state.route === "clients";
     const keys = clients
-      ? ["clientId", "email", "registeredAt", "country", "platform", "campaign", "kyc", "ftdAt", "effectiveAt", "qualityAt", "milestoneStatus", "commissionStatus", "settlementStatus", "withdrawalStatus", "taxAssessmentStatus", "guaranteeStatus", "fundStatus", "riskHandlingStatus", "riskReasonCategory", "riskStartedAt", "riskStatusTime", "riskImpactScope", "riskEvidenceScope", "riskNextStep", "riskHandlingPath", "scenarioCode", "scenarioLabel", "expected", "settled", "tax", "guarantee", "approved", "paid", "rejected", "reversed", "commissionId", "commissionReasonCode", "commissionReason"]
+      ? ["clientId", "email", "registeredAt", "country", "platform", "campaign", "kyc", "ftdAt", "effectiveAt", "qualityAt", "milestoneStatus", "commissionStatus", "settlementStatus", "withdrawalStatus", "guaranteeStatus", "fundStatus", "riskHandlingStatus", "riskReasonCategory", "riskStartedAt", "riskStatusTime", "riskImpactScope", "riskEvidenceScope", "riskNextStep", "riskHandlingPath", "scenarioCode", "scenarioLabel", "expected", "settled", "guarantee", "approved", "paid", "rejected", "reversed", "commissionId", "commissionReasonCode", "commissionReason"]
       : [...s.groups, ...s.columns];
-    const titles = clients ? ["客户编号", "脱敏邮箱", "注册时间", "国家/地区", "注册平台", "转化活动", "KYC状态", "FTD时间", "有效FTD时间", "质量服务时间", "客户里程碑状态", "资金状态", "佣金状态", "风险处理状态", "原因类别", "风险开始时间", "当前状态时间", "影响范围", "证据范围", "下一步", "处理路径", "演示场景代码", "演示场景", "预计佣金", "已结算佣金", "税费", "滚动保证金", "可提现净额", "已支付佣金", "已拒绝佣金", "冲正金额", "佣金编号", "处理原因码", "处理原因"] : keys.map(label);
+    const titles = clients ? ["客户编号", "脱敏邮箱", "注册时间", "国家/地区", "注册平台", "转化活动", "KYC状态", "首次入金时间", "有效转化时间", "质量升档时间", "客户里程碑状态", "资金状态", "佣金状态", "风险处理状态", "原因类别", "风险开始时间", "当前状态时间", "影响范围", "证据范围", "下一步", "处理路径", "演示场景代码", "演示场景", "预计佣金", "已结算佣金", "滚动保证金", "可提现净额", "已支付佣金", "已拒绝佣金", "冲正金额", "佣金编号", "处理原因码", "处理原因"] : keys.map(label);
     const csvCell = value => {
       let text = String(value ?? "");
       if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`;

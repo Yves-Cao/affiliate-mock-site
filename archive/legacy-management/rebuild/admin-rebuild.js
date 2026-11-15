@@ -52,10 +52,10 @@ const AC_DB = (() => {
   const P = [["AF-1023","Meridian Leads","印尼","公司","合作中","C2",48210,12650,341],["AF-0777","Apex Media","越南","公司","合作中","C1",31840,9120,218],["AF-1042","Siam Clicks","泰国","个人","观察中","C2",12480,4830,96],["AF-1105","Nova Traffic","墨西哥","公司","申请中","—",0,0,0],["AF-0921","Lagos Partners","尼日利亚","公司","合作中","C0",20350,0,187],["AF-0866","Golden Bridge","马来","公司","清退中","C1",26730,0,203],["AF-0998","Andes Promo","巴西","个人","合作中","C3",15920,6110,141]];
   return {
     partners:P.map(r => ({id:r[0],name:r[1],country:r[2],type:r[3],status:r[4],grade:r[5],total:r[6],pending:r[7],clients:r[8]})),
-    clients:[["C-88231","印尼","11-02","有效FTD",250,"AF-1023","L-2001","siteresia","低"],["C-88245","越南","11-02","FTD",100,"AF-0777","L-2002","tg_vn","低"],["C-88301","泰国","11-03","注册",0,"AF-1042","L-2005","fb_th","无"],["C-88354","尼日利亚","11-03","有效FTD",500,"AF-0921","L-2009","ng_bulk","高"],["C-88402","巴西","11-04","FTD",200,"AF-0998","L-2012","br_pp","低"],["C-88455","印尼","11-04","注册",0,"AF-1023","L-2001","siteresia","无"],["C-88479","墨西哥","11-05","有效FTD",350,"AF-1023","L-2014","mx_tik","中"],["C-88512","越南","11-05","流失",150,"AF-0777","L-2002","tg_vn","低"]].map(r => ({id:r[0],country:r[1],reg:r[2],life:r[3],ftd:r[4],partner:r[5],link:r[6],sub:r[7],risk:r[8]})),
+    clients:[["C-88231","印尼","11-02","有效转化",250,"AF-1023","L-2001","siteresia","低"],["C-88245","越南","11-02","首次入金",100,"AF-0777","L-2002","tg_vn","低"],["C-88301","泰国","11-03","注册",0,"AF-1042","L-2005","fb_th","无"],["C-88354","尼日利亚","11-03","有效转化",500,"AF-0921","L-2009","ng_bulk","高"],["C-88402","巴西","11-04","首次入金",200,"AF-0998","L-2012","br_pp","低"],["C-88455","印尼","11-04","注册",0,"AF-1023","L-2001","siteresia","无"],["C-88479","墨西哥","11-05","有效转化",350,"AF-1023","L-2014","mx_tik","中"],["C-88512","越南","11-05","流失",150,"AF-0777","L-2002","tg_vn","低"]].map(r => ({id:r[0],country:r[1],reg:r[2],life:r[3],ftd:r[4],partner:r[5],link:r[6],sub:r[7],risk:r[8]})),
     onboarding:[["OB-3301","Nova Traffic","公司","墨西哥","10-31 14:22",1.2,"已通过","100%"],["OB-3302","Delta Reach","个人","印尼","11-01 09:40",1.0,"待审核","85%"],["OB-3303","Kano Digital","公司","尼日利亚","11-03 16:05",3.5,"补件中","60%"],["OB-3304","Pacific Loop","公司","泰国","11-05 11:30",0.6,"待审核","95%"],["OB-3299","Urba Clicks","个人","巴西","10-28 10:12",4.2,"已驳回","40%"]].map(r => ({id:r[0],name:r[1],type:r[2],country:r[3],time:r[4],wait:r[5],status:r[6],docs:r[7]})),
     attribution:[["AE-401","归属冲突","C-88231","AF-1023 / AF-0777","双链接7日内先后点击","11-04","待处理"],["AE-402","越界拦截","C-88004","IB-3307","客户已有IB归属，拦截Affiliate计入","11-03","已修正"],["AE-403","规则缺失","C-88388","—","来源链接已停用，无规则可用","11-05","待处理"],["AE-404","重复归属","C-87955","AF-0921","重复注册账号合并判定","11-02","误报"],["AE-405","归属冲突","C-88479","AF-1023 / AF-1042","跨设备重复点击窗口重叠","11-06","待处理"]].map(r => ({id:r[0],type:r[1],client:r[2],partners:r[3],desc:r[4],time:r[5],status:r[6]})),
-    events:[["tr-7a3f","点击","Tracking","C-88479","正常","11-05 14:02:11"],["tr-7a3f","注册","CRM","C-88479","正常","11-05 14:09:38"],["tr-7a3f","FTD","CRM","C-88479","正常","11-06 09:12:04"],["tr-7a3f","计佣","计佣引擎","C-88479","正常","11-06 09:12:07"],["tr-9b21","点击","Tracking","C-88354","正常","11-03 21:44:02"],["tr-9b21","注册","CRM","C-88354","正常","11-03 21:50:19"],["tr-9b21","FTD","CRM","C-88354","缺数","—"],["tr-5c88","点击","Tracking","C-88245","正常","11-02 08:31:55"],["tr-5c88","注册","CRM","C-88245","正常","11-02 08:40:12"],["tr-5c88","FTD","CRM","C-88245","正常","11-02 19:02:33"],["tr-5c88","计佣","计佣引擎","C-88245","正常","11-02 19:02:35"]].map(r => ({tid:r[0],type:r[1],src:r[2],obj:r[3],status:r[4],time:r[5]})),
+    events:[["tr-7a3f","点击","Tracking","C-88479","正常","11-05 14:02:11"],["tr-7a3f","注册","CRM","C-88479","正常","11-05 14:09:38"],["tr-7a3f","首次入金","CRM","C-88479","正常","11-06 09:12:04"],["tr-7a3f","计佣","计佣引擎","C-88479","正常","11-06 09:12:07"],["tr-9b21","点击","Tracking","C-88354","正常","11-03 21:44:02"],["tr-9b21","注册","CRM","C-88354","正常","11-03 21:50:19"],["tr-9b21","首次入金","CRM","C-88354","缺数","—"],["tr-5c88","点击","Tracking","C-88245","正常","11-02 08:31:55"],["tr-5c88","注册","CRM","C-88245","正常","11-02 08:40:12"],["tr-5c88","首次入金","CRM","C-88245","正常","11-02 19:02:33"],["tr-5c88","计佣","计佣引擎","C-88245","正常","11-02 19:02:35"]].map(r => ({tid:r[0],type:r[1],src:r[2],obj:r[3],status:r[4],time:r[5]})),
     materials:[
       {id:"AST-1001",name:"IDR 标准横幅",type:"横幅",version:3,status:"启用",countries:["印尼"],languages:["印尼语"],devices:["网站"],platforms:["Google Display"],scope:"印尼 · 印尼语 · 网站 · Google Display",path:"LP-ID-001 · 印尼开户注册",size:"1200×628",format:"PNG",file:"idr-standard-v3.png",updated:"2026-11-08 09:42",created:"2026-10-21 15:20",uses:38,description:"面向印尼市场的标准开户注册横幅。",validFrom:"2026-11-08",validTo:"—",operator:"ops_chen",color:"gold"},
       {id:"AST-1002",name:"VN Gold 落地页",type:"落地页",version:2,status:"启用",countries:["越南"],languages:["越南语","英语"],devices:["网站","Android"],platforms:["官方站点"],scope:"越南 · 越南语/英语 · 网站/Android",path:"LP-VN-002 · Gold开户页",size:"官方路径",format:"路径引用",file:"—",updated:"2026-11-07 18:06",created:"2026-10-18 11:06",uses:52,description:"越南 Gold 方案官方落地页引用。",validFrom:"2026-10-18",validTo:"—",operator:"ops_chen",color:"plum"},
@@ -67,21 +67,20 @@ const AC_DB = (() => {
       {id:"AST-1008",name:"ID App 竖版视频",type:"视频",version:2,status:"启用",countries:["印尼"],languages:["印尼语"],devices:["iOS","Android"],platforms:["TikTok"],scope:"印尼 · 印尼语 · iOS/Android · TikTok",path:"LP-ID-004 · App开户注册",size:"1080×1920",format:"MP4",file:"id-app-v2.mp4",updated:"2026-11-04 10:02",created:"2026-10-03 10:02",uses:19,description:"印尼 App 投放竖版视频。",validFrom:"2026-10-03",validTo:"—",operator:"content_wu",color:"violet"},
       {id:"AST-1009",name:"VN 移动 GIF",type:"GIF",version:2,status:"启用",countries:["越南"],languages:["越南语"],devices:["Android"],platforms:["Zalo"],scope:"越南 · 越南语 · Android · Zalo",path:"LP-VN-003 · 移动注册页",size:"640×360",format:"GIF",file:"vn-mobile-v2.gif",updated:"2026-11-03 14:22",created:"2026-10-19 14:22",uses:7,description:"越南 Android 渠道移动 GIF。",validFrom:"2026-10-19",validTo:"—",operator:"ops_chen",color:"teal"},
     ].map(m => ({...m,history:[{version:m.version,created:m.created,operator:m.operator,status:m.status,file:m.file,note:m.version > 1 ? "替换上一版本，保留历史引用。" : "首次创建素材。"}],audit:[{time:m.updated,operator:m.operator,action:m.version > 1 ? "替换并启用新版本" : "创建素材",reason:m.version > 1 ? "内容更新" : "官方素材入库",result:"成功"}]})),
-    postback:[["AF-1023","cb.meridian-leads.com","注册+FTD","99.2%","成功 11-06 09:12","0","正常"],["AF-0777","hook.apexmedia.io","FTD","62.5%","失败 11-06 08:55","6","失败告警"],["AF-0998","post.andes.click","注册","98.1%","成功 11-05 22:31","0","正常"],["AF-1042","—","未配置","—","—","—","暂停"]].map(r => ({id:r[0],url:r[1],ev:r[2],rate:r[3],last:r[4],fails:r[5],status:r[6]})),
-    tracking:[["11-06 09:41","AF-1023","L-2001","siteresia","iOS","印尼","已计佣"],["11-06 09:38","AF-0777","L-2002","tg_vn","Android","越南","已FTD"],["11-06 09:30","AF-0998","L-2012","br_pp","Desktop","巴西","已注册"],["11-06 09:12","AF-0921","L-2009","ng_bulk","Android","尼日利亚","已FTD"],["11-06 08:59","AF-1023","L-2014","mx_tik","iOS","墨西哥","未转化"],["11-06 08:47","AF-1042","L-2005","fb_th","Desktop","泰国","未转化"]].map(r => ({time:r[0],partner:r[1],link:r[2],sub:r[3],dev:r[4],geo:r[5],stage:r[6]})),
-    commissions:[["CM-55101","AF-1023","C-88231","L2·有效FTD","基础$80+加成$16","96.00","已计佣","无","11-20"],["CM-55102","AF-0777","C-88245","L1·FTD","基础$60","60.00","已计佣","结算中","11-16"],["CM-55103","AF-0921","C-88354","L2·有效FTD","基础$80+加成$16","96.00","已计佣","C0等级","—"],["CM-55104","AF-1042","C-88301","—","—","0.00","待事件","数据缺数","—"],["CM-55105","AF-0998","C-88402","L1·FTD","基础$60","60.00","已计佣","风险隔离","11-17"],["CM-55106","AF-1023","C-88479","L2·有效FTD","基础$80+加成$16","96.00","已计佣","无","11-21"],["CM-55107","AF-0866","C-88102","L1·有效FTD","基础$60","60.00","已冲正","已冲正","—"]].map(r => ({id:r[0],partner:r[1],client:r[2],tier:r[3],comp:r[4],amount:r[5],status:r[6],block:r[7],hold:r[8]})),
+    postback:[["AF-1023","cb.meridian-leads.com","注册+首次入金","99.2%","成功 11-06 09:12","0","正常"],["AF-0777","hook.apexmedia.io","首次入金","62.5%","失败 11-06 08:55","6","失败告警"],["AF-0998","post.andes.click","注册","98.1%","成功 11-05 22:31","0","正常"],["AF-1042","—","未配置","—","—","—","暂停"]].map(r => ({id:r[0],url:r[1],ev:r[2],rate:r[3],last:r[4],fails:r[5],status:r[6]})),
+    tracking:[["11-06 09:41","AF-1023","L-2001","siteresia","iOS","印尼","已计佣"],["11-06 09:38","AF-0777","L-2002","tg_vn","Android","越南","已首次入金"],["11-06 09:30","AF-0998","L-2012","br_pp","Desktop","巴西","已注册"],["11-06 09:12","AF-0921","L-2009","ng_bulk","Android","尼日利亚","已首次入金"],["11-06 08:59","AF-1023","L-2014","mx_tik","iOS","墨西哥","未转化"],["11-06 08:47","AF-1042","L-2005","fb_th","Desktop","泰国","未转化"]].map(r => ({time:r[0],partner:r[1],link:r[2],sub:r[3],dev:r[4],geo:r[5],stage:r[6]})),
+    commissions:[["CM-55101","AF-1023","C-88231","L2·有效转化","基础$80+加成$16","96.00","已计佣","无","11-20"],["CM-55102","AF-0777","C-88245","L1·首次入金","基础$60","60.00","已计佣","结算中","11-16"],["CM-55103","AF-0921","C-88354","L2·有效转化","基础$80+加成$16","96.00","已计佣","C0等级","—"],["CM-55104","AF-1042","C-88301","—","—","0.00","待事件","数据缺数","—"],["CM-55105","AF-0998","C-88402","L1·首次入金","基础$60","60.00","已计佣","风险隔离","11-17"],["CM-55106","AF-1023","C-88479","L2·有效转化","基础$80+加成$16","96.00","已计佣","无","11-21"],["CM-55107","AF-0866","C-88102","L1·有效转化","基础$60","60.00","已冲正","已冲正","—"]].map(r => ({id:r[0],partner:r[1],client:r[2],tier:r[3],comp:r[4],amount:r[5],status:r[6],block:r[7],hold:r[8]})),
     statements:[["STM-2026-11-A","11-01~11-30",23,482100,52130,429970,"待审批","—"],["STM-2026-10-B","10-01~10-31",21,448650,48920,399730,"已付款","finance_li"],["STM-2026-10-C","10-补发",2,12600,1180,11420,"已确认","finance_wu"]].map(r => ({id:r[0],cycle:r[1],partners:r[2],total:r[3],deduct:r[4],net:r[5],status:r[6],approver:r[7]})),
     stmtDetail:[["AF-1023","Meridian Leads",48210,4820,43390,""],["AF-0777","Apex Media",31840,3180,28660,""],["AF-0921","Lagos Partners",20350,2035,18315,"C0"],["AF-1042","Siam Clicks",12480,1250,11230,""],["AF-0998","Andes Promo",15920,1590,14330,""]].map(r => ({id:r[0],name:r[1],comm:r[2],deduct:r[3],net:r[4],c0:r[5]})),
     withdrawals:[["WD-5567","AF-1023",12400,124,12276,"MER•••4821","11-06 09:58","待审核"],["WD-5566","AF-0777",8000,80,7920,"APX•••1130","11-05 16:22","已通过"],["WD-5565","AF-0998",5000,50,4950,"AND•••7702","11-04 11:40","支付中"],["WD-5564","AF-1042",3000,30,2970,"SIA•••5518","11-03 14:05","失败"],["WD-5563","AF-1023",15000,150,14850,"MER•••4821","11-01 10:12","已支付"]].map(r => ({id:r[0],partner:r[1],amt:r[2],fee:r[3],real:r[4],acct:r[5],time:r[6],status:r[7]})),
-    recon:[["RC-118","2026-10","金额不平","佣金合计与结算分摊差 $320",320,"STM-2026-10-B","待处理"],["RC-117","2026-10","重复流水","WD-5561 重复记账",150,"WD-5561","已处理"],["RC-116","2026-09","缺流水","税费代扣缺 3 条",89,"STM-2026-09-A","已容忍"],["RC-115","2026-09","状态不一致","提现支付结果未回写",12000,"WD-5539","已处理"]].map(r => ({id:r[0],cycle:r[1],type:r[2],desc:r[3],amt:r[4],obj:r[5],status:r[6]})),
+    recon:[["RC-118","2026-10","金额不平","佣金合计与结算分摊差 $320",320,"STM-2026-10-B","待处理"],["RC-117","2026-10","重复流水","WD-5561 重复记账",150,"WD-5561","已处理"],["RC-116","2026-09","缺流水","代扣缺 3 条",89,"STM-2026-09-A","已容忍"],["RC-115","2026-09","状态不一致","提现支付结果未回写",12000,"WD-5539","已处理"]].map(r => ({id:r[0],cycle:r[1],type:r[2],desc:r[3],amt:r[4],obj:r[5],status:r[6]})),
     riskObjects:[["AF-0921","合作方","R4","集群CL-118","同IP注册11账号",4260],["C-88354","客户","R3","拒付+多账号","拒付$500·3账号",500],["CL-118","集群","R4","设备/IP/支付三重关联","11成员·共享支付工具2个",4260],["AF-1042","合作方","R2","评分上升","转化异常波动",1240],["C-88512","客户","R2","CRM欺诈引用","CRM标记关联欺诈库",820]].map(r => ({obj:r[0],type:r[1],grade:r[2],src:r[3],evid:r[4],amt:r[5]})),
     clusters:[["CL-118","设备+IP+支付",11,4260,"调查中"],["CL-104","设备",6,1820,"隔离中"],["CL-097","支付工具",4,960,"已解除"]].map(r => ({id:r[0],rel:r[1],members:r[2],amt:r[3],status:r[4]})),
     blacklist:[["设备","d9f3••22","同IP批量注册","自动","10-28","生效"],["IP","41.203.••","撞库尝试","自动","11-02","生效"],["支付工具","VISA••4491","拒付关联","人工复核","11-04","生效"],["客户","C-87321","欺诈库匹配","自动","10-15","生效"],["合作方","AF-0712","流量造假清退","人工复核","09-30","生效"]].map(r => ({type:r[0],val:r[1],reason:r[2],src:r[3],time:r[4],status:r[5]})),
     tickets:[["TK-7701","异常","AF-1023","佣金未计入我的客户C-88479","中",6,"处理中"],["TK-7702","咨询","AF-0998","提现到账时间咨询","低",22,"待受理"],["TK-7703","争议","AF-0866","清退最终结算金额争议","高",-2,"处理中"],["TK-7704","咨询","AF-1042","素材尺寸要求","低",30,"已关闭"]].map(r => ({id:r[0],type:r[1],partner:r[2],subject:r[3],priority:r[4],sla:r[5],status:r[6]})),
     notifications:[["11-06 09:15","结算送审","财务角色","站内+邮件","T-v9","成功"],["11-06 08:55","回传失败告警","AF-0777","站内","T-v4","失败"],["11-05 18:30","审批通过通知","operations_wang","邮件","T-v9","退信"],["11-05 14:00","风险处置通知","risk_supervisor","站内","T-v6","成功"],["11-05 09:00","公告发布","全体合作方","站内","T-v2","成功"]].map(r => ({time:r[0],ev:r[1],to:r[2],ch:r[3],tpl:r[4],status:r[5]})),
     announcements:[["11月交易大赛公告","已发布","置顶","11-05 10:00","11-30",214],["KYC资料更新提醒","已发布","","11-02 09:00","长期",1902],["新价格表生效预告 v14","已发布","","10-28 16:40","11-15",933],["国庆假期结算延迟通知","已过期","","09-28 11:00","10-08",1544],["风控政策问答（草稿）","草稿","","—","—",0]].map(r => ({title:r[0],status:r[1],top:r[2],pub:r[3],exp:r[4],reads:r[5]})),
-    configDomains:["价格表","资格档与里程碑","信用等级权益","结算参数","保证金与税费","国家与主体","审批流","风控规则","参数字典"],
-    configEntries:{"价格表":[["印尼·标准·L1","$60","v13","生效中"],["印尼·标准·L2","$80","v13","生效中"],["越南·标准·L1","$55","v13","生效中"],["尼日利亚·标准·L1","$70","v13","生效中"],["墨西哥·标准·L2","$75","v14草稿","草稿"]],"资格档与里程碑":[["L1","FTD $100","v8","生效中"],["L2","有效FTD $250","v8","生效中"],["L3","有效FTD $500 + 留存30天","v8","生效中"]],"信用等级权益":[["C0","不进结算（硬规则）","v5","生效中"],["C1","结算期+7天","v5","生效中"],["C2","标准权益","v5","生效中"],["C4","结算期-3天·提现T+1","v5","生效中"]],"结算参数":[["基础结算期","D+14","v6","生效中"],["C0附加","+30天","v6","生效中"],["集群延长上限","3次","v6","生效中"]],"保证金与税费":[["保证金比例","10%","v4","生效中"],["释放周期","T+30","v4","生效中"],["代扣税率","按国家字典","v4","生效中"]],"国家与主体":[["印尼","开放·Max Intl","v3","生效中"],["越南","开放·Max Intl","v3","生效中"],["美国","禁投","v3","生效中"]],"审批流":[["结算审批","财务→财务主管","v2","生效中"],["提现审批","财务","v2","生效中"],["调级审批","风控主管","v2","生效中"]],"风控规则":[["D1流量画像","启用","v11","生效中"],["D2官方路径库","启用","v11","生效中"],["集群阈值·同IP","≥5","v11","生效中"]],"参数字典":[["FTD归因窗口","7天","v1","生效中"],["导出保留","24小时","v1","生效中"],["审计保留","1095天","v1","生效中"]]},
+    configDomains:["价格表","资格档与里程碑","信用等级权益","结算参数","保证金与","国家与主体","审批流","风控规则","参数字典"],
     audit:[["11-06 09:12","system","系统","STM-2026-11-A","自动送审","成功","结算模块","tr-stm11a"],["11-06 08:55","finance_li","财务","WD-5566","审批通过","成功","提现页","ap-902x"],["11-05 17:41","risk_zhao","风控主管","AF-0921","生成风险复核","成功","风险工作台","rk-5512"],["11-05 14:22","ops_chen","运营","价格表","新建草稿v14","成功","配置中心","cf-2231"],["11-05 10:00","operations_wang","运营","公告#42","发布","成功","公告管理","an-0042"],["11-04 16:30","risk_reviewer1","风控复核员","CL-118","延长结算","成功","任务队列","t-2403x"]].map(r => ({time:r[0],user:r[1],role:r[2],obj:r[3],act:r[4],result:r[5],from:r[6],tid:r[7]})),
     exports:[["EX-881","佣金记录","2026-10 全量","4,821","敏感","可下载"],["EX-880","经营分析","2026-10 汇总","312","内部","处理中"],["EX-879","操作审计","2026-09","22,014","受限","审批中"],["EX-878","客户列表","2026-10 全量","1,205","敏感","可下载"],["EX-877","提现流水","2026-10","88","内部","已过期"]].map(r => ({id:r[0],src:r[1],range:r[2],rows:r[3],level:r[4],status:r[5]})),
     govLevels:[["客户身份资料","敏感","脱敏展示·导出需审批","v2"],["收款账户","敏感","脱敏展示·变更留痕","v2"],["行为事件","内部","自由导出","v1"],["审计日志","受限","仅合规与管理员","v1"]].map(r => ({dom:r[0],level:r[1],policy:r[2],ver:r[3]})),
@@ -140,7 +139,7 @@ AC_STATE.analytics = {
   /* 客户 +120 */
   const subs = ["siteresia","tg_vn","fb_th","ng_bulk","br_pp","mx_tik","seo_01","blog_02","yt_03","app_04",""];
   for (let i = 0;i < 120;i++) {
-    const p = pick(AC_DB.partners),life = pick(["注册","注册","FTD","有效FTD","有效FTD","流失"]);
+    const p = pick(AC_DB.partners),life = pick(["注册","注册","首次入金","有效转化","有效转化","流失"]);
     AC_DB.clients.push({id:"C-"+(90000+i),country:p.country,reg:"11-0"+ri(1,6),life,ftd:life==="注册"?0:ri(5,40)*25,partner:p.id,link:"L-"+ri(2001,2060),sub:pick(subs),risk:pick(["无","无","无","低","低","中","高"])});
   }
   /* 佣金 +200 */
@@ -148,21 +147,21 @@ AC_STATE.analytics = {
   for (let i = 0;i < 200;i++) {
     const p = pick(AC_DB.partners),c = pick(AC_DB.clients);
     let block = p.grade === "C0" ? (rnd() < 0.6 ? "C0等级" : "无") : pick(blocks);
-    const tier = pick(["L1·FTD","L2·有效FTD","L3·有效FTD"]);
+    const tier = pick(["L1·首次入金","L2·有效转化","L3·有效转化"]);
     const base = tier === "L1" ? 60 : 80;
     AC_DB.commissions.push({id:"CM-"+(56000+i),partner:p.id,client:c.id,tier,comp:block === "数据缺数" ? "—" : "基础$"+base+(rnd()<0.5?"+加成$"+Math.round(base*0.2):""),amount:block === "数据缺数" ? "0.00" : String(base+(rnd()<0.5?Math.round(base*0.2):0)+".00").replace(/\.00$/,".00"),status:block === "数据缺数" ? "待事件" : rnd()<0.05 ? "已冲正" : "已计佣",block:block === "数据缺数" && rnd()<0.4 ? "风险隔离" : block,hold:block === "无" ? "11-"+pad(ri(15,28),2) : "—"});
   }
   /* 事件链 +25条trace */
   for (let t = 0;t < 25;t++) {
     const tid = "tr-"+(1000+t).toString(16)+"f",c = pick(AC_DB.clients);
-    const nodes = ["点击","注册","FTD","计佣"].slice(0,ri(3,4));
+    const nodes = ["点击","注册","首次入金","计佣"].slice(0,ri(3,4));
     nodes.forEach((n,ix) => AC_DB.events.push({tid,type:n,src:n === "点击" ? "Tracking" : n === "计佣" ? "计佣引擎" : "CRM",obj:c.id,status:rnd()<0.06 ? "缺数" : "正常",time:tm()+(ix?"":"+0"+ri(1,9)+"s")}));
   }
   /* 链接追踪 +140 */
   const devs = ["iOS","Android","Desktop"];
   for (let i = 0;i < 140;i++) {
     const p = pick(AC_DB.partners);
-    AC_DB.tracking.push({time:"11-0"+ri(1,6)+" "+pad(ri(0,23),2)+":"+pad(ri(0,59),2),partner:p.id,link:"L-"+ri(2001,2060),sub:pick(subs)||"—",dev:pick(devs),geo:p.country,stage:pick(["未转化","未转化","已注册","已注册","已FTD","已计佣"])});
+    AC_DB.tracking.push({time:"11-0"+ri(1,6)+" "+pad(ri(0,23),2)+":"+pad(ri(0,59),2),partner:p.id,link:"L-"+ri(2001,2060),sub:pick(subs)||"—",dev:pick(devs),geo:p.country,stage:pick(["未转化","未转化","已注册","已注册","已首次入金","已计佣"])});
   }
   /* 入驻 +10 */
   for (let i = 0;i < 10;i++) AC_DB.onboarding.push({id:"OB-3"+(31+i),name:pname(),type:pick(["公司","个人"]),country:pick(countries),time:"11-0"+ri(1,6)+" "+pad(ri(9,18),2)+":"+pad(ri(0,59),2),wait:(ri(5,90)/10),status:pick(["待审核","待审核","补件中","已通过","已驳回"]),docs:pick(["40%","60%","85%","95%","100%"])});
@@ -190,11 +189,11 @@ AC_STATE.analytics = {
   /* 提现 +14 */
   for (let i = 0;i < 14;i++) {const p = pick(AC_DB.partners),amt = ri(10,300)*50;AC_DB.withdrawals.push({id:"WD-55"+(70+i),partner:p.id,amt,fee:Math.round(amt*0.01),real:amt-Math.round(amt*0.01),acct:pick(["MER","APX","SIA","AND","GOL","NOV","ZEN"])+"•••"+ri(1000,9999),time:"11-0"+ri(1,6)+" "+pad(ri(8,20),2)+":"+pad(ri(0,59),2),status:pick(["待审核","待审核","已通过","支付中","已支付","已支付","失败","已驳回"])});}
   /* 对账 +6 / 结算批次 +3 / 批次明细 +12 */
-  for (let i = 0;i < 6;i++) AC_DB.recon.push({id:"RC-1"+(19+i),cycle:"2026-"+pad(ri(7,10),2),type:pick(["金额不平","缺流水","重复流水","状态不一致"]),desc:pick(["佣金合计与结算分摊差","税费代扣缺流","提现重复记账","支付结果未回写"])+" $"+ri(1,9)+"xx",amt:ri(1,40)*10,obj:pick(["STM-2026-10-B","WD-5561","WD-5539","STM-2026-09-A"]),status:pick(["待处理","已处理","已容忍"])});
+  for (let i = 0;i < 6;i++) AC_DB.recon.push({id:"RC-1"+(19+i),cycle:"2026-"+pad(ri(7,10),2),type:pick(["金额不平","缺流水","重复流水","状态不一致"]),desc:pick(["佣金合计与结算分摊差","代扣缺流","提现重复记账","支付结果未回写"])+" $"+ri(1,9)+"xx",amt:ri(1,40)*10,obj:pick(["STM-2026-10-B","WD-5561","WD-5539","STM-2026-09-A"]),status:pick(["待处理","已处理","已容忍"])});
   [["STM-2026-10-A","10-01~10-31",24,512300,56100,456200,"已付款","finance_li"],["STM-2026-09-B","09-01~09-30",19,398400,44100,354300,"已付款","finance_li"],["STM-2026-09-C","09-补发",3,16800,1520,15280,"已确认","finance_wu"]].forEach(r => AC_DB.statements.push({id:r[0],cycle:r[1],partners:r[2],total:r[3],deduct:r[4],net:r[5],status:r[6],approver:r[7]}));
   AC_DB.partners.slice(2,14).forEach((p,i) => {const comm = ri(8,50)*100;AC_DB.stmtDetail.push({id:p.id,name:p.name,comm,deduct:Math.round(comm*0.1),net:comm-Math.round(comm*0.1),c0:p.grade === "C0" ? "C0" : ""});});
   /* 回传 +6 */
-  for (let i = 0;i < 6;i++) {const p = pick(AC_DB.partners);const bad = rnd()<0.3;AC_DB.postback.push({id:p.id,url:pick(["cb.","hook.","post.","track."])+p.name.split(" ")[0].toLowerCase()+pick([".com",".io",".click"]),ev:pick(["注册","FTD","注册+FTD"]),rate:bad ? ri(40,80)+"%" : ri(93,99)+"%."+ri(0,9),last:(bad?"失败 ":"成功 ")+tm().slice(0,10),fails:bad?ri(2,8):0,status:bad?"失败告警":"正常"});}
+  for (let i = 0;i < 6;i++) {const p = pick(AC_DB.partners);const bad = rnd()<0.3;AC_DB.postback.push({id:p.id,url:pick(["cb.","hook.","post.","track."])+p.name.split(" ")[0].toLowerCase()+pick([".com",".io",".click"]),ev:pick(["注册","首次入金","注册+首次入金"]),rate:bad ? ri(40,80)+"%" : ri(93,99)+"%."+ri(0,9),last:(bad?"失败 ":"成功 ")+tm().slice(0,10),fails:bad?ri(2,8):0,status:bad?"失败告警":"正常"});}
   /* 任务 +6 / 审批 +3 */
   for (let i = 0;i < 6;i++) AC_DB.tasks.push({id:"T-24"+(10+i),type:pick(["风险复核","申诉","结算延长","保证金抵扣","冲正追回","集成失败","补数"]),title:pick(["集群CL-1"+ri(10,99),"合作方AF-2"+pad(ri(1,30),2),"提现WD-55"+ri(60,80)])+" 相关"+pick(["复核任务","处理确认","重检","立案"]),source:pick(["风险工作台","工单","佣金记录","系统集成"]),priority:pick(["高","中","低"]),sla:ri(-2,36),status:pick(["待认领","处理中","待审批"])});
   for (let i = 0;i < 3;i++) AC_DB.approvals.push({id:"AP-9"+(10+i),type:pick(["提现","调级","配置变更","财务资料变更"]),target:pick(["AF-2"+pad(ri(1,30),2),"WD-55"+ri(60,80),"价格表 v1"+ri(3,4),"AF-2003 收款账户变更"])+" · 待审批",applicant:pick(["finance_li","ops_chen","risk_zhao"]),time:"今日 "+pad(ri(8,15),2)+":"+pad(ri(0,59),2),wait:ri(1,20)});
@@ -223,18 +222,18 @@ const AC_SETTLEMENT_BATCHES = [
   {id:"SB-20261018-001",statementId:"—",period:"2026-10-03 ~ 2026-10-09",periodKey:"previous",entity:"Affiliate US LLC",currency:"USD",partners:9,cases:67,gross:8420,deduct:842,net:7578,blocked:67,blockedAmount:8420,batchStatus:"failed",approvalStatus:"not_submitted",created:"2026-10-18 08:41",config:"CPA-v13 · SET-v5",operator:"finance_li",error:"CRM关键事件同步超时"},
 ];
 const AC_SETTLEMENT_CASES = [
-  {id:"CC-20261109-001",settlementId:"SC-20261109-001",batchId:"SB-20261109-001",customer:"CUS-10428",email:"a••••@mail.test",partner:"AF-1023",partnerName:"Meridian Leads",tier:"L2 · 有效FTD",components:"基础 CPA 80 + C2 加成 16",amount:96,commissionStatus:"calculated",settlementStatus:"settling",reasons:[],due:"2026-11-20 09:12",risk:"R1",periodKey:"current",version:"CPA-v14 / SET-v6",trace:"tr-cc-10428"},
-  {id:"CC-20261109-002",settlementId:"SC-20261109-002",batchId:"SB-20261109-001",customer:"CUS-10431",email:"m••••@mail.test",partner:"AF-0777",partnerName:"Apex Media",tier:"L1 · FTD",components:"基础 CPA 60",amount:60,commissionStatus:"calculated",settlementStatus:"frozen",reasons:["investigation"],due:"—",risk:"R3",periodKey:"current",version:"CPA-v14 / SET-v6",trace:"tr-cc-10431"},
-  {id:"CC-20261109-003",settlementId:"SC-20261109-003",batchId:"SB-20261109-001",customer:"CUS-10437",email:"s••••@mail.test",partner:"AF-1042",partnerName:"Siam Clicks",tier:"L2 · 有效FTD",components:"基础 CPA 80 + C2 加成 16",amount:96,commissionStatus:"calculated",settlementStatus:"pending",reasons:["credit_c0"],due:"—",risk:"R2",periodKey:"current",version:"CPA-v14 / SET-v6",trace:"tr-cc-10437"},
+  {id:"CC-20261109-001",settlementId:"SC-20261109-001",batchId:"SB-20261109-001",customer:"CUS-10428",email:"a••••@mail.test",partner:"AF-1023",partnerName:"Meridian Leads",tier:"L2 · 有效转化",components:"基础 CPA 80 + C2 加成 16",amount:96,commissionStatus:"calculated",settlementStatus:"settling",reasons:[],due:"2026-11-20 09:12",risk:"R1",periodKey:"current",version:"CPA-v14 / SET-v6",trace:"tr-cc-10428"},
+  {id:"CC-20261109-002",settlementId:"SC-20261109-002",batchId:"SB-20261109-001",customer:"CUS-10431",email:"m••••@mail.test",partner:"AF-0777",partnerName:"Apex Media",tier:"L1 · 首次入金",components:"基础 CPA 60",amount:60,commissionStatus:"calculated",settlementStatus:"frozen",reasons:["investigation"],due:"—",risk:"R3",periodKey:"current",version:"CPA-v14 / SET-v6",trace:"tr-cc-10431"},
+  {id:"CC-20261109-003",settlementId:"SC-20261109-003",batchId:"SB-20261109-001",customer:"CUS-10437",email:"s••••@mail.test",partner:"AF-1042",partnerName:"Siam Clicks",tier:"L2 · 有效转化",components:"基础 CPA 80 + C2 加成 16",amount:96,commissionStatus:"calculated",settlementStatus:"pending",reasons:["credit_c0"],due:"—",risk:"R2",periodKey:"current",version:"CPA-v14 / SET-v6",trace:"tr-cc-10437"},
   {id:"CC-20261109-004",settlementId:"SC-20261109-004",batchId:"SB-20261109-001",customer:"CUS-10444",email:"r••••@mail.test",partner:"AF-0921",partnerName:"Lagos Partners",tier:"—",components:"—",amount:0,commissionStatus:"recalculating",settlementStatus:"pending",reasons:["missing_data"],due:"—",risk:"R2",periodKey:"current",version:"CPA-v14 / SET-v6",trace:"tr-cc-10444"},
-  {id:"CC-20261109-005",settlementId:"SC-20261109-005",batchId:"SB-20261109-001",customer:"CUS-10452",email:"d••••@mail.test",partner:"AF-0998",partnerName:"Andes Promo",tier:"L1 · FTD",components:"基础 CPA 60",amount:60,commissionStatus:"calculated",settlementStatus:"settling",reasons:["hold_active"],due:"2026-11-23 09:12",risk:"R2",periodKey:"current",version:"CPA-v14 / SET-v6",trace:"tr-cc-10452"},
-  {id:"CC-20261109-006",settlementId:"SC-20261109-006",batchId:"SB-20261109-001",customer:"CUS-10458",email:"j••••@mail.test",partner:"AF-1023",partnerName:"Meridian Leads",tier:"L2 · 有效FTD",components:"基础 CPA 80 + 质量服务 20",amount:100,commissionStatus:"calculated",settlementStatus:"settling",reasons:[],due:"2026-11-21 09:12",risk:"R1",periodKey:"current",version:"CPA-v14 / SET-v6",trace:"tr-cc-10458"},
-  {id:"CC-20261109-007",settlementId:"SC-20261109-007",batchId:"SB-20261109-001",customer:"CUS-10463",email:"p••••@mail.test",partner:"AF-0866",partnerName:"Golden Bridge",tier:"L2 · 有效FTD",components:"基础 CPA 80 + C2 加成 16",amount:96,commissionStatus:"calculated",settlementStatus:"frozen",reasons:["cluster_unresolved","settlement_overdue_frozen"],due:"2026-11-16 09:12",risk:"R4",periodKey:"current",version:"CPA-v14 / SET-v6",trace:"tr-cc-10463"},
-  {id:"CC-20261109-008",settlementId:"SC-20261109-008",batchId:"SB-20261109-001",customer:"CUS-10471",email:"k••••@mail.test",partner:"AF-0777",partnerName:"Apex Media",tier:"L1 · FTD",components:"基础 CPA 60",amount:60,commissionStatus:"calculated",settlementStatus:"released_after_recheck",reasons:[],due:"—",risk:"R2",periodKey:"current",version:"CPA-v14 / SET-v6",trace:"tr-cc-10471"},
-  {id:"CC-20261108-009",settlementId:"SC-20261108-009",batchId:"SB-20261108-002",customer:"CUS-10477",email:"t••••@mail.test",partner:"AF-1042",partnerName:"Siam Clicks",tier:"L2 · 有效FTD",components:"基础 CPA 80 + C2 加成 16",amount:96,commissionStatus:"calculated",settlementStatus:"rejected",reasons:["quarantine"],due:"—",risk:"R3",periodKey:"previous",version:"CPA-v14 / SET-v6",trace:"tr-cc-10477"},
-  {id:"CC-20261108-010",settlementId:"SC-20261108-010",batchId:"SB-20261108-002",customer:"CUS-10480",email:"v••••@mail.test",partner:"AF-0921",partnerName:"Lagos Partners",tier:"L1 · FTD",components:"基础 CPA 60",amount:60,commissionStatus:"reversed",settlementStatus:"rejected",reasons:["missing_data"],due:"—",risk:"R3",periodKey:"previous",version:"CPA-v14 / SET-v6",trace:"tr-cc-10480"},
-  {id:"CC-20261101-011",settlementId:"SC-20261101-011",batchId:"SB-20261101-001",customer:"CUS-10486",email:"n••••@mail.test",partner:"AF-1105",partnerName:"Nova Traffic",tier:"L2 · 有效FTD",components:"基础 CPA 80 + C2 加成 16",amount:96,commissionStatus:"calculated",settlementStatus:"settled",reasons:[],due:"—",risk:"R1",periodKey:"previous",version:"CPA-v13 / SET-v5",trace:"tr-cc-10486"},
-  {id:"CC-20261101-012",settlementId:"SC-20261101-012",batchId:"SB-20261101-001",customer:"CUS-10492",email:"w••••@mail.test",partner:"AF-0998",partnerName:"Andes Promo",tier:"L2 · 有效FTD",components:"基础 CPA 80 + 质量服务 20",amount:100,commissionStatus:"calculated",settlementStatus:"settled",reasons:[],due:"—",risk:"R1",periodKey:"previous",version:"CPA-v13 / SET-v5",trace:"tr-cc-10492"},
+  {id:"CC-20261109-005",settlementId:"SC-20261109-005",batchId:"SB-20261109-001",customer:"CUS-10452",email:"d••••@mail.test",partner:"AF-0998",partnerName:"Andes Promo",tier:"L1 · 首次入金",components:"基础 CPA 60",amount:60,commissionStatus:"calculated",settlementStatus:"settling",reasons:["hold_active"],due:"2026-11-23 09:12",risk:"R2",periodKey:"current",version:"CPA-v14 / SET-v6",trace:"tr-cc-10452"},
+  {id:"CC-20261109-006",settlementId:"SC-20261109-006",batchId:"SB-20261109-001",customer:"CUS-10458",email:"j••••@mail.test",partner:"AF-1023",partnerName:"Meridian Leads",tier:"L2 · 有效转化",components:"基础 CPA 80 + 质量升档 20",amount:100,commissionStatus:"calculated",settlementStatus:"settling",reasons:[],due:"2026-11-21 09:12",risk:"R1",periodKey:"current",version:"CPA-v14 / SET-v6",trace:"tr-cc-10458"},
+  {id:"CC-20261109-007",settlementId:"SC-20261109-007",batchId:"SB-20261109-001",customer:"CUS-10463",email:"p••••@mail.test",partner:"AF-0866",partnerName:"Golden Bridge",tier:"L2 · 有效转化",components:"基础 CPA 80 + C2 加成 16",amount:96,commissionStatus:"calculated",settlementStatus:"frozen",reasons:["cluster_unresolved","settlement_overdue_frozen"],due:"2026-11-16 09:12",risk:"R4",periodKey:"current",version:"CPA-v14 / SET-v6",trace:"tr-cc-10463"},
+  {id:"CC-20261109-008",settlementId:"SC-20261109-008",batchId:"SB-20261109-001",customer:"CUS-10471",email:"k••••@mail.test",partner:"AF-0777",partnerName:"Apex Media",tier:"L1 · 首次入金",components:"基础 CPA 60",amount:60,commissionStatus:"calculated",settlementStatus:"released_after_recheck",reasons:[],due:"—",risk:"R2",periodKey:"current",version:"CPA-v14 / SET-v6",trace:"tr-cc-10471"},
+  {id:"CC-20261108-009",settlementId:"SC-20261108-009",batchId:"SB-20261108-002",customer:"CUS-10477",email:"t••••@mail.test",partner:"AF-1042",partnerName:"Siam Clicks",tier:"L2 · 有效转化",components:"基础 CPA 80 + C2 加成 16",amount:96,commissionStatus:"calculated",settlementStatus:"rejected",reasons:["quarantine"],due:"—",risk:"R3",periodKey:"previous",version:"CPA-v14 / SET-v6",trace:"tr-cc-10477"},
+  {id:"CC-20261108-010",settlementId:"SC-20261108-010",batchId:"SB-20261108-002",customer:"CUS-10480",email:"v••••@mail.test",partner:"AF-0921",partnerName:"Lagos Partners",tier:"L1 · 首次入金",components:"基础 CPA 60",amount:60,commissionStatus:"reversed",settlementStatus:"rejected",reasons:["missing_data"],due:"—",risk:"R3",periodKey:"previous",version:"CPA-v14 / SET-v6",trace:"tr-cc-10480"},
+  {id:"CC-20261101-011",settlementId:"SC-20261101-011",batchId:"SB-20261101-001",customer:"CUS-10486",email:"n••••@mail.test",partner:"AF-1105",partnerName:"Nova Traffic",tier:"L2 · 有效转化",components:"基础 CPA 80 + C2 加成 16",amount:96,commissionStatus:"calculated",settlementStatus:"settled",reasons:[],due:"—",risk:"R1",periodKey:"previous",version:"CPA-v13 / SET-v5",trace:"tr-cc-10486"},
+  {id:"CC-20261101-012",settlementId:"SC-20261101-012",batchId:"SB-20261101-001",customer:"CUS-10492",email:"w••••@mail.test",partner:"AF-0998",partnerName:"Andes Promo",tier:"L2 · 有效转化",components:"基础 CPA 80 + 质量升档 20",amount:100,commissionStatus:"calculated",settlementStatus:"settled",reasons:[],due:"—",risk:"R1",periodKey:"previous",version:"CPA-v13 / SET-v5",trace:"tr-cc-10492"},
 ];
 const CS_STATUS_LABEL = {
   calculated:"已计佣",recalculating:"重算中",reversed:"已冲正",rejected:"已拒绝",
@@ -271,7 +270,7 @@ const AC_ATTR_DATA = [
     scenario:"attribution_duplicate_candidate",rowType:"case",id:"ATTR-CASE-20261109-003",caseId:"ATTR-CASE-20261109-003",customerId:"CUS-10437",email:"s••••@mail.test",registeredAt:"2026-11-07 19:04",currentAffiliate:{id:"AF-1042",name:"Siam Clicks"},candidates:[{id:"AF-1042",name:"Siam Clicks",score:"首点击"},{id:"AF-1105",name:"Nova Traffic",score:"同窗口候选"}],type:"duplicate_attribution",typeLabel:"重复候选",ibStatus:"none",ibLabel:"未核验",attributionStatus:"conflict",status:"pending",age:"38小时",sla:"已超时 14小时",slaTone:"over",ruleVersion:"ATTR-v42",lastEvent:"2026-11-08 22:16",traceId:"tr-dup-10437",dataState:"normal",lockedAt:"2026-11-07 19:06",description:"同一注册窗口内存在两个Affiliate候选，当前归属已锁定但需要复核。",requester:"—",impact:"可能触发本客户佣金资格重跑；不自动改写历史结算。",timeline:[["2026-11-07 19:04","注册完成","两个候选归属同时满足窗口条件。","is-done"],["2026-11-07 19:06","归属锁定","按首点击规则暂锁定 AF-1042。","is-done"],["2026-11-08 22:16","重复候选检查","完整性检查创建人工案件。","is-block"]]
   },
   {
-    scenario:"attribution_missing_data",rowType:"case",id:"ATTR-CASE-20261109-004",caseId:"ATTR-CASE-20261109-004",customerId:"CUS-10444",email:"r••••@mail.test",registeredAt:"2026-11-06 11:32",currentAffiliate:{id:"AF-0921",name:"Lagos Partners"},candidates:[{id:"AF-0921",name:"Lagos Partners",score:"事件链"}],type:"missing_data",typeLabel:"数据缺数",ibStatus:"none",ibLabel:"无IB关系",attributionStatus:"pending",status:"blocked_sync",age:"2天",sla:"暂停计时",slaTone:"warn",ruleVersion:"ATTR-v41",lastEvent:"2026-11-08 16:02",traceId:"tr-gap-10444",dataState:"pending",lockedAt:"2026-11-06 11:35",description:"CRM FTD回调缺失，归属可见但下游影响暂不判断，等待集成补数。",requester:"—",impact:"仅阻断本案件的下游重跑；不阻断佣金计算。",timeline:[["2026-11-06 11:32","注册归因写入","Affiliate保存候选及当前归属。","is-done"],["2026-11-08 16:02","事件缺数","FTD回调未在新鲜度阈值内到达。","is-block"],["2026-11-09 08:50","补数任务执行中","任务 INT-803 正在重试。","is-miss"]]
+    scenario:"attribution_missing_data",rowType:"case",id:"ATTR-CASE-20261109-004",caseId:"ATTR-CASE-20261109-004",customerId:"CUS-10444",email:"r••••@mail.test",registeredAt:"2026-11-06 11:32",currentAffiliate:{id:"AF-0921",name:"Lagos Partners"},candidates:[{id:"AF-0921",name:"Lagos Partners",score:"事件链"}],type:"missing_data",typeLabel:"数据缺数",ibStatus:"none",ibLabel:"无IB关系",attributionStatus:"pending",status:"blocked_sync",age:"2天",sla:"暂停计时",slaTone:"warn",ruleVersion:"ATTR-v41",lastEvent:"2026-11-08 16:02",traceId:"tr-gap-10444",dataState:"pending",lockedAt:"2026-11-06 11:35",description:"CRM 首次入金回调缺失，归属可见但下游影响暂不判断，等待集成补数。",requester:"—",impact:"仅阻断本案件的下游重跑；不阻断佣金计算。",timeline:[["2026-11-06 11:32","注册归因写入","Affiliate保存候选及当前归属。","is-done"],["2026-11-08 16:02","事件缺数","首次入金回调未在新鲜度阈值内到达。","is-block"],["2026-11-09 08:50","补数任务执行中","任务 INT-803 正在重试。","is-miss"]]
   },
   {
     scenario:"attribution_locked_correction_pending",rowType:"case",id:"ATTR-CASE-20261109-005",caseId:"ATTR-CASE-20261109-005",customerId:"CUS-10452",email:"d••••@mail.test",registeredAt:"2026-11-05 10:18",currentAffiliate:{id:"AF-1023",name:"Meridian Leads"},candidates:[{id:"AF-0777",name:"Apex Media",score:"人工补证"},{id:"AF-1023",name:"Meridian Leads",score:"当前锁定"}],type:"correction",typeLabel:"归属更正",ibStatus:"none",ibLabel:"已排除",attributionStatus:"locked",status:"pending_approval",age:"3天",sla:"待审批",slaTone:"warn",ruleVersion:"ATTR-v40",lastEvent:"2026-11-09 08:18",traceId:"tr-corr-10452",dataState:"normal",lockedAt:"2026-11-05 10:20",description:"已锁定归属申请更正，申请人 ops_chen 已提交拟应用 Affiliate。",requester:"ops_chen",reviewRequestId:"RR-20261109-005",proposedAffiliate:{id:"AF-0777",name:"Apex Media"},impact:"预计触发资格重跑、佣金重算和风险复核任务。",timeline:[["2026-11-05 10:20","归属锁定","当前最终归属为 AF-1023。","is-done"],["2026-11-09 08:18","更正申请提交","RR-20261109-005，等待职责分离审批。","is-current"]]
@@ -302,7 +301,7 @@ const acFmtSLA = h => {if (h == null) return "—";if (h <= 0) return `已超过
 const acPrio = p => p === "高" ? `<span class="ac-badge is-red">${p}</span>` : p === "中" ? `<span class="ac-badge is-orange">${p}</span>` : `<span class="ac-badge is-gray">${p}</span>`;
 const acStat = s => ({待审核:"is-blue",待认领:"is-blue",处理中:"is-blue",生成中:"is-blue",待受理:"is-blue",支付中:"is-blue",草稿:"is-blue",调查中:"is-blue",待生效:"is-blue",审批中:"is-orange",待审批:"is-orange",补件中:"is-orange",待处理:"is-orange",隔离中:"is-orange",处置中:"is-orange",已通过:"is-green",成功:"is-green",已计佣:"is-green",已确认:"is-green",已支付:"is-green",可下载:"is-green",生效中:"is-green",启用:"is-green",已批准:"is-green",正常:"is-green",已修正:"is-green",已处理:"is-green",已上架:"is-green",已发布:"is-green",已驳回:"is-red",失败:"is-red",退信:"is-red",已冲正:"is-red",失败告警:"is-red",已关闭:"is-gray",已过期:"is-gray",误报:"is-gray",已下架:"is-gray",停用:"is-gray",已解除:"is-gray",已容忍:"is-gray",已付款:"is-green",暂停:"is-gray",归档:"is-gray",待事件:"is-orange",申请中:"is-blue",观察中:"is-orange",合作中:"is-green",清退中:"is-orange",已归档:"is-gray",生效:"is-green",长期:"is-gray"}[s] || "is-gray");
 const acGrade = g => !g || g === "—" ? `<span style="color:var(--subtle)">—</span>` : g.startsWith("R") ? `<span class="ac-grade" data-g="r${g.slice(1).toLowerCase()==="" ? "" : String(5-Number(g.slice(1)))}">${g}</span>` : `<span class="ac-grade" data-g="${g.toLowerCase()}">${g}</span>`;
-const acSteps = stage => {const steps = ["点击","注册","FTD","计佣"];const n = ({未转化:0,已注册:1,已FTD:2,已计佣:3})[stage] || 0;return '<span class="ac-psteps">' + steps.map((s,i) => '<i class="' + (i <= n ? "on" : "") + '">' + s + '</i>').join('<em>›</em>') + '</span>';};
+const acSteps = stage => {const steps = ["点击","注册","首次入金","计佣"];const n = ({未转化:0,已注册:1,已首次入金:2,已计佣:3})[stage] || 0;return '<span class="ac-psteps">' + steps.map((s,i) => '<i class="' + (i <= n ? "on" : "") + '">' + s + '</i>').join('<em>›</em>') + '</span>';};
 const acMoney = n => "$" + Number(n).toLocaleString("en-US");
 
 /* ===== 下拉系统 ===== */
@@ -614,8 +613,8 @@ function acWbMetrics(role){
     operations:[
       {num:mk(12480),label:"点击",delta:"+12%",go:"analytics-performance"},
       {num:mk(1204),label:"注册",delta:"+8%",go:"analytics-performance"},
-      {num:mk(186),label:"FTD / 有效FTD",delta:"+5%",go:"analytics-performance"},
-      {num:mk(94),label:"有效FTD",delta:"+3%",go:"analytics-quality"},
+      {num:mk(186),label:"首次入金 / 有效转化",delta:"+5%",go:"analytics-performance"},
+      {num:mk(94),label:"有效转化",delta:"+3%",go:"analytics-quality"},
       {num:mk(9270,"money"),label:"新增佣金",delta:"-2%",go:"commissions"},
     ],
     finance:[
@@ -647,7 +646,7 @@ function acWbMetrics(role){
       {num:1,label:"高敏入驻待审",go:"onboarding-review"},
     ],
     admin:[
-      {num:mk(94),label:"有效FTD",delta:"+3%",go:"analytics-performance"},
+      {num:mk(94),label:"有效转化",delta:"+3%",go:"analytics-performance"},
       {num:AC_DB.tasks.filter(t=>t.status!=="已完成").length,label:"全部待办",go:"workbench"},
       {num:AC_DB.approvals.length,label:"全部待审批",tone:"warn",go:"workbench"},
       {num:9,label:"异常信号",tone:"danger",go:"workbench"},
@@ -745,9 +744,9 @@ function taskProfile(t){
   const common = {owner:t.status === "处理中" ? "当前处理人" : "待认领",reviewer:"—",approver:"—",window:"以任务创建时间为起点，按处理时限倒计时",decision:"待处理"};
   const profiles = {
     "风险复核": {review:"核验风险命中是否成立，并决定是否维持佣金隔离",participants:[["发起方","风控规则引擎"],["执行人",common.owner],["复核人","风控复核员"],["裁决人","风控主管"],["协同方","CRM / 支付 / 运营"]],params:[["风险对象","CL-118（关联集群）"],["命中规则","设备/IP/支付三重关联"],["风险等级","R4 · 高风险"],["隔离金额","$4,260"],["当前状态","结算中隔离"],["参照规则","风控规则 v11 · 集群阈值≥5"]],checks:["确认关联成员、设备/IP、支付工具证据均可追溯","核对客户与合作方归属，排除已知误报","确认隔离金额与佣金记录一致","提交复核结论并由风控主管审批"]},
-    "申诉": {review:"核验合作方对佣金/归属的申诉事实，并形成处理意见",participants:[["发起方","合作方 AF-1023"],["受理人",common.owner],["调查人","运营"],["协同方","CRM / 归属管理"],["最终确认","运营主管"]],params:[["申诉对象","AF-1023 · 客户 C-88479"],["申诉主题","佣金归属争议"],["原始来源","工单 TK-7701"],["涉及金额","$96"],["数据窗口","点击→注册→FTD 7日归因窗口"],["参照规则","Affiliate归属规则 v0.9"]],checks:["核对事件链与原始TraceId","核对IB/Affiliate双向隔离规则","核对Sub ID与链接归属","记录结论、补计/驳回原因并通知申请方"]},
+    "申诉": {review:"核验合作方对佣金/归属的申诉事实，并形成处理意见",participants:[["发起方","合作方 AF-1023"],["受理人",common.owner],["调查人","运营"],["协同方","CRM / 归属管理"],["最终确认","运营主管"]],params:[["申诉对象","AF-1023 · 客户 C-88479"],["申诉主题","佣金归属争议"],["原始来源","工单 TK-7701"],["涉及金额","$96"],["数据窗口","点击→注册→首次入金 7日归因窗口"],["参照规则","Affiliate归属规则 v0.9"]],checks:["核对事件链与原始TraceId","核对IB/Affiliate双向隔离规则","核对Sub ID与链接归属","记录结论、补计/驳回原因并通知申请方"]},
     "结算延长": {review:"核验结算中风险是否仍存在，决定是否延长结算期",participants:[["发起方","风控规则引擎"],["执行人",common.owner],["复核人","风控复核员"],["审批人","风控主管"],["知会方","财务"]],params:[["关联对象","CL-104 · 第2次延长"],["当前结算状态","结算中"],["原到期日","2026-11-16"],["拟延长至","2026-11-23"],["延长次数","2 / 最多3次"],["参照规则","结算参数 v6 · 集群延长上限3次"]],checks:["确认风险证据在最近一次复核后仍有效","核对延长次数未超过配置上限","计算对合作方和结算批次的影响","形成建议后提交风控主管审批"]},
-    "保证金抵扣": {review:"核验损失成立及抵扣金额，避免重复扣除",participants:[["发起方","财务对账"],["执行人",common.owner],["复核人","财务复核员"],["审批人","财务主管"],["协同方","风险 / 结算"]],params:[["案件号","CH-77"],["抵扣原因","拒付损失"],["拟抵扣金额","$320"],["来源流水","结算批次 STM-2026-11-A"],["保证金余额","$1,200"],["参照规则","保证金与税费 v4"]],checks:["核对支付拒付原始凭证与金额","确认未在冲正/追回任务中重复处理","核对保证金余额足够且不低于最低留存","提交抵扣明细并由财务审批"]},
+    "保证金抵扣": {review:"核验损失成立及抵扣金额，避免重复扣除",participants:[["发起方","财务对账"],["执行人",common.owner],["复核人","财务复核员"],["审批人","财务主管"],["协同方","风险 / 结算"]],params:[["案件号","CH-77"],["抵扣原因","拒付损失"],["拟抵扣金额","$320"],["来源流水","结算批次 STM-2026-11-A"],["保证金余额","$1,200"],["参照规则","保证金与 v4"]],checks:["核对支付拒付原始凭证与金额","确认未在冲正/追回任务中重复处理","核对保证金余额足够且不低于最低留存","提交抵扣明细并由财务审批"]},
     "冲正追回": {review:"核验冲正原因、追回路径和金额，建立可追溯案件",participants:[["发起方","风险处置"],["执行人",common.owner],["调查人","风控复核员"],["审批人","财务主管"],["协同方","CRM / 支付"]],params:[["案件对象","C-88354 · AF-0921"],["原计佣金额","$96"],["冲正原因","拒付关联"],["追回状态","待立案"],["关联集群","CL-118"],["参照规则","冲正追回规则 v0.6"]],checks:["核对拒付事件、客户身份仅使用客户ID展示","核对原佣金、结算与提现是否已发生","确认追偿对象及金额计算","提交案件并同步财务与CRM"]},
     "集成失败": {review:"定位外部系统失败原因，补齐数据并确认重试结果",participants:[["发起方","系统集成监控"],["执行人",common.owner],["系统负责人","CRM接口负责人"],["复核人","运营"],["知会方","数据治理"]],params:[["失败系统","CRM"],["任务对象","客户事实同步"],["失败原因","字段映射失败 ×23"],["重试次数","3次"],["影响范围","23个客户待补数"],["参照参数","CRM接口映射 v0.10"]],checks:["查看TraceId和失败响应，确认不是重复任务","对照字段映射与CRM事实源定义","补数前确认幂等键及影响范围","重试后核对客户与佣金数据一致性"]},
     "补数": {review:"核对缺失数据来源，安全补数并验证下游一致性",participants:[["发起方","数据质量监控"],["执行人",common.owner],["数据负责人","运营/CRM"],["复核人","合规或财务"],["知会方","计佣引擎"]],params:[["缺失对象","客户/事件事实"],["数据来源","CRM或事件流水"],["影响范围","待计佣与归因记录"],["补数方式","幂等重放"],["参照规则","事件与OpenAPI映射 v0.10"]],checks:["确认缺数时间窗和原始记录存在","确认补数不会覆盖人工修正","执行幂等重放并记录批次号","验证归因、计佣和通知结果"]}
@@ -904,10 +903,9 @@ function drawerPartner(id){
   const p = AC_DB.partners.find(x => x.id===id);if (!p) return;
   const t = [
     {id:"ov",label:"概览",html:acKV([["合作方ID",p.id],["状态",`<span class="ac-badge ${acStat(p.status)}">${p.status}</span>`],["国家",p.country],["类型",p.type],["信用等级",acGrade(p.grade)],["责任运营","wang_ops"],["累计佣金",acMoney(p.total)],["待结算",p.pending?acMoney(p.pending):"—"]]) + acTimeline([{time:"10-12 14:02",title:"审核通过，正式入驻",state:"is-done"},{time:"10-20 09:30",title:"进入观察期（流量质量复核）",state:"is-done"},{time:"11-02 16:44",title:"信用调级 C3 → C2",desc:"触发条件：拒付率超阈值",state:"is-done"}])},
-    {id:"promo",label:"推广（只读）",html:`<p class="ac-tab-note">活动 · 链接 · Sub ID 均为合作者自助，管理端只读</p>` + acMiniTable(["活动","类型","时间","状态"],[["11月IDAQ","注册+FTD","11-01~11-30","进行中"],["10月新客","FTD","10-01~10-31","已结束"]]) + acMiniTable(["链接","生成时间","状态","累计点击"],[["L-2001 · max-trade.com/c/af1023","10-12","生效","12,480"],["L-2014 · max-trade.com/c/af1023mx","10-15","生效","3,210"]]) + acMiniTable(["Sub ID","创建时间","点击"],[["siteresia","10-13","8,412"],["mx_tik","10-16","3,210"]])},
+    {id:"promo",label:"推广（只读）",html:`<p class="ac-tab-note">活动 · 链接 · Sub ID 均为合作者自助，管理端只读</p>` + acMiniTable(["活动","类型","时间","状态"],[["11月IDAQ","注册+首次入金","11-01~11-30","进行中"],["10月新客","首次入金","10-01~10-31","已结束"]]) + acMiniTable(["链接","生成时间","状态","累计点击"],[["L-2001 · max-trade.com/c/af1023","10-12","生效","12,480"],["L-2014 · max-trade.com/c/af1023mx","10-15","生效","3,210"]]) + acMiniTable(["Sub ID","创建时间","点击"],[["siteresia","10-13","8,412"],["mx_tik","10-16","3,210"]])},
     {id:"comp",label:"合规",html:acKV([["KYC/KYB","<span class='ac-badge is-green'>已通过（CRM）</span>"],["最后同步","11-06 08:40"],["协议","已签署 v3（10-12）"]]) + acBanner("warn","检测到1条资料同步异常：收款账户名称与CRM不一致。","查看集成任务","integrations")},
-    {id:"fin",label:"财务",html:acKV([["收款账户","MER •••• 4821（Skrill）"],["税务资料","W-8BEN · 已存档"],["信用权益",acGrade(p.grade)+(p.grade==="C0"?" <span class='ac-badge is-red'>结算阻断</span>":"")]]) + acMiniTable(["变更时间","字段","旧值 → 新值","状态"],[["11-04","收款账户","••2201 → ••4821","<span class='ac-badge is-green'>已生效</span>"],["10-28","税务资料","新增W-8BEN","<span class='ac-badge is-green'>已生效</span>"]]) + (p.grade==="C0"?acBanner("danger","信用等级C0：结算批次自动阻断，等级回升或人工调级后恢复。","查看佣金","commissions"):"")},
-    {id:"perf",label:"业绩",html:acMiniTable(["月份","点击","FTD","有效FTD","佣金"],[["2026-11","12,480","186","94",acMoney(9620)],["2026-10","38,210","520","301",acMoney(28400)],["2026-09","31,040","412","238",acMoney(21900)]])},
+    {id:"perf",label:"业绩",html:acMiniTable(["月份","点击","首次入金","有效转化","佣金"],[["2026-11","12,480","186","94",acMoney(9620)],["2026-10","38,210","520","301",acMoney(28400)],["2026-09","31,040","412","238",acMoney(21900)]])},
     {id:"notes",label:"跟进备注",html:acTimeline([{time:"11-05 10:20",title:"运营 wang_ops",desc:"沟通流量来源变化，对方说明新增TG渠道",state:"is-done"},{time:"10-28 15:02",title:"运营 wang_ops",desc:"月度例行回访完成",state:"is-done"}]) + `<div style="height:10px"></div><button class="ac-btn secondary sm" data-toast="添加备注（表单）">+ 添加备注</button>`},
   ];
   acDrawer({title:acEsc(p.name),sub:`${p.id} · ${p.country} · ${p.type}`,badge:`<span class="ac-badge ${acStat(p.status)}">${p.status}</span>`,tabs:t,wide:true,
@@ -928,8 +926,8 @@ function drawerComm(id){
   acDrawer({title:`${c.id} · ${acMoney(c.amount)}`,sub:`${c.partner} · 客户 ${c.client}`,badge:`<span class="ac-badge ${acStat(c.status)}">${c.status}</span>`,
     tabs:[
       {id:"calc",label:"计算过程",html:acTimeline([
-        {time:"11-06 09:12:04",title:"FTD事件确认（CRM）",desc:`客户 ${c.client} 首入金`,state:"is-done"},
-        {time:"11-06 09:12:05",title:"资格档判定 L2 · 有效FTD",desc:"净入金 ≥ $250 · 留存达标",state:"is-done"},
+        {time:"11-06 09:12:04",title:"首次入金事件确认（CRM）",desc:`客户 ${c.client} 首入金`,state:"is-done"},
+        {time:"11-06 09:12:05",title:"资格档判定 L2 · 有效转化",desc:"净入金 ≥ $250 · 留存达标",state:"is-done"},
         {time:"11-06 09:12:07",title:"适用价格 v13 · 基础$80",desc:"锁定版本快照（生成时生效版本，不随后续变更回写）",state:"is-done"},
         {time:"11-06 09:12:07",title:"加成构成 +$16",desc:"C2信用加成 20%",state:"is-done"},
         {time:"11-06 09:12:07",title:`计佣完成 ${acMoney(c.amount)}`,desc:"进入结算期",state:"is-done"},
@@ -1021,7 +1019,7 @@ function drawerPath(row){
     tabs:[{id:"path",label:"路径",html:acTimeline([
       {time:row.time,title:"点击",desc:`${row.dev} · ${row.geo}`,state:"is-done"},
       ...(row.stage!=="未转化"?[{time:"+7分",title:"注册",state:"is-done"}]:[{time:"已等待 2小时",title:"注册",desc:"未到达",state:"is-miss"}]),
-      ...((row.stage==="已FTD"||row.stage==="已计佣")?[{time:"+19时",title:"FTD",desc:"$200",state:"is-done"}]:[]),
+      ...((row.stage==="已首次入金"||row.stage==="已计佣")?[{time:"+19时",title:"首次入金",desc:"$200",state:"is-done"}]:[]),
       ...(row.stage==="已计佣"?[{time:"+0秒",title:"计佣",desc:"进入结算",state:"is-done"}]:[]),
     ])}],foot:`<button class="ac-btn secondary" data-drawer-close>关闭</button>`});
 }
@@ -1029,7 +1027,7 @@ function drawerTicket(id){
   const t = AC_DB.tickets.find(x => x.id===id);if (!t) return;
   acDrawer({title:`${t.id} · ${t.subject}`,sub:`${t.partner} · ${t.type}`,badge:`<span class="ac-badge ${acStat(t.status)}">${t.status}</span>`,
     tabs:[{id:"chat",label:"对话",html:`<div class="ac-chat">
-      <div class="ac-bubble in"><small>${acEsc(t.partner)} · 11-05 10:02</small><p>我的客户C-88479已经FTD了，但佣金里没有看到记录，请核查。</p></div>
+      <div class="ac-bubble in"><small>${acEsc(t.partner)} · 11-05 10:02</small><p>我的客户C-88479已经首次入金了，但佣金里没有看到记录，请核查。</p></div>
       <div class="ac-bubble out"><small>运营 · 11-05 10:31</small><p>收到，正在通过事件流水核查归属链路，预计2小时内答复。</p></div>
     </div><div class="ac-chat-input"><input type="text" placeholder="答复内容…"><button class="ac-btn primary sm" data-toast="已答复（写审计）">发送</button></div>`}],
     foot:`<button class="ac-btn secondary" data-toast="转风险复核（生成任务）">转风险复核</button><button class="ac-btn secondary" data-toast="转申诉流程">转申诉</button><button class="ac-btn primary" data-toast="已关闭（必填原因）">关闭工单</button>`});
@@ -1048,7 +1046,7 @@ function drawerPB(id){
   const p = AC_DB.postback.find(x => x.id===id);if (!p) return;
   acDrawer({title:`回传投递 · ${p.id}`,sub:p.url,
     tabs:[
-      {id:"dl",label:"投递记录",html:acMiniTable(["时间","事件","HTTP状态","耗时","结果"],[["11-06 09:12","FTD","200","340ms","<span class='ac-badge is-green'>成功</span>"],["11-06 08:55","FTD","500","—","<span class='ac-badge is-red'>失败</span>"],["11-06 08:40","注册","200","290ms","<span class='ac-badge is-green'>成功</span>"]])},
+      {id:"dl",label:"投递记录",html:acMiniTable(["时间","事件","HTTP状态","耗时","结果"],[["11-06 09:12","首次入金","200","340ms","<span class='ac-badge is-green'>成功</span>"],["11-06 08:55","首次入金","500","—","<span class='ac-badge is-red'>失败</span>"],["11-06 08:40","注册","200","290ms","<span class='ac-badge is-green'>成功</span>"]])},
       {id:"rt",label:"重试记录",html:acMiniTable(["时间","次数","结果","下次重试"],[["11-06 09:00","3/5","失败","+15分"]])},
     ],foot:`<button class="ac-btn secondary" data-drawer-close>关闭</button>`});
 }
@@ -1063,8 +1061,8 @@ function drawerWD(id){
 function pgClients(){
   const cols = [
     {key:"id",label:"客户ID",w:"96px",sortable:true},{key:"country",label:"国家",w:"76px",sortable:true},{key:"reg",label:"注册时间",w:"100px",sortable:true},
-    {key:"life",label:"生命周期",w:"86px",sortable:true,render:r => `<span class="ac-badge ${r.life==="有效FTD"?"is-green":r.life==="FTD"?"is-blue":"is-gray"}">${r.life}</span>`},
-    {key:"ftd",label:"FTD金额",w:"88px",sortable:true,render:r => r.ftd?acMoney(r.ftd):"—"},
+    {key:"life",label:"生命周期",w:"86px",sortable:true,render:r => `<span class="ac-badge ${r.life==="有效转化"?"is-green":r.life==="首次入金"?"is-blue":"is-gray"}">${r.life}</span>`},
+    {key:"ftd",label:"首次入金金额",w:"88px",sortable:true,render:r => r.ftd?acMoney(r.ftd):"—"},
     {key:"partner",label:"所属合作方",w:"100px",sortable:true,render:r => `<button class="ac-link" data-partner="${r.partner}">${r.partner}</button>`},
     {key:"sub",label:"Sub ID",w:"88px"},
     {label:"风险",w:"60px",render:r => r.risk==="高"?`<span class="ac-grade" data-g="r4">高</span>`:r.risk==="中"?`<span class="ac-grade" data-g="r2">中</span>`:`<span style="color:var(--subtle)">${r.risk}</span>`},
@@ -1073,7 +1071,7 @@ function pgClients(){
   const {rows,total,pages} = acApplyList("clients",AC_DB.clients,(r,f) => (!f.q || [r.id,r.partner,r.sub].join(" ").toLowerCase().includes(f.q)) && (!f.life || f.life === "全部" || r.life === f.life) && (!f.risk || f.risk === "全部" || r.risk === f.risk));
   return `${acPagehead("客户列表","只读 · 服务归属争议与风控排查 · 资料事实源在CRM")}
   <div class="ac-filter">${acSearch("clients","搜索 客户ID / 合作方 / SubID")}
-  ${(()=>{const k = "f.cli.life";const opts = ["全部","注册","FTD","有效FTD","流失"];acDDReg(k,opts.map(o => ({v:o,label:o})),() => (AC_LIST.filters.clients||{}).life || "全部",v => {AC_LIST.filters.clients = {...(AC_LIST.filters.clients||{}),life:v};AC_LIST.page = 1;acRender();});return `<div class="ac-field"><label>生命周期</label>${acDD(k,(AC_LIST.filters.clients||{}).life||"全部",{sm:true})}</div>`;})()}
+  ${(()=>{const k = "f.cli.life";const opts = ["全部","注册","首次入金","有效转化","流失"];acDDReg(k,opts.map(o => ({v:o,label:o})),() => (AC_LIST.filters.clients||{}).life || "全部",v => {AC_LIST.filters.clients = {...(AC_LIST.filters.clients||{}),life:v};AC_LIST.page = 1;acRender();});return `<div class="ac-field"><label>生命周期</label>${acDD(k,(AC_LIST.filters.clients||{}).life||"全部",{sm:true})}</div>`;})()}
   ${(()=>{const k = "f.cli.risk";const opts = ["全部","无","低","中","高"];acDDReg(k,opts.map(o => ({v:o,label:o})),() => (AC_LIST.filters.clients||{}).risk || "全部",v => {AC_LIST.filters.clients = {...(AC_LIST.filters.clients||{}),risk:v};AC_LIST.page = 1;acRender();});return `<div class="ac-field"><label>风险</label>${acDD(k,(AC_LIST.filters.clients||{}).risk||"全部",{sm:true})}</div>`;})()}
   <div class="ac-filter-actions"><button class="ac-btn ghost sm" data-filter-reset="clients">重置</button></div></div>
   ${acTableX("clients",cols,rows,{total,pages})}`;
@@ -1572,7 +1570,7 @@ function pgTracking(){
   const {rows,total,pages} = acApplyList("tracking",AC_DB.tracking,(r,f) => (!f.q || [r.partner,r.link,r.sub].join(" ").toLowerCase().includes(f.q)) && (!f.stage || f.stage === "全部" || r.stage === f.stage));
   return `${acPagehead("链接追踪","点击明细 · 转化路径 · 共"+AC_DB.tracking.length+"条")}
   <div class="ac-filter">${acSearch("tracking","搜索 合作方 / 链接 / SubID")}
-  ${(()=>{const k = "f.trk.stage";const opts = ["全部","未转化","已注册","已FTD","已计佣"];acDDReg(k,opts.map(o => ({v:o,label:o})),() => (AC_LIST.filters.tracking||{}).stage || "全部",v => {AC_LIST.filters.tracking = {...(AC_LIST.filters.tracking||{}),stage:v};AC_LIST.page = 1;acRender();});return `<div class="ac-field"><label>转化进度</label>${acDD(k,(AC_LIST.filters.tracking||{}).stage||"全部",{sm:true})}</div>`;})()}
+  ${(()=>{const k = "f.trk.stage";const opts = ["全部","未转化","已注册","已首次入金","已计佣"];acDDReg(k,opts.map(o => ({v:o,label:o})),() => (AC_LIST.filters.tracking||{}).stage || "全部",v => {AC_LIST.filters.tracking = {...(AC_LIST.filters.tracking||{}),stage:v};AC_LIST.page = 1;acRender();});return `<div class="ac-field"><label>转化进度</label>${acDD(k,(AC_LIST.filters.tracking||{}).stage||"全部",{sm:true})}</div>`;})()}
   <div class="ac-filter-actions"><button class="ac-btn ghost sm" data-filter-reset="tracking">重置</button></div></div>
   ${acTableX("tracking",cols,rows,{total,pages})}`;
 }
@@ -1891,10 +1889,10 @@ function analyticsTrendData(summary) {
   const defs = {
     valid_clicks: {label:"有效点击", values:[.70,.77,.73,.82,.86,.91,1], previous:[.64,.68,.70,.74,.77,.80,.84], format:v => Number(v).toLocaleString("en-US")},
     registrations: {label:"注册", values:[.61,.65,.59,.73,.76,.84,1], previous:[.57,.61,.63,.64,.69,.74,.78], format:v => Number(v).toLocaleString("en-US")},
-    ftd_customers: {label:"FTD 客户", values:[.52,.58,.55,.66,.69,.78,1], previous:[.47,.51,.53,.56,.62,.68,.74], format:v => Number(v).toLocaleString("en-US")},
-    effective_ftd: {label:"有效 FTD", values:[.48,.54,.51,.63,.68,.82,1], previous:[.44,.48,.51,.56,.61,.69,.76], format:v => Number(v).toLocaleString("en-US")},
+    ftd_customers: {label:"首次入金 客户", values:[.52,.58,.55,.66,.69,.78,1], previous:[.47,.51,.53,.56,.62,.68,.74], format:v => Number(v).toLocaleString("en-US")},
+    effective_ftd: {label:"有效转化", values:[.48,.54,.51,.63,.68,.82,1], previous:[.44,.48,.51,.56,.61,.69,.76], format:v => Number(v).toLocaleString("en-US")},
     accrued_commission: {label:"应计佣金", values:[.42,.49,.46,.58,.67,.77,1], previous:[.41,.44,.49,.53,.58,.64,.70], format:v => analyticsMoney(v)},
-    avg_cost: {label:"有效 FTD 平均佣金成本", values:[.94,.90,.92,.87,.88,.84,1], previous:[.97,.95,.94,.93,.91,.90,.89], format:v => analyticsMoney(v)},
+    avg_cost: {label:"有效转化 平均佣金成本", values:[.94,.90,.92,.87,.88,.84,1], previous:[.97,.95,.94,.93,.91,.90,.89], format:v => analyticsMoney(v)},
   };
   const def = defs[metric] || defs.effective_ftd;
   const base = metric === "valid_clicks" ? summary.validClicks : metric === "registrations" ? summary.registrations : metric === "ftd_customers" ? summary.ftd : metric === "accrued_commission" ? summary.commission : metric === "avg_cost" ? summary.avgCost : summary.effectiveFtd;
@@ -1907,7 +1905,7 @@ function analyticsTrendPanel(summary) {
   return `<section class="ac-analytics-panel ac-analytics-trend">
     <header class="ac-analytics-panel-head"><div><h2>趋势</h2><p>${acEsc(trend.def.label)} · ${acEsc(analyticsPeriodLabel(AC_STATE.analytics.applied.period))}</p></div>
       <div class="ac-analytics-chart-controls"><select data-analytics-trend aria-label="趋势指标">${[
-        ["effective_ftd","有效 FTD"],["valid_clicks","有效点击"],["registrations","注册"],["ftd_customers","FTD 客户"],["accrued_commission","应计佣金"],["avg_cost","有效 FTD 平均佣金成本"]
+        ["effective_ftd","有效转化"],["valid_clicks","有效点击"],["registrations","注册"],["ftd_customers","首次入金 客户"],["accrued_commission","应计佣金"],["avg_cost","有效转化 平均佣金成本"]
       ].map(([v,l]) => `<option value="${v}" ${v===AC_STATE.analytics.trendMetric?"selected":""}>${l}</option>`).join("")}</select>
       <label class="ac-analytics-toggle"><input type="checkbox" data-analytics-compare ${AC_STATE.analytics.compare?"checked":""}> 对比上一周期</label></div>
     </header>
@@ -1923,8 +1921,8 @@ function analyticsFunnelPanel(summary) {
     ["原始点击", summary.rawClicks, null],
     ["有效点击", summary.validClicks, summary.rawClicks ? summary.validClicks / summary.rawClicks * 100 : null],
     ["注册", summary.registrations, summary.validClicks ? summary.registrations / summary.validClicks * 100 : null],
-    ["FTD", summary.ftd, summary.registrations ? summary.ftd / summary.registrations * 100 : null],
-    ["有效 FTD", summary.effectiveFtd, summary.ftd ? summary.effectiveFtd / summary.ftd * 100 : null],
+    ["首次入金", summary.ftd, summary.registrations ? summary.ftd / summary.registrations * 100 : null],
+    ["有效转化", summary.effectiveFtd, summary.ftd ? summary.effectiveFtd / summary.ftd * 100 : null],
     ["计佣案件", summary.commissionCases, summary.effectiveFtd ? summary.commissionCases / summary.effectiveFtd * 100 : null],
   ];
   const max = Math.max(...steps.map(step => step[1]), 1);
@@ -1977,10 +1975,10 @@ function analyticsBreakdownDrawer(partnerId) {
   const tabs = [["sub_id","Sub ID"],["country","国家"],["activity","活动"],["link","链接"]];
   const makeTab = tab => {
     const rows = analyticsBreakdownRows(row, tab);
-    const headers = tab === "link" ? ["链接 ID","链接状态","Sub ID","有效点击","注册","FTD","有效 FTD","转化率","应计佣金"] : [tab === "sub_id" ? "Sub ID" : tab === "country" ? "国家" : "活动","有效点击","注册","FTD","有效 FTD","转化率","应计佣金","平均成本"];
+    const headers = tab === "link" ? ["链接 ID","链接状态","Sub ID","有效点击","注册","首次入金","有效转化","转化率","应计佣金"] : [tab === "sub_id" ? "Sub ID" : tab === "country" ? "国家" : "活动","有效点击","注册","首次入金","有效转化","转化率","应计佣金","平均成本"];
     return `<div class="ac-analytics-breakdown-table"><table class="ac-table"><thead><tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(item => tab === "link" ? `<tr><td><button class="ac-link" data-go="tracking">${acEsc(item.name)}</button></td><td><span class="ac-badge ${acStat(item.status)}">${item.status}</span></td><td>${acEsc(item.subId)}</td><td>${item.clicks.toLocaleString("en-US")}</td><td>${item.regs.toLocaleString("en-US")}</td><td>${item.ftd.toLocaleString("en-US")}</td><td>${item.vftd.toLocaleString("en-US")}</td><td>${analyticsPercent(item.rate)}</td><td>${analyticsMoney(item.comm)}</td></tr>` : `<tr><td><button class="ac-link" data-go="${tab === "sub_id" ? "tracking" : "partners"}">${acEsc(item.name)}</button></td><td>${item.clicks.toLocaleString("en-US")}</td><td>${item.regs.toLocaleString("en-US")}</td><td>${item.ftd.toLocaleString("en-US")}</td><td>${item.vftd.toLocaleString("en-US")}</td><td>${analyticsPercent(item.rate)}</td><td>${analyticsMoney(item.comm)}</td><td>${analyticsMoney(item.avg)}</td></tr>`).join("")}</tbody></table></div>`;
   };
-  acDrawer({title:`${row.name} · 经营构成`,sub:`${row.id} · ${row.status} · ${analyticsPeriodLabel(AC_STATE.analytics.applied.period)} · Asia/Shanghai（UTC+08:00）`,badge:`<span class="ac-badge is-orange">部分数据，待补数</span>`,wide:true,tabs:tabs.map(([id,label]) => ({id,label,html:`${id === "sub_id" ? `<div class="ac-analytics-drawer-summary">${acKV([["有效 FTD",row.vftd.toLocaleString("en-US")],["应计佣金",analyticsMoney(row.comm)],["平均成本",analyticsMoney(row.avgCost)],["快照","PERF-20261109-001"]])}</div>` : ""}${makeTab(id)}`})),foot:`<button class="ac-btn secondary" data-dclose>关闭</button>`});
+  acDrawer({title:`${row.name} · 经营构成`,sub:`${row.id} · ${row.status} · ${analyticsPeriodLabel(AC_STATE.analytics.applied.period)} · Asia/Shanghai（UTC+08:00）`,badge:`<span class="ac-badge is-orange">部分数据，待补数</span>`,wide:true,tabs:tabs.map(([id,label]) => ({id,label,html:`${id === "sub_id" ? `<div class="ac-analytics-drawer-summary">${acKV([["有效转化",row.vftd.toLocaleString("en-US")],["应计佣金",analyticsMoney(row.comm)],["平均成本",analyticsMoney(row.avgCost)],["快照","PERF-20261109-001"]])}</div>` : ""}${makeTab(id)}`})),foot:`<button class="ac-btn secondary" data-dclose>关闭</button>`});
 }
 function analyticsExportModal() {
   const applied = AC_STATE.analytics.applied;
@@ -1994,16 +1992,16 @@ function pgAnalyticsPerf(){
   const metrics = [
     analyticsMetricCard("valid_clicks","有效点击",summary.validClicks,analyticsDelta(summary.validClicks,d.validClicks),"有效且未排除的去重 click_id"),
     analyticsMetricCard("registrations","注册",summary.registrations,analyticsDelta(summary.registrations,d.registrations),"已归属并完成注册的去重 customer_id"),
-    analyticsMetricCard("ftd_customers","FTD 客户",summary.ftd,analyticsDelta(summary.ftd,d.ftd),"至少一笔 CRM 到账首入金"),
-    analyticsMetricCard("effective_ftd","有效 FTD 客户",summary.effectiveFtd,analyticsDelta(summary.effectiveFtd,d.effectiveFtd),"通过资格、KYC、净入金、交易和合规校验"),
-    analyticsMetricCard("registration_to_effective_ftd_rate","注册→有效 FTD 率",summary.registrationRate,analyticsDelta(summary.registrationRate, d.registrations ? d.effectiveFtd/d.registrations*100 : null,"pp"),"有效 FTD ÷ 注册", "percent"),
-    analyticsMetricCard("ftd_to_effective_ftd_rate","FTD→有效 FTD 率",summary.ftdRate,analyticsDelta(summary.ftdRate, d.ftd ? d.effectiveFtd/d.ftd*100 : null,"pp"),"有效 FTD ÷ FTD", "percent"),
+    analyticsMetricCard("ftd_customers","首次入金 客户",summary.ftd,analyticsDelta(summary.ftd,d.ftd),"至少一笔 CRM 到账首入金"),
+    analyticsMetricCard("effective_ftd","有效转化 客户",summary.effectiveFtd,analyticsDelta(summary.effectiveFtd,d.effectiveFtd),"通过资格、KYC、净入金、交易和合规校验"),
+    analyticsMetricCard("registration_to_effective_ftd_rate","注册→有效转化 率",summary.registrationRate,analyticsDelta(summary.registrationRate, d.registrations ? d.effectiveFtd/d.registrations*100 : null,"pp"),"有效转化 ÷ 注册", "percent"),
+    analyticsMetricCard("ftd_to_effective_ftd_rate","首次入金→有效转化 率",summary.ftdRate,analyticsDelta(summary.ftdRate, d.ftd ? d.effectiveFtd/d.ftd*100 : null,"pp"),"有效转化 ÷ 首次入金", "percent"),
     analyticsMetricCard("accrued_commission","应计佣金",summary.commission,analyticsDelta(summary.commission,d.commission),"基础 CPA、附加和调整合计","money"),
-    analyticsMetricCard("avg_commission_cost_per_effective_ftd","有效 FTD 平均佣金成本",summary.avgCost,analyticsDelta(summary.avgCost,d.avgCost),"应计佣金 ÷ 有效 FTD","money"),
+    analyticsMetricCard("avg_commission_cost_per_effective_ftd","有效转化 平均佣金成本",summary.avgCost,analyticsDelta(summary.avgCost,d.avgCost),"应计佣金 ÷ 有效转化","money"),
   ];
   const sortedRows = rows.slice().sort((a,b) => b.vftd - a.vftd);
   const table = sortedRows.length ? `<div class="ac-table-wrap ac-analytics-table-wrap"><table class="ac-table ac-analytics-table"><thead><tr>
-    <th class="ac-col-select">合作方</th><th>状态</th><th>有效点击</th><th>注册</th><th>FTD</th><th>有效 FTD</th><th>注册→有效 FTD 率</th><th>FTD→有效 FTD 率</th><th>应计佣金</th><th>有效 FTD 平均佣金成本</th><th class="ac-col-actions">较上一周期</th>
+    <th class="ac-col-select">合作方</th><th>状态</th><th>有效点击</th><th>注册</th><th>首次入金</th><th>有效转化</th><th>注册→有效转化 率</th><th>首次入金→有效转化 率</th><th>应计佣金</th><th>有效转化 平均佣金成本</th><th class="ac-col-actions">较上一周期</th>
   </tr></thead><tbody>${sortedRows.map(row => `<tr data-analytics-row="${row.id}">
     <td class="ac-col-select"><button class="ac-link ac-analytics-partner-link" data-partner="${row.id}">${acEsc(row.id)}</button><small>${acEsc(row.name)} · 已脱敏</small></td>
     <td><span class="ac-badge ${acStat(row.status)}">${acEsc(row.status)}</span></td><td class="num">${row.clicks.toLocaleString("en-US")}</td><td class="num">${row.regs.toLocaleString("en-US")}</td><td class="num">${row.ftd.toLocaleString("en-US")}</td><td class="num">${row.vftd.toLocaleString("en-US")}</td><td class="num">${analyticsPercent(row.regRate)}</td><td class="num">${analyticsPercent(row.ftdRate)}</td><td class="num">${analyticsMoney(row.comm)}</td><td class="num">${analyticsMoney(row.avgCost)}</td>
@@ -2014,17 +2012,17 @@ function pgAnalyticsPerf(){
     ${analyticsFilterPanel()}
     <section class="ac-analytics-metrics">${metrics.join("")}</section>
     <div class="ac-analytics-analysis-grid">${analyticsTrendPanel(summary)}${analyticsFunnelPanel(summary)}</div>
-    <section class="ac-analytics-panel ac-analytics-partners"><header class="ac-analytics-panel-head"><div><h2>合作方汇总</h2><p>${rows.length} 家合作方 · 默认按有效 FTD 降序 · 快照 PERF-20261109-001</p></div><span class="ac-analytics-table-note">数值按业务主体时区统计</span></header>${table}<footer class="ac-analytics-table-foot"><span>共 ${rows.length} 条 · 当前页 1 / 1</span><span>操作列固定在右侧 · 表格可横向滚动</span></footer></section>`;
+    <section class="ac-analytics-panel ac-analytics-partners"><header class="ac-analytics-panel-head"><div><h2>合作方汇总</h2><p>${rows.length} 家合作方 · 默认按有效转化 降序 · 快照 PERF-20261109-001</p></div><span class="ac-analytics-table-note">数值按业务主体时区统计</span></header>${table}<footer class="ac-analytics-table-foot"><span>共 ${rows.length} 条 · 当前页 1 / 1</span><span>操作列固定在右侧 · 表格可横向滚动</span></footer></section>`;
 }
 function pgAnalyticsQuality(){
   return `${acPagehead("质量与风险分析","流量质量 · 风险损失 · 规则效能","<button class='ac-btn secondary' data-toast='异步导出→导出中心'>⤓ 导出</button>")}
-  ${acSummary([["有效FTD率","55.1%","+1.2pp"],["30日留存","62%","+3%"],["拒付率","1.8%","+0.3pp"],["冲正率","2.4%","-0.2pp"],["欺诈关联率","0.9%","+0.1pp"],["集群风险敞口",acMoney(4260),"-8%"],["损失回收率","41%","+5%"]])}
+  ${acSummary([["有效转化率","55.1%","+1.2pp"],["30日留存","62%","+3%"],["拒付率","1.8%","+0.3pp"],["冲正率","2.4%","-0.2pp"],["欺诈关联率","0.9%","+0.1pp"],["集群风险敞口",acMoney(4260),"-8%"],["损失回收率","41%","+5%"]])}
   <div class="ac-two-col">
     <div class="ac-card"><h3>损失构成 · 11月</h3>${acBars([["拒付",3120,acMoney(3120)],["冲正",2480,acMoney(2480)],["欺诈关联",1660,acMoney(1660)]])}</div>
     <div class="ac-card"><h3>合作方质量分布</h3>${acBars([["优质（A）",3,"3家"],["正常（B）",2,"2家"],["观察（C）",1,"1家"],["高风险（D）",1,"1家"]])}</div>
   </div>
   ${acTable([
-    {key:"name",label:"合作方"},{key:"vftd",label:"有效FTD",w:"84px"},
+    {key:"name",label:"合作方"},{key:"vftd",label:"有效转化",w:"84px"},
     {label:"留存30日",w:"84px",render:(r,i) => ["68%","61%","55%","49%","42%"][i]},
     {label:"拒付率",w:"80px",render:(r,i) => `<span class="${[3.8].includes(i)?"ac-warn-text":""}">${[0.9,1.2,2.1,1.6,3.8][i]}%</span>`},
     {label:"冲正率",w:"80px",render:(r,i) => `${[1.1,2.0,1.4,2.8,3.1][i]}%`},
@@ -2034,14 +2032,14 @@ function pgAnalyticsQuality(){
 }
 function pgAnalyticsFunds(){
   return `${acPagehead("资金分析","资金流 · 保证金覆盖","<button class='ac-btn secondary' data-toast='异步导出→导出中心'>⤓ 导出</button>")}
-  ${acSummary([["本月佣金",acMoney(48210),"+6%"],["税费",acMoney(4820),"+5%"],["保证金占用",acMoney(32600),"+2%"],["提现",acMoney(43400),"+9%"],["冲正损失",acMoney(2480),"-12%"],["净支出",acMoney(39110),"+4%"],["保证金覆盖率","1.32x","+0.05"]])}
+  ${acSummary([["本月佣金",acMoney(48210),"+6%"],["",acMoney(4820),"+5%"],["保证金占用",acMoney(32600),"+2%"],["提现",acMoney(43400),"+9%"],["冲正损失",acMoney(2480),"-12%"],["净支出",acMoney(39110),"+4%"],["保证金覆盖率","1.32x","+0.05"]])}
   <div class="ac-two-col">
     <div class="ac-card"><h3>月度资金流</h3>${acBars([["计佣",48210,acMoney(48210)],["结算",42997,acMoney(42997)],["提现",43400,acMoney(43400)]])}</div>
     <div class="ac-card"><h3>保证金覆盖趋势</h3>${acBars([["9月",1.24,"1.24x"],["10月",1.28,"1.28x"],["11月",1.32,"1.32x"]])}</div>
   </div>
   ${acTable([
     {key:"name",label:"合作方"},{key:"comm",label:"佣金",w:"90px",render:r => acMoney(r.comm)},
-    {label:"税费",w:"84px",render:(r,i) => acMoney([4820,3180,1250,1590,2035][i])},
+    {label:"",w:"84px",render:(r,i) => acMoney([4820,3180,1250,1590,2035][i])},
     {label:"保证金",w:"90px",render:(r,i) => acMoney([4820,3180,1250,1590,2035][i])},
     {label:"提现",w:"90px",render:(r,i) => acMoney([27450,18600,5400,8000,9200][i])},
     {label:"净支出",w:"90px",render:(r,i) => `<strong>${acMoney([9620,7110,2240,3890,1870][i])}</strong>`},
@@ -2115,10 +2113,9 @@ function pgRiskConfig(){
 }
 const AC_CONFIG_CATALOG = {
   "价格表":["国家/主体","资格档","事件类型","基础单价","加成比例","币种","有效期","优先级"],
-  "资格档与里程碑":["档位名称","FTD门槛","有效FTD门槛","质量服务条件","观察期","升级条件","降级条件","启用状态"],
+  "资格档与里程碑":["档位名称","首次入金门槛","有效转化门槛","质量升档条件","观察期","升级条件","降级条件","启用状态"],
   "信用等级权益":["信用等级","适用条件","信用附加比例","固定金额","Hold调整","保证金比例","额度","复核优先级"],
   "结算参数":["结算周期","结算日","最低结算门槛","结算币种","结算前检查","C0结算资格","失败重试","冻结处理"],
-  "保证金与税费":["保证金计提比例","正常释放期","终止合作保留期","冻结批次","保证金释放条件","税费类型","税率","计税基数","冲正/追回处理"],
   "国家与主体":["国家/地区","开放状态","风险等级","经营主体","KYC/KYB要求","币种","时区","生效/失效时间"],
   "审批流":["业务类型","节点顺序","审批角色","会签/或签","是否允许自审","驳回处理","超时处理","替代审批","必填意见"],
   "参数字典":["参数键","中文名称","数据类型","单位","默认值","最小/最大值","精度","敏感等级","修改权限"],
@@ -2158,7 +2155,7 @@ function pgConfig(){
   <div class="ac-card ac-release-card"><h3>版本发布流程</h3><div class="ac-release-flow"><span class="done">创建/复制草稿</span><b>→</b><span class="done">编辑全部配置</span><b>→</b><span>校验</span><b>→</b><span>试算</span><b>→</b><span>审批</span><b>→</b><span>待生效</span><b>→</b><span>生效并锁定</span></div><p class="ac-field-hint">任何状态都可以复制为新草稿；回滚不覆盖历史版本，必须通过复制生成新版本。</p></div>`;
 }
 function pgConfigDetail(){
-  const d=AC_STATE.configDomain, domains=["基础信息","业务规则","财务规则","风控规则","数据治理","系统参数"], sub={基础信息:["版本说明","通知设置","发布设置"],业务规则:["资格档与里程碑","国家与主体","归属规则"],财务规则:["价格表","信用等级权益","结算参数","保证金与税费"],风控规则:AC_RISK_GROUPS,数据治理:["数据分级","敏感授权","保留与删除","Breach响应"],系统参数:["审批流","参数字典","通知模板"]};
+  const d=AC_STATE.configDomain, domains=["基础信息","业务规则","财务规则","风控规则","数据治理","系统参数"], sub={基础信息:["版本说明","通知设置","发布设置"],业务规则:["资格档与里程碑","国家与主体","归属规则"],财务规则:["价格表","信用等级权益","结算参数","保证金与"],风控规则:AC_RISK_GROUPS,数据治理:["数据分级","敏感授权","保留与删除","Breach响应"],系统参数:["审批流","参数字典","通知模板"]};
   const domain=domains.includes(d)?d:"财务规则", subItems=sub[domain], selected=subItems.includes(d)?d:subItems[0], catalog=AC_CONFIG_CATALOG[selected]||["启用状态","业务定义","当前值","草稿值","取值范围","依赖项","影响范围","最后修改人"];
   if (AC_RISK_GROUPS.includes(selected)) return `${acPagehead("配置中心",`版本 ${AC_STATE.configVersion} · 风控规则 · 处理时限与联动`,`<button class='ac-btn secondary' data-config-back>返回版本列表</button><button class='ac-btn primary' data-toast='已打开发布向导'>发布向导</button>`)}<div class="ac-config-grid"><div class="ac-tree"><button class="ac-back-tree" data-config-back>← 版本列表</button>${domains.map(x=>`<button class="${x===domain?"active":""}" data-domain="${x}">${x}</button>`).join("")}</div><div>${pgRiskConfig()}</div></div>`;
   const rows=catalog.map((item,i)=>({item,key:`${selected.toLowerCase().replaceAll(" ","_")}.${i+1}`,value:(AC_DB.configEntries[selected]||[])[i%Math.max(1,(AC_DB.configEntries[selected]||[]).length)]?.[1]||"未配置",type:i%3===0?"数字/金额":i%3===1?"枚举/条件":"开关/文本",range:i%2?"按业务字典":"必填"}));
