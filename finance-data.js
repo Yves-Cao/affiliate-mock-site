@@ -40,7 +40,7 @@
   };
 
   const scenarioConfigs = [
-    { code: "normal_l1", country: "VN", kyc: "通过", date: "2026-07-01", registeredAt: "2026-07-02", ftdAt: "2026-07-05", effectiveAt: "2026-07-12", tradedAt: "2026-07-12", qualityAt: "2026-08-20", expected: 200, tier: "L1", commissionStatus: "approved", holdOverride: 5, netDepositBalance: 350, tradingVolume: 1.2, tradingDays: 4 },
+    { code: "normal_l1", country: "VN", kyc: "通过", date: "2026-07-01", registeredAt: "2026-07-02", ftdAt: "2026-07-05", effectiveAt: "2026-07-12", tradedAt: "2026-07-12", qualityAt: "2026-11-10", expected: 200, tier: "L1", commissionStatus: "approved", holdOverride: 5, netDepositBalance: 350, tradingVolume: 1.2, tradingDays: 4 },
     { code: "normal_l2", country: "TH", kyc: "通过", date: "2026-06-20", registeredAt: "2026-06-21", ftdAt: "2026-06-24", effectiveAt: "2026-07-01", tradedAt: "2026-07-01", qualityAt: "2026-08-10", expected: 480, tier: "L2", commissionStatus: "approved", holdOverride: 4, netDepositBalance: 950, tradingVolume: 3.4, tradingDays: 6 },
     { code: "tier_downgrade", country: "ZA", kyc: "通过", date: "2026-07-10", registeredAt: "2026-07-11", ftdAt: "2026-07-15", effectiveAt: "2026-07-22", tradedAt: "2026-07-23", qualityAt: "2026-09-02", expected: 220, tier: "L1", commissionStatus: "approved", netDepositBalance: 4200, tradingVolume: 1.1, tradingDays: 4 },
     { code: "ftd_only", country: "PK", kyc: "通过", date: "2026-09-10", registeredAt: "2026-09-11", ftdAt: "2026-09-15", effectiveAt: null, tradedAt: null, qualityAt: null, expected: 0, tier: "-", commissionStatus: "pending", netDepositBalance: 500, tradingVolume: 0, tradingDays: 0 },

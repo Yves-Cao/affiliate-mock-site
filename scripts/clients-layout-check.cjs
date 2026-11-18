@@ -22,6 +22,52 @@ async function main() {
     await page.fill("#login-form input[name=password]", "demo-password");
     await page.click("#login-form button[type=submit]");
     await page.evaluate(() => navigate("clients"));
+    check(await page.locator("select[data-rp-quick='commissionStatus']").getAttribute("aria-label") === "结算状态",
+      "fourth quick filter is labeled settlement status");
+    const mixedRow = await page.evaluate(() => {
+      const row = AFF.reporting.rows.find(item => item.clientId && item.settlementStatus === "processing" &&
+        item.commissionCases.some(caseItem => caseItem.settlementStatus === "settled"));
+      if (!row) return null;
+      AFF.reports.state("clients").filters = {
+        from: "2000-01-01", to: AFF.reporting.now, search: row.clientId
+      };
+      row.commissionCases = [
+        ...row.commissionCases,
+        ...Array.from({ length: 3 }, (_, index) => ({
+          ...row.commissionCases[0],
+          id: `COM-TEST-${index + 1}`,
+          settlementStatus: "settled"
+        }))
+      ];
+      render();
+      const cell = document.querySelector(".report-client-table .report-commission-cell");
+      const count = document.querySelector(".report-client-table .report-commission-status small");
+      return {
+        text: document.querySelector(".report-client-table .report-commission-status")?.textContent || "",
+        cases: row.commissionCases.length,
+        countFits: count.getBoundingClientRect().right <= cell.getBoundingClientRect().right + 1
+      };
+    });
+    check(mixedRow?.cases <= 5, "settlement count display supports the five-record maximum");
+    check(mixedRow?.text.startsWith("结算中") && mixedRow?.text.includes("结算中：1｜结算完成：4"),
+      "mixed settlement cell keeps the aggregate label and actual counts stacked");
+    check(mixedRow?.countFits, "mixed settlement count stays inside the settlement column");
+    await page.evaluate(() => {
+      const row = AFF.reporting.rows.find(item => item.clientId && item.settlementStatus === "settled");
+      if (row) {
+        AFF.reports.state("clients").filters = {
+          from: "2000-01-01", to: AFF.reporting.now, search: row.clientId
+        };
+        render();
+      }
+    });
+    const settledText = await page.locator(".report-client-table .report-commission-status").first().textContent();
+    check(settledText.startsWith("已结算") && /结算完成：[1-5]$/.test(settledText),
+      "settled cell keeps the aggregate label above the actual count");
+    await page.evaluate(() => {
+      AFF.reports.state("clients").filters = AFF.reports.range("past30");
+      render();
+    });
     for (const width of [1920, 1440, 1111, 390]) {
       await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 });
       await page.mouse.move(width - 10, 130);
@@ -90,7 +136,7 @@ async function main() {
     check(await page.locator(".report-client-scroll").evaluate(node =>
       node.scrollHeight <= node.clientHeight + 1), "50 rows use page scrolling");
     await page.evaluate(() => {
-      AFF.reports.state("clients").filters.commissionStatus = "rejected";
+      AFF.reports.state("clients").filters.commissionStatus = "blocked";
       render();
     });
     for (const width of [1440, 390]) {

@@ -42,7 +42,7 @@
 
 用户端页面生成与视觉验收统一执行[页面生成质量门禁](page-generation-quality-gate-v0.1.md)。功能测试通过但截图、层级、密度或响应式检查未通过时，不标记页面完成。
 
-合作者计划入口与登录时的半屏目录执行[导航抽屉契约](program-navigation-v0.1.md)，目录只负责导航，沿用六步内容、已到达进度与完成边界。
+合作者计划入口与登录时的半屏目录执行[导航抽屉契约](program-navigation-v0.1.md)，目录只负责导航，沿用七步内容、已到达进度与完成边界。
 
 资金状态同步记录见 [finance-flow-sync-v0.1.md](finance-flow-sync-v0.1.md)。
 

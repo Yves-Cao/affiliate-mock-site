@@ -32,7 +32,7 @@ async function main() {
       withdrawals: AFF.finance.allWithdrawals()
     }));
     const before = await businessSnapshot();
-    check(await page.locator(".steps .step").count() === 6, "Six-step flow retained");
+    check(await page.locator(".steps .step").count() === 7, "Seven-step flow retained");
     check(await page.locator(".steps [data-apply-step='5']").isDisabled(), "Future step remains gated");
     check(await page.locator(".program-reward-stages li").count() === 3, "Three earning stages");
     let text = await page.locator("#main").innerText();
@@ -111,30 +111,39 @@ async function main() {
     check(await page.locator(".program-share-link").count() === 2, "Web and app link actions retained");
     check(await page.locator(".program-share-recap li").count() === 3, "Three brief takeaways on sharing step");
     check(await page.locator(".program-share-shortcuts .program-text-link > span[aria-hidden='true']").count() === 3 &&
-      (await page.locator(".program-share-shortcuts [data-apply-step='5']").innerText()).includes("查看结算规则"),
+      (await page.locator(".program-share-shortcuts [data-apply-step='5']").textContent()).includes("查看结算规则"),
       "Sharing shortcuts use the settlement-rules label and matching trailing arrows");
     const postbackText = await page.locator(".program-postback-guide").innerText();
-    check(postbackText.includes("广告追踪器或自建数据系统") &&
-      postbackText.includes("转化事件发送至您的平台") && postbackText.includes("比较渠道效果"),
-      "Postback guide explains its audience, outbound direction and purpose");
-    await page.locator(".program-postback-guide [data-route='tracker']").click();
+    check(postbackText.includes("广告追踪器或自建数据系统") && postbackText.includes("下一页"),
+      "Sharing step introduces the dedicated postback guide without duplicating it");
+    await page.locator(".program-postback-guide [data-apply-step='7']").click();
+    check(await page.evaluate(() => AFF.state.applyStep === 7 && AFF.state.programMaxStep === 7),
+      "Postback guide unlocks as the seventh step");
+    const guideText = await page.locator(".program-postback-page").innerText();
+    check(guideText.includes("适合谁") && guideText.includes("有什么用") && guideText.includes("何时配置"),
+      "Postback guide explains audience, purpose and timing");
+    await page.locator(".program-postback-actions [data-route='tracker']").click();
     check(await page.evaluate(() => AFF.state.route === "tracker") &&
       await page.locator("[data-action='open-tracker-modal']").isVisible(), "Postback entry opens existing configuration page");
     await page.evaluate(() => navigate("apply"));
-    check(await page.evaluate(() => AFF.state.applyStep === 6 && AFF.state.programMaxStep === 6),
+    check(await page.evaluate(() => AFF.state.applyStep === 7 && AFF.state.programMaxStep === 7),
       "Returning from postback configuration preserves guide progress");
+    await page.locator(".program-postback-actions [data-apply-step='6']").click();
+    check(await page.evaluate(() => AFF.state.applyStep === 6), "Postback guide can return to sharing links");
+    await page.locator(".program-advanced-tools summary").click();
     await page.locator(".program-share-shortcuts [data-apply-step='1']").click();
-    check(await page.evaluate(() => AFF.state.applyStep === 1 && AFF.state.programMaxStep === 6), "Reward revisit preserves furthest step");
+    check(await page.evaluate(() => AFF.state.applyStep === 1 && AFF.state.programMaxStep === 7), "Reward revisit preserves furthest step");
     await page.locator(".program-settlement-summary [data-apply-step='5']").click();
     check(await page.evaluate(() => AFF.state.applyStep) === 5, "Unlocked funds shortcut works");
     for (const width of [1920, 1440, 992, 912, 768, 390]) {
       await page.setViewportSize({ width, height: width < 480 ? 844 : 1000 });
       await page.mouse.move(width - 5, 120);
-      for (const step of [1, 5, 6]) {
+      for (const step of [1, 5, 6, 7]) {
         await page.evaluate(step => { AFF.state.applyStep = step; render(); }, step);
         if (step === 5) await page.locator(".program-rule-example summary").click();
         const layout = await page.evaluate(() => {
-          const selector = AFF.state.applyStep === 1 ? ".program-reward-stages p" : ".program-funds-flow p";
+          const selector = AFF.state.applyStep === 1 ? ".program-reward-stages p"
+            : AFF.state.applyStep === 7 ? ".program-postback-panel p" : ".program-funds-flow p";
           const text = document.querySelector(selector);
           const footer = document.querySelector(".program-action-card").getBoundingClientRect();
           const launcher = document.querySelector(".simulation-launcher")?.getBoundingClientRect();
@@ -167,10 +176,13 @@ async function main() {
     check(!/[\u3400-\u9fff]/.test(await page.locator(".program-rule-example").innerText()), "Expanded rules support English");
     await page.evaluate(() => { AFF.state.applyStep = 6; render(); });
     check(!/[\u3400-\u9fff]/.test(await page.locator(".program-postback-guide").innerText()) &&
-      (await page.locator(".program-share-shortcuts").innerText()).includes("View settlement rules"),
+      (await page.locator(".program-share-shortcuts").textContent()).includes("View settlement rules"),
       "Postback guide and renamed shortcuts support English");
-    await page.evaluate(() => { AFF.state.language = "zh"; AFF.state.applyStep = 6; render(); window.scrollTo(0, document.body.scrollHeight); });
-    const finalAction = await page.locator(".program-postback-guide [data-route='tracker']").boundingBox();
+    await page.evaluate(() => { AFF.state.applyStep = 7; render(); });
+    check(!/[\u3400-\u9fff]/.test(await page.locator(".program-postback-page").innerText()),
+      "Dedicated postback guide supports English");
+    await page.evaluate(() => { AFF.state.language = "zh"; AFF.state.applyStep = 7; render(); window.scrollTo(0, document.body.scrollHeight); });
+    const finalAction = await page.locator(".program-postback-actions [data-route='tracker']").boundingBox();
     const footer = await page.locator(".program-action-card").boundingBox();
     check(finalAction.y + finalAction.height < footer.y, "Last content remains accessible above the fixed footer at scroll end");
     check(await businessSnapshot() === before, "Reading, navigation and trial configuration do not change business state");

@@ -6,6 +6,7 @@ const path = require("node:path");
 
 const target = path.join(__dirname, "..", "openapi", "affiliate-mock-openapi.yaml");
 const cxSchemaPath = path.join(__dirname, "..", "openapi", "schemas", "cx.json");
+const inventoryPath = path.join(__dirname, "..", "openapi", "admin-openapi-inventory.json");
 let openapi = fs.readFileSync(target, "utf8");
 const cxSchema = JSON.parse(fs.readFileSync(cxSchemaPath, "utf8"));
 const initialPathsIndex = openapi.indexOf("\npaths:");
@@ -263,6 +264,48 @@ for (const [pathName, pathItem] of Object.entries(paths)) {
   for (const operationObject of Object.values(pathItem)) operationObject.tags = [tag];
 }
 
+function rebuildInventory() {
+  const inventory = JSON.parse(fs.readFileSync(inventoryPath, "utf8"));
+  const yamlOperationIdMatches = [...next.matchAll(/^\s+"?operationId"?\s*:\s*"?([A-Za-z0-9_-]+)"?,?\s*$/gm)];
+  const yamlOperationIds = new Set(yamlOperationIdMatches.map(match => match[1]));
+  if (yamlOperationIds.size !== yamlOperationIdMatches.length) {
+    const duplicates = yamlOperationIdMatches
+      .map(match => match[1])
+      .filter((id, index, ids) => ids.indexOf(id) !== index);
+    throw new Error(`Duplicate OpenAPI operationId values: ${[...new Set(duplicates)].join(", ")}`);
+  }
+
+  inventory.operations = inventory.operations.filter(operation => yamlOperationIds.has(operation.operationId));
+  const retainedTags = new Set(inventory.operations.map(operation => operation.tag));
+  inventory.tags = inventory.tags.filter(tag => retainedTags.has(tag.name));
+  const inventoryTagNames = new Set(inventory.tags.map(tag => tag.name));
+  for (const tag of cxTags) {
+    if (!inventoryTagNames.has(tag.name)) {
+      inventory.tags.push({name: tag.name, tab: "IF-J cross-cutting", scenarios: tag.scenarios});
+    }
+  }
+
+  const inventoryOperationIds = new Set(inventory.operations.map(operation => operation.operationId));
+  let addedOperations = 0;
+  for (const [pathName, pathItem] of Object.entries(paths)) {
+    for (const [method, operationObject] of Object.entries(pathItem)) {
+      if (inventoryOperationIds.has(operationObject.operationId)) continue;
+      inventory.operations.push({
+        path: pathName,
+        method: method.toUpperCase(),
+        tag: operationObject.tags[0],
+        operationId: operationObject.operationId,
+        summary: operationObject.summary,
+        scenarios: operationObject["x-mock-scenarios"]
+      });
+      inventoryOperationIds.add(operationObject.operationId);
+      addedOperations += 1;
+    }
+  }
+  fs.writeFileSync(inventoryPath, `${JSON.stringify(inventory, null, 2)}\n`, "utf8");
+  return {tags: inventory.tags.length, operations: inventory.operations.length, addedOperations};
+}
+
 function indent(value, spaces) {
   const pad = " ".repeat(spaces);
   return String(value).split("\n").map(line => pad + line).join("\n");
@@ -304,6 +347,7 @@ const tagBlock = [
 next = next.replace(/\n?# IF-J CX\/D1-D10 TAGS START[\s\S]*?# IF-J CX\/D1-D10 TAGS END\n?/g, "\n");
 next = next.replace(/\n  # x-affiliate-cx-tag-begin[\s\S]*?\n  # x-affiliate-cx-tag-end\n?/g, "\n");
 next = next.replace("\npaths:", `\n${tagBlock}\npaths:`);
+next = next.replace(/\n+# IF-J CX\/D1-D10 TAGS START/, "\n\n# IF-J CX/D1-D10 TAGS START");
 next = next.replace(/^  x-affiliate-cx-status:.*$/gm, "");
 next = next.replace(/^  x-affiliate-page-tag-count: 30$/m, "  x-affiliate-page-tag-count: 30\n  x-affiliate-cx-status: \"IF-J D1-D10 contract included; page implementation remains pending\"\n  x-affiliate-event-schema: \"./schemas/events-v1.0.json\"");
 next = next.replace(/^ version: 0\.[12]\.0$/m, " version: 0.2.0");
@@ -333,3 +377,5 @@ next = `${next.trimEnd()}\n  # x-affiliate-cx-schemas-begin\n${schemaRefs}\n  # 
 
 fs.writeFileSync(target, next, "utf8");
 console.log(`Added ${Object.keys(paths).length} CX paths and ${Object.keys(cxSchema.definitions).length} schemas to ${path.relative(process.cwd(), target)}`);
+const inventoryResult = rebuildInventory();
+console.log(`Updated ${path.relative(process.cwd(), inventoryPath)}: ${inventoryResult.tags} tags, ${inventoryResult.operations} operations (+${inventoryResult.addedOperations})`);

@@ -126,6 +126,46 @@ async function main() {
     const sorted = await page.evaluate(() => AFF.reports.tableRows().map(row => row.metrics.clicks));
     assert.ok(sorted.every((value, index) => !index || value >= sorted[index - 1]));
 
+    await page.click("[data-rp-view='chart']");
+    await page.waitForSelector(".report-chart");
+    let chartState = await page.evaluate(() => ({
+      view: AFF.reports.state().view,
+      metric: AFF.reports.state().chartMetric,
+      type: document.querySelector(".report-chart-type").innerText,
+      bars: document.querySelectorAll(".report-bar-row").length,
+      metricButtons: document.querySelectorAll("[data-rp-chart-metric]").length
+    }));
+    assert.equal(chartState.view, "chart");
+    assert.equal(chartState.type, "横向柱状图");
+    assert.ok(chartState.bars > 0 && chartState.bars <= 12);
+    assert.equal(chartState.metricButtons, 6);
+    await page.click("[data-rp-chart-metric='expected']");
+    assert.equal(await page.evaluate(() => AFF.reports.state().chartMetric), "expected");
+    assert.equal(await page.locator("[data-rp-chart-metric='expected']").getAttribute("aria-pressed"), "true");
+    await patchState("perf", { groups: ["date"], page: 1 });
+    assert.equal(await page.locator(".report-chart-type").innerText(), "折线图");
+    assert.ok(await page.locator(".report-chart-line").count() === 1);
+    assert.equal(await page.locator(".report-chart-y span").count(), 5);
+    assert.ok(await page.locator(".report-chart-point").count() > 0);
+    assert.equal(await page.locator(".report-chart-point").first().evaluate(node => getComputedStyle(node, "::after").opacity), "1");
+    await page.locator(".report-chart-point").nth(14).hover();
+    await page.waitForTimeout(150);
+    const pointTooltip = await page.locator(".report-chart-point").nth(14).evaluate(node => ({
+      content: getComputedStyle(node, "::before").content,
+      opacity: getComputedStyle(node, "::before").opacity
+    }));
+    assert.match(pointTooltip.content, /\d{4}-\d{2}-\d{2} · [^"]+/);
+    assert.equal(pointTooltip.opacity, "1");
+    await page.click("[data-rp-view='table']");
+    chartState = await page.evaluate(() => ({
+      view: AFF.reports.state().view,
+      hasTable: !!document.querySelector(".report-table"),
+      hasChart: !!document.querySelector(".report-chart")
+    }));
+    assert.equal(chartState.view, "table");
+    assert.ok(chartState.hasTable && !chartState.hasChart);
+    await patchState("perf", { groups: ["country", "platform"], page: 1 });
+
     const unfilteredTotal = await getTotal();
     await page.click("[data-rp-action='filters']");
     await page.selectOption("[data-rp-filter='country']", "KZ");
@@ -197,6 +237,31 @@ async function main() {
     );
 
     await route("summary");
+    const summaryState = await page.evaluate(() => ({
+      cards: [...document.querySelectorAll(".report-stat")].map(node => node.innerText.trim()),
+      columns: AFF.reports.state().columns,
+      headers: [...document.querySelectorAll(".report-table thead th")].map(node => node.innerText.trim())
+    }));
+    assert.ok(summaryState.cards.some(text => text.startsWith("首次入金客户\n")));
+    assert.ok(summaryState.cards.some(text => text.startsWith("有效转化客户\n")));
+    assert.ok(summaryState.cards.some(text => text.startsWith("结算中佣金\n")));
+    assert.ok(!summaryState.cards.some(text => text.includes("已结算佣金")));
+    assert.ok(!summaryState.columns.includes("settled"));
+    assert.equal(summaryState.columns.includes("held"), true);
+    assert.ok(!summaryState.headers.includes("已结算佣金"));
+    await page.click("[data-rp-view='chart']");
+    await page.waitForSelector(".report-chart");
+    const summaryChart = await page.evaluate(() => ({
+      metricCount: document.querySelectorAll("[data-rp-chart-metric]").length,
+      metrics: [...document.querySelectorAll("[data-rp-chart-metric]")].map(node => node.innerText.trim()),
+      type: document.querySelector(".report-chart-type").innerText,
+      line: !!document.querySelector(".report-chart-line")
+    }));
+    assert.equal(summaryChart.metricCount, 7);
+    assert.deepEqual(summaryChart.metrics, ["注册客户", "首次入金客户", "有效转化客户", "质量升档客户", "注册→首次入金", "首次入金→有效转化", "有效转化→质量升档"]);
+    assert.equal(summaryChart.type, "折线图");
+    assert.ok(summaryChart.line);
+    await page.click("[data-rp-view='table']");
     const cardsBefore = await page.locator(".report-stats").innerText();
     await addGroup("country");
     assert.equal(await page.locator(".report-stats").innerText(), cardsBefore, "Grouping must not change summary cards");
@@ -289,7 +354,7 @@ async function main() {
     assert.ok(kycPendingClient, "A client without completed KYC exists");
     await page.evaluate(id => {
       const s = AFF.reports.state("clients");
-      s.filters = { from: AFF.reporting.from, to: AFF.reporting.now, search: id };
+      s.filters = { from: "2000-01-01", to: AFF.reporting.now, search: id };
       s.page = 1;
       render();
     }, kycPendingClient);
@@ -325,7 +390,7 @@ async function main() {
     assert.ok(settlementCandidate?.heldCase, "A client with an unsettled held commission exists");
     await page.evaluate(({ id }) => {
       const s = AFF.reports.state("clients");
-      s.filters = { from: AFF.reporting.from, to: AFF.reporting.now, search: id };
+      s.filters = { from: "2000-01-01", to: AFF.reporting.now, search: id };
       s.page = 1;
       render();
     }, settlementCandidate);
@@ -432,7 +497,9 @@ async function main() {
         await route(id);
         await patchState(id, {
           filters: { from: "2026-09-28", to: "2026-10-27" }, preset: "past30", metric: null, page: 1,
-          ...(id === "clients" ? {} : { groups: ["country", "platform"] })
+          ...(id === "clients" ? {} : { groups: ["country", "platform"] }),
+          ...(id === "perf" ? { view: "chart", chartMetric: "clicks" } : {}),
+          ...(id === "summary" ? { view: "chart", chartMetric: "registrations" } : {})
         });
         await page.mouse.move(width - 30, 110);
         await page.evaluate(() => document.activeElement?.blur());
@@ -446,7 +513,8 @@ async function main() {
           }));
           assert.ok(bounds.sidebar <= 0 && bounds.mainLeft >= 0, `${id} sidebar overlaps mobile content: ${JSON.stringify(bounds)}`);
         }
-        assert.ok(await page.locator(".report-table").isVisible());
+        if (["perf", "summary"].includes(id)) assert.ok(await page.locator(".report-chart").isVisible());
+        else assert.ok(await page.locator(".report-table").isVisible());
         if (id === "clients") {
           if (width >= 768) await page.click("[data-rp-column-help='expected']", { force: true });
           else {

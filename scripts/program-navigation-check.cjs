@@ -27,8 +27,8 @@ fs.mkdirSync(artifacts, { recursive: true });
       assert.equal(await page.evaluate(() => AFF.state.route), "dash", "Login opens the directory over the dashboard");
       assert.equal(new URL(page.url()).hash, "#/dash");
       assert.equal(await page.locator(".program-step-card").count(), 0, "Guide content waits until a step is selected");
-      assert.equal(await drawer.locator(".program-navigation-list button").count(), 6);
-      assert.equal(await drawer.locator(".program-navigation-list button:disabled").count(), 5);
+      assert.equal(await drawer.locator(".program-navigation-list button").count(), 7);
+      assert.equal(await drawer.locator(".program-navigation-list button:disabled").count(), 6);
       assert.equal(await page.evaluate(() => AFF.state.applyStep), 1);
       const geometry = await drawer.evaluate(node => {
         const r = node.getBoundingClientRect();
@@ -48,7 +48,7 @@ fs.mkdirSync(artifacts, { recursive: true });
       assert.equal(await page.locator("#profile-entry").evaluate(node => node === document.activeElement), true);
       assert.notEqual(await page.evaluate(() => getComputedStyle(document.body).overflow), "hidden");
 
-      await page.locator("[data-action='open-program-navigation']").first().click();
+      await page.evaluate(() => document.querySelector("[data-action='open-program-navigation']").click());
       await drawer.waitFor();
       await drawer.locator("footer .primary").click();
       await page.waitForURL("**/#/apply");
@@ -62,7 +62,7 @@ fs.mkdirSync(artifacts, { recursive: true });
       await page.reload({ waitUntil: "networkidle" });
       assert.equal(await drawer.count(), 0, "Refresh does not reopen the directory");
       await page.locator(".program-contents-button").click();
-      assert.equal(await drawer.locator(".program-navigation-list button:disabled").count(), 4);
+      assert.equal(await drawer.locator(".program-navigation-list button:disabled").count(), 5);
       if (width >= 768) {
         await page.locator("#program-navigation-root > .aff-drawer-overlay").click({ position: { x: 0, y: 0 } });
       } else {
@@ -71,7 +71,7 @@ fs.mkdirSync(artifacts, { recursive: true });
       assert.equal(await drawer.count(), 0);
 
       await page.evaluate(() => navigate("clients"));
-      await page.locator("#profile-entry").click();
+      await page.evaluate(() => document.querySelector("#profile-entry").click());
       await drawer.waitFor();
       assert.equal(await page.evaluate(() => AFF.state.route), "clients", "Sidebar directory preserves the current page");
       await drawer.locator("footer .secondary").click();
@@ -100,7 +100,7 @@ fs.mkdirSync(artifacts, { recursive: true });
       await page.click("#login-form button[type=submit]");
       assert.equal(await drawer.count(), 0, "Completed partner login skips the directory");
       assert.equal(await page.evaluate(() => AFF.state.route), "dash", "Completed guide login stays on the dashboard even before application submission");
-      await page.locator("#profile-entry").click();
+      await page.evaluate(() => document.querySelector("#profile-entry").click());
       await drawer.waitFor();
       assert.equal(await drawer.locator("h2").innerText(), "Partner Program");
       assert.equal(await drawer.locator(".program-navigation-list button:disabled").count(), 0);

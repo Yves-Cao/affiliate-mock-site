@@ -184,7 +184,7 @@ AFF.dataText = value => {
     "佣金确认": "Commission confirmed",
     "结算中": "Settling",
     "质量升档": "Quality upgrade",
-    "达到有效转化或质量升档要求，确认对应奖励。": "The corresponding reward is confirmed when effective 首次入金 or quality-service requirements are met.",
+    "达到有效转化或质量升档要求，确认对应奖励。": "The corresponding reward is confirmed when qualified-conversion or quality-upgrade requirements are met.",
     "经过适用的观察与核验周期，符合条件后参与每日自动结算。": "Eligible amounts enter daily automatic settlement after the applicable observation and verification period.",
     "可提现佣金": "Withdrawable commission",
     "完成结算后，符合提现条件的佣金进入可提现余额。": "After settlement, eligible commission enters your withdrawable balance.",
@@ -359,7 +359,7 @@ AFF.partnerProgram = {
     { name: "移动端教程视频", device: "安卓", platform: "YouTube", type: "视频", resolution: "1920×1080" },
     { name: "iOS评测落地页", device: "iOS", platform: "YouTube", type: "落地页", resolution: "自适应" }
   ],
-  shareIntro: `GTC FX Affiliate 合作计划：注册账户、完成首次入金并开始交易后，我可协助你获取交易指引与市场材料。点击链接了解详情：`
+  shareIntro: `AffiliateCPA 合作计划：注册账户、完成首次入金并开始交易后，我可协助你获取交易指引与市场材料。点击链接了解详情：`
 };
 
 AFF.performance = {

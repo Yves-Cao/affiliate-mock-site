@@ -27,19 +27,22 @@ async function main() {
   async function dashboard(period) {
     await page.evaluate(() => navigate("dash"));
     await page.locator(".dashboard-metrics").waitFor();
-    if (period) await page.locator("[data-dashboard-period]").selectOption(period);
+    if (period) {
+      await page.locator("[data-dashboard-period]").selectOption(period);
+      await page.waitForTimeout(80);
+    }
   }
   async function drill(selector, keyboard = false) {
     const button = page.locator(selector);
     const attrs = await button.evaluate(node => ({ ...node.dataset }));
-    const displayed = Number((await button.innerText()).replace(/[$,]/g, ""));
+    const displayed = await button.evaluate(node => Number(node.dataset.value));
     const expected = await page.evaluate(({ metric, period }) => {
       const data = AFF.reporting;
       const filters = period === "all" ? { from: data.from, to: data.now }
         : period === "month" ? { from: `${data.now.slice(0, 7)}-01`, to: data.now }
         : AFF.reports.range(period);
       const source = data.filterRows(filters).filter(row => row.clientId);
-      const milestone = { effective: "effectiveAt", quality: "qualityAt" }[metric];
+      const milestone = { ftd: "ftdAt", effective: "effectiveAt", quality: "qualityAt" }[metric];
       const rows = source.filter(row => metric === "revenue"
         ? row.fundStatus === "settled_partial" && row.expected > 0
         : !milestone || row[milestone]);
@@ -49,7 +52,8 @@ async function main() {
         value: metric === "revenue" ? rows.reduce((sum, row) => sum + row.available, 0) : rows.length
       };
     }, attrs);
-    check(Math.abs(displayed - expected.value) < 0.005, `${attrs.period}/${attrs.metric}: displayed ${displayed} / source ${expected.value}`);
+    check(Math.abs(displayed - expected.value) < 0.005,
+      `${attrs.period}/${attrs.metric}: displayed ${displayed} / source ${expected.value}`);
     await page.evaluate(() => {
       Object.assign(AFF.reports.state("clients"), {
         filters: {
@@ -90,6 +94,12 @@ async function main() {
     const money = value => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
     check((await page.locator(".dashboard-metrics .metric").count()) === 4,
       "Dashboard keeps only four client milestone cards");
+    check((await page.locator(".dashboard-conversion-stages button").count()) === 4 &&
+      (await page.locator(".dashboard-conversion-stages li.is-lowest").count()) === 1,
+    "Dashboard conversion ladder has four stages and one lowest-stage highlight");
+    check((await page.locator(".dashboard-summary").count()) === 0 &&
+      (await page.locator(".partner-funnel").count()) === 0,
+    "Dashboard removes the old promotion summary and simple funnel");
     check(!(await page.locator(".dashboard-metrics").innerText()).includes("可提现余额") &&
       !(await page.locator(".dashboard-metrics").innerText()).includes("进行中的余额") &&
       !(await page.locator(".dashboard-metrics").innerText()).includes("滚动保证金") &&
@@ -103,9 +113,9 @@ async function main() {
     "Wallet popover contains all funding amounts");
     await drill('.dashboard-metrics [data-metric="effective"]', true);
     for (const period of ["today", "past7", "past30", "lastWeek", "lastMonth"]) {
-      for (const metric of ["registrations", "effective", "revenue"]) {
+      for (const metric of ["registrations", "ftd", "effective", "quality"]) {
         await dashboard(period);
-        await drill(`.dashboard-summary [data-metric="${metric}"]`);
+        await drill(`.dashboard-conversion-stages [data-metric="${metric}"]`);
       }
     }
     await dashboard("today");
@@ -114,9 +124,9 @@ async function main() {
       AFF.reporting.rows.splice(0, AFF.reporting.rows.length);
       render();
     });
-    for (const metric of ["registrations", "effective", "revenue"]) {
+    for (const metric of ["registrations", "ftd", "effective", "quality"]) {
       await dashboard("today");
-      await drill(`.dashboard-summary [data-metric="${metric}"]`);
+      await drill(`.dashboard-conversion-stages [data-metric="${metric}"]`);
     }
     await page.evaluate(rows => {
       AFF.reporting.rows.push(...rows);
@@ -135,7 +145,7 @@ async function main() {
           fullPage: true, animations: "disabled"
         });
       }
-      if (width === 390) await drill('.dashboard-summary [data-metric="effective"]');
+      if (width === 390) await drill('.dashboard-conversion-stages [data-metric="effective"]');
     }
     check(errors.length === 0, `No browser errors: ${errors.join("; ")}`);
     console.log(JSON.stringify({ checks, drills, screenshots: 2, result: "Dashboard client drilldowns passed" }));

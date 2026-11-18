@@ -1,5 +1,12 @@
 # Affiliate CPA Mock
 
+> **English Summary**
+>
+> This static site publishes the current Affiliate CPA user-side and operations Mock at `affiliate.evecha.cn`. It also hosts Flow Diagrams v2 under `/flowcharts/`. Mock behavior and diagrams are review artifacts, not production integration claims.
+
+> **中文摘要**
+>
+> 本静态站点在 `affiliate.evecha.cn` 发布当前 Affiliate CPA 用户端与运营端 Mock，并在 `/flowcharts/` 承载流程图 v2。Mock 行为与流程图仅用于评审，不代表生产集成已完成。
 
 ## Pages
 

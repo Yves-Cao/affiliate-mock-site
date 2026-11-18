@@ -93,37 +93,42 @@ affiliate-mock/docs/user/screenshots/design-1.0-wave0/
 
 ### 2.2 登录页试算记录
 
-2026-11-14 已完成登录页 1.0 视觉试算：
+2026-11-16 已按 `https://web.mygtc.app/user` 完成登录/注册高精度克隆；2026-11-17 起用户可见品牌统一为 AffiliateCPA：登录页欢迎语为“欢迎来到 AffiliateCPA”，左上角使用 Affiliate 图标 + AffiliateCPA 文字，注册页联系同意文案不再出现 GTCFX。登录页保留模板原始背景与控件；注册页左侧整块视觉仅显示用户提供的 `assets/register-hero.png`，不叠加模板文案、二维码或下载入口：
 
 | 项 | 结果 |
 | --- | --- |
-| 桌面结构 | 左侧真实登录视觉图，右侧白色表单区；1440 下表单宽 460px并在右栏居中。 |
-| 品牌区 | 右栏顶部增加 Affiliate 品牌锁定，不引入外部系统账户语义。 |
-| 登录/注册切换 | 使用 1.0 分段控件形态；登录模式下保留可见切换。 |
-| 标题 | 24px SemiBold / 32。 |
-| 表单 | 标签 14px Medium / 20；输入高 42px、圆角 6px、强边框 `#CDD5DF`。 |
-| Focus | 品牌候选色 `#1A5BFF` 边框和 3px 品牌光晕。 |
-| 主按钮 | 42px 高、6px 圆角、品牌候选色实底。 |
-| 校验 | 就地错误 13px / 20，危险色 `#F04438`。 |
-| 注册页 | 保留原有字段、法律声明和真实视觉图，只同步表单与控件样式。 |
-| 移动端 | 视觉图在上、表单在下；390 下输入和主按钮高 44px。 |
+| 登录结构 | 模板原始 `login-bg` 全屏背景上叠加认证 Header 与居中白色卡片；1440 下卡片 `417,134,606x653`，圆角 `18px`，padding `56/32/40`。 |
+| 认证 Header | 使用模板 `auth-brand-logo`；按用户指示移除下载APP和支持中心，仅保留语言控件；1440 下语言命中区为 `1234,57,146x22`。 |
+| 登录字段 | 标题 `欢迎来到 GTC`、说明 `请登录您的账户`、邮箱、密码、忘记密码、`登 录`、或、通行密钥 / Google / Apple、注册；按用户指示不展示游客访问。 |
+| 登录控件 | 输入 `542x52`、边框 `#CDD5DF`；主按钮 `542x45`；分隔线、三方按钮和底部操作的 y 坐标按模板对齐。 |
+| 像素复核 | 与模板 1440 登录截图按阈值 16 比较，差异像素占比约 0.26%；剩余差异集中在字体抗锯齿边缘。 |
+| 注册结构 | 左侧使用用户提供视觉图；右侧表单用 flex 在面板内真实居中，1920 下表单中心与右栏中心均为 1440，偏差 0。 |
+| 注册滚动契约 | 标题与账号类型固定在上部；字段和法律声明在 `272,729` 的 457px 内部滚动区；`注 册` 固定在 `753`，`去登录` 固定在 `823`。 |
+| 注册字段 | 个人账号：姓、名、居住国家、手机号码、电子邮箱、邮箱验证码、密码、邀请码(选填)；公司账号：公司名称、注册国家/地区及后续同构字段。 |
+| 注册控件 | 账号类型胶囊高 60px；国家选择 `598x48`；手机、验证码、密码及法律声明按模板文案和坐标还原。 |
+| 语言控件 | 认证页语言下拉包含模板 17 项语言，可展开、键盘导航、选择后在登录/注册两个状态同步显示。 |
+| 注册像素复核 | 排除左侧指定视觉后，右半区与模板按阈值 16 比较，差异像素占比约 1.15%；主要剩余差异为输入占位文本抗锯齿边缘。 |
+| Mock 边界 | 通行密钥 / Google / Apple / 发送验证码均为本地演示状态，不接入真实认证、短信或邮箱服务。 |
+| 移动端 | 登录卡片 390 下为 `12,117,366x565`；注册切换为上下结构，整页无横向溢出。 |
 
 验证截图：
 
-1. [login-before-1440x900.png](../screenshots/design-1.0-wave0/login-before-1440x900.png)
-2. [login-after-1440x900.png](../screenshots/design-1.0-wave0/login-after-1440x900.png)
-3. [login-after-1024x900.png](../screenshots/design-1.0-wave0/login-after-1024x900.png)
-4. [login-after-390x844.png](../screenshots/design-1.0-wave0/login-after-390x844.png)
+1. [auth-mygtc-login-1440x900.png](../screenshots/design-1.0-wave0/auth-mygtc-login-1440x900.png)
+2. [auth-mygtc-register-1440x900.png](../screenshots/design-1.0-wave0/auth-mygtc-register-1440x900.png)
+3. [auth-mygtc-company-1440x900.png](../screenshots/design-1.0-wave0/auth-mygtc-company-1440x900.png)
+4. [auth-mygtc-login-390x844.png](../screenshots/design-1.0-wave0/auth-mygtc-login-390x844.png)
 
-浏览器交互验证：邮箱 focus 使用新品牌光晕；空表单提交显示就地错误；登录/注册切换正常；注册模式加载 `auth-visual.jpg` 且法律声明保留；1440、1024、390 均无整页横向溢出。
+浏览器交互验证：登录/注册通过模板底部文字切换；个人/公司账号切换生效；空表单校验、Mock 验证码、密码可见性、本地注册后回填登录可用；1440 与 390 无整页横向溢出。
 
 自动化验证：
 
-1. `test:design-tokens` 通过，当前检查 24 个颜色/Shell Token。
-2. `npm --prefix affiliate-mock run check` 通过。
-3. `test:design-audit-p1` 通过。
-4. `test:i18n` 未通过，失败点是脚本仍断言旧 `data.js/app.js/pages.js` cache version，与本次登录视觉改动无关。
-5. `test:design-audit-freeze` 未执行到断言，本地缺少 `playwright` 模块。
+1. `npm --prefix affiliate-mock run check` 通过。
+2. `npm --prefix affiliate-mock run test:design-tokens` 通过，当前检查 28 个颜色/Shell Token。
+3. `REPORT_BASE_URL=http://127.0.0.1:4180 NODE_PATH=$HOME/.cache/axure-extractor/node_modules npm --prefix affiliate-mock run test:ui` 通过。
+4. `npm --prefix affiliate-mock run test:design-audit-p1` 通过。
+5. `REPORT_BASE_URL=http://127.0.0.1:4180 NODE_PATH=$HOME/.cache/axure-extractor/node_modules npm --prefix affiliate-mock run test:design-audit-freeze` 通过。
+
+浏览器复核：1440 注册态整页横向溢出为 0，表单内部 `overflow-y: auto`，检测控件无裁切；390 登录卡片为 `12,117,366x565`，登录与注册横向溢出均为 0，console 无错误。
 
 ### 2.3 左侧导航试算记录
 
@@ -159,17 +164,17 @@ affiliate-mock/docs/user/screenshots/design-1.0-wave0/
 | 项 | 结果 |
 | --- | --- |
 | 页面画布 | `route-dash` 使用 `#F4F6FA`，减少后台白底的模块感。 |
-| PageHeader | 新增仪表盘标题和 14px 说明，标题使用 24px SemiBold / 32。 |
-| 月度指标 | 四个指标合为一条白色承载面；内部用 1px 分隔线，不再各自带边框和阴影。 |
-| 主分析区 | 客户转化漏斗与信用等级合为同一承载面；左侧为数据和筛选，右侧为深品牌色权益区。 |
+| 页面起点 | 2026-11-17 起删除仪表盘标题和说明，合并首行即页面首个内容模块。 |
+| 合并首行 | 左侧四项月度客户指标按2×2排列，右侧为信用等级；左右宽度可不等，中间用1px分隔线。 |
+| 主分析区 | 原简版客户漏斗移除；信用等级并入首行。 |
 | 推广准备区 | 推广链接和素材入口合为同一承载面；中间使用 1px 边界，不再保留双卡片间距。 |
 | 服务区 | 使用建议、客户状态和追踪器合为同一承载面；左右两栏用 1px 边界分隔。 |
-| 汇总表 | 保留独立白色承载面，表头改透明，行分隔承担结构。 |
+| 分段转化阶梯 | 2026-11-17 替换原推广数据汇总并置于页面底部；展示四段转化率、结果数、较上期变化、保留/流失条与最低环节提示，每段可下钻客户数据。 |
 | 卡片阴影 | 仪表盘内 `.card` 阴影数量从 12 降为 0。 |
 | 控件 | 下拉、链接块、时间筛选统一 6px 圆角、强边框和品牌 focus。 |
 | 响应式 | 1440 四列指标；1024 两列；390 单列。 |
 
-业务边界：字段仍为本月注册、首次入金、有效转化、质量升档、信用权益、推广链接、素材、客户查询、追踪器和汇总；未引入模板的总资产、资金统计、资产分布、邀请返佣或交易盈亏字段。
+业务边界：字段仍为本月注册、首次入金、有效转化、质量升档、信用权益、推广链接、素材、客户查询、追踪器和分段转化；未引入模板的总资产、资金统计、资产分布、邀请返佣或交易盈亏字段。
 
 验证截图：
 
@@ -220,13 +225,15 @@ affiliate-mock/docs/user/screenshots/design-1.0-wave0/
 | 项 | 结果 |
 | --- | --- |
 | Header | 高 `62px`，Light 白底，Dark 使用 `#061335`。 |
-| 时间 | 模板式双行网格：label 列 + 19ch 数值列，12px / 20。 |
-| 钱包 | 模板 Rich Account 式两行：业务标签行 + 名称/金额/下箭头行。 |
-| 客服 | 模板原始 headset SVG、36px 白色阴影圆底和 13px 左右命中区。 |
-| 语言 | 模板原始 globe SVG、36px 白色阴影圆底和 13px 左右命中区。 |
-| 消息 | 模板原始 bell SVG、36px 白色阴影圆底、右上未读 badge。 |
+| 品牌 | 顶部品牌区左对齐，1440 下左边界为 `8px`。 |
+| 时间 | 模板式双行网格：label 与数值均右对齐；时间块按内容收缩为约 `204px`，右边界贴合钱包分隔线；服务器时间固定 `UTC+3`，本地时间读取当前设备时区。 |
+| 钱包 | 两行摘要按内容收缩为约 `147px`：第一行仅普通文本 `Affiliate CPA合作者`；第二行为 18px 线条钱包图标、金额和下箭头；两行左对齐，可见内容距分隔线 `13px`，不再显示系统、渠道、类型胶囊或 ID。 |
+| 客服 | 模板原始 headset SVG、36px 白色阴影圆底和 13px 左右命中区；悬浮不追加背景。 |
+| 语言 | 模板原始 globe SVG、36px 白色阴影圆底和 13px 左右命中区；悬浮不追加背景。 |
+| 消息 | 模板原始 bell SVG、36px 白色阴影圆底、右上未读 badge；悬浮不追加背景。 |
 | 主题切换 | 模板原始 `75x36px` 半侧滑块：37px 渐变 knob、moon/sun 图标。 |
-| 头像昵称 | 36px 头像 + 昵称 + 下箭头，13px 左右命中区。 |
+| 头像昵称 | 36px 模板头像 + 按内容自适应的完整昵称 + 下箭头，13px 左右命中区；悬浮不改变背景。 |
+| 账户资料提醒 | 提醒条整体可点击，也可按 `Enter/Space` 触发；点击任意非“知道了”区域执行“去完成”并进入 `onboarding`。 |
 | 响应式 | 1199px 以下隐藏品牌文字区；991px 以下隐藏时间；479px 以下隐藏语言和昵称。 |
 
 主题实现：
@@ -243,21 +250,24 @@ affiliate-mock/docs/user/screenshots/design-1.0-wave0/
 2. [topbar-notifications-dark-1440x220.png](../screenshots/design-1.0-wave0/topbar-notifications-dark-1440x220.png)
 3. [topbar-notifications-light-390x160.png](../screenshots/design-1.0-wave0/topbar-notifications-light-390x160.png)
 4. [topbar-notifications-exact-1047x63.png](../screenshots/design-1.0-wave0/topbar-notifications-exact-1047x63.png)
+5. [topbar-user-info-1440x63.png](../screenshots/design-1.0-wave0/topbar-user-info-1440x63.png)
+6. [topbar-wallet-actions-1440x63.png](../screenshots/design-1.0-wave0/topbar-wallet-actions-1440x63.png)
+7. [topbar-time-brand-1440x63.png](../screenshots/design-1.0-wave0/topbar-time-brand-1440x63.png)
 
 按用户截图同比例校准的 1047px 坐标：
 
 | 组件 | 左边界 | 宽度 |
 | --- | ---: | ---: |
-| 时间 | `57px` | `230px` |
-| 分隔线 | `291px` | `1px` |
-| 钱包 / 账户摘要 | `292px` | `289px` |
-| 客服 | `581px` | `62px` |
-| 语言 | `643px` | `62px` |
-| 消息 | `705px` | `62px` |
-| 主题滑块主体 | `780px` | `75px` |
-| 头像昵称区 | `868px` | 按昵称收缩 |
+| 时间 | `65px` | `230px` |
+| 分隔线 | `299px` | `1px` |
+| 钱包 / 账户摘要 | `300px` | `289px` |
+| 客服 | `589px` | `62px` |
+| 语言 | `651px` | `62px` |
+| 消息 | `713px` | `62px` |
+| 主题滑块主体 | `788px` | `75px` |
+| 头像昵称区 | `876px` | 按昵称收缩 |
 
-浏览器交互验证：主题切换和刷新持久化正常；钱包、语言、账户弹出层在 Dark 下边界清晰且不遮顶栏；客服打开现有帮助助手；消息直达消息中心；1440、1024、390 无整页横向溢出或文本裁切。
+浏览器交互验证：主题切换和刷新持久化正常；钱包、语言、账户弹出层在 Dark 下边界清晰且不遮顶栏；客服打开现有帮助助手；消息直达消息中心；账户资料提醒整块点击与键盘触发均进入入驻申请；1440、1024、390 无整页横向溢出或文本裁切。
 
 ## 3. 核心页面契约
 
@@ -286,27 +296,69 @@ affiliate-mock/docs/user/screenshots/design-1.0-wave0/
 3. 指标点击下钻后返回状态一致。
 4. `test:ui`、`test:dashboard-clients`、`test:dashboard-postbacks` 通过。
 
+### `perf` 业绩数据图表模式
+
+页面目标：在保留精确表格工作流的同时，提供可扫读的趋势与分类对比视图。
+
+2026-11-16 扁平化已确认并推广：`perf`、`clients`、`summary` 使用连续单一表面；时间筛选、工具区、数据/图表、导出入口和脚注不再用色块分区，改为横向细线隔断。表头与分段控件使用透明背景；图表指标为13px文字，未选中透明，选中使用品牌色实心和白色文字。客户数据去除快捷筛选底色和表格斑马纹；总览数据将指标卡改为带竖向细线的指标带。
+
+| 项 | 结果 |
+| --- | --- |
+| 视图切换 | 业绩数据表格区提供 `数据 / 统计图` 分段切换；筛选、时间范围、分组和导出入口保持不变。 |
+| 指标口径 | 主图单指标展示，指标为点击量、注册客户、首次入金客户、有效转化、质量升档客户、预计佣金；金额与数量分别格式化。 |
+| 图表类型 | 仅按时间粒度分组时使用折线图；非时间分组或双分组使用横向柱状图，并按当前指标降序展示前 12 项。 |
+| 折线数值 | 图头显示总计与最新值；左侧显示 0/25%/50%/75%/最大值 5 档刻度；折线点默认可见，悬停或键盘聚焦显示日期与精确数值。 |
+| 交互 | 指标切换后图表即时重绘；切回数据视图后保留筛选、分组、排序和分页状态。 |
+| 空状态 | 无匹配数据时沿用“暂无数据 / 请调整时间范围或筛选条件”与重置操作。 |
+| 响应式 | 1440 图表高度 260px；390 折线图高度 220px，指标按钮 36px 命中区，整页无横向溢出。 |
+| Mock 边界 | 图表仅消费当前 `AFF.reporting.aggregate` 聚合结果，不新增第三方图表库，不改变导出与下钻数据语义。 |
+
+验证截图：
+
+1. [perf-chart-line-1440x900.png](../screenshots/design-1.0-wave0/perf-chart-line-1440x900.png)
+2. [perf-chart-bars-1440x900.png](../screenshots/design-1.0-wave0/perf-chart-bars-1440x900.png)
+3. [perf-chart-mobile-390x844.png](../screenshots/design-1.0-wave0/perf-chart-mobile-390x844.png)
+
+验收：
+
+1. 日期分组自动渲染折线图，国家等分类分组自动渲染横向柱状图。
+2. 统计图指标切换可用，预计佣金按金额格式展示。
+3. 分类图表超过 12 行时仅展示前 12 项并显示说明。
+4. 图表与表格来回切换后，Telegram 等筛选条件不丢失。
+5. `test:reports-data`、`test:reports`、`test:ui`、`test:design-tokens` 通过。
+
 ### 3.2 `summary` 总览数据
 
-页面目标：呈现资金链路总览和可解释的四态资金状态。
+页面目标：呈现客户链路、资金链路总览和可解释的资金状态。
 
 保留行为：
 
 1. 佣金、保证金、可提现和流水同源。
 2. 资金状态解释和页面间跳转不变。
 3. Mock 时间推进后的状态联动不变。
+4. 表格增加与业绩数据一致的 `数据 / 统计图` 切换。
 
 视觉变更：
 
-1. 资金摘要使用稳定 MetricCard。
-2. 状态说明使用统一 info、warning、danger 视觉语义。
-3. 表格和筛选区使用共享 DataTable 规格。
+1. 顶部指标卡显示首次入金客户、有效转化客户、质量升档客户、结算中佣金、滚动保证金、可提现净额。
+2. 默认表格前七项指标为注册客户、首次入金客户、有效转化客户、质量升档客户、注册→首次入金、首次入金→有效转化、有效转化→质量升档。
+3. 总览默认列和顶部卡片展示 `held` 结算中佣金，不再默认展示 `settled` 已结算佣金。
+4. 时间粒度分组渲染折线图；非时间分组渲染横向柱状图。
+5. 状态说明使用统一 info、warning、danger 视觉语义。
+6. 表格和筛选区使用共享 DataTable 规格。
+
+验证截图：
+
+1. [summary-chart-line-1440x900.png](../screenshots/design-1.0-wave0/summary-chart-line-1440x900.png)
+2. [summary-chart-mobile-390x844.png](../screenshots/design-1.0-wave0/summary-chart-mobile-390x844.png)
 
 验收：
 
-1. 金额右对齐且单位不与数值分离。
-2. 不可提现原因仍分层可解释。
-3. `test:funds-availability`、`test:earnings`、`test:ui` 通过。
+1. `首次入金客户` 中间无空格。
+2. 统计图指标为总览表格默认前七项。
+3. 金额右对齐且单位不与数值分离。
+4. 不可提现原因仍分层可解释。
+5. `test:funds-availability`、`test:earnings`、`test:reports`、`test:ui` 通过。
 
 ### 3.3 `wd` 提现
 
@@ -383,7 +435,7 @@ affiliate-mock/docs/user/screenshots/design-1.0-wave0/
 | `wd` | 2 | `test:ui`、`test:withdrawals`、`test:partner-closure` | 三视口 |
 | `clients` | 2 | `test:ui`、`test:clients-layout`、`test:client-risk`、`test:client-hold-help` | 三视口 |
 | `assets` | 2 | `test:ui`、素材或 campaign 专项 | 三视口 |
-| `perf` | 3 | `test:ui`、`test:reports`、`test:reports-data` | 抽查 |
+| `perf` | 3 | `test:ui`、`test:reports`、`test:reports-data` | 表格 / 折线 / 柱状 / 手机截图 |
 | `promo` | 3 | `test:ui`、`test:campaigns` | 抽查 |
 | `subchannels` | 3 | `test:ui`、对应专项 | 抽查 |
 | `deep` | 3 | `test:ui`、`test:deep-official` | 抽查 |
@@ -397,7 +449,7 @@ affiliate-mock/docs/user/screenshots/design-1.0-wave0/
 | `support` | 3 | `test:support`、`test:service-pages` | 抽查 |
 | `account` | 3 | `test:account-page`、`test:profile-controls` | 抽查 |
 | `export` | 3 | `test:ui`、`test:export-center` | 抽查 |
-| `apply` | 4 | `test:partner-program-guide`、`test:user-flow-routing` | 状态抽查 |
+| `apply` | 4 | 合作者计划第1/5/6/7步专项、`test:user-flow-routing` | 状态抽查 |
 | `onboarding` | 4 | `test:onboarding-profile`、`test:user-flow-routing` | 状态抽查 |
 
 隐藏状态额外检查：

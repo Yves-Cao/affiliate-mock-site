@@ -268,19 +268,6 @@ tags:
       - "guarantee_release_delayed"
     x-aff-req: "I05,F"
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 # IF-J CX/D1-D10 TAGS START
   - name: "IFJOnboardingGate"
     description: "IF-J onboarding traffic profile gate"

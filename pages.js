@@ -59,12 +59,29 @@ AFF.dashboardData = (period = "past30") => {
   };
 };
 
+const shiftDashboardDate = (value, days) => {
+  const date = new Date(`${value}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+};
+
+const previousDashboardRange = (period, current) => {
+  if (period === "lastMonth") {
+    const to = shiftDashboardDate(current.from, -1);
+    return { from: `${to.slice(0, 7)}-01`, to };
+  }
+  if (period === "lastWeek") {
+    return { from: shiftDashboardDate(current.from, -7), to: shiftDashboardDate(current.to, -7) };
+  }
+  const days = Math.round((Date.parse(`${current.to}T00:00:00Z`) - Date.parse(`${current.from}T00:00:00Z`)) / 86400000) + 1;
+  return { from: shiftDashboardDate(current.from, -days), to: shiftDashboardDate(current.to, -days) };
+};
+
 AFF.pages.dash = () => {
   const state = AFF.state;
   const t = (zh, en) => state.language === "en" ? en : zh;
   const number = value => new Intl.NumberFormat("en-US").format(value);
-  const money = value => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
-  const clientButton = (metric, value, period, label) => `<button class="dashboard-number-link" type="button" data-action="dashboard-clients" data-metric="${metric}" data-period="${period}" title="${AFF.helpers.h(label)}">${value}</button>`;
+  const clientButton = (metric, value, period, label) => `<button class="dashboard-number-link" type="button" data-action="dashboard-clients" data-metric="${metric}" data-period="${period}" data-value="${value}" title="${AFF.helpers.h(label)}">${value}</button>`;
   const languageCodes = { "简体中文": "zh-cn", "English": "en", "ไทย": "th", "Tiếng Việt": "vi" };
   const promotionAsset = AFF.deepLinks.assets.find(item => item.name === state.dashboardLinkPage) || AFF.deepLinks.assets[0];
   const promotionUrl = AFF.linkBuilder.build(`${AFF.deepLinks.domain}${AFF.deepLinks.promotionPath || "/register"}`, AFF.linkBuilder.trackingParams({
@@ -74,7 +91,7 @@ AFF.pages.dash = () => {
   const promotionLink = promotionUrl.href;
   const summaryPeriod = ["today", "past7", "past30", "lastWeek", "lastMonth"].includes(state.dashboardPeriod)
     ? state.dashboardPeriod : "past30";
-  const summary = AFF.dashboardData(summaryPeriod).totals;
+  const summaryData = AFF.dashboardData(summaryPeriod);
   const finance = AFF.finance.summary();
   const monthClients = AFF.dashboardData("month").totals;
   const periodOptions = [
@@ -95,36 +112,80 @@ AFF.pages.dash = () => {
         <div class="dashboard-link-option-list" data-dashboard-link-option-list="${field}">${AFF.renderDashboardLinkOptions(field)}</div>
       </div>
     </div>`;
-  return `
-    <header class="page-header dashboard-header">
-      <div>
-        <h1>${t("仪表盘", "Dashboard")}</h1>
-        <p>${t("查看本月进展、资金状态与推广准备情况；金额与资金流水同源。", "Track monthly progress, funds, and promotion readiness; amounts share the funds source.")}</p>
+  const conversionLadder = () => {
+    const current = summaryData.totals;
+    const previous = AFF.reporting.totals(AFF.reporting.filterRows(previousDashboardRange(summaryPeriod, summaryData.range)));
+    const definitions = [
+      ["clicks", "registrations", "registrations", t("点击 → 注册", "Click → registration")],
+      ["registrations", "ftd", "ftd", t("注册 → 首次入金", "Registration → first deposit")],
+      ["ftd", "effective", "effective", t("首次入金 → 有效转化", "First deposit → qualified conversion")],
+      ["effective", "quality", "quality", t("有效转化 → 质量升档", "Qualified conversion → quality upgrade")]
+    ];
+    const percent = value => value === null ? "—" : `${(value * 100).toFixed(1)}%`;
+    const stages = definitions.map(([sourceKey, destinationKey, metric, label]) => {
+      const from = current[sourceKey];
+      const to = current[destinationKey];
+      const rate = from ? to / from : null;
+      const previousRate = previous[sourceKey] ? previous[destinationKey] / previous[sourceKey] : null;
+      return {
+        label, metric, from, to, rate,
+        delta: rate === null || previousRate === null ? null : (rate - previousRate) * 100,
+        retained: rate === null ? 0 : Math.max(1, Math.round(rate * 100))
+      };
+    });
+    const lowest = stages.filter(stage => stage.rate !== null)
+      .sort((left, right) => left.rate - right.rate)[0];
+    const deltaText = delta => delta === null ? "—" : `${delta >= 0 ? "+" : ""}${delta.toFixed(1)}pp`;
+    return `<section class="card dashboard-conversion" aria-label="${t("分段转化阶梯", "Staged conversion ladder")}">
+      <div class="panel-header">
+        <h2>${t("分段转化阶梯", "Staged conversion ladder")}</h2>
+        <label class="dashboard-summary-filter">
+          <span>${t("时间范围", "Date range")}</span>
+          <select data-dashboard-period aria-label="${t("数据时间范围", "Data date range")}">
+            ${periodOptions.map(([value, label]) => `<option value="${value}" ${summaryPeriod === value ? "selected" : ""}>${label}</option>`).join("")}
+          </select>
+        </label>
       </div>
-    </header>
-    <div class="cards dashboard-metrics">
-      <article class="card metric">
-        <span>${t("本月注册客户", "Registrations this month")}</span>
-        ${clientButton("registrations", number(monthClients.registrations), "month", t("查看本月注册客户", "View registrations"))}
-        <small>${AFF.reporting.now.slice(0, 7)}</small>
-      </article>
-      <article class="card metric">
-        <span>${t("本月首次入金", "首次入金 this month")}</span>
-        ${clientButton("ftd", number(monthClients.ftd), "month", t("查看本月首次入金", "View 首次入金"))}
-        <small>${AFF.reporting.now.slice(0, 7)}</small>
-      </article>
-      <article class="card metric">
-        <span>${t("本月有效转化", "Qualified conversion this month")}</span>
-        ${clientButton("effective", number(monthClients.effective), "month", t("查看本月有效转化", "View this month's qualified conversion"))}
-        <small>${AFF.reporting.now.slice(0, 7)}</small>
-      </article>
-      <article class="card metric">
-        <span>${t("本月质量升档", "Quality upgrade this month")}</span>
-        ${clientButton("quality", number(monthClients.quality), "month", t("查看本月质量升档", "View quality upgrade"))}
-        <small>${AFF.reporting.now.slice(0, 7)}</small>
-      </article>
-    </div>
-    ${AFF.creditCenter.dashboardRow()}
+      <ul class="dashboard-conversion-stages">
+        ${stages.map(stage => `<li class="${lowest?.label === stage.label ? "is-lowest" : ""}">
+          <button type="button" data-action="dashboard-clients" data-metric="${stage.metric}" data-period="${summaryPeriod}" data-value="${stage.to}" title="${t("查看本段结果客户明细", "View clients reaching this stage")}">
+            <span class="conversion-stage-name"><strong>${stage.label}</strong><small>${number(stage.from)} → ${number(stage.to)}</small></span>
+            <span class="conversion-stage-rate">${percent(stage.rate)}</span>
+            <span class="conversion-stage-delta ${stage.delta === null ? "" : stage.delta >= 0 ? "up" : "down"}">${deltaText(stage.delta)}</span>
+            <span class="conversion-stage-bar" role="img" aria-label="${t("本段转化率", "Stage conversion rate")} ${percent(stage.rate)}"><i style="width:${stage.retained}%"></i></span>
+            <span class="conversion-stage-result">${number(stage.to)}</span>
+          </button>
+        </li>`).join("")}
+      </ul>
+      <p class="dashboard-conversion-insight">${lowest ? t(`最低环节：${lowest.label}，转化率 ${percent(lowest.rate)}；可优先检查该环节的流量质量与落地匹配。`, `Lowest stage: ${lowest.label} at ${percent(lowest.rate)}. Check traffic quality and landing-page fit first.`) : t("当前范围内还没有可计算的转化环节。", "No comparable conversion stage exists in this range.")}</p>
+    </section>`;
+  };
+  return `
+    <section class="dashboard-overview" aria-label="${t("客户数据与信用等级", "Client data and credit level")}">
+      <div class="cards dashboard-metrics">
+        <article class="card metric">
+          <span>${t("本月注册客户", "Registrations this month")}</span>
+          ${clientButton("registrations", number(monthClients.registrations), "month", t("查看本月注册客户", "View registrations"))}
+          <small>${AFF.reporting.now.slice(0, 7)}</small>
+        </article>
+        <article class="card metric">
+          <span>${t("本月首次入金", "首次入金 this month")}</span>
+          ${clientButton("ftd", number(monthClients.ftd), "month", t("查看本月首次入金", "View 首次入金"))}
+          <small>${AFF.reporting.now.slice(0, 7)}</small>
+        </article>
+        <article class="card metric">
+          <span>${t("本月有效转化", "Qualified conversion this month")}</span>
+          ${clientButton("effective", number(monthClients.effective), "month", t("查看本月有效转化", "View this month's qualified conversion"))}
+          <small>${AFF.reporting.now.slice(0, 7)}</small>
+        </article>
+        <article class="card metric">
+          <span>${t("本月质量升档", "Quality upgrade this month")}</span>
+          ${clientButton("quality", number(monthClients.quality), "month", t("查看本月质量升档", "View quality upgrade"))}
+          <small>${AFF.reporting.now.slice(0, 7)}</small>
+        </article>
+      </div>
+      ${AFF.creditCenter.dashboardStrip()}
+    </section>
     <div class="dashboard-promotion-grid">
       <section class="card dashboard-link-card">
         <div class="panel-header"><h2>${t("我的推广链接", "My promotion link")}</h2><button class="button secondary small" type="button" data-route="deep">${t("深度链接设置", "Deep-link settings")}</button></div>
@@ -171,27 +232,7 @@ AFF.pages.dash = () => {
       </div>
       ${AFF.postbacks.renderDashboard()}
     </div>
-      <section class="card dashboard-summary">
-        <div class="panel-header">
-          <h2>${t("推广数据汇总", "Promotion summary")}</h2>
-          <label class="dashboard-summary-filter">
-            <span>${t("时间范围", "Date range")}</span>
-            <select data-dashboard-period aria-label="${t("数据时间范围", "Data date range")}">
-              ${periodOptions.map(([value, label]) => `<option value="${value}" ${summaryPeriod === value ? "selected" : ""}>${label}</option>`).join("")}
-            </select>
-          </label>
-        </div>
-        <div class="dashboard-summary-table-wrap">
-          <table class="dashboard-summary-table">
-            <thead><tr><th>${t("数据项", "Metric")}</th><th>${t("合计数量", "Total")}</th></tr></thead>
-            <tbody>
-              <tr><td>${t("注册量", "Registrations")}</td><td>${clientButton("registrations", number(summary.registrations), summaryPeriod, t("查看注册客户", "View registered clients"))}</td></tr>
-              <tr><td>${t("有效转化数量", "Qualified conversion clients")}</td><td>${clientButton("effective", number(summary.effective), summaryPeriod, t("查看有效转化客户", "View qualified conversion clients"))}</td></tr>
-              <tr><td>${t("已入账收入", "Credited revenue")}</td><td>${clientButton("revenue", money(summary.approved), summaryPeriod, t("查看收入对应客户", "View clients contributing to revenue"))}</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </section>`;
+      ${conversionLadder()}`;
 };
 
 AFF.pages.tracker = () => {
@@ -1087,7 +1128,7 @@ AFF.pages.apply = () => {
     <section class="card program-action-card"><div class="panel-body">
       <div class="action-row">
         <button class="button secondary" type="button" data-apply-step="${state.applyStep - 1}" ${state.applyStep <= 1 ? "disabled" : ""}>上一步</button>
-        ${state.applyStep < 6
+        ${state.applyStep < 7
           ? `<button class="button primary" type="button" data-apply-step="${state.applyStep + 1}">下一步</button>`
           : `<button class="button primary" type="button" data-action="complete-program" ${state.programCompleted ? "disabled" : ""}>${state.programCompleted ? "已完成引导" : "完成引导"}</button>`}
       </div>
@@ -1096,6 +1137,7 @@ AFF.pages.apply = () => {
 
 AFF.pages.applyStep = () => {
   const state = AFF.state;
+  const t = (zh, en) => state.language === "en" ? en : zh;
   const rules = AFF.finance.configuration;
   const guaranteeRate = Number.isFinite(rules.guaranteeRate) ? `${Number((rules.guaranteeRate * 100).toFixed(2))}%` : "待确认";
   const guaranteePeriod = Number.isFinite(rules.guaranteeReleaseDays)
@@ -1411,7 +1453,7 @@ AFF.pages.applyStep = () => {
     lang: state.language === "en" ? "en" : "zh-cn"
   }));
   const mobileLink = AFF.linkBuilder.build(webLink, { platform: "app" });
-  return `
+  if (state.applyStep === 6) return `
     <div class="program-intro">
       <h2>分享您的链接，开始赚取收入</h2>
       <p>复制您的专属推广链接，分享到网站、社交平台或社群，追踪客户转化与佣金。</p>
@@ -1451,12 +1493,39 @@ AFF.pages.applyStep = () => {
       </details>
       </div>
       <section class="program-postback-guide" aria-labelledby="program-postback-title">
-        <h3 id="program-postback-title">用回传链接连接您的追踪平台</h3>
-        <p>适合使用广告追踪器或自建数据系统管理投放的合作者。</p>
-        <p>配置回传链接后，系统会将您选择的转化事件发送至您的平台，帮助您关联广告点击与客户转化、比较渠道效果并优化投放。</p>
-        <button class="program-text-link" type="button" data-route="tracker">配置回传链接 <span aria-hidden="true">→</span></button>
+        <h3 id="program-postback-title">${t("进阶投放：回传链接指引", "Advanced promotion: postback guide")}</h3>
+        <p>${t("如果您使用广告追踪器或自建数据系统，可在下一页了解回传适用场景、事件用途与配置入口。", "If you use an ad tracker or your own data system, the next page explains when postbacks fit, what they transmit, and where to configure them.")}</p>
+        <button class="program-text-link" type="button" data-apply-step="7">${t("查看回传链接指引", "View the postback guide")} <span aria-hidden="true">→</span></button>
       </section>
     </div>`;
+
+  return `
+    <div class="program-intro">
+      <h2>${t("回传链接：把转化送回您的系统", "Postbacks: send conversions to your systems")}</h2>
+      <p>${t("判断自己的投放方式是否需要回传，并了解配置后的用途与入口。", "Decide whether your promotion workflow needs postbacks and understand their purpose and setup entry.")}</p>
+    </div>
+    <div class="program-postback-page">
+      <section class="program-postback-panel">
+        <span>${t("适合谁", "Who it is for")}</span>
+        <strong>${t("使用追踪系统管理投放的合作者", "Partners managing paid traffic with tracking systems")}</strong>
+        <p>${t("适合已使用广告追踪器、买量报表或自建数据系统的团队。自然流量、社群分享或刚开始的合作者可以先不配置，推广链接本身仍会记录点击与转化。", "It fits teams already using ad trackers, buying-side reports, or their own data systems. Organic traffic, community sharing, and new partners can skip it initially; promotion links still record clicks and conversions.")}</p>
+      </section>
+      <section class="program-postback-panel">
+        <span>${t("有什么用", "What it does")}</span>
+        <strong>${t("把所选转化事件发送到您的平台", "Send selected conversion events to your platform")}</strong>
+        <p>${t("配置后可将所选转化事件回传到您的追踪系统，便于关联广告点击与客户转化、比较渠道效果，并把投放优化建立在自己的数据报表上。", "After setup, selected conversion events can be sent to your tracking system to connect ad clicks with client conversions, compare channel performance, and optimize from your own reports.")}</p>
+      </section>
+      <section class="program-postback-panel">
+        <span>${t("何时配置", "When to configure")}</span>
+        <strong>${t("基础推广跑通后再接入", "Connect after basic promotion is running")}</strong>
+        <p>${t("建议先确认链接、素材和基础数据报表满足投放需要；当您需要在自有系统中核算渠道成本或自动优化时，再配置回传。", "Confirm that links, materials, and basic reporting meet your needs first. Configure postbacks when you must calculate channel cost or automate optimization in your own system.")}</p>
+      </section>
+    </div>
+    <section class="program-postback-actions" aria-label="回传链接操作引导">
+      <button class="button primary" type="button" data-route="tracker">${t("配置回传链接", "Configure postbacks")}</button>
+      <button class="button secondary" type="button" data-apply-step="6">${t("返回分享链接", "Back to sharing links")}</button>
+    </section>
+    <p class="program-postback-note">${t("回传配置为可选项。本页只提供使用判断和入口引导，不会自动创建回传任务或向外部系统发送事件。", "Postbacks are optional. This page only explains usage and provides an entry; it does not create postback tasks or send external events.")}</p>`;
 };
 
 AFF.pages.wd = () => {

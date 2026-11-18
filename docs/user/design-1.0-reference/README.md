@@ -3,7 +3,7 @@
 版本：v0.1  
 日期：2026-11-14  
 状态：`reference_only`  
-来源：`docs/PRD_SOURCE_CN/页面设计/1.0版本用户端/`
+来源：`docs/PRD_SOURCE_CN/04-页面设计/页面设计/1.0版本用户端/`
 
 > **English Summary**
 >
@@ -19,7 +19,7 @@
 | --- | --- |
 | 本目录 | 外部参考样式、交互模式、证据索引和使用边界。 |
 | [../design-1.0-standard/](../design-1.0-standard/README.md) | Affiliate 用户端 Mock 的执行标准、页面分批和验收规则。 |
-| [原始1.0来源](../../../../docs/PRD_SOURCE_CN/页面设计/1.0版本用户端/README.md) | 完整中文来源证据，保持只读，不在这里改写。 |
+| [原始1.0来源](../../../../docs/PRD_SOURCE_CN/04-页面设计/页面设计/1.0版本用户端/README.md) | 完整中文来源证据，保持只读，不在这里改写。 |
 
 ## 使用原则
 

@@ -4,19 +4,25 @@
   const t = (zh, en) => AFF.state.language === "en" ? en : zh;
   const timeKeys = ["date", "week", "month", "year"];
   const routeKeys = ["perf", "clients", "summary"];
-  const summaryMetrics = ["ftd", "effective", "quality", "settled", "guarantee", "available"];
-  const amountDrillMetrics = ["expected", "settled", "guarantee", "available"];
+  const summaryMetrics = ["ftd", "effective", "quality", "held", "guarantee", "available"];
+  const amountDrillMetrics = ["expected", "held", "settled", "guarantee", "available"];
   const presetDays = { today: 1, past7: 7, past30: 30, past90: 90 };
+  const chartLimit = 12;
   const previousMetricDefaults = {
     perf: ["clicks", "visitors", "registrations", "ftd", "effective", "quality", "ftdRate", "qualityRate", "expected", "held"],
     summary: ["registrations", "ftd", "effective", "quality", "ftdRate", "qualityRate", "expected", "guarantee", "available", "paid"]
   };
   const metricDefaults = {
     perf: ["clicks", "visitors", "registrations", "ftd", "effective", "quality", "ftdRate", "effectiveRate", "qualityRate", "expected", "held"],
-    summary: ["registrations", "ftd", "effective", "quality", "ftdRate", "effectiveRate", "qualityRate", "expected", "settled", "guarantee", "available", "paid"]
+    summary: ["registrations", "ftd", "effective", "quality", "ftdRate", "effectiveRate", "qualityRate", "expected", "held", "guarantee", "available", "paid"]
+  };
+  const chartMetricsByRoute = {
+    perf: ["clicks", "registrations", "ftd", "effective", "quality", "expected"],
+    summary: metricDefaults.summary.slice(0, 7)
   };
   let returnFocus = null;
   let holdHelpTimer = null;
+  let keyboardNavigation = false;
   const initializedStates = new WeakSet();
 
   function dateShift(value, days) {
@@ -46,7 +52,8 @@
       AFF.state.reports[route] = {
         groups: ["date"], filters: range("past30"), preset: "past30",
         columns: [...(metricDefaults[route] || [])], page: 1, pageSize: 10,
-        sort: route === "clients" ? "registeredAt" : "date", direction: "desc"
+        sort: route === "clients" ? "registeredAt" : "date", direction: "desc",
+        ...(chartMetricsByRoute[route] ? { view: "table", chartMetric: chartMetricsByRoute[route][0] } : {})
       };
     }
     const value = AFF.state.reports[route];
@@ -59,18 +66,23 @@
       if (!value.columnsCustomized && previousMetricDefaults[route]?.join(",") === value.columns.join(",")) {
         value.columns = [...metricDefaults[route]];
       }
-      if (route === "summary" && !value.settledColumnAdded) {
-        if (!value.columns.includes("settled")) {
+      if (route === "summary" && !value.heldColumnMigrated) {
+        value.columns = value.columns.filter(key => key !== "settled");
+        if (!value.columns.includes("held")) {
           const expectedIndex = value.columns.indexOf("expected");
-          value.columns.splice(expectedIndex < 0 ? value.columns.length : expectedIndex + 1, 0, "settled");
+          value.columns.splice(expectedIndex < 0 ? value.columns.length : expectedIndex + 1, 0, "held");
         }
-        value.settledColumnAdded = true;
+        value.heldColumnMigrated = true;
       }
       initializedStates.add(value);
     }
     value.groups = value.groups.filter(key => data.dimensions.some(item => item.key === key)).slice(0, 2);
     value.columns = value.columns.filter(key => data.metrics.some(item => item.key === key));
     if (route !== "clients" && !value.columns.length) value.columns = [...metricDefaults[route]];
+    if (chartMetricsByRoute[route]) {
+      value.view = value.view === "chart" ? "chart" : "table";
+      value.chartMetric = chartMetricsByRoute[route].includes(value.chartMetric) ? value.chartMetric : chartMetricsByRoute[route][0];
+    }
     return value;
   }
 
@@ -90,6 +102,20 @@
     if (type === "money") return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
     if (type === "rate") return `${(value * 100).toFixed(1)}%`;
     return new Intl.NumberFormat("en-US").format(value);
+  }
+
+  function formatAxis(value, type = "count") {
+    if (!value) return type === "money" ? "$0" : "0";
+    const compact = number => {
+      const abs = Math.abs(number);
+      if (abs >= 1_000_000_000) return `${(number / 1_000_000_000).toFixed(1).replace(/\.0$/, "")}B`;
+      if (abs >= 1_000_000) return `${(number / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
+      if (abs >= 1_000) return `${(number / 1_000).toFixed(abs >= 10_000 ? 0 : 1).replace(/\.0$/, "")}K`;
+      return abs < 10 ? String(Number(number.toFixed(1))) : String(Math.round(number));
+    };
+    if (type === "money") return `$${compact(value)}`;
+    if (type === "rate") return `${(value * 100).toFixed(1)}%`;
+    return compact(value);
   }
 
   function icon(name) {
@@ -188,10 +214,23 @@
     ].join("\n");
   }
 
+  function settlementCounts(row) {
+    const cases = row.commissionCases || [];
+    return {
+      processing: cases.filter(item => item.settlementStatus === "processing").length,
+      settled: cases.filter(item => item.settlementStatus === "settled").length
+    };
+  }
+
   function commissionStatusCell(row) {
-    const status = badge(settlementStatus(row));
-    const days = row.settlementStatus === "processing" ? heldDaysText(row) : "";
-    return `<div class="report-commission-status ${row.settlementStatus === "processing" ? "held" : ""}" ${row.settlementStatus === "processing" ? `data-rp-fund-tooltip="${h(heldStatusTooltip(row))}" tabindex="0" aria-label="${t("结算中原因与总天数说明", "In-settlement reason and duration")}"` : ""}>${status}${days ? `<small>${t("结算中", "In settlement")} ${h(days)}</small>` : ""}</div>`;
+    const counts = settlementCounts(row);
+    if (row.settlementStatus === "processing") {
+      return `<div class="report-commission-status held" data-rp-fund-tooltip="${h(heldStatusTooltip(row))}" tabindex="0" aria-label="${t("结算中原因与总天数说明", "In-settlement reason and duration")}">${badge(settlementStatus(row))}<small>${t("结算中", "In settlement")}：${counts.processing}｜${t("结算完成", "Settled")}：${counts.settled}</small></div>`;
+    }
+    if (row.settlementStatus === "settled") {
+      return `<div class="report-commission-status">${badge(settlementStatus(row))}<small>${t("结算完成", "Settled")}：${counts.settled}</small></div>`;
+    }
+    return `<div class="report-commission-status">${badge(settlementStatus(row))}</div>`;
   }
 
   function badge(values) {
@@ -442,6 +481,10 @@
 
   function tableActions(s) {
     return `<div class="report-actions">
+      ${chartMetricsByRoute[AFF.state.route] ? `<div class="report-view-switch" role="group" aria-label="${t("数据展示形式", "Data display")}">
+        <button type="button" data-rp-view="table" aria-pressed="${s.view === "table"}">${t("数据", "Data")}</button>
+        <button type="button" data-rp-view="chart" aria-pressed="${s.view === "chart"}">${t("统计图", "Chart")}</button>
+      </div>` : ""}
       <button class="button secondary" type="button" data-rp-action="filters">${icon("filter")}${t("筛选器", "Filters")}${activeFilters(s).length ? `<span class="report-count">${activeFilters(s).length}</span>` : ""}</button>
       ${AFF.state.route !== "clients" ? iconButton("columns", "columns", t("设置显示列", "Display columns")) : ""}
       <button class="button secondary" type="button" data-export-action="create">${icon("download")}${t("创建导出", "Create export")}</button>
@@ -583,6 +626,118 @@
     return `<div class="empty-state report-empty"><strong>${t("暂无数据", "No data")}</strong><span>${t("请调整时间范围或筛选条件", "Try another date range or filter")}</span><button class="button secondary" type="button" data-rp-action="reset">${t("重置筛选", "Reset filters")}</button></div>`;
   }
 
+  function chartDataset(sourceRows, s) {
+    const groups = s.groups.length ? s.groups : ["date"];
+    const rows = data.aggregate(sourceRows, groups);
+    const timeOnly = groups.length === 1 && timeKeys.includes(groups[0]);
+    const sorted = timeOnly
+      ? [...rows].sort((left, right) => String(left.values[0]).localeCompare(String(right.values[0]), "zh-CN", { numeric: true }))
+      : [...rows].sort((left, right) => (right.metrics[s.chartMetric] || 0) - (left.metrics[s.chartMetric] || 0));
+    return {
+      groups,
+      mode: timeOnly ? "line" : "bar",
+      rows: timeOnly ? sorted : sorted.slice(0, chartLimit),
+      truncated: timeOnly ? false : sorted.length > chartLimit
+    };
+  }
+
+  function chartMetricSwitch(s) {
+    return `<div class="report-chart-metrics" role="group" aria-label="${t("统计图指标", "Chart metric")}">
+      ${chartMetricsByRoute[AFF.state.route].map(key => {
+        const item = data.metrics.find(metric => metric.key === key);
+        return `<button type="button" data-rp-chart-metric="${key}" aria-pressed="${s.chartMetric === key}">${h(t(item.label, item.en))}</button>`;
+      }).join("")}
+    </div>`;
+  }
+
+  function chartPointButton(row, index, total, value, maxValue, metricItem) {
+    const x = total === 1 ? 50 : index / (total - 1) * 100;
+    const ratio = maxValue ? Math.max(0, value / maxValue) : 0;
+    const name = row.values.map(item => AFF.dataText(item)).join(" / ");
+    const align = x < 12 ? "start" : x > 88 ? "end" : "center";
+    return `<button type="button" class="report-chart-point" style="left:${x.toFixed(2)}%;bottom:${(ratio * 100).toFixed(2)}%" data-align="${align}" data-tooltip="${h(`${name} · ${format(value, metricItem.type)}`)}" title="${h(`${name} · ${format(value, metricItem.type)}`)}" aria-label="${h(`${name} ${format(value, metricItem.type)}`)}"></button>`;
+  }
+
+  function lineChart(rows, metricItem) {
+    const values = rows.map(row => row.metrics[metricItem.key] || 0);
+    const maxValue = Math.max(...values, 1);
+    const points = rows.map((row, index) => {
+      const x = rows.length === 1 ? 500 : index / (rows.length - 1) * 1000;
+      const y = 260 - (values[index] / maxValue) * 260;
+      return `${x.toFixed(2)},${y.toFixed(2)}`;
+    });
+    const line = points.join(" ");
+    const visibleIndexes = new Set();
+    const labelStep = Math.max(1, Math.ceil(rows.length / 6));
+    rows.forEach((_, index) => {
+      if (index === 0 || index === rows.length - 1 || index % labelStep === 0) visibleIndexes.add(index);
+    });
+    const axisLabels = [1, .75, .5, .25, 0].map(ratio => ({
+      ratio,
+      text: formatAxis(maxValue * ratio, metricItem.type)
+    }));
+    return `<div class="report-chart-canvas report-chart-canvas--line" aria-label="${h(t("折线图", "Line chart"))}">
+      <div class="report-chart-y" aria-hidden="true">${axisLabels.map(item => `<span style="top:${(item.ratio * 100).toFixed(2)}%">${h(item.text)}</span>`).join("")}</div>
+      <div class="report-line-plot">
+        <svg viewBox="0 0 1000 260" preserveAspectRatio="none" aria-hidden="true">
+          <polygon class="report-chart-area" points="0,260 ${line} 1000,260"></polygon>
+          <line x1="0" x2="1000" y1="0" y2="0"></line>
+          <line x1="0" x2="1000" y1="65" y2="65"></line>
+          <line x1="0" x2="1000" y1="130" y2="130"></line>
+          <line x1="0" x2="1000" y1="195" y2="195"></line>
+          <line x1="0" x2="1000" y1="260" y2="260"></line>
+          <polyline class="report-chart-line" points="${line}"></polyline>
+        </svg>
+        ${rows.map((row, index) => chartPointButton(row, index, rows.length, values[index], maxValue, metricItem)).join("")}
+      </div>
+      <div class="report-chart-x" aria-hidden="true">
+        ${rows.map((row, index) => {
+          const x = rows.length === 1 ? 50 : index / (rows.length - 1) * 100;
+          return `<span class="${visibleIndexes.has(index) ? "is-visible" : ""}" style="left:${x.toFixed(2)}%">${h(AFF.dataText(row.values[0]))}</span>`;
+        }).join("")}
+      </div>
+    </div>`;
+  }
+
+  function barChart(rows, metricItem) {
+    const values = rows.map(row => row.metrics[metricItem.key] || 0);
+    const maxValue = Math.max(...values, 1);
+    return `<div class="report-chart-canvas report-chart-canvas--bar" aria-label="${h(t("横向柱状图", "Horizontal bar chart"))}">
+      ${rows.map((row, index) => {
+        const label = row.values.map(item => AFF.dataText(item)).join(" / ");
+        const ratio = values[index] / maxValue;
+        return `<div class="report-bar-row" title="${h(`${label} · ${format(values[index], metricItem.type)}`)}">
+          <span class="report-bar-label">${h(label)}</span>
+          <span class="report-bar-track"><span class="report-bar-value" style="width:${Math.max(ratio * 100, .6).toFixed(2)}%"></span></span>
+          <span class="report-bar-number">${h(format(values[index], metricItem.type))}</span>
+        </div>`;
+      }).join("")}
+    </div>`;
+  }
+
+  function chartPanel(sourceRows, s) {
+    const metricItem = data.metrics.find(item => item.key === s.chartMetric);
+    const dataset = chartDataset(sourceRows, s);
+    const totals = data.totals(sourceRows);
+    const latest = dataset.mode === "line" && dataset.rows.length
+      ? dataset.rows[dataset.rows.length - 1].metrics[s.chartMetric] || 0
+      : null;
+    return `<div class="report-chart">
+      <header class="report-chart-head">
+        <div>
+          <strong>${h(label(s.chartMetric))}</strong>
+          <span>${h(t("总计", "Total"))} ${h(format(totals[s.chartMetric], metricItem.type))}${latest === null ? "" : ` · ${h(t("最新", "Latest"))} ${h(format(latest, metricItem.type))}`}</span>
+        </div>
+        <span class="report-chart-type">${dataset.mode === "line" ? t("折线图", "Line chart") : t("横向柱状图", "Horizontal bar chart")}</span>
+      </header>
+      ${chartMetricSwitch(s)}
+      ${dataset.rows.length
+        ? (dataset.mode === "line" ? lineChart(dataset.rows, metricItem) : barChart(dataset.rows, metricItem))
+        : `<div class="empty-state report-empty"><strong>${t("暂无数据", "No data")}</strong><span>${t("请调整时间范围或筛选条件", "Try another date range or filter")}</span></div>`}
+      ${dataset.truncated ? `<p class="report-chart-note">${t("统计图展示前12项，完整数据请切换回数据视图。", "The chart shows the top 12 rows. Switch back to Data for the full table.")}</p>` : ""}
+    </div>`;
+  }
+
   function customerTable(rows, s) {
     const footer = pagination(rows.length, s);
     const heads = [
@@ -664,7 +819,7 @@
       </div>
       ${quickSelect("stage", t("转化阶段", "Conversion stage"), stages)}
       ${quickSelect("quality", t("质量升档", "Quality upgrade"), [["qualified", t("已达标", "Qualified")], ["unqualified", t("未达标", "Not qualified")]])}
-      ${quickSelect("commissionStatus", t("资金状态", "Fund status"), funds)}
+      ${quickSelect("commissionStatus", t("结算状态", "Settlement status"), funds)}
       ${quickSelect("riskStatus", t("风险处理", "Risk handling"), risks)}
     </div>`;
   }
@@ -883,11 +1038,11 @@
     const s = state();
     const source = filtered(s);
     const rows = tableRows();
-    return `<div class="report-page">${controls(s)}
+    return `<div class="report-page ${["perf", "clients", "summary"].includes(AFF.state.route) ? "perf-flat data-flat" : ""}">${controls(s)}
       ${AFF.state.route === "summary" ? summaryCards(source) : ""}
       <section class="card report-panel ${AFF.state.route === "clients" ? "client-panel" : ""}">
         ${AFF.state.route !== "clients" ? `<div class="report-table-toolbar">${groupPicker(s)}${tableActions(s)}</div>` : ""}
-        ${AFF.state.route === "clients" ? customerTable(rows, s) : reportTable(rows, source, s)}
+        ${AFF.state.route === "clients" ? customerTable(rows, s) : (chartMetricsByRoute[AFF.state.route] && s.view === "chart" ? chartPanel(source, s) : reportTable(rows, source, s))}
       </section>
       ${AFF.exportCenter.panel()}
       <div class="report-footnote">${t("时区", "Timezone")} ${h(data.fields.timezone)} · ${t("金额", "Currency")} USD<span>${t("数据截至", "Data through")} ${data.now} 23:59</span></div>
@@ -1000,7 +1155,7 @@
     }
     const comboBox = event.target.closest("[data-rp-combobox]");
     if (!comboBox) closeQuickCombos();
-    const target = event.target.closest("[data-rp-action], [data-rp-add-group], [data-rp-remove-group], [data-rp-sort], [data-rp-page], [data-aff-page], [data-rp-clear], [data-rp-client], [data-rp-appeal], [data-rp-drill-metric], [data-rp-column-help], [data-rp-tier-tooltip], [data-rp-expected-tooltip], [data-rp-fund-tooltip], [data-rp-detail-help]");
+    const target = event.target.closest("[data-rp-action], [data-rp-add-group], [data-rp-remove-group], [data-rp-sort], [data-rp-page], [data-aff-page], [data-rp-clear], [data-rp-client], [data-rp-appeal], [data-rp-drill-metric], [data-rp-column-help], [data-rp-tier-tooltip], [data-rp-expected-tooltip], [data-rp-fund-tooltip], [data-rp-detail-help], [data-rp-view], [data-rp-chart-metric]");
     const s = state();
     if (!target) {
       if (s.picker && !event.target.closest(".report-picker")) {
@@ -1014,7 +1169,7 @@
     if (target.disabled) return;
     const d = target.dataset;
     if (d.rpAction === "hold-help") {
-      const mouse = event.pointerType === "mouse" || (event.detail > 0 && matchMedia("(hover: hover)").matches);
+      const mouse = event.pointerType === "mouse";
       return setHoldHelp(mouse || document.getElementById("rp-hold-help").hidden);
     }
     if (d.rpAction === "commission-help") return toggleCommissionHelp(target);
@@ -1050,6 +1205,14 @@
       return renderPage(".report-drawer .report-icon");
     }
     if (d.rpDrillMetric) return drill(d.rpDrillMetric, d.rpRow);
+    if (d.rpView) {
+      s.view = d.rpView === "chart" ? "chart" : "table";
+      return renderPage(`[data-rp-view="${s.view}"]`);
+    }
+    if (d.rpChartMetric && chartMetricsByRoute[AFF.state.route]?.includes(d.rpChartMetric)) {
+      s.chartMetric = d.rpChartMetric;
+      return renderPage(`[data-rp-chart-metric="${s.chartMetric}"]`);
+    }
     if (d.rpAddGroup) {
       let groups = s.groups.filter(key => !timeKeys.includes(d.rpAddGroup) || !timeKeys.includes(key));
       if (!groups.includes(d.rpAddGroup) && groups.length < 2) groups.push(d.rpAddGroup);
@@ -1145,7 +1308,8 @@
     }
   });
   document.addEventListener("focusin", event => {
-    if (event.target.closest(".report-hold-anchor") && event.target.matches(":focus-visible")) setHoldHelp(true);
+    if (event.target.closest(".report-hold-anchor") &&
+        (keyboardNavigation || event.target.matches(":focus-visible"))) setHoldHelp(true);
     const floatingTrigger = event.target.closest?.("[data-rp-column-help], [data-rp-tier-tooltip], [data-rp-expected-tooltip], [data-rp-fund-tooltip], [data-rp-detail-help]");
     if (floatingTrigger && event.target.matches(":focus-visible")) {
       const content = floatingTrigger.dataset.rpColumnHelp
@@ -1159,6 +1323,12 @@
       window.requestAnimationFrame(() => event.target.select());
     }
   });
+  document.addEventListener("keydown", event => {
+    if (event.key === "Tab") keyboardNavigation = true;
+  }, true);
+  document.addEventListener("pointerdown", event => {
+    if (event.pointerType !== "keyboard") keyboardNavigation = false;
+  }, true);
   document.addEventListener("focusout", event => {
     leaveHoldHelp(event);
     if (!event.relatedTarget?.closest?.(".report-inline-help")) setInlineHelp(event, false);

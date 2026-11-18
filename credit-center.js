@@ -140,53 +140,6 @@
     </div>`;
   }
 
-  /* D-CREDIT-05 (2026-11-07 user-confirmed): the credit component shares a
-   * half-width row with a funnel chart on the dashboard.
-   * AFF.creditCenter.dashboardRow() renders chart (left) + credit (right);
-   * dashboardStrip() keeps rendering the credit card alone for narrow layouts. */
-  const FUNNEL_PERIODS = [
-    ["today", "1天", "1D"],
-    ["past7", "7天", "7D"],
-    ["past30", "30天", "30D"]
-  ];
-
-  function funnelChart() {
-    const period = FUNNEL_PERIODS.some(([key]) => key === AFF.state.creditFunnelPeriod) ? AFF.state.creditFunnelPeriod : "past30";
-    const totals = AFF.dashboardData(period).totals;
-    const bars = [
-      { key: "registrations", label: t("注册客户", "Registrations"), value: totals.registrations },
-      { key: "ftd", label: t("首次入金客户", "First deposit clients"), value: totals.ftd },
-      { key: "effective", label: t("有效转化客户", "Valid-First deposit clients"), value: totals.effective },
-      { key: "quality", label: t("质量升档客户", "Quality-upgrade clients"), value: totals.quality }
-    ];
-    const max = Math.max(1, ...bars.map(bar => bar.value));
-    return `<section class="card partner-funnel-card" aria-label="${t("客户转化漏斗", "Client conversion funnel")}">
-      <header class="partner-funnel-head">
-        <h3>${t("客户转化漏斗", "Client conversion funnel")}</h3>
-        <div class="partner-funnel-periods" role="tablist" aria-label="${t("时间维度", "Time range")}">
-          ${FUNNEL_PERIODS.map(([key, zh, en]) => `<button type="button" role="tab" aria-selected="${key === period}" class="${key === period ? "active" : ""}" data-credit-funnel-period="${key}">${t(zh, en)}</button>`).join("")}
-        </div>
-      </header>
-      <ul class="partner-funnel">
-        ${bars.map(bar => `<li>
-          <button class="partner-funnel-row" type="button" data-action="dashboard-clients" data-metric="${bar.key}" data-period="${period}" title="${t("查看明细", "View details")}">
-            <span class="partner-funnel-label">${h(bar.label)}</span>
-            <span class="partner-funnel-track"><span class="partner-funnel-bar" style="width:${Math.max(2, Math.round(bar.value / max * 100))}%"></span></span>
-            <span class="partner-funnel-value">${bar.value}</span>
-          </button>
-        </li>`).join("")}
-      </ul>
-      <p class="partner-funnel-note">${t("点击任意环节查看客户明细", "Click any stage to view client details")}</p>
-    </section>`;
-  }
-
-  function dashboardRow() {
-    return `<div class="dashboard-credit-row">
-      ${funnelChart()}
-      ${dashboardStrip()}
-    </div>`;
-  }
-
   /* D-CREDIT-14 (2026-11-07 redesign): deep-blue membership card.
    * Left: current level summary. Right: earned and next-level benefits.
    * Bottom: 5 segmented tier bars (achieved full / current partial / future empty). */
@@ -285,18 +238,11 @@
     </section>`;
   }
 
-  /* Entry points: benefits modal + funnel period switch + hint tooltip. */
+  /* Entry points: benefits modal and hint tooltip. */
   document.addEventListener("click", event => {
     const btn = event.target.closest("[data-credit-benefits]");
     if (!btn) return;
     benefitsModal(summary());
-  });
-  document.addEventListener("click", event => {
-    const tab = event.target.closest("[data-credit-funnel-period]");
-    if (!tab) return;
-    AFF.state.creditFunnelPeriod = tab.dataset.creditFunnelPeriod;
-    render();
-    document.querySelector(`[data-credit-funnel-period="${tab.dataset.creditFunnelPeriod}"]`)?.focus();
   });
 
   /* D-CREDIT-14: hint tooltip. Panel is position:fixed, placed by AFF.tooltip (D-04).
@@ -346,5 +292,5 @@
   });
   window.addEventListener("resize", hideHint);
 
-  AFF.creditCenter = { summary, dashboardStrip, dashboardRow, accountPanel };
+  AFF.creditCenter = { summary, dashboardStrip, accountPanel };
 })();

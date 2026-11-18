@@ -282,6 +282,87 @@
         "guarantee_coverage_shortfall",
         "guarantee_release_delayed"
       ]
+    },
+    {
+      "name": "IFJOnboardingGate",
+      "tab": "IF-J cross-cutting",
+      "scenarios": [
+        "onboarding_traffic_profile",
+        "onboarding_gate_disabled"
+      ]
+    },
+    {
+      "name": "IFJOfficialPath",
+      "tab": "IF-J cross-cutting",
+      "scenarios": [
+        "official_path_generation",
+        "domain_violation"
+      ]
+    },
+    {
+      "name": "IFJClickRisk",
+      "tab": "IF-J cross-cutting",
+      "scenarios": [
+        "click_risk_observed"
+      ]
+    },
+    {
+      "name": "IFJEventIntegrity",
+      "tab": "IF-J cross-cutting",
+      "scenarios": [
+        "event_gap_alert",
+        "event_gap_minor_alert",
+        "attribution_integrity_check",
+        "attribution_health_drop"
+      ]
+    },
+    {
+      "name": "IFJRiskGovernance",
+      "tab": "IF-J cross-cutting",
+      "scenarios": [
+        "cluster_case_group",
+        "partner_baseline_deviation",
+        "partner_baseline_switched",
+        "investigation_required",
+        "investigation_link_restricted",
+        "limited_explanation",
+        "auto_quarantine",
+        "d_plus_n_threshold_changed",
+        "fraud_commission_review"
+      ]
+    },
+    {
+      "name": "IFJDataGovernance",
+      "tab": "IF-J cross-cutting",
+      "scenarios": [
+        "data_breach_runbook",
+        "partner_operations_tags"
+      ]
+    },
+    {
+      "name": "IFJStagingGate",
+      "tab": "IF-J cross-cutting",
+      "scenarios": [
+        "staging_e2e_pass",
+        "staging_signoff_missing"
+      ]
+    },
+    {
+      "name": "IFJContractQuality",
+      "tab": "IF-J cross-cutting",
+      "scenarios": [
+        "rule_shadow_run",
+        "quality_economics_basic",
+        "api_docs_playbook",
+        "quality_economics_full",
+        "quarterly_audit_pack",
+        "asset_landing_patrol",
+        "subid_risk_state",
+        "external_risk_adapter",
+        "model_risk_advice",
+        "advanced_tier_pricing",
+        "multi_level_schema_reserve"
+      ]
     }
   ],
   "operations": [
@@ -3647,6 +3728,655 @@
         "guarantee_coverage_normal",
         "guarantee_coverage_shortfall",
         "guarantee_release_delayed"
+      ]
+    },
+    {
+      "path": "/partners/{partner_id}/traffic-profile",
+      "method": "GET",
+      "tag": "IFJOnboardingGate",
+      "operationId": "getPartnerTrafficProfile",
+      "summary": "Get partner traffic profile",
+      "scenarios": [
+        "onboarding_traffic_profile",
+        "onboarding_gate_disabled",
+        "official_path_generation",
+        "domain_violation",
+        "click_risk_observed",
+        "event_gap_alert",
+        "event_gap_minor_alert",
+        "cluster_case_group",
+        "partner_baseline_deviation",
+        "partner_baseline_switched",
+        "investigation_required",
+        "investigation_link_restricted",
+        "attribution_integrity_check",
+        "limited_explanation",
+        "rule_shadow_run",
+        "attribution_health_drop",
+        "auto_quarantine",
+        "d_plus_n_threshold_changed",
+        "staging_e2e_pass",
+        "staging_signoff_missing",
+        "data_breach_runbook",
+        "partner_operations_tags",
+        "quality_economics_basic",
+        "fraud_commission_review",
+        "api_docs_playbook"
+      ]
+    },
+    {
+      "path": "/partners/{partner_id}/traffic-profile/review",
+      "method": "POST",
+      "tag": "IFJOnboardingGate",
+      "operationId": "reviewPartnerTrafficProfile",
+      "summary": "Review partner traffic profile",
+      "scenarios": [
+        "onboarding_traffic_profile",
+        "onboarding_gate_disabled",
+        "official_path_generation",
+        "domain_violation",
+        "click_risk_observed",
+        "event_gap_alert",
+        "event_gap_minor_alert",
+        "cluster_case_group",
+        "partner_baseline_deviation",
+        "partner_baseline_switched",
+        "investigation_required",
+        "investigation_link_restricted",
+        "attribution_integrity_check",
+        "limited_explanation",
+        "rule_shadow_run",
+        "attribution_health_drop",
+        "auto_quarantine",
+        "d_plus_n_threshold_changed",
+        "staging_e2e_pass",
+        "staging_signoff_missing",
+        "data_breach_runbook",
+        "partner_operations_tags",
+        "quality_economics_basic",
+        "fraud_commission_review",
+        "api_docs_playbook"
+      ]
+    },
+    {
+      "path": "/partners/{partner_id}/link-eligibility",
+      "method": "GET",
+      "tag": "IFJOnboardingGate",
+      "operationId": "getPartnerLinkEligibility",
+      "summary": "Get first-link eligibility",
+      "scenarios": [
+        "onboarding_traffic_profile",
+        "onboarding_gate_disabled",
+        "official_path_generation",
+        "domain_violation",
+        "click_risk_observed",
+        "event_gap_alert",
+        "event_gap_minor_alert",
+        "cluster_case_group",
+        "partner_baseline_deviation",
+        "partner_baseline_switched",
+        "investigation_required",
+        "investigation_link_restricted",
+        "attribution_integrity_check",
+        "limited_explanation",
+        "rule_shadow_run",
+        "attribution_health_drop",
+        "auto_quarantine",
+        "d_plus_n_threshold_changed",
+        "staging_e2e_pass",
+        "staging_signoff_missing",
+        "data_breach_runbook",
+        "partner_operations_tags",
+        "quality_economics_basic",
+        "fraud_commission_review",
+        "api_docs_playbook"
+      ]
+    },
+    {
+      "path": "/official-paths",
+      "method": "GET",
+      "tag": "IFJOfficialPath",
+      "operationId": "listOfficialPaths",
+      "summary": "List enabled official path options",
+      "scenarios": [
+        "onboarding_traffic_profile",
+        "onboarding_gate_disabled",
+        "official_path_generation",
+        "domain_violation",
+        "click_risk_observed",
+        "event_gap_alert",
+        "event_gap_minor_alert",
+        "cluster_case_group",
+        "partner_baseline_deviation",
+        "partner_baseline_switched",
+        "investigation_required",
+        "investigation_link_restricted",
+        "attribution_integrity_check",
+        "limited_explanation",
+        "rule_shadow_run",
+        "attribution_health_drop",
+        "auto_quarantine",
+        "d_plus_n_threshold_changed",
+        "staging_e2e_pass",
+        "staging_signoff_missing",
+        "data_breach_runbook",
+        "partner_operations_tags",
+        "quality_economics_basic",
+        "fraud_commission_review",
+        "api_docs_playbook"
+      ]
+    },
+    {
+      "path": "/deep-links/validate-target",
+      "method": "POST",
+      "tag": "IFJOfficialPath",
+      "operationId": "validateDeepLinkTarget",
+      "summary": "Validate official target before link generation",
+      "scenarios": [
+        "official_path_generation",
+        "domain_violation"
+      ]
+    },
+    {
+      "path": "/admin/configs/domain-policies",
+      "method": "GET",
+      "tag": "IFJOfficialPath",
+      "operationId": "getOfficialDomainPolicy",
+      "summary": "Get official domain policy",
+      "scenarios": [
+        "onboarding_traffic_profile",
+        "onboarding_gate_disabled",
+        "official_path_generation",
+        "domain_violation",
+        "click_risk_observed",
+        "event_gap_alert",
+        "event_gap_minor_alert",
+        "cluster_case_group",
+        "partner_baseline_deviation",
+        "partner_baseline_switched",
+        "investigation_required",
+        "investigation_link_restricted",
+        "attribution_integrity_check",
+        "limited_explanation",
+        "rule_shadow_run",
+        "attribution_health_drop",
+        "auto_quarantine",
+        "d_plus_n_threshold_changed",
+        "staging_e2e_pass",
+        "staging_signoff_missing",
+        "data_breach_runbook",
+        "partner_operations_tags",
+        "quality_economics_basic",
+        "fraud_commission_review",
+        "api_docs_playbook"
+      ]
+    },
+    {
+      "path": "/admin/configs/domain-policies",
+      "method": "POST",
+      "tag": "IFJOfficialPath",
+      "operationId": "updateOfficialDomainPolicy",
+      "summary": "Update official domain policy",
+      "scenarios": [
+        "domain_violation"
+      ]
+    },
+    {
+      "path": "/admin/configs/onboarding-gate",
+      "method": "GET",
+      "tag": "IFJRiskGovernance",
+      "operationId": "getOnboardingGateConfig",
+      "summary": "Get onboarding profile gate config",
+      "scenarios": [
+        "onboarding_traffic_profile",
+        "onboarding_gate_disabled"
+      ]
+    },
+    {
+      "path": "/admin/configs/onboarding-gate",
+      "method": "POST",
+      "tag": "IFJRiskGovernance",
+      "operationId": "updateOnboardingGateConfig",
+      "summary": "Update onboarding profile gate config",
+      "scenarios": [
+        "onboarding_traffic_profile",
+        "onboarding_gate_disabled"
+      ]
+    },
+    {
+      "path": "/admin/configs/official-paths",
+      "method": "GET",
+      "tag": "IFJOfficialPath",
+      "operationId": "adminListOfficialPaths",
+      "summary": "List official path library",
+      "scenarios": [
+        "onboarding_traffic_profile",
+        "onboarding_gate_disabled",
+        "official_path_generation",
+        "domain_violation",
+        "click_risk_observed",
+        "event_gap_alert",
+        "event_gap_minor_alert",
+        "cluster_case_group",
+        "partner_baseline_deviation",
+        "partner_baseline_switched",
+        "investigation_required",
+        "investigation_link_restricted",
+        "attribution_integrity_check",
+        "limited_explanation",
+        "rule_shadow_run",
+        "attribution_health_drop",
+        "auto_quarantine",
+        "d_plus_n_threshold_changed",
+        "staging_e2e_pass",
+        "staging_signoff_missing",
+        "data_breach_runbook",
+        "partner_operations_tags",
+        "quality_economics_basic",
+        "fraud_commission_review",
+        "api_docs_playbook"
+      ]
+    },
+    {
+      "path": "/admin/configs/official-paths",
+      "method": "POST",
+      "tag": "IFJOfficialPath",
+      "operationId": "updateOfficialPathLibrary",
+      "summary": "Update official path library",
+      "scenarios": [
+        "official_path_generation",
+        "domain_violation"
+      ]
+    },
+    {
+      "path": "/events/click/risk-evaluation",
+      "method": "POST",
+      "tag": "IFJClickRisk",
+      "operationId": "evaluateClickRisk",
+      "summary": "Evaluate deterministic click risk",
+      "scenarios": [
+        "click_risk_observed"
+      ]
+    },
+    {
+      "path": "/admin/integration/event-integrity",
+      "method": "GET",
+      "tag": "IFJEventIntegrity",
+      "operationId": "listEventIntegritySnapshots",
+      "summary": "List event integrity snapshots",
+      "scenarios": [
+        "event_gap_alert",
+        "event_gap_minor_alert"
+      ]
+    },
+    {
+      "path": "/admin/integration/event-integrity/{stage}",
+      "method": "GET",
+      "tag": "IFJEventIntegrity",
+      "operationId": "getEventIntegritySnapshot",
+      "summary": "Get one event integrity stage",
+      "scenarios": [
+        "event_gap_alert",
+        "event_gap_minor_alert"
+      ]
+    },
+    {
+      "path": "/admin/integration/attribution-integrity-checks",
+      "method": "POST",
+      "tag": "IFJEventIntegrity",
+      "operationId": "runAttributionIntegrityCheck",
+      "summary": "Run attribution integrity check",
+      "scenarios": [
+        "attribution_integrity_check"
+      ]
+    },
+    {
+      "path": "/admin/reports/attribution-health",
+      "method": "GET",
+      "tag": "IFJEventIntegrity",
+      "operationId": "getAttributionHealth",
+      "summary": "Get attribution health report",
+      "scenarios": [
+        "attribution_health_drop"
+      ]
+    },
+    {
+      "path": "/admin/risk-case-groups",
+      "method": "GET",
+      "tag": "IFJRiskGovernance",
+      "operationId": "listRiskCaseGroups",
+      "summary": "List auto-merged risk case groups",
+      "scenarios": [
+        "cluster_case_group"
+      ]
+    },
+    {
+      "path": "/admin/risk-case-groups",
+      "method": "POST",
+      "tag": "IFJRiskGovernance",
+      "operationId": "createRiskCaseGroupReview",
+      "summary": "Create risk case group review",
+      "scenarios": [
+        "cluster_case_group"
+      ]
+    },
+    {
+      "path": "/admin/risk-case-groups/{case_group_id}/split",
+      "method": "POST",
+      "tag": "IFJRiskGovernance",
+      "operationId": "splitRiskCaseGroup",
+      "summary": "Split members from a risk case group",
+      "scenarios": [
+        "cluster_case_group"
+      ]
+    },
+    {
+      "path": "/admin/risk/baselines",
+      "method": "GET",
+      "tag": "IFJRiskGovernance",
+      "operationId": "listPartnerBaselines",
+      "summary": "List partner, peer, country, and channel baselines",
+      "scenarios": [
+        "partner_baseline_deviation",
+        "partner_baseline_switched"
+      ]
+    },
+    {
+      "path": "/admin/reviews/investigations",
+      "method": "POST",
+      "tag": "IFJRiskGovernance",
+      "operationId": "createInvestigationTask",
+      "summary": "Create boundary anomaly investigation",
+      "scenarios": [
+        "investigation_required",
+        "investigation_link_restricted"
+      ]
+    },
+    {
+      "path": "/admin/reviews/investigations/{task_id}/conclude",
+      "method": "POST",
+      "tag": "IFJRiskGovernance",
+      "operationId": "concludeInvestigationTask",
+      "summary": "Conclude investigation and recommend fund action",
+      "scenarios": [
+        "investigation_required",
+        "investigation_link_restricted"
+      ]
+    },
+    {
+      "path": "/admin/quarantines",
+      "method": "GET",
+      "tag": "IFJRiskGovernance",
+      "operationId": "listQuarantines",
+      "summary": "List unified logical quarantine queue",
+      "scenarios": [
+        "auto_quarantine",
+        "d_plus_n_threshold_changed"
+      ]
+    },
+    {
+      "path": "/admin/quarantines",
+      "method": "POST",
+      "tag": "IFJRiskGovernance",
+      "operationId": "createQuarantine",
+      "summary": "Apply logical quarantine or update queue config",
+      "scenarios": [
+        "auto_quarantine",
+        "d_plus_n_threshold_changed"
+      ]
+    },
+    {
+      "path": "/admin/quarantines/{quarantine_id}/release",
+      "method": "POST",
+      "tag": "IFJRiskGovernance",
+      "operationId": "releaseQuarantine",
+      "summary": "Release quarantine and rerun settlement checks",
+      "scenarios": [
+        "auto_quarantine"
+      ]
+    },
+    {
+      "path": "/admin/reviews/{case_group_id}/commission-links",
+      "method": "GET",
+      "tag": "IFJRiskGovernance",
+      "operationId": "listRiskCommissionLinks",
+      "summary": "List commissions linked to a risk case",
+      "scenarios": [
+        "fraud_commission_review"
+      ]
+    },
+    {
+      "path": "/finance/commission-cases/{commission_case_id}/risk-links",
+      "method": "GET",
+      "tag": "IFJRiskGovernance",
+      "operationId": "listCommissionRiskLinks",
+      "summary": "Reverse lookup risk links from commission",
+      "scenarios": [
+        "fraud_commission_review"
+      ]
+    },
+    {
+      "path": "/admin/staging-runs",
+      "method": "GET",
+      "tag": "IFJStagingGate",
+      "operationId": "listStagingRuns",
+      "summary": "List staging E2E runs",
+      "scenarios": [
+        "staging_e2e_pass",
+        "staging_signoff_missing"
+      ]
+    },
+    {
+      "path": "/admin/staging-runs",
+      "method": "POST",
+      "tag": "IFJStagingGate",
+      "operationId": "createStagingRun",
+      "summary": "Create staging E2E run",
+      "scenarios": [
+        "staging_e2e_pass",
+        "staging_signoff_missing"
+      ]
+    },
+    {
+      "path": "/admin/staging-runs/{run_id}/signoffs",
+      "method": "POST",
+      "tag": "IFJStagingGate",
+      "operationId": "submitStagingSignoff",
+      "summary": "Submit risk, finance, or compliance signoff",
+      "scenarios": [
+        "staging_e2e_pass",
+        "staging_signoff_missing"
+      ]
+    },
+    {
+      "path": "/admin/configs/shadow-runs",
+      "method": "POST",
+      "tag": "IFJContractQuality",
+      "operationId": "createRuleShadowRun",
+      "summary": "Create rule shadow run",
+      "scenarios": [
+        "rule_shadow_run"
+      ]
+    },
+    {
+      "path": "/admin/configs/shadow-runs/{shadow_run_id}",
+      "method": "GET",
+      "tag": "IFJContractQuality",
+      "operationId": "getRuleShadowRun",
+      "summary": "Get shadow run diff and fund impact",
+      "scenarios": [
+        "rule_shadow_run"
+      ]
+    },
+    {
+      "path": "/admin/partners/{partner_id}/operation-tags",
+      "method": "GET",
+      "tag": "IFJDataGovernance",
+      "operationId": "listPartnerOperationTags",
+      "summary": "List partner operation tags",
+      "scenarios": [
+        "partner_operations_tags"
+      ]
+    },
+    {
+      "path": "/admin/partners/{partner_id}/operation-tags",
+      "method": "POST",
+      "tag": "IFJDataGovernance",
+      "operationId": "applyPartnerOperationTag",
+      "summary": "Apply partner operation tag",
+      "scenarios": [
+        "partner_operations_tags"
+      ]
+    },
+    {
+      "path": "/admin/partners/{partner_id}/operation-tags/{tag_id}",
+      "method": "DELETE",
+      "tag": "IFJDataGovernance",
+      "operationId": "removePartnerOperationTag",
+      "summary": "Remove partner operation tag",
+      "scenarios": [
+        "partner_operations_tags"
+      ]
+    },
+    {
+      "path": "/admin/data-governance/policies",
+      "method": "GET",
+      "tag": "IFJDataGovernance",
+      "operationId": "listDataGovernancePolicies",
+      "summary": "List data governance policies",
+      "scenarios": [
+        "data_breach_runbook"
+      ]
+    },
+    {
+      "path": "/admin/data-governance/exports",
+      "method": "POST",
+      "tag": "IFJDataGovernance",
+      "operationId": "createDataExportRequest",
+      "summary": "Create data export request",
+      "scenarios": [
+        "data_breach_runbook"
+      ]
+    },
+    {
+      "path": "/admin/data-governance/deletions",
+      "method": "POST",
+      "tag": "IFJDataGovernance",
+      "operationId": "createDataDeletionTask",
+      "summary": "Create policy-based deletion task",
+      "scenarios": [
+        "data_breach_runbook"
+      ]
+    },
+    {
+      "path": "/admin/data-governance/breach-incidents",
+      "method": "POST",
+      "tag": "IFJDataGovernance",
+      "operationId": "createDataBreachIncident",
+      "summary": "Register data breach incident",
+      "scenarios": [
+        "data_breach_runbook"
+      ]
+    },
+    {
+      "path": "/admin/reports/quality-economics",
+      "method": "GET",
+      "tag": "IFJContractQuality",
+      "operationId": "getQualityEconomicsSnapshot",
+      "summary": "Get MVP quality economics report",
+      "scenarios": [
+        "quality_economics_basic",
+        "quality_economics_full"
+      ]
+    },
+    {
+      "path": "/dev/contract/checks",
+      "method": "POST",
+      "tag": "IFJContractQuality",
+      "operationId": "runContractQualityCheck",
+      "summary": "Run OpenAPI, schema, mock, and docs check",
+      "scenarios": [
+        "api_docs_playbook"
+      ]
+    },
+    {
+      "path": "/admin/reports/audit-packs",
+      "method": "GET",
+      "tag": "IFJContractQuality",
+      "operationId": "listQuarterlyAuditPacks",
+      "summary": "List reserved quarterly audit packs",
+      "scenarios": [
+        "quarterly_audit_pack"
+      ]
+    },
+    {
+      "path": "/admin/reports/audit-packs",
+      "method": "POST",
+      "tag": "IFJContractQuality",
+      "operationId": "generateQuarterlyAuditPack",
+      "summary": "Generate reserved quarterly audit pack",
+      "scenarios": [
+        "quarterly_audit_pack"
+      ]
+    },
+    {
+      "path": "/admin/assets/landing-patrols",
+      "method": "GET",
+      "tag": "IFJContractQuality",
+      "operationId": "listAssetLandingPatrols",
+      "summary": "List reserved landing patrol tasks",
+      "scenarios": [
+        "asset_landing_patrol"
+      ]
+    },
+    {
+      "path": "/subchannels/{subchannel_id}/risk-state",
+      "method": "GET",
+      "tag": "IFJContractQuality",
+      "operationId": "getSubChannelRiskState",
+      "summary": "Get reserved Sub ID risk state",
+      "scenarios": [
+        "subid_risk_state"
+      ]
+    },
+    {
+      "path": "/subchannels/{subchannel_id}/risk-state",
+      "method": "PATCH",
+      "tag": "IFJContractQuality",
+      "operationId": "updateSubChannelRiskState",
+      "summary": "Update reserved Sub ID risk state",
+      "scenarios": [
+        "subid_risk_state"
+      ]
+    },
+    {
+      "path": "/admin/schema-extensions/multi-level",
+      "method": "GET",
+      "tag": "IFJContractQuality",
+      "operationId": "getMultiLevelSchemaReserve",
+      "summary": "Get multi-level hierarchy schema reserve",
+      "scenarios": [
+        "multi_level_schema_reserve"
+      ]
+    },
+    {
+      "path": "/admin/configs/advanced-tier-pricing",
+      "method": "GET",
+      "tag": "IFJContractQuality",
+      "operationId": "getAdvancedTierPricingReserve",
+      "summary": "Get richer tier pricing reserve",
+      "scenarios": [
+        "advanced_tier_pricing"
+      ]
+    },
+    {
+      "path": "/admin/configs/advanced-tier-pricing",
+      "method": "POST",
+      "tag": "IFJContractQuality",
+      "operationId": "updateAdvancedTierPricingReserve",
+      "summary": "Update richer tier pricing reserve",
+      "scenarios": [
+        "advanced_tier_pricing"
       ]
     }
   ]

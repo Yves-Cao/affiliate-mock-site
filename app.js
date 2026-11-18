@@ -165,6 +165,7 @@ let accountDraft = null;
 let accountMenuCloseTimer = null;
 let walletCloseTimer = null;
 let authMode = "login";
+let authAccountType = "personal";
 let sidebarHoverOpen = false;
 let onboardingPicker = "";
 let onboardingQuery = "";
@@ -209,7 +210,10 @@ function accountTimezoneLabel(timezone) {
 }
 
 function accountTimezoneOffset(timezone) {
-  const match = accountTimezoneLabel(timezone).match(/GMT([+-]\d{2}:\d{2})/);
+  const offset = new Intl.DateTimeFormat("en-US", { timeZone: timezone, timeZoneName: "longOffset" })
+    .formatToParts(new Date())
+    .find(part => part.type === "timeZoneName")?.value || "GMT";
+  const match = offset.match(/GMT([+-]\d{2}:\d{2})/);
   if (!match) return "UTC";
   const [, rawOffset] = match;
   const [hours, minutes] = rawOffset.slice(1).split(":");
@@ -264,34 +268,32 @@ function closeOnboardingPicker(restoreFocus = false) {
 
 function initializeElements() {
   for (const id of [
-    "login-view", "login-form", "login-error", "register-form", "register-error",
-    "login-tab", "register-tab", "app-view", "sidebar", "nav",
+    "login-view", "login-form", "login-error", "ib-login-error", "simulate-ib-login", "register-form", "register-error",
+    "app-view", "sidebar", "nav",
     "profile-entry", "sidebar-toggle", "mobile-nav-toggle", "language-toggle", "language-menu",
     "kyc-banner", "dismiss-kyc", "main", "modal-root", "toast", "scenario-select",
     "account-menu", "avatar-button", "account-dropdown", "wallet-menu", "wallet-toggle",
     "wallet-popover", "wallet-balance", "wallet-total-revenue", "wallet-available-commission", "wallet-available-guarantee", "message-count",
     "wallet-processing",
     "server-time", "server-date", "server-time-zone", "local-time", "local-date", "local-time-zone",
-    "wallet-system", "wallet-category", "wallet-account-name", "theme-toggle", "avatar-initial", "avatar-name"
+    "theme-toggle", "avatar-initial", "avatar-name"
   ]) elements[id] = document.getElementById(id);
 }
 
 function updateTopbarClocks() {
   const now = new Date();
-  const timezone = isValidTimezone(AFF.state?.account?.timezone)
-    ? AFF.state.account.timezone
-    : defaultState.account.timezone;
-  const time = formatAccountTime(now, timezone);
-  const zoneLabel = accountTimezoneLabel(timezone);
-  const offsetLabel = accountTimezoneOffset(timezone);
-  elements["server-time"].textContent = time.slice(11);
-  elements["server-date"].textContent = time.slice(0, 10);
-  elements["local-time"].textContent = time.slice(11);
-  elements["local-date"].textContent = time.slice(0, 10);
-  elements["server-time-zone"].textContent = offsetLabel;
-  elements["local-time-zone"].textContent = offsetLabel;
-  elements["server-date"].title = `服务器时间 · ${zoneLabel}`;
-  elements["local-date"].title = `本地时间 · ${zoneLabel}`;
+  const serverTimezone = "Etc/GMT-3";
+  const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || defaultState.account.timezone;
+  const serverTime = formatAccountTime(now, serverTimezone);
+  const localTime = formatAccountTime(now, localTimezone);
+  elements["server-time"].textContent = serverTime.slice(11);
+  elements["server-date"].textContent = serverTime.slice(0, 10);
+  elements["local-time"].textContent = localTime.slice(11);
+  elements["local-date"].textContent = localTime.slice(0, 10);
+  elements["server-time-zone"].textContent = "UTC+3";
+  elements["local-time-zone"].textContent = accountTimezoneOffset(localTimezone);
+  elements["server-date"].title = "服务器时间 · UTC+3";
+  elements["local-date"].title = `本地时间 · ${localTimezone}`;
 }
 
 function currentState() {
@@ -307,8 +309,8 @@ function currentState() {
     }
     merged.account = { ...structuredClone(defaultState.account), ...(savedState.account || {}) };
     if (!isValidTimezone(merged.account.timezone)) merged.account.timezone = defaultState.account.timezone;
-    merged.applyStep = Math.min(6, Math.max(1, Number(savedState.applyStep) || 1));
-    merged.programMaxStep = Math.min(6, Math.max(merged.applyStep, savedState.programCompleted ? 6 : 1, Number(savedState.programMaxStep) || 1));
+    merged.applyStep = Math.min(7, Math.max(1, Number(savedState.applyStep) || 1));
+    merged.programMaxStep = Math.min(7, Math.max(merged.applyStep, savedState.programCompleted ? 7 : 1, Number(savedState.programMaxStep) || 1));
     merged.programAssetSlide = 0;
     const selectionVersionMatches = savedState.programCommissionSelectionVersion === defaultState.programCommissionSelectionVersion;
     merged.programCommissionCountries = selectionVersionMatches && Array.isArray(savedState.programCommissionCountries)
@@ -487,8 +489,8 @@ function navIcon(name) {
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${paths[name] || paths.dashboard}</svg>`;
 }
 
-function accountInitial() {
-  return [...AFF.state.account.displayName.trim()].find(char => /\S/.test(char)) || "M";
+function topbarDisplayName() {
+  return String(AFF.state.account.displayName || "");
 }
 
 function maskEmail(email) {
@@ -512,9 +514,8 @@ function render() {
     .filter(message => message.status === "unread").length;
   elements["message-count"].textContent = unreadCount;
   elements["message-count"].hidden = unreadCount === 0;
-  elements["avatar-initial"].textContent = accountInitial();
-  elements["avatar-name"].textContent = AFF.state.account.displayName;
-  elements["wallet-account-name"].textContent = AFF.state.account.displayName;
+  elements["avatar-initial"].alt = AFF.state.account.displayName;
+  elements["avatar-name"].textContent = topbarDisplayName();
   elements["avatar-button"].setAttribute("aria-label", `${AFF.state.account.displayName} 个人中心菜单`);
   elements["scenario-select"].value = AFF.state.scenario;
   elements.main.innerHTML = ["normal-flow", "closure-flow"].includes(AFF.state.scenario)
@@ -560,8 +561,6 @@ function syncTopbarLanguage() {
   const clockLabels = document.querySelectorAll(".mt-time-display__name");
   if (clockLabels[0]) clockLabels[0].textContent = english ? "Server" : "服务器";
   if (clockLabels[1]) clockLabels[1].textContent = english ? "Local" : "本地";
-  elements["wallet-system"].textContent = "Affiliate CPA";
-  elements["wallet-category"].textContent = english ? "Partner" : "合作方";
   const accountLabels = document.querySelectorAll("#account-dropdown .account-menu-item span:last-child");
   if (accountLabels[0]) accountLabels[0].textContent = english ? "Personal center" : "个人中心";
   if (accountLabels[1]) accountLabels[1].textContent = english ? "Sign out" : "退出登录";
@@ -1418,7 +1417,7 @@ function handleAction(action, target) {
   }
   if (action === "complete-program") {
     state.programCompleted = true;
-    state.programMaxStep = 6;
+    state.programMaxStep = 7;
     showToast("合作者计划引导已完成");
     return render();
   }
@@ -1544,7 +1543,7 @@ function handleClick(event) {
     const step = Number(dataset.applyStep);
     const reached = Math.max(AFF.state.programMaxStep || 1, AFF.state.applyStep);
     const limit = target.hasAttribute("data-program-progress") ? reached : Math.max(reached, AFF.state.applyStep + 1);
-    if (step < 1 || step > 6 || step > limit) return;
+    if (step < 1 || step > 7 || step > limit) return;
     AFF.state.applyStep = step;
     AFF.state.programMaxStep = Math.max(reached, step);
     return render();
@@ -1675,21 +1674,19 @@ function setAuthMode(mode, updateHash = true) {
   elements["login-view"].classList.toggle("register-mode", isRegister);
   elements["login-form"].classList.toggle("hidden", isRegister);
   elements["register-form"].classList.toggle("hidden", !isRegister);
-  elements["login-tab"].classList.toggle("active", !isRegister);
-  elements["register-tab"].classList.toggle("active", isRegister);
-  elements["login-tab"].setAttribute("aria-selected", String(!isRegister));
-  elements["register-tab"].setAttribute("aria-selected", String(isRegister));
   elements["login-error"].hidden = true;
+  elements["ib-login-error"].hidden = true;
   elements["register-error"].hidden = true;
   if (updateHash) {
     history.replaceState(null, "", `${location.pathname}${location.search}#/${authMode}`);
-  document.title = `${isRegister ? "注册" : "登录"} · Affiliate CPA`;
   }
+  document.title = `${isRegister ? "注册" : "登录"} · Affiliate CPA`;
 }
 
 function showLoginError(message) {
   elements["login-error"].textContent = message;
   elements["login-error"].hidden = false;
+  elements["ib-login-error"].hidden = true;
 }
 
 function showRegisterError(message) {
@@ -1704,6 +1701,7 @@ async function handleLogin(event) {
   if (!isValidEmail(email)) return showLoginError("请输入有效邮箱。");
   if (!password) return showLoginError("请输入密码。");
   elements["login-error"].hidden = true;
+  elements["ib-login-error"].hidden = true;
   sessionStorage.setItem("affiliate-user-session", email);
   try {
     const registered = JSON.parse(sessionStorage.getItem("affiliate-registered-account") || "null");
@@ -1713,7 +1711,7 @@ async function handleLogin(event) {
   const isFirstLogin = localStorage.getItem(markerKey) !== "1";
   if (isFirstLogin) localStorage.setItem(markerKey, "1");
   if (!AFF.state.programCompleted) {
-    AFF.state.applyStep = Math.min(6, Math.max(1, Number(AFF.state.programMaxStep) || Number(AFF.state.applyStep) || 1));
+    AFF.state.applyStep = Math.min(7, Math.max(1, Number(AFF.state.programMaxStep) || Number(AFF.state.applyStep) || 1));
   }
   AFF.state.route = "dash";
   history.replaceState(null, "", `${location.pathname}${location.search}#/${AFF.state.route}`);
@@ -1724,19 +1722,43 @@ async function handleLogin(event) {
   showToast(`已登录：${maskEmail(email)}`);
 }
 
+function simulateIbLogin() {
+  const form = elements["login-form"];
+  form.email.value = "ib.partner@example.com";
+  form.password.value = "demo-password";
+  elements["login-error"].hidden = true;
+  elements["ib-login-error"].hidden = false;
+}
+
 function handleRegister(event) {
   event.preventDefault();
   const form = event.currentTarget;
+  const accountType = form.dataset.accountType === "company" ? "company" : "personal";
   const email = form.email.value.trim();
   const password = form.password.value;
-  const confirmPassword = form.confirmPassword.value;
+  const verificationCode = form.verificationCode.value.trim();
+  const phone = form.phone.value.trim();
   const country = form.country.value;
+  if (accountType === "personal" && !form.lastName.value.trim()) return showRegisterError("请输入真实姓氏。");
+  if (accountType === "personal" && !form.firstName.value.trim()) return showRegisterError("请输入真实名字。");
+  if (accountType === "company" && !form.companyName.value.trim()) return showRegisterError("请输入公司名称。");
   if (!isValidEmail(email)) return showRegisterError("请输入有效邮箱。");
+  if (!phone) return showRegisterError("请输入手机号码。");
+  if (!verificationCode) return showRegisterError("请输入邮箱验证码。");
   if (!password) return showRegisterError("请输入密码。");
-  if (password !== confirmPassword) return showRegisterError("两次输入的密码不一致。");
-  if (!country) return showRegisterError("请选择国家。");
-  sessionStorage.setItem("affiliate-registered-account", JSON.stringify({ email, country }));
+  if (!form.legalConfirmed.checked) return showRegisterError("请确认账号创建声明。");
+  sessionStorage.setItem("affiliate-registered-account", JSON.stringify({
+    email,
+    country,
+    accountType,
+    lastName: form.lastName.value.trim(),
+    firstName: form.firstName.value.trim(),
+    companyName: form.companyName.value.trim(),
+    phone
+  }));
   form.reset();
+  form.querySelector("[data-send-code]").disabled = true;
+  setRegisterAccountType("personal");
   setAuthMode("login");
   elements["login-form"].email.value = email;
   elements["login-form"].password.value = "";
@@ -1820,20 +1842,101 @@ function initializeAccountMenu() {
 }
 
 function initializeAuthForms() {
-  elements["login-tab"].addEventListener("click", () => setAuthMode("login"));
-  elements["register-tab"].addEventListener("click", () => setAuthMode("register"));
-  [elements["login-tab"], elements["register-tab"]].forEach((tab, index, tabs) => {
-    tab.addEventListener("keydown", event => {
-      if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
-      event.preventDefault();
-      const nextMode = index === 0 ? "register" : "login";
-      setAuthMode(nextMode);
-      tabs[1 - index].focus();
-    });
-  });
+  initializeAuthLanguageMenus();
   document.querySelectorAll("[data-auth-switch]").forEach(button => {
     button.addEventListener("click", () => setAuthMode(button.dataset.authSwitch));
   });
+  document.querySelectorAll("[data-register-account]").forEach(button => {
+    button.addEventListener("click", () => setRegisterAccountType(button.dataset.registerAccount));
+  });
+  elements["register-form"].email.addEventListener("input", event => {
+    const sendButton = elements["register-form"].querySelector("[data-send-code]");
+    sendButton.disabled = !isValidEmail(event.target.value.trim());
+  });
+  elements["register-form"].querySelector("[data-send-code]").addEventListener("click", event => {
+    event.preventDefault();
+    elements["register-form"].verificationCode.value = "123456";
+    showToast("Mock 验证码：123456");
+  });
+  document.querySelectorAll("[data-password-toggle]").forEach(button => {
+    button.addEventListener("click", () => {
+      const input = button.parentElement.querySelector("input");
+      input.type = input.type === "password" ? "text" : "password";
+    });
+  });
+  document.querySelectorAll(".login-social").forEach(button => {
+    button.addEventListener("click", () => showToast("Mock 页面暂未接入第三方登录"));
+  });
+}
+
+function setAuthLanguageMenuOpen(menu, open) {
+  const trigger = menu.querySelector("[data-auth-language-toggle]");
+  const options = menu.querySelector("[data-auth-language-options]");
+  options.hidden = !open;
+  trigger.setAttribute("aria-expanded", String(open));
+  if (!open) return;
+  const selected = options.querySelector("[aria-selected='true']") || options.querySelector("button");
+  selected?.focus();
+}
+
+function selectAuthLanguage(value) {
+  document.querySelectorAll(".auth-language-menu").forEach(menu => {
+    menu.querySelector("[data-auth-language-label]").textContent = value;
+    menu.querySelectorAll("[data-auth-language-value]").forEach(option => {
+      option.setAttribute("aria-selected", String(option.dataset.authLanguageValue === value));
+    });
+  });
+}
+
+function initializeAuthLanguageMenus() {
+  const menus = [...document.querySelectorAll(".auth-language-menu")];
+  menus.forEach(menu => {
+    const trigger = menu.querySelector("[data-auth-language-toggle]");
+    const options = menu.querySelector("[data-auth-language-options]");
+    trigger.addEventListener("click", event => {
+      event.stopPropagation();
+      const open = trigger.getAttribute("aria-expanded") === "true";
+      menus.forEach(other => setAuthLanguageMenuOpen(other, false));
+      setAuthLanguageMenuOpen(menu, !open);
+    });
+    options.addEventListener("click", event => {
+      const option = event.target.closest("[data-auth-language-value]");
+      if (!option) return;
+      event.stopPropagation();
+      selectAuthLanguage(option.dataset.authLanguageValue);
+      setAuthLanguageMenuOpen(menu, false);
+      trigger.focus();
+    });
+    options.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        setAuthLanguageMenuOpen(menu, false);
+        trigger.focus();
+      }
+      if (!["ArrowDown", "ArrowUp"].includes(event.key)) return;
+      event.preventDefault();
+      const items = [...options.querySelectorAll("[data-auth-language-value]")];
+      const nextIndex = items.indexOf(document.activeElement) + (event.key === "ArrowDown" ? 1 : -1);
+      items[(nextIndex + items.length) % items.length]?.focus();
+    });
+  });
+  document.addEventListener("click", () => {
+    menus.forEach(menu => setAuthLanguageMenuOpen(menu, false));
+  });
+}
+
+function setRegisterAccountType(type) {
+  authAccountType = type === "company" ? "company" : "personal";
+  const form = elements["register-form"];
+  form.dataset.accountType = authAccountType;
+  const countryLabel = form.querySelector('[data-account-label="country"]');
+  countryLabel.textContent = authAccountType === "company" ? countryLabel.dataset.companyLabel : "居住国家";
+  form.querySelectorAll("[data-register-account]").forEach(button => {
+    const active = button.dataset.registerAccount === authAccountType;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-selected", String(active));
+  });
+  elements["register-error"].hidden = true;
 }
 
 function initialize() {
@@ -1844,6 +1947,7 @@ function initialize() {
   initializeAccountMenu();
   initializeAuthForms();
   elements["login-form"].addEventListener("submit", handleLogin);
+  elements["simulate-ib-login"].addEventListener("click", simulateIbLogin);
   elements["register-form"].addEventListener("submit", handleRegister);
   const toggleSidebar = () => {
     if (window.innerWidth <= 991) {
@@ -1909,9 +2013,19 @@ function initialize() {
   document.addEventListener("click", event => {
     if (!event.target.closest("#language-menu")) setLanguageMenu(false);
   });
-  elements["dismiss-kyc"].addEventListener("click", () => {
+  elements["dismiss-kyc"].addEventListener("click", event => {
+    event.stopPropagation();
     AFF.state.kycDismissed = true;
     render();
+  });
+  elements["kyc-banner"].addEventListener("click", event => {
+    if (event.target.closest("#dismiss-kyc")) return;
+    navigate("onboarding");
+  });
+  elements["kyc-banner"].addEventListener("keydown", event => {
+    if (!["Enter", " "].includes(event.key)) return;
+    event.preventDefault();
+    navigate("onboarding");
   });
   elements["scenario-select"].addEventListener("change", event => {
     AFF.simulation.setScenario(event.target.value);

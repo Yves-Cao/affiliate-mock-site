@@ -165,22 +165,23 @@
 
 .report-client-table { border-collapse: separate; border-spacing: 0; }
 
-.report-client-scroll .report-client-table { min-width: 1190px; }
+.report-client-scroll .report-client-table { min-width: 1150px; }
 .report-client-col-clientId { width: 142px; }
 .report-client-col-registeredAt { width: 98px; }
-.report-client-col-campaign { width: 112px; }
+.report-client-col-campaign { width: 106px; }
 .report-client-col-kyc { width: 60px; }
 .report-client-col-stage { width: 100px; }
 .report-client-col-quality { width: 68px; }
 .report-client-col-expected { width: 94px; }
 .report-client-col-settled { width: 94px; }
-.report-client-col-progress { width: 74px; }
-.report-client-col-commissionStatus { width: 128px; }
-.report-client-col-riskHandlingStatus { width: 86px; }
-.report-client-col-actions { width: 116px; }
+.report-client-col-progress { width: 66px; }
+.report-client-col-commissionStatus { width: 144px; }
+.report-client-col-riskHandlingStatus { width: 68px; }
+.report-client-col-actions { width: 94px; }
 
 .report-client-scroll .report-client-table th,
 .report-client-scroll .report-client-table td { padding: 11px 10px; }
+.report-client-scroll .report-client-table td.report-commission-cell { padding-top: 8px; padding-bottom: 8px; }
 .report-client-table tbody tr { --row-accent: var(--surface); }
 .report-client-table tbody tr:nth-child(even) { --row-accent: #fbfdff; }
 .report-client-table tbody tr:hover { --row-accent: var(--row-hover); }
@@ -265,6 +266,7 @@
     -webkit-overflow-scrolling: touch;
   }
     .report-client-scroll .report-client-table { width: 1190px; min-width: 1190px; table-layout: fixed; }
+  .report-client-col-actions { width: 116px; }
   .report-client-table thead th:first-child,
   .report-client-table tbody td:first-child { position: sticky; left: 0; }
   .report-client-table thead th:last-child,

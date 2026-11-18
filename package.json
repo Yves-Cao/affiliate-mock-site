@@ -13,6 +13,7 @@
     "test:earnings-risk": "node scripts/earnings-risk-check.cjs",
     "test:dashboard-clients": "node scripts/dashboard-clients-check.cjs",
     "test:sidebar-hover": "node scripts/sidebar-hover-check.cjs",
+    "test:partner-program-guide": "node scripts/partner-program-guide-check.cjs",
     "test:withdrawals": "node scripts/withdrawal-check.cjs",
     "test:service-pages": "node scripts/service-pages-check.cjs",
     "test:account-page": "node scripts/account-page-check.cjs",
@@ -58,7 +59,8 @@
     "test:task-queue": "node scripts/task-queue-check.cjs",
     "test:admin-api": "node scripts/admin-api-check.cjs",
     "test:cx-api": "node scripts/cx-api-check.cjs",
-    "test:mock-contract": "npm run test:admin-api && npm run test:cx-api && npm run test:target-openapi",
-    "test:target-openapi": "node scripts/target-openapi-check.cjs"
+    "test:mock-contract": "npm run test:admin-api && npm run test:cx-api && npm run test:target-openapi && npm run test:admin-inventory",
+    "test:target-openapi": "node scripts/target-openapi-check.cjs",
+    "test:admin-inventory": "node scripts/admin-openapi-inventory-check.cjs"
   }
 }

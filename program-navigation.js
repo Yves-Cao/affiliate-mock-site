@@ -5,7 +5,8 @@
     ["查看支持地区", "Supported regions", "确认推广国家支持的网页和移动平台。", "Check supported web and mobile platforms for each country."],
     ["素材库总览", "Asset library", "选择适合您的横幅、视频和落地页。", "Find banners, videos and landing pages for your channels."],
     ["收益与系统指引", "Earnings and system guide", "了解佣金结算、保证金与数据查看入口。", "Understand settlement, guarantees and reporting tools."],
-    ["分享简介链接", "Share your link", "获取推广链接，按需配置进阶推广工具。", "Get promotion links and explore advanced tools when needed."]
+    ["分享简介链接", "Share your link", "复制适合投放场景的专属推广链接。", "Copy the promotion link that fits your channel."],
+    ["回传链接指引", "Postback guide", "判断是否需要回传，并了解配置入口。", "Decide whether postbacks fit your workflow and configure them."]
   ];
   let trigger = null;
 
@@ -17,7 +18,7 @@
   }
 
   function go(step) {
-    const reached = Math.min(6, Math.max(1, AFF.state.programMaxStep, AFF.state.applyStep));
+    const reached = Math.min(7, Math.max(1, AFF.state.programMaxStep, AFF.state.applyStep));
     if (!Number.isInteger(step) || step < 1 || step > reached) return;
     close(false);
     AFF.state.applyStep = step;
@@ -29,7 +30,7 @@
     trigger = source instanceof HTMLElement ? source : document.getElementById("profile-entry");
     const en = AFF.state.language === "en";
     const t = (zh, english) => en ? english : zh;
-    const reached = Math.min(6, Math.max(1, AFF.state.programMaxStep, AFF.state.applyStep));
+    const reached = Math.min(7, Math.max(1, AFF.state.programMaxStep, AFF.state.applyStep));
     const completed = AFF.state.programCompleted;
     const root = document.createElement("div");
     root.id = "program-navigation-root";
@@ -42,8 +43,8 @@
         </header>
         <div class="aff-drawer-body program-navigation-body">
           <section class="program-navigation-progress" aria-label="${t("学习进度", "Learning progress")}">
-            <div><strong>${completed ? t("已完成指引", "Guide completed") : t("继续了解您的合作计划", "Continue your program guide")}</strong><span>${completed ? "6 / 6" : `${reached} / 6`}</span></div>
-            <progress max="6" value="${completed ? 6 : reached}" aria-label="${t("已到达步骤", "Steps reached")}"></progress>
+            <div><strong>${completed ? t("已完成指引", "Guide completed") : t("继续了解您的合作计划", "Continue your program guide")}</strong><span>${completed ? "7 / 7" : `${reached} / 7`}</span></div>
+            <progress max="7" value="${completed ? 7 : reached}" aria-label="${t("已到达步骤", "Steps reached")}"></progress>
             <p>${completed ? t("随时回看奖励、结算规则与推广方式。", "Revisit rewards, settlement rules and promotion tools anytime.") : t("从上次进度继续，已到达的步骤可随时回看。", "Continue where you left off, or revisit any step you have reached.")}</p>
           </section>
           <ol class="program-navigation-list">

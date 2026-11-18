@@ -75,6 +75,22 @@
   --font-text-24-semibold: 600 24px/32px var(--font-family-user);
 }
 
+@font-face {
+  font-family: "D-DIN-PRO";
+  src: url("assets/fonts/D-DIN-PRO-500-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "D-DIN-PRO";
+  src: url("assets/fonts/D-DIN-PRO-600-SemiBold.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 body[data-theme="dark"] {
   color-scheme: dark;
   --canvas: #061335;

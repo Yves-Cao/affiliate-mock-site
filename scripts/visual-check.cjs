@@ -57,7 +57,7 @@ async function main() {
   const browser = await chromium.launch({
     executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
   });
-  const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   const consoleErrors = [];
   const failedRequests = [];
   page.on("console", message => {
@@ -70,38 +70,85 @@ async function main() {
   await page.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded" });
   const loginLayout = await page.evaluate(() => {
     const view = document.querySelector(".login-view");
-    const loginBg = document.querySelector(".auth-visual-login");
-    const registerBg = document.querySelector(".auth-visual-register");
-    const panel = document.querySelector(".auth-panel");
-    const loginPanel = document.querySelector("#login-form");
-    const tabs = document.querySelector(".auth-tabs");
-    const panelRect = panel.getBoundingClientRect();
-    const loginPanelRect = loginPanel.getBoundingClientRect();
-    const panelStyle = getComputedStyle(panel);
-    return {
+    const background = document.querySelector(".login-page-bg");
+    const logo = document.querySelector(".login-logo img");
+    const card = document.querySelector(".login-auth");
+    const form = document.querySelector("#login-form");
+    const cardRect = card.getBoundingClientRect();
+    const formRect = form.getBoundingClientRect();
+    const cardStyle = getComputedStyle(card);
+    const rect = node => {
+      const value = node.getBoundingClientRect();
+      return [Math.round(value.left), Math.round(value.top), Math.round(value.width), Math.round(value.height)];
+    };
+  return {
       loginMode: view.classList.contains("login-mode"),
-      loginBgVisible: getComputedStyle(loginBg).display !== "none",
-      registerBgVisible: getComputedStyle(registerBg).display !== "none",
-      imageLoaded: loginBg.querySelector("img").complete && loginBg.querySelector("img").naturalWidth === 1672,
-      tabsVisible: getComputedStyle(tabs).display !== "none",
-      panelWidth: panelRect.width,
-      panelHeight: panelRect.height,
-      formWidth: loginPanelRect.width,
-      formCenterDelta: Math.abs(loginPanelRect.left + loginPanelRect.width / 2 - (panelRect.left + panelRect.width / 2)),
-      paddingTop: panelStyle.paddingTop,
-      paddingBottom: panelStyle.paddingBottom
+      backgroundImage: getComputedStyle(background).backgroundImage,
+      logoLoaded: logo.complete && logo.naturalWidth > 0,
+      header: rect(document.querySelector(".auth-logo")),
+      headerText: document.querySelector(".login-shell .auth-header").innerText.trim(),
+      languageAction: rect(document.querySelector(".login-shell .language-action")),
+      card: rect(card),
+      form: rect(form),
+      title: rect(document.querySelector(".login-copy h1")),
+      email: rect(document.querySelector("#login-form input[name=email]")),
+      password: rect(document.querySelector("#login-form input[name=password]")),
+      submit: rect(document.querySelector("#login-form button[type=submit]")),
+      divider: rect(document.querySelector(".auth-divider")),
+      social: rect(document.querySelector(".login-social-grid")),
+      footer: rect(document.querySelector(".login-footer-actions")),
+      footerText: document.querySelector(".login-footer-actions").innerText.trim(),
+      passkeyIconColor: getComputedStyle(document.querySelector(".icon-passkey")).backgroundColor,
+      appleIconColor: getComputedStyle(document.querySelector(".icon-apple")).backgroundColor,
+      radius: cardStyle.borderRadius,
+      padding: cardStyle.padding,
+      formCenterDelta: Math.abs(formRect.left + formRect.width / 2 - (cardRect.left + cardRect.width / 2)),
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth
     };
   });
-  if (!loginLayout.loginMode || !loginLayout.loginBgVisible || loginLayout.registerBgVisible || !loginLayout.imageLoaded || !loginLayout.tabsVisible) {
+  if (!loginLayout.loginMode || !loginLayout.backgroundImage.includes("reference/mygtc/login-bg.png") ||
+      !loginLayout.logoLoaded || loginLayout.overflow > 2) {
     throw new Error("Login reference layout state failed");
   }
-  if (Math.abs(loginLayout.formWidth - 460) > 2 ||
-      loginLayout.formCenterDelta > 2 ||
-      loginLayout.paddingTop !== "48px" || loginLayout.paddingBottom !== "48px") {
+  if (JSON.stringify(loginLayout.header) !== JSON.stringify([60, 40, 156, 56]) ||
+      loginLayout.headerText !== "AffiliateCPA\n简体中文" ||
+      JSON.stringify(loginLayout.languageAction) !== JSON.stringify([1234, 57, 146, 22]) ||
+      JSON.stringify(loginLayout.card) !== JSON.stringify([417, 134, 606, 653]) ||
+      JSON.stringify(loginLayout.form) !== JSON.stringify([449, 190, 542, 557]) ||
+      JSON.stringify(loginLayout.title) !== JSON.stringify([449, 190, 542, 48]) ||
+      JSON.stringify(loginLayout.email) !== JSON.stringify([449, 333, 542, 52]) ||
+      JSON.stringify(loginLayout.password) !== JSON.stringify([466, 440, 486, 50]) ||
+      JSON.stringify(loginLayout.submit) !== JSON.stringify([449, 541, 542, 45]) ||
+      JSON.stringify(loginLayout.divider) !== JSON.stringify([449, 610, 542, 16]) ||
+      JSON.stringify(loginLayout.social) !== JSON.stringify([449, 650, 542, 45]) ||
+      JSON.stringify(loginLayout.footer) !== JSON.stringify([449, 727, 542, 20]) ||
+      loginLayout.footerText !== "还没有账户？\n注册" ||
+      loginLayout.passkeyIconColor !== "rgb(65, 70, 81)" || loginLayout.appleIconColor !== "rgb(65, 70, 81)" ||
+      loginLayout.radius !== "18px" || loginLayout.padding !== "56px 32px 40px" || loginLayout.formCenterDelta > 2) {
     throw new Error(`Login card geometry failed: ${JSON.stringify(loginLayout)}`);
   }
+  await page.click(".login-shell [data-auth-language-toggle]");
+  const languageMenu = await page.evaluate(() => ({
+    expanded: document.querySelector(".login-shell [data-auth-language-toggle]").getAttribute("aria-expanded"),
+    visible: !document.querySelector(".login-shell [data-auth-language-options]").hidden,
+    optionCount: document.querySelectorAll(".login-shell [data-auth-language-value]").length
+  }));
+  if (languageMenu.expanded !== "true" || !languageMenu.visible || languageMenu.optionCount !== 17) {
+    throw new Error(`Authentication language menu failed: ${JSON.stringify(languageMenu)}`);
+  }
+  await page.click(".login-shell [data-auth-language-value='English']");
+  const selectedLanguage = await page.evaluate(() => ({
+    label: document.querySelector(".login-shell [data-auth-language-label]").textContent,
+    selected: document.querySelector(".login-shell [data-auth-language-value='English']").getAttribute("aria-selected"),
+    syncedRegisterLabel: document.querySelector(".register-shell [data-auth-language-label]").textContent,
+    menuClosed: document.querySelector(".login-shell [data-auth-language-options]").hidden
+  }));
+  if (selectedLanguage.label !== "English" || selectedLanguage.selected !== "true" ||
+      selectedLanguage.syncedRegisterLabel !== "English" || !selectedLanguage.menuClosed) {
+    throw new Error(`Authentication language selection failed: ${JSON.stringify(selectedLanguage)}`);
+  }
   await page.setViewportSize({ width: 390, height: 844 });
-  const mobileLoginLayout = await page.locator(".auth-panel").evaluate(node => {
+  const mobileLoginLayout = await page.locator(".login-auth").evaluate(node => {
     const rect = node.getBoundingClientRect();
     return {
       width: rect.width,
@@ -111,35 +158,107 @@ async function main() {
       overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth
     };
   });
-  if (mobileLoginLayout.width > 390 || mobileLoginLayout.height > 700 ||
-      mobileLoginLayout.top < 12 || mobileLoginLayout.bottom < 12 || mobileLoginLayout.overflow > 2) {
+  if (Math.abs(mobileLoginLayout.width - 366) > 2 || Math.abs(mobileLoginLayout.height - 565) > 4 ||
+      Math.abs(mobileLoginLayout.top - 117) > 4 || mobileLoginLayout.overflow > 2) {
     throw new Error(`Mobile login spacing failed: ${JSON.stringify(mobileLoginLayout)}`);
   }
-  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const ibConflict = await page.evaluate(() => {
+    const button = document.querySelector("#simulate-ib-login");
+    const box = button.getBoundingClientRect();
+    return {
+      text: button.innerText,
+      inCorner: box.right <= innerWidth && box.bottom <= innerHeight,
+      visible: getComputedStyle(button).display !== "none"
+    };
+  });
+  if (ibConflict.text !== "模拟IB身份登录" || !ibConflict.inCorner || !ibConflict.visible) {
+    throw new Error(`IB simulation entry failed: ${JSON.stringify(ibConflict)}`);
+  }
+  await page.click("#simulate-ib-login");
+  const ibPrompt = await page.locator("#ib-login-error").evaluate(node => {
+    const action = node.querySelector("button");
+    const actionStyle = getComputedStyle(action);
+    const box = node.getBoundingClientRect();
+    return {
+      text: node.innerText,
+      actionText: action.innerText,
+      actionColor: actionStyle.backgroundColor,
+      textColor: actionStyle.color,
+      visible: box.right <= innerWidth && box.bottom <= innerHeight
+    };
+  });
+  if (!ibPrompt.visible || !ibPrompt.text.includes("当前账户无法申请成为CPA合作者，请注册新账户") ||
+      ibPrompt.actionText !== "去注册" || ibPrompt.actionColor !== "rgb(26, 91, 255)" ||
+      ibPrompt.textColor !== "rgb(255, 255, 255)") {
+    throw new Error(`IB identity conflict prompt failed: ${JSON.stringify(ibPrompt)}`);
+  }
+  await page.click("#ib-login-error [data-auth-switch='register']");
+  if (!(await page.locator("#register-form").isVisible()) || !(await page.locator("#ib-login-error").isHidden())) {
+    throw new Error("IB identity conflict registration action failed");
+  }
+  await page.click(".register-footer [data-auth-switch='login']");
+  await page.fill("#login-form input[name=email]", "");
+  await page.fill("#login-form input[name=password]", "");
   await page.click("#login-form button[type=submit]");
   if (!(await page.locator("#login-error").isVisible())) throw new Error("Empty login validation failed");
 
-  await page.click("[data-auth-switch='register']");
+  await page.click(".login-footer-actions [data-auth-switch='register']");
+  await page.setViewportSize({ width: 1920, height: 900 });
+  const registerWideCenter = await page.evaluate(() => {
+    const panel = document.querySelector(".register-panel").getBoundingClientRect();
+    const form = document.querySelector("#register-form").getBoundingClientRect();
+    return Math.abs(form.left + form.width / 2 - (panel.left + panel.width / 2));
+  });
+  if (registerWideCenter > 1) throw new Error(`Register content is not centered: ${registerWideCenter}`);
+  await page.setViewportSize({ width: 1440, height: 900 });
   const registerLayout = await page.evaluate(() => ({
     registerMode: document.querySelector(".login-view").classList.contains("register-mode"),
-    loginBgVisible: getComputedStyle(document.querySelector(".auth-visual-login")).display !== "none",
-    registerBgVisible: getComputedStyle(document.querySelector(".auth-visual-register")).display !== "none",
-    columns: getComputedStyle(document.querySelector(".login-view")).gridTemplateColumns.split(" ").length
+    imageLoaded: document.querySelector(".register-hero img").complete && document.querySelector(".register-hero img").naturalWidth === 1448,
+    display: getComputedStyle(document.querySelector(".register-desktop")).display,
+    hero: (() => { const r = document.querySelector(".register-hero").getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)]; })(),
+    panel: (() => { const r = document.querySelector(".register-panel").getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)]; })(),
+    form: (() => { const r = document.querySelector("#register-form").getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)]; })(),
+    tabs: (() => { const r = document.querySelector(".register-tabs").getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)]; })(),
+    firstInput: (() => { const r = document.querySelector(".personal-account-field input").getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)]; })(),
+    scroll: (() => { const r = document.querySelector(".register-scroll").getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)]; })(),
+    submit: (() => { const r = document.querySelector(".register-submit").getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)]; })(),
+    footer: (() => { const r = document.querySelector(".register-footer").getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)]; })(),
+    scrollOverflow: getComputedStyle(document.querySelector(".register-scroll")).overflowY,
+    overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth
   }));
-  if (!registerLayout.registerMode || registerLayout.loginBgVisible || !registerLayout.registerBgVisible || registerLayout.columns !== 2) {
+  if (!registerLayout.registerMode || !registerLayout.imageLoaded || registerLayout.display !== "flex" ||
+      JSON.stringify(registerLayout.hero) !== JSON.stringify([0, 0, 720, 900]) ||
+      JSON.stringify(registerLayout.panel) !== JSON.stringify([720, 0, 720, 900]) ||
+      JSON.stringify(registerLayout.form) !== JSON.stringify([781, 54, 598, 806]) ||
+      JSON.stringify(registerLayout.tabs) !== JSON.stringify([781, 200, 598, 60]) ||
+      JSON.stringify(registerLayout.firstInput) !== JSON.stringify([781, 302, 598, 52]) ||
+      JSON.stringify(registerLayout.scroll) !== JSON.stringify([781, 272, 598, 457]) ||
+      JSON.stringify(registerLayout.submit) !== JSON.stringify([781, 753, 598, 50]) ||
+      JSON.stringify(registerLayout.footer) !== JSON.stringify([781, 823, 598, 37]) ||
+      registerLayout.scrollOverflow !== "auto" || registerLayout.overflow > 2) {
     throw new Error(`Register split layout failed: ${JSON.stringify(registerLayout)}`);
   }
-  assertText(await page.locator("#register-form").innerText(), "确认密码", "Register form fields");
-  assertText(await page.locator("#register-form").innerText(), "在创建账户时，我确认", "Register legal copy");
+  const registerText = await page.locator("#register-form").innerText();
+  for (const field of ["姓", "名", "居住国家", "手机号码", "电子邮箱", "邮箱验证码", "密码", "邀请码(选填)", "创建账号即表示我确认:"]) {
+    assertText(registerText, field, "Register form fields");
+  }
   await page.click("#register-form button[type=submit]");
   if (!(await page.locator("#register-error").isVisible())) throw new Error("Empty register validation failed");
+  await page.click("[data-register-account='company']");
+  assertText(await page.locator("#register-form").innerText(), "公司名称", "Company register fields");
+  assertText(await page.locator("#register-form").innerText(), "注册国家/地区", "Company register country");
+  await page.click("[data-register-account='personal']");
+  await page.fill("#register-form input[name=lastName]", "Demo");
+  await page.fill("#register-form input[name=firstName]", "User");
+  await page.fill("#register-form input[name=phone]", "13800138000");
   await page.fill("#register-form input[name=email]", "registered-user@example.com");
+  await page.click("#register-form [data-send-code]");
+  if ((await page.locator("#register-form input[name=verificationCode]").inputValue()) !== "123456") {
+    throw new Error("Mock email code action failed");
+  }
   await page.fill("#register-form input[name=password]", "demo-password");
-  await page.fill("#register-form input[name=confirmPassword]", "different-password");
-  await page.selectOption("#register-form select[name=country]", "新加坡");
-  await page.click("#register-form button[type=submit]");
-  assertText(await page.locator("#register-error").innerText(), "两次输入的密码不一致", "Register password mismatch");
-  await page.fill("#register-form input[name=confirmPassword]", "demo-password");
+  await page.check("#register-form input[name=legalConfirmed]");
   await page.click("#register-form button[type=submit]");
   await page.waitForSelector("#login-form:not(.hidden)");
   if ((await page.locator("#login-form input[name=email]").inputValue()) !== "registered-user@example.com") {
@@ -153,11 +272,49 @@ async function main() {
   await page.evaluate(() => navigate("dash"));
   assertText(await page.locator(".topbar").innerText(), "Affiliate CPA", "Dashboard topbar");
   assertText(await page.locator("#wallet-toggle").innerText(), "$", "Wallet trigger amount");
+  await page.setViewportSize({ width: 1920, height: 1080 });
   const shellState = await page.evaluate(() => ({
+    route: AFF.state.route,
     topbarLeft: document.querySelector(".topbar").getBoundingClientRect().left,
     topbarWidth: document.querySelector(".topbar").getBoundingClientRect().width,
+    brandLeft: document.querySelector(".topbar-brand").getBoundingClientRect().left,
     brandText: document.querySelector(".topbar-brand .brand-text strong").innerText.trim(),
     brandImageLoaded: document.querySelector(".topbar-brand img")?.naturalWidth > 0,
+    avatarImageLoaded: document.querySelector("#avatar-initial")?.complete && document.querySelector("#avatar-initial")?.naturalWidth === 36,
+    avatarRect: (() => { const r = document.querySelector("#avatar-initial").getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height), getComputedStyle(document.querySelector("#avatar-initial")).borderRadius]; })(),
+    avatarTriggerBackground: getComputedStyle(document.querySelector("#avatar-button")).backgroundColor,
+    nickname: document.querySelector("#avatar-name").textContent,
+    nicknameStyle: (() => {
+      const style = getComputedStyle(document.querySelector("#avatar-name"));
+      return { maxWidth: style.maxWidth, overflow: style.overflow };
+    })(),
+    walletLabel: document.querySelector(".wallet-tags").innerText.trim(),
+    walletLabelBackground: getComputedStyle(document.querySelector(".wallet-tags > span")).backgroundColor,
+    walletIcon: (() => {
+      const icon = document.querySelector(".wallet-account-icon");
+      const rect = icon.getBoundingClientRect();
+      return [Math.round(rect.width), Math.round(rect.height), getComputedStyle(icon).backgroundColor];
+    })(),
+    walletLayout: (() => {
+      const firstRow = document.querySelector(".wallet-tags").getBoundingClientRect();
+      const secondRow = document.querySelector(".wallet-identity").getBoundingClientRect();
+      const box = document.querySelector("#wallet-menu").getBoundingClientRect();
+      const divider = document.querySelector(".topbar-divider").getBoundingClientRect();
+      return {
+        visibleGap: Math.round(Math.min(firstRow.left, secondRow.left) - divider.right),
+        rowDelta: Math.round(Math.abs(firstRow.left - secondRow.left)),
+        boxWidth: Math.round(box.width)
+      };
+    })(),
+    timeAlignment: (() => ({
+      label: getComputedStyle(document.querySelector(".mt-time-display__label")).textAlign,
+      value: getComputedStyle(document.querySelector(".mt-time-display__value")).textAlign,
+      blockWidth: Math.round(document.querySelector(".topbar-clock").getBoundingClientRect().width),
+      gapToWallet: Math.round(document.querySelector(".wallet-menu").getBoundingClientRect().left - document.querySelector(".topbar-clock").getBoundingClientRect().right)
+    }))(),
+    serverZone: document.querySelector("#server-time-zone").textContent,
+    localZone: document.querySelector("#local-time-zone").textContent,
+    expectedLocalZone: accountTimezoneOffset(Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Shanghai"),
     sidebarBrandCount: document.querySelectorAll(".sidebar .brand").length,
     breadcrumbCount: document.querySelectorAll(".breadcrumb").length,
     pageTitleCount: document.querySelectorAll(".page-header h1").length,
@@ -169,17 +326,24 @@ async function main() {
     mainWidth: document.querySelector(".main").getBoundingClientRect().width,
     mainExpectedWidth: document.documentElement.clientWidth - 240,
     mainMaxWidth: getComputedStyle(document.querySelector(".main")).maxWidth,
+    navScrollbar: getComputedStyle(document.querySelector("#nav")).scrollbarWidth,
     footerCount: document.querySelectorAll(".footer").length,
     topbarOrder: [...document.querySelectorAll(".topbar-tools > *")].map(node => node.id || node.className),
     expandedGroups: [...document.querySelectorAll(".nav-parent[aria-expanded='true']")].length,
     visibleChildren: [...document.querySelectorAll(".nav-children")].filter(node => getComputedStyle(node).display !== "none").length
   }));
-  if (shellState.topbarLeft !== 0 || Math.abs(shellState.topbarWidth - page.viewportSize().width) > 2 || shellState.brandText !== "Affiliate CPA" || !shellState.brandImageLoaded || shellState.sidebarBrandCount || shellState.footerCount || shellState.breadcrumbCount || shellState.pageTitleCount !== 1 || !shellState.scenarioHidden || Math.abs(shellState.sidebarWidth - 240) > 2 || Math.abs(shellState.workspaceLeft - 240) > 2 || shellState.mainPaddingLeft !== "24px" || shellState.mainPaddingRight !== "24px" || Math.abs(shellState.mainWidth - shellState.mainExpectedWidth) > 2 || shellState.mainMaxWidth !== "none" || shellState.expandedGroups !== 5 || shellState.visibleChildren !== 5) {
+  if (shellState.topbarLeft !== 0 || Math.abs(shellState.topbarWidth - page.viewportSize().width) > 2 || Math.abs(shellState.brandLeft - 8) > 2 || shellState.brandText !== "Affiliate CPA" || !shellState.brandImageLoaded || !shellState.avatarImageLoaded || JSON.stringify(shellState.avatarRect) !== JSON.stringify([36, 36, "50%"]) || shellState.nickname !== "Affiliate Partner" || shellState.nicknameStyle.maxWidth !== "none" || shellState.nicknameStyle.overflow !== "visible" || shellState.walletLabel !== "Affiliate CPA合作者" || shellState.walletLabelBackground !== "rgba(0, 0, 0, 0)" || JSON.stringify(shellState.walletIcon) !== JSON.stringify([18, 18, "rgba(0, 0, 0, 0)"]) || shellState.walletLayout.visibleGap < 12 || shellState.walletLayout.visibleGap > 14 || shellState.walletLayout.rowDelta > 1 || shellState.walletLayout.boxWidth > 180 || shellState.timeAlignment.label !== "right" || shellState.timeAlignment.value !== "right" || shellState.timeAlignment.blockWidth > 210 || shellState.timeAlignment.gapToWallet > 2 || shellState.serverZone !== "UTC+3" || shellState.localZone !== shellState.expectedLocalZone || shellState.navScrollbar !== "none" || shellState.sidebarBrandCount || shellState.footerCount || shellState.breadcrumbCount || shellState.pageTitleCount !== (shellState.route === "dash" ? 0 : 1) || !shellState.scenarioHidden || Math.abs(shellState.sidebarWidth - 240) > 2 || Math.abs(shellState.workspaceLeft - 240) > 2 || shellState.mainPaddingLeft !== "24px" || shellState.mainPaddingRight !== "24px" || Math.abs(shellState.mainWidth - shellState.mainExpectedWidth) > 2 || shellState.mainMaxWidth !== "none" || shellState.expandedGroups !== 5 || shellState.visibleChildren !== 5) {
     throw new Error(`Global shell state failed: ${JSON.stringify(shellState)}`);
   }
   const expectedTopbarOrder = ["topbar-clock mt-time-display", "topbar-divider", "wallet-menu", "header-icon-actions", "account-menu"];
   if (JSON.stringify(shellState.topbarOrder) !== JSON.stringify(expectedTopbarOrder)) {
     throw new Error(`Topbar order failed: ${JSON.stringify(shellState.topbarOrder)}`);
+  }
+  for (const selector of [".support-center", ".language-selector", ".message-icon"]) {
+    await page.locator(selector).hover();
+    await page.waitForTimeout(100);
+    const hoverBackground = await page.locator(selector).evaluate(node => getComputedStyle(node).backgroundColor);
+    if (hoverBackground !== "rgba(0, 0, 0, 0)") throw new Error(`${selector} hover background failed: ${hoverBackground}`);
   }
   const navStructure = await page.locator("#nav .nav-section").evaluateAll(sections => sections.map(section => ({
     group: section.querySelector("[data-nav-group]")?.dataset.navGroup || "仪表盘",
@@ -263,7 +427,7 @@ async function main() {
     if (tutorial.images || Math.abs(tutorial.width - expectedWidth) > 2) {
       throw new Error(`Tutorial layout failed at ${width}px: ${JSON.stringify(tutorial)}`);
     }
-    const summaryPosition = await page.locator(".dashboard-summary").evaluate(node => ({
+    const summaryPosition = await page.locator(".dashboard-conversion").evaluate(node => ({
       last: node === document.querySelector("#main").lastElementChild,
       top: node.getBoundingClientRect().top,
       tutorialBottom: document.querySelector(".tutorial-card").getBoundingClientRect().bottom,
@@ -313,12 +477,17 @@ async function main() {
   await page.waitForFunction(() => document.title.includes("素材库"));
   assertText(await page.title(), "素材库", "Materials route");
   await page.click("#nav [data-route='dash']");
-  await page.locator(".tutorial-card").press("Enter");
+  await page.locator(".tutorial-card").click();
+  await page.waitForFunction(() => document.title.includes("合作者计划"));
   assertText(await page.title(), "合作者计划", "Tutorial route");
   await page.click("#nav [data-route='dash']");
 
   await page.locator("#avatar-button").hover();
   await page.waitForTimeout(220);
+  const avatarHoverBackground = await page.locator("#avatar-button").evaluate(node => getComputedStyle(node).backgroundColor);
+  if (avatarHoverBackground !== shellState.avatarTriggerBackground || avatarHoverBackground !== "rgba(0, 0, 0, 0)") {
+    throw new Error(`Avatar hover background failed: ${avatarHoverBackground}`);
+  }
   let dropdownState = await page.locator("#account-dropdown").evaluate(node => ({
     open: node.closest(".account-menu").classList.contains("open"),
     visibility: getComputedStyle(node).visibility,
@@ -391,6 +560,14 @@ async function main() {
 
   await page.goto(`${baseUrl}/#/dash`, { waitUntil: "domcontentloaded" });
   assertText(await page.locator("#kyc-banner").innerText(), "您的账户资料未完善，部分功能可能受限。", "Account completion banner text");
+  await page.click("#kyc-banner span");
+  await page.waitForFunction(() => document.title.includes("入驻申请"));
+  if ((await page.evaluate(() => AFF.state.route)) !== "onboarding") throw new Error("KYC banner whole-area click failed");
+  await page.evaluate(() => {
+    AFF.state.programCompleted = false;
+    AFF.state.kycDismissed = false;
+    navigate("dash");
+  });
   await page.click("#dismiss-kyc");
   await page.evaluate(() => navigate("wd"));
   assertText(await page.title(), "提现", "Withdrawal route");
@@ -466,6 +643,45 @@ async function main() {
   await page.click("[data-rp-action='groups']");
   await page.click("[data-rp-add-group='country']");
   assertText(await page.locator("#main").innerText(), "国家", "Performance grouping");
+  await page.click("[data-rp-view='chart']");
+  await page.waitForSelector(".report-chart");
+  const performanceChart = await page.evaluate(() => ({
+    view: AFF.reports.state().view,
+    type: document.querySelector(".report-chart-type").innerText,
+    bars: document.querySelectorAll(".report-bar-row").length,
+    metricButtons: document.querySelectorAll("[data-rp-chart-metric]").length,
+    overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth
+  }));
+  if (performanceChart.view !== "chart" || performanceChart.type !== "横向柱状图" ||
+      performanceChart.bars <= 0 || performanceChart.bars > 12 || performanceChart.metricButtons !== 6 || performanceChart.overflow > 2) {
+    throw new Error(`Performance chart state failed: ${JSON.stringify(performanceChart)}`);
+  }
+  await page.click("[data-rp-chart-metric='expected']");
+  if ((await page.evaluate(() => AFF.reports.state().chartMetric)) !== "expected") throw new Error("Performance chart metric switch failed");
+  await page.click("[data-rp-remove-group='country']");
+  await page.waitForSelector(".report-chart-line");
+  if ((await page.locator(".report-chart-type").innerText()) !== "折线图") throw new Error("Performance time-dimension chart type failed");
+  const lineChartValues = await page.evaluate(() => ({
+    axisLabels: document.querySelectorAll(".report-chart-y span").length,
+    points: document.querySelectorAll(".report-chart-point").length,
+    pointOpacity: getComputedStyle(document.querySelector(".report-chart-point"), "::after").opacity,
+    summary: document.querySelector(".report-chart-head span").innerText
+  }));
+  if (lineChartValues.axisLabels !== 5 || lineChartValues.points === 0 || lineChartValues.pointOpacity !== "1" ||
+      !lineChartValues.summary.includes("总计") || !lineChartValues.summary.includes("最新")) {
+    throw new Error(`Performance line chart values failed: ${JSON.stringify(lineChartValues)}`);
+  }
+  await page.click("[data-rp-view='table']");
+  const performanceTableRestored = await page.evaluate(() => ({
+    view: AFF.reports.state().view,
+    hasTable: !!document.querySelector(".report-table"),
+    hasChart: !!document.querySelector(".report-chart"),
+    sourceFilter: AFF.reports.state().filters.source
+  }));
+  if (performanceTableRestored.view !== "table" || !performanceTableRestored.hasTable || performanceTableRestored.hasChart ||
+      performanceTableRestored.sourceFilter !== "Telegram") {
+    throw new Error(`Performance table restore failed: ${JSON.stringify(performanceTableRestored)}`);
+  }
 
   await page.click("[data-route='clients']");
   await page.locator("[data-rp-client]").first().click();
@@ -744,7 +960,7 @@ async function main() {
   if (!profileEntryText.includes("合作者计划")) {
     throw new Error(`Partner program entry failed: ${profileEntryText}`);
   }
-  const programSteps = ["查看佣金奖励", "高转化地区", "查看支持地区", "素材库总览", "收益与系统指引", "分享简介链接"];
+  const programSteps = ["查看佣金奖励", "高转化地区", "查看支持地区", "素材库总览", "收益与系统指引", "分享简介链接", "回传链接指引"];
   const stepsText = await page.locator(".steps").innerText();
   for (const step of programSteps) assertText(stepsText, step, `Partner program step: ${step}`);
   let programText = await page.locator("#main").innerText();
@@ -927,6 +1143,10 @@ async function main() {
   await page.locator(".program-share-link [data-copy]").first().click();
   await page.waitForTimeout(150);
   if ((await page.evaluate(() => navigator.clipboard.readText())) !== shareLinks[0]) throw new Error("Share link clipboard failed");
+  await page.click(".action-row .button.primary");
+  programText = await page.locator("#main").innerText();
+  assertText(programText, "回传链接：把转化送回您的系统", "Postback guide page");
+  assertText(programText, "配置回传链接", "Postback guide configuration entry");
   await page.click("[data-action='complete-program']");
   assertText(await page.locator("#main").innerText(), "已完成引导", "Program completion");
   await page.evaluate(() => {

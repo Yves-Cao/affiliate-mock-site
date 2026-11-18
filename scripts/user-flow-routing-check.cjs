@@ -11,7 +11,7 @@ const context = read("docs/user/CONTEXT-INDEX.md");
 
 assert.ok(data.includes('{ id: "account", group: "服务中心", label: "个人中心", hidden: true }'));
 assert.ok(app.includes('["account", "apply", "onboarding"]'), "Account stays out of sidebar navigation");
-assert.ok(app.includes('AFF.state.applyStep = Math.min(6'), "Apply resumes from furthest saved step");
+assert.ok(app.includes('AFF.state.applyStep = Math.min(7'), "Apply resumes from furthest saved step");
 assert.ok(scope.includes("/ export / apply / onboarding") && context.includes("/ export / apply / onboarding"), "User indexes include export");
 assert.ok(scope.includes("statements`是隐藏兼容入口") && context.includes("statements` 是隐藏兼容入口"), "User indexes document hidden statements route");
 
