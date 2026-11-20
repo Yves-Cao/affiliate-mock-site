@@ -229,7 +229,7 @@
       const chain = [{ name: "风控复核", role: "risk" }].concat(/转财务/.test(st.plan) ? [{ name: "财务复核", role: "fin" }] : []);
       ADM.approvals.push({ id: n, type: "任务处置", obj: "对象 " + target, summary: `${st.plan}（${t.id}）`, amt: (ADM.riskObjects.find((o) => o.id === target) || {}).amt || "—", applicant: ADM.role().userId, at: NOW, waitH: 0, limitH: 24, chain, step: 0, status: "pending", capital: false, previewValid: true, taskId: t.id, refs: [t.id], diff: [["处置计划", "无", st.plan]], impact: "按预览范围执行；不连带其他案件。", reason: st.why || "—", records: [{ node: "提交", who: ADM.user().name, role: ADM.role().name, decision: "提交申请", note: "", at: NOW }] });
       t.state = "pending_approval"; t.version++; t.upd = NOW;
-      ADM.toast(`处置申请已提交审批（${n}）`); ADM.refreshNav(); ADM.drawer.close(); done();
+      delete ADM._rd[target]; ADM.audit("提交风险处置审批", "对象 " + target, st.why, { before: "处理中", after: "待审批" }); delete ADM._rd[target]; ADM.audit("提交风险处置审批", "对象 " + target, st.why, { before: "处理中", after: "待审批" }); ADM.toast(`处置申请已提交审批（${n}）`); ADM.refreshNav(); ADM.drawer.close(); done();
     });
   }
 

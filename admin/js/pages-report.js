@@ -18,7 +18,7 @@
   }
   function bindExport(src, obj, scope) {
     const b = $("#exp"); if (!b) return;
-    b.onclick = () => ADM.modal({ title: "发起导出", body: `<p>导出走导出中心：异步、脱敏、绑定当前快照 <b>${ADM.snapshot.id}</b> 与全部匹配范围（不是当前页）；下载时重新校验权限。</p>${U.reasonRow("xW", "用途（必填）")}${src === "资金分析" ? '<div class="callout warn">财务金额导出需额外授权，将进入审批。</div>' : ""}`, okText: "创建导出任务", onOk: (m) => { const w = U.needReason(m, "xW", 4); if (!w) return false; const id = "EX-" + (7109 + ADM.exports.length - 8); ADM.exports.unshift({ id, src, obj, applicant: ADM.role().userId, purpose: w, scope: scope(), sens: "敏感", rows: null, appr: src === "资金分析" ? "待审批" : "无需审批", gen: "排队", exp: "—", dl: 0 }); ADM.toast(`导出任务已创建（${id}），请到导出中心查看`); } });
+    b.onclick = () => ADM.modal({ title: "发起导出", body: `<p>导出走导出中心：异步、脱敏、绑定当前快照 <b>${ADM.snapshot.id}</b> 与全部匹配范围（不是当前页）；下载时重新校验权限。</p>${U.reasonRow("xW", "用途（必填）")}${src === "资金分析" ? '<div class="callout warn">财务金额导出需额外授权，将进入审批。</div>' : ""}`, okText: "创建导出任务", onOk: (m) => { const w = U.needReason(m, "xW", 4); if (!w) return false; const id = "EX-" + (7109 + ADM.exports.length - 8); const ex = { id, src, obj, applicant: ADM.role().userId, purpose: w, scope: scope(), sens: "敏感", rows: null, appr: src === "资金分析" ? "待审批" : "无需审批", gen: "排队", exp: "—", dl: 0 }; ADM.exports.unshift(ex); if (ex.appr === "待审批") ADM.exportApproval(ex); ADM.audit("创建导出任务", id, w); ADM.refreshNav(); ADM.toast(`导出任务已创建（${id}），请到导出中心查看`); } });
   }
 
   /* =============== 25 经营与转化 =============== */

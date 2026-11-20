@@ -40,6 +40,17 @@
     EX("EX-7107", "素材库", "素材元数据", "u-ops1", "素材盘点", "全部 · 元数据", "一般", 56, "无需审批", "失败", "—", 0),
     EX("EX-7108", "客户 360", "客户列表", "u-ops1", "测试导出", "全部客户", "敏感", null, "已驳回", "排队", "—", 0)
   ];
+  /* 导出审批：敏感导出必须进入审批队列，通过后导出才会生成；驳回则结束 */
+  ADM.exportApproval = function (e, at) {
+    const n = "AP-" + (3200 + ADM.approvals.length);
+    const u = ADM.users[e.applicant] || {};
+    const ap = { id: n, type: "导出", obj: `导出 ${e.id} · ${e.src}`, summary: `${e.src}导出（${e.scope}）`, amt: "—", applicant: e.applicant, at: at || "2026-11-19 10:30", waitH: 0, limitH: 24, chain: [{ name: "风控复核（合规）", role: "risk" }], step: 0, status: "pending", capital: false, previewValid: true, refs: [e.id], diff: [["导出状态", "待审批", "允许生成"]], impact: "仅生成脱敏导出文件；下载时重新校验权限。", reason: e.purpose, records: [{ node: "提交", who: u.name || "—", role: u.role ? ADM.roles[u.role].name : "—", decision: "提交申请", note: "", at: at || "2026-11-19 10:30" }] };
+    ap.onApprove = () => { e.appr = "已通过"; if (e.gen === "排队") e.gen = "就绪"; };
+    ap.onReject = () => { e.appr = "已驳回"; };
+    ap.onRevert = () => { e.appr = "已撤回"; };
+    ADM.approvals.push(ap); e.apId = n; return ap;
+  };
+  ADM.exports.filter((e) => e.appr === "待审批").forEach((e) => ADM.exportApproval(e, "2026-11-18 16:20"));
   const IJ = (id, op, sys, state, last, retry, rel, scope, upd, extra) => Object.assign({ id, op, sys, state, last, retry, rel, scope, upd, queried: false }, extra || {});
   ADM.integrations = [
     IJ("JOB-6601", "回传投递", "事件总线", "失败", "目标拒绝", "是 · 剩余 2 次 · 11-19 11:00", "DLV-88217 / T-24109", "1 个合作方", "2026-11-19 10:11"),

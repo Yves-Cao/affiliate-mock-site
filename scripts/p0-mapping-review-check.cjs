@@ -24,6 +24,45 @@ function countDataRows(file) {
   return rows + 1;
 }
 
+function parseCsv(file) {
+  const text = fs.readFileSync(file, 'utf8').trim();
+  if (!text) return [];
+  const rows = [];
+  let row = [];
+  let cell = '';
+  let quoted = false;
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    if (quoted) {
+      if (char === '"' && text[index + 1] === '"') {
+        cell += '"';
+        index += 1;
+      } else if (char === '"') {
+        quoted = false;
+      } else {
+        cell += char;
+      }
+    } else if (char === '"') {
+      quoted = true;
+    } else if (char === ',') {
+      row.push(cell);
+      cell = '';
+    } else if (char === '\n') {
+      row.push(cell);
+      rows.push(row);
+      row = [];
+      cell = '';
+    } else if (char !== '\r') {
+      cell += char;
+    }
+  }
+  if (cell || row.length) {
+    row.push(cell);
+    rows.push(row);
+  }
+  return rows;
+}
+
 assert(manifest.counts.operations === 321, 'Operation review count changed');
 assert(manifest.counts.metrics === 145, 'Metric review count changed');
 assert(manifest.counts.schemaConflicts === 20, 'Schema conflict review count changed');
@@ -31,6 +70,38 @@ assert(manifest.counts.total === 486, 'Total review count changed');
 assert(manifest.counts.pending === 466, 'Only operation and metric reviews must remain pending');
 assert(manifest.counts.ownerResolved === 20, 'All schema conflicts must be owner-resolved');
 assert(manifest.status === 'partial_owner_review_complete', 'Manifest status must reflect partial owner review');
+
+const batchRows = parseCsv(path.join(baseDir, 'openapi/p0-operation-mapping-batch3-review.csv'));
+const batchHeaders = batchRows.shift();
+const batchColumn = name => batchHeaders.indexOf(name);
+const expectedBatchCounts = {
+  'OP-B3-01': 3,
+  'OP-B3-02': 7,
+  'OP-B3-03': 4,
+  'OP-B3-04': 36,
+  'OP-B3-05': 12,
+  'OP-B3-06': 16,
+  'OP-B3-07': 24,
+  'OP-B3-08': 23,
+  'OP-B3-09': 48,
+  'OP-B3-10': 30,
+  'OP-B3-11': 43,
+  'OP-B3-12': 42,
+  'OP-B3-13': 12,
+  'OP-B3-14': 12,
+  'OP-B3-15': 9,
+};
+assert(batchRows.length === 321, 'Batch 3 operation row count changed');
+assert(new Set(batchRows.map(row => row[batchColumn('operationId')])).size === 321, 'Batch 3 operation IDs are not unique');
+assert(new Set(batchRows.map(row => row[batchColumn('reviewId')])).size === 321, 'Batch 3 review IDs are not unique');
+const actualBatchCounts = batchRows.reduce((counts, row) => {
+  counts[row[batchColumn('batchId')]] = (counts[row[batchColumn('batchId')]] || 0) + 1;
+  return counts;
+}, {});
+assert(JSON.stringify(actualBatchCounts) === JSON.stringify(expectedBatchCounts), 'Batch 3 group counts changed');
+assert(batchRows.filter(row => row[batchColumn('reviewScope')] === 'lane_1_p0').length === 246, 'Batch 3 lane-1 count changed');
+assert(batchRows.filter(row => row[batchColumn('reviewScope')] !== 'lane_1_p0').length === 75, 'Batch 3 later-scope count changed');
+assert(batchRows.every(row => row[batchColumn('recommendation')] && row[batchColumn('canonicalEligibility')] && row[batchColumn('ownerGate')]), 'Batch 3 recommendation is incomplete');
 
 const groups = [
   [manifest.operationReviews, 'operationId', 321, 'p0-operation-mapping-review.csv'],
