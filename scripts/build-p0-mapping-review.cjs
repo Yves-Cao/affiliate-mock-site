@@ -441,7 +441,7 @@ ${rows.map(row => `| ${row.map(cell => String(cell).replace(/\|/g, '\\|')).join(
 
 ## 5. 机器可读评审
 
-| 行级分组见 [\`p0-operation-mapping-batch3-review.csv\`](../../../affiliate-mock/openapi/p0-operation-mapping-batch3-review.csv)。该文件保留全部原始operation ID和路径，不填写原始pending决策字段。
+行级分组见 [\`p0-operation-mapping-batch3-review.csv\`](../../../affiliate-mock/openapi/p0-operation-mapping-batch3-review.csv)。该文件保留全部原始operation ID和路径，不填写原始pending决策字段。
 
 ## 6. 验证
 
