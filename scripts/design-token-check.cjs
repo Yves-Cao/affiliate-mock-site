@@ -41,7 +41,7 @@ const requiredTokens = [
   ["--text-muted-1-0", "#717680"],
   ["--text-disabled-1-0", "#a4a7ae"],
   ["--brand-deep", "#00187e"],
-  ["--brand", "#005bff"],
+  ["--brand", "#1a5bff"],
   ["--nav-text", "#6b7897"],
   ["--side-icon", "#828a9a"],
   ["--side-text", "#2c3751"],

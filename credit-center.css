@@ -6,7 +6,7 @@
   container-type: inline-size;
   color: #fff; border: 0; border-radius: 8px;
   background:
-    radial-gradient(120% 90% at 100% 0%, rgba(0, 91, 255, .55) 0%, rgba(0, 91, 255, 0) 55%),
+    radial-gradient(120% 90% at 100% 0%, rgba(26, 91, 255, .55) 0%, rgba(26, 91, 255, 0) 55%),
     radial-gradient(80% 70% at 0% 100%, rgba(77, 125, 255, .22) 0%, rgba(77, 125, 255, 0) 60%),
     linear-gradient(145deg, #0c2176 0%, #00187e 100%);
   box-shadow: 0 10px 24px rgba(0, 24, 126, .22), inset 0 1px 0 rgba(255, 255, 255, .12);
@@ -32,7 +32,7 @@
 .credit-card-actions { grid-column: 2; }
 .credit-card-level {
   font-size: 44px; line-height: 1; font-weight: 700; letter-spacing: 1px; color: #fff;
-  text-shadow: 0 2px 12px rgba(0, 91, 255, .55);
+  text-shadow: 0 2px 12px rgba(26, 91, 255, .55);
 }
 .credit-card-title {
   display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px;
@@ -41,11 +41,10 @@
 }
 .credit-card-meta { margin: 0; color: rgba(255, 255, 255, .6); font-size: 12px; }
 .credit-date-help {
-  display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; padding: 0;
-  border: 1px solid rgba(255, 255, 255, .42); border-radius: 50%; background: transparent; color: #fff;
-  font-size: 10px; line-height: 1; cursor: help; vertical-align: -2px;
+  display: inline; padding: 0; border: 0; border-bottom: 1px dotted rgba(255, 255, 255, .45); border-radius: 0; background: transparent;
+  color: inherit; font: inherit; line-height: inherit; cursor: help;
 }
-.credit-date-help:hover, .credit-date-help[aria-expanded="true"] { background: rgba(255, 255, 255, .18); border-color: #fff; }
+.credit-date-help:hover, .credit-date-help[aria-expanded="true"] { border-bottom-color: #fff; color: #fff; }
 .credit-date-help:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .credit-benefits-trigger {
   display: inline-flex; align-items: center; min-height: 25px; padding: 3px 10px; border: 1px solid rgba(255, 255, 255, .28);
@@ -119,7 +118,7 @@
 /* Hint panel: fixed, placed by AFF.tooltip.position (D-04). */
 .credit-hint-panel {
   position: fixed; z-index: 1200; box-sizing: border-box; display: grid; gap: 8px; padding: 14px 16px;
-  background: #fff; color: var(--body-text); border: 1px solid var(--border); border-radius: 10px;
+  background: #fff; color: var(--body-text); border: 1px solid var(--border); border-radius: 8px;
   box-shadow: 0 12px 32px rgba(0, 24, 126, .18); font-size: 12px; line-height: 1.6; text-align: left;
 }
 .credit-hint-panel[hidden] { display: none; }
@@ -145,7 +144,7 @@
   font-size: 10px; font-weight: 700; line-height: 1; letter-spacing: .3px;
 }
 .partner-rail li.is-achieved .partner-rail-node { border-color: var(--brand); background: var(--brand); color: #fff; }
-.partner-rail li.is-current .partner-rail-node { border-color: var(--brand); color: var(--brand); box-shadow: 0 0 0 3px rgba(0, 91, 255, .16); }
+.partner-rail li.is-current .partner-rail-node { border-color: var(--brand); color: var(--brand); box-shadow: 0 0 0 3px rgba(26, 91, 255, .16); }
 .partner-rail li small { color: var(--muted); font-size: 11px; white-space: nowrap; }
 .partner-rail li.is-current small { color: var(--text); font-weight: 600; }
 .partner-rail-panel li small { display: block; }
@@ -193,8 +192,8 @@
 .partner-credit-lvlist-head span { color: var(--muted); font-size: 11px; }
 .partner-credit-lvlist-head span:nth-child(2) { text-align: right; }
 .partner-credit-lvlist-head span:nth-child(3) { text-align: right; }
-.partner-credit-lv { display: grid; grid-template-columns: minmax(0, 1fr) 110px 90px; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; background: #f8fbff; }
-.partner-credit-lv.is-current { background: #eaf0ff; border-color: var(--brand); }
+.partner-credit-lv { display: grid; grid-template-columns: minmax(0, 1fr) 110px 90px; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; background: #f9fafb; }
+.partner-credit-lv.is-current { background: #e8efff; border-color: var(--brand); }
 .partner-credit-lv-head { min-width: 0; color: var(--body-text); font-size: 13px; }
 .partner-credit-lv-head b { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin-right: 6px; border-radius: 50%; background: #fff; border: 1px solid #d7dfe9; color: var(--muted); font-size: 11px; font-weight: 600; vertical-align: middle; }
 .partner-credit-lv.is-current .partner-credit-lv-head b { border-color: var(--brand); color: var(--brand); }
@@ -241,3 +240,4 @@
   .partner-credit-lv-cell:nth-of-type(4) { grid-column: 1; grid-row: 3; }
   .partner-credit-lv-cell:nth-of-type(5) { grid-column: 1; grid-row: 4; }
 }
+.credit-benefit-empty { margin: 10px 0 0; color: rgba(255, 255, 255, .68); font-size: 12px; line-height: 18px; }

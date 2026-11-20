@@ -87,7 +87,7 @@
   min-height: 34px;
   padding: 6px 11px;
   border: 1px solid transparent;
-  border-radius: 5px;
+  border-radius: 4px;
   color: var(--body-text);
   font-size: 13px;
   font-weight: 500;
@@ -442,7 +442,7 @@
   padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 4px;
-  background: #f8fbff;
+  background: #f9fafb;
 }
 .report-commission-summary span:not(.report-inline-tooltip),
 .report-hold-progress span {
@@ -475,7 +475,7 @@
   padding: 10px 12px;
   border: 1px solid #d7e0ec;
   border-radius: 4px;
-  background: #f8fbff;
+  background: #f9fafb;
 }
 .report-unsettled-commissions span {
   display: block;
@@ -648,7 +648,7 @@
   min-height: 32px;
   padding: 6px 10px;
   border: 1px solid var(--border-strong-1-0);
-  border-radius: 5px;
+  border-radius: 4px;
   background: var(--surface);
   color: var(--text-body-1-0);
   font-size: 12px;
@@ -741,7 +741,7 @@
   min-width: max-content;
   max-width: 180px;
   padding: 6px 8px;
-  border-radius: 5px;
+  border-radius: 4px;
   background: #0a0d12;
   color: #fff;
   font-size: 11px;

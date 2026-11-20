@@ -28,7 +28,7 @@
   gap: 8px;
   padding: 10px 20px;
   border-bottom: 1px solid var(--border);
-  background: #fbfdff;
+  background: #f9fafb;
 }
 .client-quick-field { position: relative; flex: 1 1 0; min-width: 0; }
 .client-quick-field .aff-dd { display: block; }
@@ -39,7 +39,7 @@
 /* Open state: transparent border + single soft halo (same treatment as combobox), brand chevron */
 .client-quick-field:has(.aff-dd-trigger[aria-expanded="true"]) .aff-dd-trigger {
   border-color: transparent;
-  box-shadow: 0 0 0 3px rgba(0, 91, 255, 0.22), 0 1px 2px rgba(15, 34, 58, 0.04);
+  box-shadow: 0 0 0 3px rgba(26, 91, 255, 0.22), 0 1px 2px rgba(15, 34, 58, 0.04);
 }
 .client-quick-field:has(.aff-dd-trigger[aria-expanded="true"])::after {
   border-right-color: var(--brand);
@@ -80,7 +80,7 @@
   padding: 0 30px 0 10px;
   border: 1px solid #d6dee8;
   border-radius: 4px;
-  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
   color: var(--text);
   font-size: 12px;
   box-shadow: 0 1px 2px rgba(15, 34, 58, 0.04);
@@ -90,12 +90,12 @@
 .client-quick-combobox input[type="search"]:focus-visible {
   outline: none;
   border-color: transparent;
-  box-shadow: 0 0 0 3px rgba(0, 91, 255, 0.22), 0 1px 2px rgba(15, 34, 58, 0.04);
+  box-shadow: 0 0 0 3px rgba(26, 91, 255, 0.22), 0 1px 2px rgba(15, 34, 58, 0.04);
 }
 /* While the option list is open, keep the soft halo even when focus moves to options */
 .client-quick-combobox [data-rp-quick-combo-input][aria-expanded="true"] {
   border-color: transparent;
-  box-shadow: 0 0 0 3px rgba(0, 91, 255, 0.22), 0 1px 2px rgba(15, 34, 58, 0.04);
+  box-shadow: 0 0 0 3px rgba(26, 91, 255, 0.22), 0 1px 2px rgba(15, 34, 58, 0.04);
 }
 .client-quick-combobox-toggle {
   position: absolute;
@@ -183,7 +183,7 @@
 .report-client-scroll .report-client-table td { padding: 11px 10px; }
 .report-client-scroll .report-client-table td.report-commission-cell { padding-top: 8px; padding-bottom: 8px; }
 .report-client-table tbody tr { --row-accent: var(--surface); }
-.report-client-table tbody tr:nth-child(even) { --row-accent: #fbfdff; }
+.report-client-table tbody tr:nth-child(even) { --row-accent: #f9fafb; }
 .report-client-table tbody tr:hover { --row-accent: var(--row-hover); }
 .report-client-table tbody td { background: var(--row-accent); }
 .report-client-table tbody tr:hover td { background: var(--row-hover); }
@@ -193,7 +193,7 @@
 .report-client-table thead th:not(:first-child):not(:last-child) {
   position: relative;
   z-index: 6;
-  background: #f8fbff;
+  background: #f9fafb;
 }
 .report-client-table thead th:first-child,
 .report-client-table thead th:last-child { z-index: 8; }

@@ -1,0 +1,145 @@
+/* Data pages: performance, client data, overview, earnings.
+   Flat and text-led, same rhythm as the dashboard: page intro, then content on a white canvas separated by hairlines.
+   No tiled cards, no outer border around toolbar + table. Loaded after reports.css, clients-page.css and earnings.css. */
+
+.page-intro { padding: 28px 0 20px; }
+.page-intro h1 { margin: 0; color: var(--text-strong-1-0); font: 600 24px/32px var(--font-family-user); }
+.page-intro p { margin: 4px 0 0; color: var(--text-muted-1-0); font-size: 13px; line-height: 20px; }
+
+/* ---- Performance / client data / overview ---- */
+.report-page.perf-flat {
+  padding: 0 0 24px;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+.report-page.perf-flat .report-controls { padding: 0 0 16px; border-bottom: 0; }
+.report-page.perf-flat .report-applied { padding: 12px 0; border-bottom: 0; }
+.report-page.perf-flat .report-panel { border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.report-page.perf-flat .report-table-toolbar { padding: 8px 0 16px; border-bottom: 0; }
+.report-page.perf-flat .client-table-header { padding: 0 0 16px; border-bottom: 0; background: transparent; }
+.report-page.perf-flat .client-table-header .client-table-title > strong { color: var(--text-strong-1-0); font: 600 16px/24px var(--font-family-user); }
+.report-page.perf-flat .client-quick-filters { padding: 0 0 16px; border: 0; background: transparent; }
+.report-page.perf-flat .report-footer,
+.report-page.perf-flat .table-footer { padding: 16px 0; border-top: 1px solid var(--border); }
+.report-page.perf-flat .export-entry { padding: 16px 0; border: 0; border-top: 1px solid var(--border); background: transparent; box-shadow: none; }
+.report-page.perf-flat .report-footnote { padding: 16px 0 0; border: 0; }
+
+/* ---- Tables (shared look) ---- */
+.report-page.perf-flat .report-table th,
+.report-page.perf-flat .report-table td,
+.earn-page .earn-table th,
+.earn-page .earn-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--table-body-size);
+  line-height: 20px;
+}
+.report-page.perf-flat .report-table thead th,
+.earn-page .earn-table thead th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--control-border);
+  background: transparent;
+  color: var(--text-muted-1-0);
+  font-size: 12px;
+  font-weight: 500;
+}
+.report-page.perf-flat .report-table th:first-child,
+.report-page.perf-flat .report-table td:first-child,
+.earn-page .earn-table th:first-child,
+.earn-page .earn-table td:first-child { padding-left: 0; }
+.report-page.perf-flat .report-table th:last-child,
+.report-page.perf-flat .report-table td:last-child,
+.earn-page .earn-table th:last-child,
+.earn-page .earn-table td:last-child { padding-right: 0; }
+.report-page.perf-flat .report-table tbody tr:hover td,
+.report-page.perf-flat .report-table tbody tr:hover th,
+.earn-page .earn-table tbody tr:hover td { background: var(--surface-soft-1-0); }
+.report-page.perf-flat .report-table tbody tr.report-total th,
+.report-page.perf-flat .report-table tbody tr.report-total td {
+  border-top: 0;
+  border-bottom: 1px solid var(--control-border);
+  font-weight: 600;
+}
+/* header help marks: quiet, not a blue accent */
+.report-page .report-table thead th button.report-help-button,
+.earn-page .earn-table thead th button { color: var(--text-disabled-1-0); font-weight: 400; }
+.report-page .report-table thead th button.report-help-button:hover { color: var(--brand-1-0); }
+.report-page.perf-flat .report-client-table td { white-space: nowrap; }
+
+/* ---- Earnings ---- */
+.earn-page .earn-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 32px; margin-bottom: 32px; }
+.earn-page .earn-stat { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; gap: 6px; }
+.earn-page .earn-stat > span { color: var(--text-muted-1-0); font-size: 13px; line-height: 20px; }
+.earn-page .earn-stat > strong { color: var(--text-strong-1-0); font: 600 32px/40px "D-DIN-PRO", var(--font-family-user); white-space: nowrap; }
+.earn-page .earn-stat > small { color: var(--text-muted-1-0); font-size: 12px; }
+.earn-page .earn-panel {
+  overflow: visible;
+  padding-top: 24px;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.earn-page .earn-table-header,
+.earn-page .earn-panel-heading { padding: 0 0 16px; border-bottom: 0; background: transparent; }
+.earn-page .client-quick-filters { padding: 0 0 16px; border: 0; background: transparent; }
+.earn-page .table-footer { padding: 16px 0; border-top: 1px solid var(--border); }
+.earn-page .earn-footnote { padding: 16px 0 24px; }
+
+@media (max-width: 767px) {
+  .earn-page .earn-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 20px; }
+}
+
+/* ---- Client table: readable columns, one filter entry, neutral avatar ---- */
+.report-page.perf-flat .client-table-header [data-rp-action="filters"] { display: none; }
+.report-page.perf-flat .report-client-table { min-width: 100%; }
+.report-page.perf-flat .report-client-col-clientId { width: 124px; }
+.report-page.perf-flat .report-client-col-registeredAt { width: 100px; }
+.report-page.perf-flat .report-client-col-campaign { width: 118px; }
+.report-page.perf-flat .report-client-col-kyc { width: 76px; }
+.report-page.perf-flat .report-client-col-stage { width: 112px; }
+.report-page.perf-flat .report-client-col-quality { width: 84px; }
+.report-page.perf-flat .report-client-col-expected,
+.report-page.perf-flat .report-client-col-settled { width: 84px; }
+.report-page.perf-flat .report-client-col-progress { width: 104px; }
+.report-page.perf-flat .report-client-col-commissionStatus { width: 124px; }
+.report-page.perf-flat .report-client-col-risk { width: 84px; }
+.report-page.perf-flat .report-client-col-actions { width: 72px; }
+.report-page.perf-flat .client-avatar { display: none; }
+.report-page.perf-flat .report-client-table th:last-child,
+.report-page.perf-flat .report-client-table td:last-child { position: sticky; right: 0; background: var(--surface); box-shadow: -10px 0 10px -10px rgba(16, 24, 40, .12); }
+
+.earn-page .earn-stat { align-content: start; }
+.report-page .report-table thead th .report-column-label { color: inherit; }
+.earn-page .earn-table { min-width: 100%; }
+.earn-page .earn-table td.earn-reason { min-width: 180px; max-width: 240px; line-height: 1.6; }
+.earn-page .earn-table td.earn-withdrawal { min-width: 100px; }
+.report-page.perf-flat .report-table:not(.report-client-table) th,
+.report-page.perf-flat .report-table:not(.report-client-table) td { min-width: 104px; }
+.report-page.perf-flat .report-client-table th,
+.report-page.perf-flat .report-client-table td { padding-left: 8px; padding-right: 8px; }
+.report-page.perf-flat .report-client-table th:first-child,
+.report-page.perf-flat .report-client-table td:first-child { padding-left: 0; }
+.report-page.perf-flat .report-client-table th:last-child,
+.report-page.perf-flat .report-client-table td:last-child { padding-right: 0; }
+.report-page.perf-flat .report-client-table .report-commission-status small { white-space: normal; }
+/* actions: two buttons stacked so the column stays narrow */
+.report-page.perf-flat .report-client-table .report-client-actions { display: flex; flex-direction: column; align-items: stretch; gap: 4px; }
+.report-page.perf-flat .report-client-table td { padding-top: 10px; padding-bottom: 10px; }
+
+/* ---- Overview summary row: same type-led style as the dashboard and earnings ---- */
+.report-page.perf-flat .report-stats { gap: 32px; margin-bottom: 24px; padding: 0; border: 0; }
+.report-page.perf-flat .report-stat { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; gap: 6px; }
+.report-page.perf-flat .report-stat > span { min-height: 0; color: var(--text-muted-1-0); font-size: 13px; line-height: 20px; }
+.report-page.perf-flat .report-stat-number { color: var(--text-strong-1-0); font: 600 28px/36px "D-DIN-PRO", var(--font-family-user); white-space: nowrap; }
+.report-page.perf-flat .report-stat-number:hover { color: var(--brand-1-0); }
+@media (max-width: 1199px) { .report-page.perf-flat .report-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 20px; } }
+@media (max-width: 767px) { .report-page.perf-flat .report-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; } }
+.report-page.perf-flat .report-stats { background: transparent; box-shadow: none; }
+.report-page .report-table thead th .report-sort-button,
+.report-page .report-table thead th .report-column-label { color: var(--text-muted-1-0); }
+.report-page .report-table thead th .report-sort-button,
+.report-page .report-table thead th .report-column-label { font-weight: 500; }

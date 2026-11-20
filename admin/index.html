@@ -3,17 +3,43 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Affiliate Admin Mock</title>
-  <link rel="stylesheet" href="../admin.css?v=admin-support-v1">
-  <link rel="stylesheet" href="../admin-dev.css?v=admin-system-sections-v1">
-  <link rel="stylesheet" href="../admin-table.css?v=20261109">
-  <link rel="stylesheet" href="../admin-filter.css?v=20261109">
+  <title>管理端 · Affiliate</title>
+  <link rel="stylesheet" href="../design-tokens.css">
+  <link rel="stylesheet" href="css/shell.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
 </head>
-<body class="admin-tables">
-  <div id="admin-app"></div>
-  <div id="admin-modal-root" aria-live="polite"></div>
-  <script src="../admin-prototype-data.js?v=admin-system-sections-v1"></script>
-  <script src="../admin-dev.js?v=admin-system-sections-v1"></script>
-  <script src="../admin-table.js?v=20261109"></script>
+<body>
+  <header class="adm-topbar" id="topbar"></header>
+  <nav class="adm-sidebar" id="sidebar" aria-label="主菜单"></nav>
+  <main class="adm-main" id="main" tabindex="-1"></main>
+  <div class="adm-pop" id="rolePop" role="menu" aria-label="切换角色视角"></div>
+  <div class="scrim" id="scrim"></div>
+  <aside class="drawer" id="drawer" aria-hidden="true" role="dialog"></aside>
+  <div class="modal" id="modal" role="dialog" aria-modal="true"></div>
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/data-risk.js"></script>
+  <script src="js/data-funds.js"></script>
+  <script src="js/data-promo.js"></script>
+  <script src="js/data-ops.js"></script>
+  <script src="js/data-gov.js"></script>
+  <script src="js/data-config.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/pages-dashboard.js"></script>
+  <script src="js/pages-tasks.js"></script>
+  <script src="js/pages-partner.js"></script>
+  <script src="js/pages-approvals.js"></script>
+  <script src="js/pages-risk.js"></script>
+  <script src="js/pages-funds.js"></script>
+  <script src="js/pages-customer.js"></script>
+  <script src="js/pages-promo.js"></script>
+  <script src="js/pages-workbench.js"></script>
+  <script src="js/pages-report.js"></script>
+  <script src="js/pages-gov.js"></script>
+  <script src="js/pages-config.js"></script>
+  <script src="js/pages-cpaedit.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

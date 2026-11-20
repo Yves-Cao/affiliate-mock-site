@@ -2,6 +2,14 @@
   const data = AFF.reporting;
   const h = value => AFF.helpers.h(value);
   const t = (zh, en) => AFF.state.language === "en" ? en : zh;
+  function pageIntro() {
+    const copy = {
+      perf: [t("业绩数据", "Performance"), t("按日期、渠道等维度查看点击、注册与转化。", "Clicks, registrations and conversion by date and channel.")],
+      clients: [t("客户数据", "Client data"), t("查看客户注册、转化阶段与佣金状态。", "Client registrations, conversion stages and commission status.")],
+      summary: [t("总览数据", "Overview"), t("汇总客户转化与佣金，按维度分组查看。", "Client conversion and commission, grouped by dimension.")]
+    }[AFF.state.route];
+    return copy ? `<header class="page-intro"><h1>${copy[0]}</h1><p>${copy[1]}</p></header>` : "";
+  }
   const timeKeys = ["date", "week", "month", "year"];
   const routeKeys = ["perf", "clients", "summary"];
   const summaryMetrics = ["ftd", "effective", "quality", "held", "guarantee", "available"];
@@ -755,7 +763,7 @@
     return `<div class="client-table-shell">
       <div class="client-table-header">
         <div class="client-table-title">
-          <strong>${t("客户数据", "Client data")}</strong>
+          <strong>${t("客户列表", "Client list")}</strong>
           ${filterChips(s)}
         </div>
         <div class="client-table-tools">
@@ -1038,7 +1046,7 @@
     const s = state();
     const source = filtered(s);
     const rows = tableRows();
-    return `<div class="report-page ${["perf", "clients", "summary"].includes(AFF.state.route) ? "perf-flat data-flat" : ""}">${controls(s)}
+    return `<div class="report-page ${["perf", "clients", "summary"].includes(AFF.state.route) ? "perf-flat data-flat" : ""}">${pageIntro()}${controls(s)}
       ${AFF.state.route === "summary" ? summaryCards(source) : ""}
       <section class="card report-panel ${AFF.state.route === "clients" ? "client-panel" : ""}">
         ${AFF.state.route !== "clients" ? `<div class="report-table-toolbar">${groupPicker(s)}${tableActions(s)}</div>` : ""}

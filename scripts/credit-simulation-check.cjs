@@ -38,11 +38,11 @@ function test(name, run) {
 test("baseline remains unchanged until a credit adjustment", () => {
   const { AFF } = setup();
   assert.equal(AFF.simulation.state().credit, null);
-  assert.equal(AFF.creditCenter.summary().level, "C0");
+  assert.equal(AFF.creditCenter.summary().level, "C2");
   assert.equal(AFF.creditCenter.summary().progress, 0.1);
   const verified = setup(new Map(), { kybCompleted: true }).AFF;
   assert.equal(verified.creditCenter.summary().level, "C2");
-  assert.equal(verified.creditCenter.summary().progress, 0.55);
+  assert.equal(verified.creditCenter.summary().progress, 0.1);
 });
 
 test("level actions move one tier, reset progress, and clamp at either boundary", () => {
@@ -50,9 +50,10 @@ test("level actions move one tier, reset progress, and clamp at either boundary"
   const sim = AFF.simulation;
   const adjust = direction => sim.changeCreditLevel(direction, AFF.creditCenter.summary());
   adjust(-1);
-  assert.equal(sim.state().credit, null);
-  assert.equal(sim.state().logs.length, 0);
-  for (let level = 1; level <= 4; level += 1) {
+  assert.equal(sim.state().credit.level, "C1");
+  assert.equal(sim.state().credit.points, 0);
+  assert.equal(sim.state().logs.length, 1);
+  for (let level = 2; level <= 4; level += 1) {
     adjust(1);
     assert.equal(sim.state().credit.level, `C${level}`);
     assert.equal(sim.state().credit.points, 0);
@@ -80,7 +81,7 @@ test("points update the baseline progress and clamp without promoting the level"
   assert.match(AFF.creditCenter.accountPanel(), /style="width:25%"/);
   adjust(200);
   assert.equal(sim.state().credit.points, 100);
-  assert.equal(AFF.creditCenter.summary().level, "C0");
+  assert.equal(AFF.creditCenter.summary().level, "C2");
   const full = sim.exportSnapshot();
   adjust(1);
   assert.equal(sim.exportSnapshot(), full);
@@ -111,7 +112,7 @@ test("session reload and snapshot import retain the credit override", () => {
   AFF.simulation.advanceDays(7, {});
   AFF.simulation.changeCreditLevel(1, AFF.creditCenter.summary());
   AFF.simulation.changeCreditPoints(40, AFF.creditCenter.summary());
-  const expected = { level: "C1", points: 40, effectiveAt: "2026-11-03" };
+  const expected = { level: "C3", points: 40, effectiveAt: "2026-11-03" };
   assert.deepEqual(plain(setup(storage).AFF.simulation.state().credit), expected);
   const restored = setup().AFF;
   restored.simulation.importSnapshot(AFF.simulation.exportSnapshot());
@@ -150,7 +151,7 @@ test("reset clears credit while retaining records, violations, and operation his
   assert.equal(sim.state().records.length, 1);
   assert.equal(sim.state().violations.length, 1);
   assert.equal(sim.state().logs.length, logs + 1);
-  assert.equal(AFF.creditCenter.summary().level, "C0");
+  assert.equal(AFF.creditCenter.summary().level, "C2");
   assert.equal(AFF.creditCenter.summary().progress, 0.1);
 });
 
@@ -158,9 +159,11 @@ test("summary, stages, account panel, and benefits reflect the selected tier", (
   const { AFF } = setup();
   const sim = AFF.simulation;
   const startMarkup = AFF.creditCenter.dashboardStrip();
-  assert.doesNotMatch(startMarkup, /credit-benefit-group is-current/);
-  assert.match(startMarkup, /下级权益<\/span><strong>VIP2/);
-  assert.doesNotMatch(startMarkup, /免结算额度/);
+  assert.match(startMarkup, /当前等级权益<\/span><strong>VIP3/);
+  assert.doesNotMatch(startMarkup, /下级权益|credit-benefit-group is-next/, "card shows only current-level benefits");
+  assert.match(startMarkup, /免结算额度/);
+  sim.changeCreditLevel(-1, AFF.creditCenter.summary());
+  sim.changeCreditLevel(-1, AFF.creditCenter.summary());
   const ratios = [0, 0.02, 0.04, 0.07, 0.10];
   for (let index = 1; index <= 4; index += 1) {
     sim.changeCreditLevel(1, AFF.creditCenter.summary());
@@ -171,10 +174,8 @@ test("summary, stages, account panel, and benefits reflect the selected tier", (
     const markup = AFF.creditCenter.dashboardStrip();
     assert.match(markup, new RegExp(`当前等级权益</span><strong>VIP${index + 1}`));
     assert.match(AFF.creditCenter.accountPanel(), new RegExp(`VIP${index + 1} ·`));
-    if (index < 4) {
-      assert.match(markup, new RegExp(`下级权益</span><strong>VIP${index + 2}`));
-    } else {
-      assert.doesNotMatch(markup, /credit-benefit-group is-next/);
+    assert.doesNotMatch(markup, /下级权益|credit-benefit-group is-next/);
+    if (index === 4) {
       sim.changeCreditPoints(20, info);
       assert.equal(sim.state().credit.points, 20);
       assert.equal(AFF.creditCenter.summary().progress, 1);

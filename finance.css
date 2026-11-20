@@ -13,7 +13,7 @@
   padding: 12px;
   border: 1px solid var(--border);
   border-radius: 4px;
-  background: #f8fbff;
+  background: #f9fafb;
 }
 .finance-rule-grid span,
 .finance-rule-grid small { display: block; color: var(--muted); }
@@ -159,7 +159,7 @@
 .calculator-result span { color: var(--muted); font-size: 12px; }
 .calculator-fields input,
 .calculator-fields select { min-height: 34px; padding: 5px 8px; border: 1px solid var(--control-border); border-radius: 4px; background: #fff; color: var(--text); font: inherit; }
-.calculator-result { padding: 16px; border: 1px solid var(--border); border-radius: 4px; background: #f8fbff; }
+.calculator-result { padding: 16px; border: 1px solid var(--border); border-radius: 4px; background: #f9fafb; }
 .calculator-result > strong { color: var(--brand); font: var(--font-text-24-b); font-variant-numeric: tabular-nums; }
 .calculator-result > div { display: flex; justify-content: space-between; gap: 12px; }
 .calculator-result > div strong { color: var(--blue-black); font-variant-numeric: tabular-nums; }

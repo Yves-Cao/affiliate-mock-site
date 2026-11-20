@@ -1,0 +1,2523 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://affiliate.local/schemas/p0-object-schemas.json",
+  "title": "Affiliate P0 canonical object schemas",
+  "type": "object",
+  "additionalProperties": false,
+  "definitions": {
+    "Application": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/Application.schema.json",
+      "title": "Application P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "application_id",
+        "application_version",
+        "partner_id",
+        "schema_version",
+        "material_snapshot",
+        "source_channel",
+        "submitted_at",
+        "status",
+        "status_reason_code"
+      ],
+      "properties": {
+        "application_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "application_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "material_snapshot": {
+          "type": "object"
+        },
+        "source_channel": {
+          "type": "string",
+          "minLength": 1
+        },
+        "submitted_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status_reason_code": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "application_id + application_version",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "CRM must confirm the same application version."
+    },
+    "CRMSyncOperation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/CRMSyncOperation.schema.json",
+      "title": "CRMSyncOperation P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "business_operation_id",
+        "application_id",
+        "application_version",
+        "sync_type",
+        "crm_subject_id",
+        "record_version",
+        "status",
+        "failure",
+        "retry_task_id"
+      ],
+      "properties": {
+        "business_operation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "application_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "application_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sync_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "crm_subject_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "failure": {
+          "type": "string",
+          "minLength": 1
+        },
+        "retry_task_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "business_operation_id",
+      "x-affiliate-authority": "CPA projection of CRM operation",
+      "x-affiliate-notes": "Timeout reuses the original idempotency key."
+    },
+    "Partner": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/Partner.schema.json",
+      "title": "Partner P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "partner_id",
+        "crm_subject_id",
+        "state",
+        "risk_scope",
+        "created_at",
+        "updated_at"
+      ],
+      "properties": {
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "crm_subject_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "risk_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "x-affiliate-stable-identity": "partner_id",
+      "x-affiliate-authority": "CPA lifecycle / CRM identity facts",
+      "x-affiliate-notes": "No local password account."
+    },
+    "PartnerLifecycleRecord": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/PartnerLifecycleRecord.schema.json",
+      "title": "PartnerLifecycleRecord P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "lifecycle_record_id",
+        "partner_id",
+        "from_state",
+        "to_state",
+        "reason_code",
+        "authorization",
+        "handoff_refs"
+      ],
+      "properties": {
+        "lifecycle_record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "from_state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "to_state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authorization": {
+          "type": "string",
+          "minLength": 1
+        },
+        "handoff_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "x-affiliate-stable-identity": "lifecycle_record_id",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "Illegal transitions are rejected and retained for audit."
+    },
+    "TerminationHandoff": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/TerminationHandoff.schema.json",
+      "title": "TerminationHandoff P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "handoff_id",
+        "partner_id",
+        "required_item_refs",
+        "completed_item_refs",
+        "state",
+        "status_reason_code",
+        "review_task_id"
+      ],
+      "properties": {
+        "handoff_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "required_item_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "completed_item_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status_reason_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "review_task_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "handoff_id",
+      "x-affiliate-authority": "CPA orchestration / owning domain systems",
+      "x-affiliate-notes": "A missing dependency is incomplete, not completed."
+    },
+    "AgreementConsent": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/AgreementConsent.schema.json",
+      "title": "AgreementConsent P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "consent_id",
+        "partner_id",
+        "agreement_version",
+        "acceptance",
+        "accepted_at",
+        "evidence_policy_version"
+      ],
+      "properties": {
+        "consent_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "agreement_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "acceptance": {
+          "type": "boolean"
+        },
+        "accepted_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "evidence_policy_version": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "consent_id",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "Legal evidence scope remains compliance-gated."
+    },
+    "FirstLinkGateEvaluation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/FirstLinkGateEvaluation.schema.json",
+      "title": "FirstLinkGateEvaluation P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "evaluation_id",
+        "partner_id",
+        "release_phase",
+        "policy_version",
+        "gate_results",
+        "signoff_refs",
+        "result",
+        "reason_code"
+      ],
+      "properties": {
+        "evaluation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "release_phase": {
+          "type": "string",
+          "minLength": 1
+        },
+        "policy_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "gate_results": {
+          "type": "object"
+        },
+        "signoff_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "result": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "evaluation_id",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "Working target object derived from Partner Onboarding logical contract."
+    },
+    "OfficialPath": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/OfficialPath.schema.json",
+      "title": "OfficialPath P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "official_path_id",
+        "path_version",
+        "destination_ref",
+        "country",
+        "system",
+        "language",
+        "effective_at",
+        "status",
+        "approval_ref"
+      ],
+      "properties": {
+        "official_path_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "destination_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "country": {
+          "type": "string",
+          "minLength": 1
+        },
+        "system": {
+          "type": "string",
+          "minLength": 1
+        },
+        "language": {
+          "type": "string",
+          "minLength": 1
+        },
+        "effective_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approval_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "official_path_id + path_version",
+      "x-affiliate-authority": "CPA configuration synchronized to CRM",
+      "x-affiliate-notes": "No arbitrary partner URL."
+    },
+    "OfficialLink": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/OfficialLink.schema.json",
+      "title": "OfficialLink P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "link_id",
+        "partner_id",
+        "sub_id",
+        "official_path_id",
+        "path_version",
+        "activity_id",
+        "asset_id",
+        "asset_version",
+        "status"
+      ],
+      "properties": {
+        "link_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sub_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "official_path_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "activity_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "asset_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "asset_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "link_id",
+      "x-affiliate-authority": "CRM",
+      "x-affiliate-notes": "Generated from official domain only."
+    },
+    "Click": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/Click.schema.json",
+      "title": "Click P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "click_id",
+        "link_id",
+        "partner_id",
+        "sub_id",
+        "clicked_at",
+        "raw_parameter_snapshot_ref",
+        "risk_result",
+        "effective_click"
+      ],
+      "properties": {
+        "click_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "link_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sub_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "clicked_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "raw_parameter_snapshot_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "risk_result": {
+          "type": "string",
+          "minLength": 1
+        },
+        "effective_click": {
+          "type": "boolean"
+        }
+      },
+      "x-affiliate-stable-identity": "click_id",
+      "x-affiliate-authority": "CRM",
+      "x-affiliate-notes": "Raw evidence remains in CRM."
+    },
+    "ClickRiskEvaluation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/ClickRiskEvaluation.schema.json",
+      "title": "ClickRiskEvaluation P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "click_id",
+        "rule_version",
+        "parameter_version",
+        "rule_id",
+        "evidence_refs",
+        "result",
+        "reason_code",
+        "evaluated_at"
+      ],
+      "properties": {
+        "click_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rule_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parameter_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rule_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "result": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evaluated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "x-affiliate-stable-identity": "click_id + rule_version + parameter_version",
+      "x-affiliate-authority": "CRM",
+      "x-affiliate-notes": "Unknown decision is not effective."
+    },
+    "RegistrationFact": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/RegistrationFact.schema.json",
+      "title": "RegistrationFact P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "registration_id",
+        "record_version",
+        "customer_id",
+        "registered_at",
+        "raw_source_snapshot_ref",
+        "quality_state",
+        "correction_ref"
+      ],
+      "properties": {
+        "registration_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "customer_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "registered_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "raw_source_snapshot_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "quality_state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "correction_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "registration_id + record_version",
+      "x-affiliate-authority": "CRM",
+      "x-affiliate-notes": "CPA stores references only."
+    },
+    "ExternalTouch": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/ExternalTouch.schema.json",
+      "title": "ExternalTouch P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "touch_id",
+        "provider",
+        "customer_ref",
+        "click_ref",
+        "touch_time",
+        "evidence_ref",
+        "quality_state"
+      ],
+      "properties": {
+        "touch_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provider": {
+          "type": "string",
+          "minLength": 1
+        },
+        "customer_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "click_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "touch_time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "quality_state": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "touch_id",
+      "x-affiliate-authority": "provider -> CRM",
+      "x-affiliate-notes": "PostHog/AppsFlyer physical integration gated."
+    },
+    "CustomerSnapshot": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/CustomerSnapshot.schema.json",
+      "title": "CustomerSnapshot P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "customer_id",
+        "snapshot_version",
+        "crm_subject_ref",
+        "country",
+        "identity_state",
+        "ib_state",
+        "data_as_of"
+      ],
+      "properties": {
+        "customer_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "snapshot_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "crm_subject_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "country": {
+          "type": "string",
+          "minLength": 1
+        },
+        "identity_state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ib_state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "data_as_of": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "customer_id + snapshot_version",
+      "x-affiliate-authority": "CRM projection",
+      "x-affiliate-notes": "Used for isolation and eligibility checks."
+    },
+    "AttributionCandidate": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/AttributionCandidate.schema.json",
+      "title": "AttributionCandidate P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "candidate_id",
+        "customer_id",
+        "click_id",
+        "touch_id",
+        "rule_version",
+        "score",
+        "state"
+      ],
+      "properties": {
+        "candidate_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "customer_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "click_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "touch_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rule_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "score": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "candidate_id",
+      "x-affiliate-authority": "CRM",
+      "x-affiliate-notes": "Candidate is not payable."
+    },
+    "Attribution": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/Attribution.schema.json",
+      "title": "Attribution P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "attribution_id",
+        "customer_id",
+        "partner_id",
+        "state",
+        "locked_at",
+        "attribution_rule_version",
+        "evidence_refs"
+      ],
+      "properties": {
+        "attribution_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "customer_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "locked_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "attribution_rule_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "x-affiliate-stable-identity": "attribution_id",
+      "x-affiliate-authority": "CRM",
+      "x-affiliate-notes": "Only locked attribution may enter qualification."
+    },
+    "AttributionCorrection": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/AttributionCorrection.schema.json",
+      "title": "AttributionCorrection P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "correction_id",
+        "correction_version",
+        "original_attribution_id",
+        "change_type",
+        "reason_code",
+        "impact_refs",
+        "review_task_id"
+      ],
+      "properties": {
+        "correction_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "correction_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "original_attribution_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "change_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "impact_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "review_task_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "correction_id + correction_version",
+      "x-affiliate-authority": "CRM",
+      "x-affiliate-notes": "Never overwrites the original lock."
+    },
+    "QualificationCase": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/QualificationCase.schema.json",
+      "title": "QualificationCase P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "qualification_case_id",
+        "customer_id",
+        "attribution_id",
+        "milestone",
+        "fact_versions",
+        "rule_versions",
+        "result",
+        "reason_code"
+      ],
+      "properties": {
+        "qualification_case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "customer_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "attribution_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "milestone": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fact_versions": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rule_versions": {
+          "type": "string",
+          "minLength": 1
+        },
+        "result": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "qualification_case_id",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "Separate from commission and funds."
+    },
+    "MilestoneSnapshot": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/MilestoneSnapshot.schema.json",
+      "title": "MilestoneSnapshot P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "customer_id",
+        "milestone",
+        "fact_version",
+        "source_fact_refs",
+        "inputs_cutoff",
+        "old_state",
+        "new_state",
+        "concluded_at"
+      ],
+      "properties": {
+        "customer_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "milestone": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fact_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_fact_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "inputs_cutoff": {
+          "type": "string",
+          "minLength": 1
+        },
+        "old_state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "new_state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "concluded_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "x-affiliate-stable-identity": "customer_id + milestone + fact_version",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "First Deposit, Qualified Conversion, Quality Upgrade."
+    },
+    "PriceSnapshot": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/PriceSnapshot.schema.json",
+      "title": "PriceSnapshot P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "price_version",
+        "country",
+        "qualification_tier",
+        "base_price",
+        "country_coefficient",
+        "currency",
+        "rounding_context"
+      ],
+      "properties": {
+        "price_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "country": {
+          "type": "string",
+          "minLength": 1
+        },
+        "qualification_tier": {
+          "type": "string",
+          "minLength": 1
+        },
+        "base_price": {
+          "type": "string",
+          "pattern": "^-?[0-9]+\\.[0-9]{2}$"
+        },
+        "country_coefficient": {
+          "type": "string",
+          "minLength": 1
+        },
+        "currency": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rounding_context": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "price_version + country + qualification_tier",
+      "x-affiliate-authority": "CPA configuration snapshot",
+      "x-affiliate-notes": "Locked at case generation."
+    },
+    "QualityUpgradeRuleSnapshot": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/QualityUpgradeRuleSnapshot.schema.json",
+      "title": "QualityUpgradeRuleSnapshot P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "m3_rule_version",
+        "source_commission_case_id",
+        "m3_percentage",
+        "source_case_id",
+        "source_amount_snapshot"
+      ],
+      "properties": {
+        "m3_rule_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_commission_case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "m3_percentage": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_amount_snapshot": {
+          "type": "object"
+        }
+      },
+      "x-affiliate-stable-identity": "m3_rule_version + source_commission_case_id",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "M3 = configured percentage x source M1+M2 commission."
+    },
+    "CommissionCase": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/CommissionCase.schema.json",
+      "title": "CommissionCase P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "commission_case_id",
+        "calculation_version",
+        "case_type",
+        "partner_id",
+        "customer_id",
+        "attribution_id",
+        "qualification_case_id",
+        "amount",
+        "currency",
+        "snapshot_refs"
+      ],
+      "properties": {
+        "commission_case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "calculation_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "case_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "customer_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "attribution_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "qualification_case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "amount": {
+          "type": "string",
+          "pattern": "^-?[0-9]+\\.[0-9]{2}$"
+        },
+        "currency": {
+          "type": "string",
+          "minLength": 1
+        },
+        "snapshot_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "x-affiliate-stable-identity": "commission_case_id + calculation_version",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "Base and M3 are separate cases."
+    },
+    "CommissionLine": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/CommissionLine.schema.json",
+      "title": "CommissionLine P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "commission_line_id",
+        "commission_case_id",
+        "component",
+        "amount",
+        "snapshot_ref"
+      ],
+      "properties": {
+        "commission_line_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commission_case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "component": {
+          "type": "string",
+          "minLength": 1
+        },
+        "amount": {
+          "type": "string",
+          "pattern": "^-?[0-9]+\\.[0-9]{2}$"
+        },
+        "snapshot_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "commission_line_id",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "Preserves amount breakdown."
+    },
+    "CommissionAdjustment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/CommissionAdjustment.schema.json",
+      "title": "CommissionAdjustment P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "adjustment_id",
+        "original_case_id",
+        "direction",
+        "difference_amount",
+        "source_version",
+        "rule_version",
+        "downstream_routing"
+      ],
+      "properties": {
+        "adjustment_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "original_case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "direction": {
+          "type": "string",
+          "minLength": 1
+        },
+        "difference_amount": {
+          "type": "string",
+          "pattern": "^-?[0-9]+\\.[0-9]{2}$"
+        },
+        "source_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rule_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "downstream_routing": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "adjustment_id",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "Correction route, not historical overwrite."
+    },
+    "RiskFact": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/RiskFact.schema.json",
+      "title": "RiskFact P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "source_system",
+        "source_fact_id",
+        "source_version",
+        "fact_type",
+        "raw_status",
+        "mapped_status",
+        "scope_hint",
+        "occurred_at",
+        "quality_state"
+      ],
+      "properties": {
+        "source_system": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_fact_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fact_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "raw_status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mapped_status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope_hint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "quality_state": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "source_system + source_fact_id + source_version",
+      "x-affiliate-authority": "CRM/external source",
+      "x-affiliate-notes": "CPA does not overwrite source facts."
+    },
+    "RiskSignal": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/RiskSignal.schema.json",
+      "title": "RiskSignal P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "risk_signal_id",
+        "risk_fact_refs",
+        "rule_version",
+        "scope",
+        "outcome",
+        "reason_code",
+        "evidence_refs"
+      ],
+      "properties": {
+        "risk_signal_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "risk_fact_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "rule_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "outcome": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "x-affiliate-stable-identity": "risk_signal_id",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "Signal is not a money action."
+    },
+    "SettlementGateEvaluation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/SettlementGateEvaluation.schema.json",
+      "title": "SettlementGateEvaluation P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "settlement_case_id",
+        "evaluation_version",
+        "gate_results",
+        "input_versions",
+        "result",
+        "block_reason",
+        "trace_id"
+      ],
+      "properties": {
+        "settlement_case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evaluation_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "gate_results": {
+          "type": "object"
+        },
+        "input_versions": {
+          "type": "string",
+          "minLength": 1
+        },
+        "result": {
+          "type": "string",
+          "minLength": 1
+        },
+        "block_reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "settlement_case_id + evaluation_version",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "Records every gate, not only final result."
+    },
+    "RiskCase": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/RiskCase.schema.json",
+      "title": "RiskCase P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "risk_case_id",
+        "signal_refs",
+        "scope",
+        "evidence_snapshot",
+        "review_task_id",
+        "state",
+        "decision"
+      ],
+      "properties": {
+        "risk_case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signal_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_snapshot": {
+          "type": "object"
+        },
+        "review_task_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "risk_case_id",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "Review and execution are separate."
+    },
+    "QuarantineRecord": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/QuarantineRecord.schema.json",
+      "title": "QuarantineRecord P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "quarantine_id",
+        "source_type",
+        "source_ref",
+        "scope",
+        "reason_code",
+        "blocked_amount",
+        "state",
+        "release_recheck_ref"
+      ],
+      "properties": {
+        "quarantine_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "blocked_amount": {
+          "type": "string",
+          "pattern": "^-?[0-9]+\\.[0-9]{2}$"
+        },
+        "state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "release_recheck_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "quarantine_id",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "Logical queue only."
+    },
+    "RiskExecution": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/RiskExecution.schema.json",
+      "title": "RiskExecution P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "execution_id",
+        "risk_case_id",
+        "action",
+        "affected_object_ids",
+        "result",
+        "partial_failures",
+        "compensation_ref"
+      ],
+      "properties": {
+        "execution_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "risk_case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "affected_object_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "result": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partial_failures": {
+          "type": "string",
+          "minLength": 1
+        },
+        "compensation_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "execution_id",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "Exact affected scope is mandatory."
+    },
+    "CreditPointRecord": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/CreditPointRecord.schema.json",
+      "title": "CreditPointRecord P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "credit_point_record_id",
+        "partner_id",
+        "source_event_ref",
+        "point_rule_version",
+        "direction",
+        "points",
+        "window_version",
+        "effective_at"
+      ],
+      "properties": {
+        "credit_point_record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_event_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "point_rule_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "direction": {
+          "type": "string",
+          "minLength": 1
+        },
+        "points": {
+          "type": "string",
+          "minLength": 1
+        },
+        "window_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "effective_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "x-affiliate-stable-identity": "credit_point_record_id",
+      "x-affiliate-authority": "CPA credit projection",
+      "x-affiliate-notes": "Immutable point fact; production point values remain configuration-gated."
+    },
+    "CreditScoreSnapshot": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/CreditScoreSnapshot.schema.json",
+      "title": "CreditScoreSnapshot P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "partner_id",
+        "calculation_version",
+        "score",
+        "dimension_weights_version",
+        "window_version",
+        "input_versions",
+        "data_quality",
+        "calculated_at"
+      ],
+      "properties": {
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "calculation_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "score": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dimension_weights_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "window_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "input_versions": {
+          "type": "string",
+          "minLength": 1
+        },
+        "data_quality": {
+          "type": "string",
+          "minLength": 1
+        },
+        "calculated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "x-affiliate-stable-identity": "partner_id + calculation_version",
+      "x-affiliate-authority": "CPA credit projection",
+      "x-affiliate-notes": "Missing or conflicting critical inputs are data_blocked, not score zero."
+    },
+    "CreditLevelSnapshot": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/CreditLevelSnapshot.schema.json",
+      "title": "CreditLevelSnapshot P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "partner_id",
+        "level_version",
+        "level",
+        "basis",
+        "source_score_version",
+        "target_level_rules_version",
+        "effective_at",
+        "reason_code"
+      ],
+      "properties": {
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "level_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "level": {
+          "type": "string",
+          "minLength": 1
+        },
+        "basis": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_score_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target_level_rules_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "effective_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "partner_id + level_version",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "C0-C4 is a credit layer, not itself a settlement block."
+    },
+    "CreditOverride": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/CreditOverride.schema.json",
+      "title": "CreditOverride P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "override_id",
+        "partner_id",
+        "target_level",
+        "approval_ref",
+        "effective_at",
+        "expires_at",
+        "state"
+      ],
+      "properties": {
+        "override_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target_level": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approval_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "effective_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "state": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "override_id",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "C4 requires high-permission manual approval; expiry restores the system level."
+    },
+    "CreditBenefitSnapshot": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/CreditBenefitSnapshot.schema.json",
+      "title": "CreditBenefitSnapshot P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "benefit_snapshot_id",
+        "commission_case_id",
+        "partner_id",
+        "credit_level",
+        "benefit_version",
+        "personal_benefit_version",
+        "base_price_snapshot_version",
+        "locked_at"
+      ],
+      "properties": {
+        "benefit_snapshot_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commission_case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "credit_level": {
+          "type": "string",
+          "minLength": 1
+        },
+        "benefit_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "personal_benefit_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "base_price_snapshot_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "locked_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "x-affiliate-stable-identity": "benefit_snapshot_id",
+      "x-affiliate-unique-key": "commission_case_id",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "Base-case and quality-upgrade cases reuse the locked snapshot."
+    },
+    "SettlementRun": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/SettlementRun.schema.json",
+      "title": "SettlementRun P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "settlement_run_id",
+        "settlement_date",
+        "timezone",
+        "config_version",
+        "run_state",
+        "case_count",
+        "passed_count",
+        "blocked_count",
+        "failed_count",
+        "recovery_checkpoint"
+      ],
+      "properties": {
+        "settlement_run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "settlement_date": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timezone": {
+          "type": "string",
+          "minLength": 1
+        },
+        "config_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "run_state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "case_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "passed_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "blocked_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "recovery_checkpoint": {
+          "type": "object"
+        }
+      },
+      "x-affiliate-stable-identity": "settlement_run_id",
+      "x-affiliate-unique-key": "settlement_date + timezone + config_version",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "Retries failed tasks without duplicating cases."
+    },
+    "SettlementCase": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/SettlementCase.schema.json",
+      "title": "SettlementCase P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "settlement_case_id",
+        "commission_case_id",
+        "gate_evaluation_refs",
+        "state",
+        "reason_code",
+        "hold_started_at"
+      ],
+      "properties": {
+        "settlement_case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commission_case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "gate_evaluation_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "hold_started_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "x-affiliate-stable-identity": "settlement_case_id",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "Blocked commission remains traceable."
+    },
+    "LedgerEntry": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/LedgerEntry.schema.json",
+      "title": "LedgerEntry P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "ledger_entry_id",
+        "wallet_id",
+        "entry_type",
+        "amount",
+        "currency",
+        "conservation_group",
+        "before_ref",
+        "after_ref",
+        "idempotency_key"
+      ],
+      "properties": {
+        "ledger_entry_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "wallet_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entry_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "amount": {
+          "type": "string",
+          "pattern": "^-?[0-9]+\\.[0-9]{2}$"
+        },
+        "currency": {
+          "type": "string",
+          "minLength": 1
+        },
+        "conservation_group": {
+          "type": "string",
+          "minLength": 1
+        },
+        "before_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "after_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "ledger_entry_id",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "Immutable line-level money fact."
+    },
+    "GuaranteeLine": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/GuaranteeLine.schema.json",
+      "title": "GuaranteeLine P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "guarantee_line_id",
+        "partner_id",
+        "source_case_id",
+        "entry_type",
+        "amount",
+        "config_snapshot",
+        "available_at"
+      ],
+      "properties": {
+        "guarantee_line_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entry_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "amount": {
+          "type": "string",
+          "pattern": "^-?[0-9]+\\.[0-9]{2}$"
+        },
+        "config_snapshot": {
+          "type": "object"
+        },
+        "available_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "x-affiliate-stable-identity": "guarantee_line_id",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "Partner-level deposit pool."
+    },
+    "Statement": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/Statement.schema.json",
+      "title": "Statement P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "statement_id",
+        "partner_id",
+        "period_start",
+        "period_end",
+        "timezone",
+        "legal_entity",
+        "currency",
+        "current_version"
+      ],
+      "properties": {
+        "statement_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "period_start": {
+          "type": "string",
+          "minLength": 1
+        },
+        "period_end": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timezone": {
+          "type": "string",
+          "minLength": 1
+        },
+        "legal_entity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "currency": {
+          "type": "string",
+          "minLength": 1
+        },
+        "current_version": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "statement_id",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "Independent from withdrawal."
+    },
+    "StatementVersion": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/StatementVersion.schema.json",
+      "title": "StatementVersion P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "statement_id",
+        "statement_version",
+        "version_type",
+        "case_refs",
+        "opening_amount",
+        "closing_amount",
+        "status",
+        "correction_diff"
+      ],
+      "properties": {
+        "statement_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "statement_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "version_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "case_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "opening_amount": {
+          "type": "string",
+          "pattern": "^-?[0-9]+\\.[0-9]{2}$"
+        },
+        "closing_amount": {
+          "type": "string",
+          "pattern": "^-?[0-9]+\\.[0-9]{2}$"
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "correction_diff": {
+          "type": "object"
+        }
+      },
+      "x-affiliate-stable-identity": "statement_id + statement_version",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "Finalized corrections create new versions."
+    },
+    "Withdrawal": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/Withdrawal.schema.json",
+      "title": "Withdrawal P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "withdrawal_id",
+        "partner_id",
+        "request_ref",
+        "requested_amount",
+        "fee",
+        "net_amount",
+        "currency",
+        "state",
+        "status_reason_code",
+        "allocation_snapshot_version"
+      ],
+      "properties": {
+        "withdrawal_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "request_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requested_amount": {
+          "type": "string",
+          "pattern": "^-?[0-9]+\\.[0-9]{2}$"
+        },
+        "fee": {
+          "type": "string",
+          "pattern": "^-?[0-9]+\\.[0-9]{2}$"
+        },
+        "net_amount": {
+          "type": "string",
+          "pattern": "^-?[0-9]+\\.[0-9]{2}$"
+        },
+        "currency": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status_reason_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "allocation_snapshot_version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "x-affiliate-stable-identity": "withdrawal_id",
+      "x-affiliate-unique-key": "partner_id + request_ref",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "Manual request; no unconditional auto-release."
+    },
+    "WithdrawalAllocation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/WithdrawalAllocation.schema.json",
+      "title": "WithdrawalAllocation P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "allocation_id",
+        "withdrawal_id",
+        "ledger_entry_id",
+        "allocated_amount",
+        "available_at",
+        "allocation_sort_key"
+      ],
+      "properties": {
+        "allocation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "withdrawal_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ledger_entry_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "allocated_amount": {
+          "type": "string",
+          "pattern": "^-?[0-9]+\\.[0-9]{2}$"
+        },
+        "available_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "allocation_sort_key": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "allocation_id",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "FIFO and atomic lock."
+    },
+    "PayoutAttempt": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/PayoutAttempt.schema.json",
+      "title": "PayoutAttempt P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "payout_attempt_id",
+        "withdrawal_id",
+        "attempt",
+        "provider_operation",
+        "provider_request_ref",
+        "provider_transaction_ref",
+        "state",
+        "raw_status",
+        "mapped_status",
+        "query_count"
+      ],
+      "properties": {
+        "payout_attempt_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "withdrawal_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "attempt": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provider_operation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provider_request_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provider_transaction_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "raw_status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mapped_status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "query_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "x-affiliate-stable-identity": "payout_attempt_id",
+      "x-affiliate-unique-key": "withdrawal_id + attempt",
+      "x-affiliate-authority": "CPA request / provider result",
+      "x-affiliate-notes": "Unknown must query before retry."
+    },
+    "PaymentFact": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/PaymentFact.schema.json",
+      "title": "PaymentFact P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "payment_fact_id",
+        "payout_attempt_id",
+        "fact_type",
+        "provider_ref",
+        "amount",
+        "occurred_at",
+        "raw_payload_hash"
+      ],
+      "properties": {
+        "payment_fact_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "payout_attempt_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fact_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provider_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "amount": {
+          "type": "string",
+          "pattern": "^-?[0-9]+\\.[0-9]{2}$"
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "raw_payload_hash": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "payment_fact_id",
+      "x-affiliate-authority": "payment provider",
+      "x-affiliate-notes": "Raw payload retention is compliance-gated."
+    },
+    "ReconciliationRecord": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/ReconciliationRecord.schema.json",
+      "title": "ReconciliationRecord P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "reconciliation_id",
+        "payout_attempt_id",
+        "provider_fact_refs",
+        "ledger_refs",
+        "difference_amount",
+        "result",
+        "task_id"
+      ],
+      "properties": {
+        "reconciliation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "payout_attempt_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provider_fact_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "ledger_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "difference_amount": {
+          "type": "string",
+          "pattern": "^-?[0-9]+\\.[0-9]{2}$"
+        },
+        "result": {
+          "type": "string",
+          "minLength": 1
+        },
+        "task_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "reconciliation_id",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "Difference is explicit and ownable."
+    },
+    "ReversalCase": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "https://affiliate.local/schemas/p0/objects/ReversalCase.schema.json",
+      "title": "ReversalCase P0 object",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "reversal_case_id",
+        "external_ref",
+        "original_case_ref",
+        "payment_ref",
+        "approved_amount",
+        "unreleased_case_action",
+        "same_customer_deposit_deduction",
+        "same_partner_withdrawable_deduction",
+        "same_partner_other_deposit_deduction",
+        "offset_order_version",
+        "debt_ref",
+        "state"
+      ],
+      "properties": {
+        "reversal_case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "external_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "original_case_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "payment_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approved_amount": {
+          "type": "string",
+          "pattern": "^-?[0-9]+\\.[0-9]{2}$"
+        },
+        "unreleased_case_action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "same_customer_deposit_deduction": {
+          "type": "string",
+          "minLength": 1
+        },
+        "same_partner_withdrawable_deduction": {
+          "type": "string",
+          "minLength": 1
+        },
+        "same_partner_other_deposit_deduction": {
+          "type": "string",
+          "minLength": 1
+        },
+        "offset_order_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "debt_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "reversal_case_id",
+      "x-affiliate-unique-key": "external_ref",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-notes": "Controlled partner-scoped reversal order; final shortfall registers debt and no value is deducted twice or across partners."
+    }
+  }
+}

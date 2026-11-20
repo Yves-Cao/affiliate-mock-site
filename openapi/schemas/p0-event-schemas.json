@@ -1,0 +1,2686 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://affiliate.local/schemas/p0-event-schemas.json",
+  "title": "Affiliate P0 target event schemas",
+  "oneOf": [
+    {
+      "$ref": "#/definitions/partner_application_submitted"
+    },
+    {
+      "$ref": "#/definitions/partner_crm_subject_confirmed"
+    },
+    {
+      "$ref": "#/definitions/partner_application_reviewed"
+    },
+    {
+      "$ref": "#/definitions/partner_agreement_consent_recorded"
+    },
+    {
+      "$ref": "#/definitions/partner_first_link_gate_evaluated"
+    },
+    {
+      "$ref": "#/definitions/partner_lifecycle_changed"
+    },
+    {
+      "$ref": "#/definitions/partner_termination_handoff_completed"
+    },
+    {
+      "$ref": "#/definitions/official_config_synced"
+    },
+    {
+      "$ref": "#/definitions/official_link_generated"
+    },
+    {
+      "$ref": "#/definitions/official_link_suspended"
+    },
+    {
+      "$ref": "#/definitions/click_received"
+    },
+    {
+      "$ref": "#/definitions/click_risk_evaluated"
+    },
+    {
+      "$ref": "#/definitions/effective_click_classified"
+    },
+    {
+      "$ref": "#/definitions/crm_registration_fact_recorded"
+    },
+    {
+      "$ref": "#/definitions/crm_registration_fact_changed"
+    },
+    {
+      "$ref": "#/definitions/external_touch_recorded"
+    },
+    {
+      "$ref": "#/definitions/attribution_candidate_evaluated"
+    },
+    {
+      "$ref": "#/definitions/attribution_locked"
+    },
+    {
+      "$ref": "#/definitions/attribution_excluded"
+    },
+    {
+      "$ref": "#/definitions/attribution_conflict_detected"
+    },
+    {
+      "$ref": "#/definitions/attribution_corrected"
+    },
+    {
+      "$ref": "#/definitions/customer_fact_intake"
+    },
+    {
+      "$ref": "#/definitions/qualification_evaluation"
+    },
+    {
+      "$ref": "#/definitions/milestone_changed"
+    },
+    {
+      "$ref": "#/definitions/commission_case_generated"
+    },
+    {
+      "$ref": "#/definitions/commission_adjustment_created"
+    },
+    {
+      "$ref": "#/definitions/risk_fact_intake"
+    },
+    {
+      "$ref": "#/definitions/risk_signal_evaluated"
+    },
+    {
+      "$ref": "#/definitions/settlement_gate_evaluated"
+    },
+    {
+      "$ref": "#/definitions/risk_case_reviewed"
+    },
+    {
+      "$ref": "#/definitions/quarantine_changed"
+    },
+    {
+      "$ref": "#/definitions/risk_execution_changed"
+    },
+    {
+      "$ref": "#/definitions/credit_point_recorded"
+    },
+    {
+      "$ref": "#/definitions/credit_score_recalculated"
+    },
+    {
+      "$ref": "#/definitions/credit_level_changed"
+    },
+    {
+      "$ref": "#/definitions/credit_override_activated"
+    },
+    {
+      "$ref": "#/definitions/credit_override_expired"
+    },
+    {
+      "$ref": "#/definitions/credit_benefit_locked"
+    },
+    {
+      "$ref": "#/definitions/settlement_run_started"
+    },
+    {
+      "$ref": "#/definitions/settlement_run_completed"
+    },
+    {
+      "$ref": "#/definitions/settlement_run_failed"
+    },
+    {
+      "$ref": "#/definitions/settlement_case_changed"
+    },
+    {
+      "$ref": "#/definitions/wallet_ledger_entry_created"
+    },
+    {
+      "$ref": "#/definitions/deposit_entry_changed"
+    },
+    {
+      "$ref": "#/definitions/statement_generated"
+    },
+    {
+      "$ref": "#/definitions/statement_recalculated"
+    },
+    {
+      "$ref": "#/definitions/statement_correction_created"
+    },
+    {
+      "$ref": "#/definitions/statement_finalized"
+    },
+    {
+      "$ref": "#/definitions/withdrawal_previewed"
+    },
+    {
+      "$ref": "#/definitions/withdrawal_submitted"
+    },
+    {
+      "$ref": "#/definitions/withdrawal_allocation_locked"
+    },
+    {
+      "$ref": "#/definitions/withdrawal_status_changed"
+    },
+    {
+      "$ref": "#/definitions/withdrawal_cancelled"
+    },
+    {
+      "$ref": "#/definitions/payout_attempt_created"
+    },
+    {
+      "$ref": "#/definitions/payout_attempt_submitted"
+    },
+    {
+      "$ref": "#/definitions/payout_attempt_result_recorded"
+    },
+    {
+      "$ref": "#/definitions/payout_attempt_queried"
+    },
+    {
+      "$ref": "#/definitions/payout_attempt_partial_result_recorded"
+    },
+    {
+      "$ref": "#/definitions/payout_attempt_returned"
+    },
+    {
+      "$ref": "#/definitions/withdrawal_reconciled"
+    },
+    {
+      "$ref": "#/definitions/reversal_created"
+    }
+  ],
+  "definitions": {
+    "EventEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event_id",
+        "event_type",
+        "event_version",
+        "occurred_at",
+        "processed_at",
+        "trace_id",
+        "source",
+        "object_type",
+        "object_id",
+        "fact_version",
+        "rule_version",
+        "idempotency_key",
+        "visibility"
+      ],
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "event_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "event_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "processed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "affiliate",
+            "crm",
+            "payment",
+            "salesforce",
+            "analytics",
+            "test"
+          ]
+        },
+        "object_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "object_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fact_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rule_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "visibility": {
+          "type": "string",
+          "enum": [
+            "partner_limited",
+            "admin",
+            "audit_only"
+          ]
+        },
+        "data": {
+          "type": "object"
+        },
+        "audit": {
+          "type": "object",
+          "required": [
+            "actor_id",
+            "reason_code"
+          ],
+          "properties": {
+            "actor_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason_code": {
+              "type": "string",
+              "minLength": 1
+            },
+            "impact": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "partner_application_submitted": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "partner_application_submitted"
+            },
+            "object_type": {
+              "const": "Application"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/Application"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-01",
+      "x-affiliate-requirements": [
+        "AFF-REQ-A01",
+        "AFF-REQ-A02",
+        "AFF-REQ-A03",
+        "AFF-REQ-A04",
+        "AFF-REQ-A07",
+        "AFF-REQ-A10",
+        "AFF-REQ-A12",
+        "AFF-REQ-A14",
+        "BOUNDARY-28",
+        "BOUNDARY-29",
+        "BOUNDARY-30",
+        "BOUNDARY-31",
+        "BOUNDARY-32",
+        "BOUNDARY-34"
+      ],
+      "x-affiliate-primary-object": "Application"
+    },
+    "partner_crm_subject_confirmed": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "partner_crm_subject_confirmed"
+            },
+            "object_type": {
+              "const": "Application"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/Application"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-01",
+      "x-affiliate-requirements": [
+        "AFF-REQ-A01",
+        "AFF-REQ-A02",
+        "AFF-REQ-A03",
+        "AFF-REQ-A04",
+        "AFF-REQ-A07",
+        "AFF-REQ-A10",
+        "AFF-REQ-A12",
+        "AFF-REQ-A14",
+        "BOUNDARY-28",
+        "BOUNDARY-29",
+        "BOUNDARY-30",
+        "BOUNDARY-31",
+        "BOUNDARY-32",
+        "BOUNDARY-34"
+      ],
+      "x-affiliate-primary-object": "Application"
+    },
+    "partner_application_reviewed": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "partner_application_reviewed"
+            },
+            "object_type": {
+              "const": "Application"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/Application"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-01",
+      "x-affiliate-requirements": [
+        "AFF-REQ-A01",
+        "AFF-REQ-A02",
+        "AFF-REQ-A03",
+        "AFF-REQ-A04",
+        "AFF-REQ-A07",
+        "AFF-REQ-A10",
+        "AFF-REQ-A12",
+        "AFF-REQ-A14",
+        "BOUNDARY-28",
+        "BOUNDARY-29",
+        "BOUNDARY-30",
+        "BOUNDARY-31",
+        "BOUNDARY-32",
+        "BOUNDARY-34"
+      ],
+      "x-affiliate-primary-object": "Application"
+    },
+    "partner_agreement_consent_recorded": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "partner_agreement_consent_recorded"
+            },
+            "object_type": {
+              "const": "Application"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/Application"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-01",
+      "x-affiliate-requirements": [
+        "AFF-REQ-A01",
+        "AFF-REQ-A02",
+        "AFF-REQ-A03",
+        "AFF-REQ-A04",
+        "AFF-REQ-A07",
+        "AFF-REQ-A10",
+        "AFF-REQ-A12",
+        "AFF-REQ-A14",
+        "BOUNDARY-28",
+        "BOUNDARY-29",
+        "BOUNDARY-30",
+        "BOUNDARY-31",
+        "BOUNDARY-32",
+        "BOUNDARY-34"
+      ],
+      "x-affiliate-primary-object": "Application"
+    },
+    "partner_first_link_gate_evaluated": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "partner_first_link_gate_evaluated"
+            },
+            "object_type": {
+              "const": "Application"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/Application"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-01",
+      "x-affiliate-requirements": [
+        "AFF-REQ-A01",
+        "AFF-REQ-A02",
+        "AFF-REQ-A03",
+        "AFF-REQ-A04",
+        "AFF-REQ-A07",
+        "AFF-REQ-A10",
+        "AFF-REQ-A12",
+        "AFF-REQ-A14",
+        "BOUNDARY-28",
+        "BOUNDARY-29",
+        "BOUNDARY-30",
+        "BOUNDARY-31",
+        "BOUNDARY-32",
+        "BOUNDARY-34"
+      ],
+      "x-affiliate-primary-object": "Application"
+    },
+    "partner_lifecycle_changed": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "partner_lifecycle_changed"
+            },
+            "object_type": {
+              "const": "PartnerLifecycleRecord"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/PartnerLifecycleRecord"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-01",
+      "x-affiliate-requirements": [
+        "AFF-REQ-A01",
+        "AFF-REQ-A02",
+        "AFF-REQ-A03",
+        "AFF-REQ-A04",
+        "AFF-REQ-A07",
+        "AFF-REQ-A10",
+        "AFF-REQ-A12",
+        "AFF-REQ-A14",
+        "BOUNDARY-28",
+        "BOUNDARY-29",
+        "BOUNDARY-30",
+        "BOUNDARY-31",
+        "BOUNDARY-32",
+        "BOUNDARY-34"
+      ],
+      "x-affiliate-primary-object": "PartnerLifecycleRecord"
+    },
+    "partner_termination_handoff_completed": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "partner_termination_handoff_completed"
+            },
+            "object_type": {
+              "const": "TerminationHandoff"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/TerminationHandoff"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-01",
+      "x-affiliate-requirements": [
+        "AFF-REQ-A01",
+        "AFF-REQ-A02",
+        "AFF-REQ-A03",
+        "AFF-REQ-A04",
+        "AFF-REQ-A07",
+        "AFF-REQ-A10",
+        "AFF-REQ-A12",
+        "AFF-REQ-A14",
+        "BOUNDARY-28",
+        "BOUNDARY-29",
+        "BOUNDARY-30",
+        "BOUNDARY-31",
+        "BOUNDARY-32",
+        "BOUNDARY-34"
+      ],
+      "x-affiliate-primary-object": "TerminationHandoff"
+    },
+    "official_config_synced": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "official_config_synced"
+            },
+            "object_type": {
+              "const": "OfficialPath"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/OfficialPath"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-02",
+      "x-affiliate-requirements": [
+        "AFF-REQ-B11",
+        "AFF-REQ-B12",
+        "AFF-REQ-H05",
+        "AFF-REQ-H06",
+        "AFF-REQ-H07",
+        "AFF-REQ-J04",
+        "AFF-REQ-CXD02",
+        "AFF-REQ-CXD03"
+      ],
+      "x-affiliate-primary-object": "OfficialPath"
+    },
+    "official_link_generated": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "official_link_generated"
+            },
+            "object_type": {
+              "const": "OfficialLink"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/OfficialLink"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-02",
+      "x-affiliate-requirements": [
+        "AFF-REQ-B11",
+        "AFF-REQ-B12",
+        "AFF-REQ-H05",
+        "AFF-REQ-H06",
+        "AFF-REQ-H07",
+        "AFF-REQ-J04",
+        "AFF-REQ-CXD02",
+        "AFF-REQ-CXD03"
+      ],
+      "x-affiliate-primary-object": "OfficialLink"
+    },
+    "official_link_suspended": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "official_link_suspended"
+            },
+            "object_type": {
+              "const": "OfficialLink"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/OfficialLink"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-02",
+      "x-affiliate-requirements": [
+        "AFF-REQ-B11",
+        "AFF-REQ-B12",
+        "AFF-REQ-H05",
+        "AFF-REQ-H06",
+        "AFF-REQ-H07",
+        "AFF-REQ-J04",
+        "AFF-REQ-CXD02",
+        "AFF-REQ-CXD03"
+      ],
+      "x-affiliate-primary-object": "OfficialLink"
+    },
+    "click_received": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "click_received"
+            },
+            "object_type": {
+              "const": "Click"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/Click"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-02",
+      "x-affiliate-requirements": [
+        "AFF-REQ-B11",
+        "AFF-REQ-B12",
+        "AFF-REQ-H05",
+        "AFF-REQ-H06",
+        "AFF-REQ-H07",
+        "AFF-REQ-J04",
+        "AFF-REQ-CXD02",
+        "AFF-REQ-CXD03"
+      ],
+      "x-affiliate-primary-object": "Click"
+    },
+    "click_risk_evaluated": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "click_risk_evaluated"
+            },
+            "object_type": {
+              "const": "Click"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/Click"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-02",
+      "x-affiliate-requirements": [
+        "AFF-REQ-B11",
+        "AFF-REQ-B12",
+        "AFF-REQ-H05",
+        "AFF-REQ-H06",
+        "AFF-REQ-H07",
+        "AFF-REQ-J04",
+        "AFF-REQ-CXD02",
+        "AFF-REQ-CXD03"
+      ],
+      "x-affiliate-primary-object": "Click"
+    },
+    "effective_click_classified": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "effective_click_classified"
+            },
+            "object_type": {
+              "const": "Click"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/Click"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-02",
+      "x-affiliate-requirements": [
+        "AFF-REQ-B11",
+        "AFF-REQ-B12",
+        "AFF-REQ-H05",
+        "AFF-REQ-H06",
+        "AFF-REQ-H07",
+        "AFF-REQ-J04",
+        "AFF-REQ-CXD02",
+        "AFF-REQ-CXD03"
+      ],
+      "x-affiliate-primary-object": "Click"
+    },
+    "crm_registration_fact_recorded": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "crm_registration_fact_recorded"
+            },
+            "object_type": {
+              "const": "RegistrationFact"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/RegistrationFact"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-03",
+      "x-affiliate-requirements": [
+        "AFF-REQ-B01",
+        "AFF-REQ-B02",
+        "AFF-REQ-B03",
+        "AFF-REQ-B04",
+        "AFF-REQ-B05",
+        "AFF-REQ-B06",
+        "AFF-REQ-B07",
+        "AFF-REQ-B08",
+        "AFF-REQ-B09",
+        "AFF-REQ-B10",
+        "AFF-REQ-B13",
+        "AFF-REQ-B14"
+      ],
+      "x-affiliate-primary-object": "RegistrationFact"
+    },
+    "crm_registration_fact_changed": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "crm_registration_fact_changed"
+            },
+            "object_type": {
+              "const": "RegistrationFact"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/RegistrationFact"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-03",
+      "x-affiliate-requirements": [
+        "AFF-REQ-B01",
+        "AFF-REQ-B02",
+        "AFF-REQ-B03",
+        "AFF-REQ-B04",
+        "AFF-REQ-B05",
+        "AFF-REQ-B06",
+        "AFF-REQ-B07",
+        "AFF-REQ-B08",
+        "AFF-REQ-B09",
+        "AFF-REQ-B10",
+        "AFF-REQ-B13",
+        "AFF-REQ-B14"
+      ],
+      "x-affiliate-primary-object": "RegistrationFact"
+    },
+    "external_touch_recorded": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "external_touch_recorded"
+            },
+            "object_type": {
+              "const": "ExternalTouch"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/ExternalTouch"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-03",
+      "x-affiliate-requirements": [
+        "AFF-REQ-B01",
+        "AFF-REQ-B02",
+        "AFF-REQ-B03",
+        "AFF-REQ-B04",
+        "AFF-REQ-B05",
+        "AFF-REQ-B06",
+        "AFF-REQ-B07",
+        "AFF-REQ-B08",
+        "AFF-REQ-B09",
+        "AFF-REQ-B10",
+        "AFF-REQ-B13",
+        "AFF-REQ-B14"
+      ],
+      "x-affiliate-primary-object": "ExternalTouch"
+    },
+    "attribution_candidate_evaluated": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "attribution_candidate_evaluated"
+            },
+            "object_type": {
+              "const": "AttributionCandidate"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/AttributionCandidate"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-03",
+      "x-affiliate-requirements": [
+        "AFF-REQ-B01",
+        "AFF-REQ-B02",
+        "AFF-REQ-B03",
+        "AFF-REQ-B04",
+        "AFF-REQ-B05",
+        "AFF-REQ-B06",
+        "AFF-REQ-B07",
+        "AFF-REQ-B08",
+        "AFF-REQ-B09",
+        "AFF-REQ-B10",
+        "AFF-REQ-B13",
+        "AFF-REQ-B14"
+      ],
+      "x-affiliate-primary-object": "AttributionCandidate"
+    },
+    "attribution_locked": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "attribution_locked"
+            },
+            "object_type": {
+              "const": "Attribution"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/Attribution"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-03",
+      "x-affiliate-requirements": [
+        "AFF-REQ-B01",
+        "AFF-REQ-B02",
+        "AFF-REQ-B03",
+        "AFF-REQ-B04",
+        "AFF-REQ-B05",
+        "AFF-REQ-B06",
+        "AFF-REQ-B07",
+        "AFF-REQ-B08",
+        "AFF-REQ-B09",
+        "AFF-REQ-B10",
+        "AFF-REQ-B13",
+        "AFF-REQ-B14"
+      ],
+      "x-affiliate-primary-object": "Attribution"
+    },
+    "attribution_excluded": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "attribution_excluded"
+            },
+            "object_type": {
+              "const": "Attribution"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/Attribution"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-03",
+      "x-affiliate-requirements": [
+        "AFF-REQ-B01",
+        "AFF-REQ-B02",
+        "AFF-REQ-B03",
+        "AFF-REQ-B04",
+        "AFF-REQ-B05",
+        "AFF-REQ-B06",
+        "AFF-REQ-B07",
+        "AFF-REQ-B08",
+        "AFF-REQ-B09",
+        "AFF-REQ-B10",
+        "AFF-REQ-B13",
+        "AFF-REQ-B14"
+      ],
+      "x-affiliate-primary-object": "Attribution"
+    },
+    "attribution_conflict_detected": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "attribution_conflict_detected"
+            },
+            "object_type": {
+              "const": "Attribution"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/Attribution"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-03",
+      "x-affiliate-requirements": [
+        "AFF-REQ-B01",
+        "AFF-REQ-B02",
+        "AFF-REQ-B03",
+        "AFF-REQ-B04",
+        "AFF-REQ-B05",
+        "AFF-REQ-B06",
+        "AFF-REQ-B07",
+        "AFF-REQ-B08",
+        "AFF-REQ-B09",
+        "AFF-REQ-B10",
+        "AFF-REQ-B13",
+        "AFF-REQ-B14"
+      ],
+      "x-affiliate-primary-object": "Attribution"
+    },
+    "attribution_corrected": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "attribution_corrected"
+            },
+            "object_type": {
+              "const": "AttributionCorrection"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/AttributionCorrection"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-03",
+      "x-affiliate-requirements": [
+        "AFF-REQ-B01",
+        "AFF-REQ-B02",
+        "AFF-REQ-B03",
+        "AFF-REQ-B04",
+        "AFF-REQ-B05",
+        "AFF-REQ-B06",
+        "AFF-REQ-B07",
+        "AFF-REQ-B08",
+        "AFF-REQ-B09",
+        "AFF-REQ-B10",
+        "AFF-REQ-B13",
+        "AFF-REQ-B14"
+      ],
+      "x-affiliate-primary-object": "AttributionCorrection"
+    },
+    "customer_fact_intake": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "customer_fact_intake"
+            },
+            "object_type": {
+              "const": "QualificationCase"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/QualificationCase"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-04",
+      "x-affiliate-requirements": [
+        "AFF-REQ-C01",
+        "AFF-REQ-C02",
+        "AFF-REQ-C03",
+        "AFF-REQ-C04",
+        "AFF-REQ-C05",
+        "AFF-REQ-C06",
+        "AFF-REQ-C07",
+        "AFF-REQ-C08",
+        "AFF-REQ-C09",
+        "AFF-REQ-C10",
+        "AFF-REQ-C11",
+        "AFF-REQ-C12",
+        "AFF-REQ-C13",
+        "AFF-REQ-C14",
+        "AFF-REQ-D01",
+        "AFF-REQ-D02"
+      ],
+      "x-affiliate-primary-object": "QualificationCase"
+    },
+    "qualification_evaluation": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "qualification_evaluation"
+            },
+            "object_type": {
+              "const": "QualificationCase"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/QualificationCase"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-04",
+      "x-affiliate-requirements": [
+        "AFF-REQ-C01",
+        "AFF-REQ-C02",
+        "AFF-REQ-C03",
+        "AFF-REQ-C04",
+        "AFF-REQ-C05",
+        "AFF-REQ-C06",
+        "AFF-REQ-C07",
+        "AFF-REQ-C08",
+        "AFF-REQ-C09",
+        "AFF-REQ-C10",
+        "AFF-REQ-C11",
+        "AFF-REQ-C12",
+        "AFF-REQ-C13",
+        "AFF-REQ-C14",
+        "AFF-REQ-D01",
+        "AFF-REQ-D02"
+      ],
+      "x-affiliate-primary-object": "QualificationCase"
+    },
+    "milestone_changed": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "milestone_changed"
+            },
+            "object_type": {
+              "const": "MilestoneSnapshot"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/MilestoneSnapshot"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-04",
+      "x-affiliate-requirements": [
+        "AFF-REQ-C01",
+        "AFF-REQ-C02",
+        "AFF-REQ-C03",
+        "AFF-REQ-C04",
+        "AFF-REQ-C05",
+        "AFF-REQ-C06",
+        "AFF-REQ-C07",
+        "AFF-REQ-C08",
+        "AFF-REQ-C09",
+        "AFF-REQ-C10",
+        "AFF-REQ-C11",
+        "AFF-REQ-C12",
+        "AFF-REQ-C13",
+        "AFF-REQ-C14",
+        "AFF-REQ-D01",
+        "AFF-REQ-D02"
+      ],
+      "x-affiliate-primary-object": "MilestoneSnapshot"
+    },
+    "commission_case_generated": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "commission_case_generated"
+            },
+            "object_type": {
+              "const": "CommissionCase"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/CommissionCase"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-04",
+      "x-affiliate-requirements": [
+        "AFF-REQ-C01",
+        "AFF-REQ-C02",
+        "AFF-REQ-C03",
+        "AFF-REQ-C04",
+        "AFF-REQ-C05",
+        "AFF-REQ-C06",
+        "AFF-REQ-C07",
+        "AFF-REQ-C08",
+        "AFF-REQ-C09",
+        "AFF-REQ-C10",
+        "AFF-REQ-C11",
+        "AFF-REQ-C12",
+        "AFF-REQ-C13",
+        "AFF-REQ-C14",
+        "AFF-REQ-D01",
+        "AFF-REQ-D02"
+      ],
+      "x-affiliate-primary-object": "CommissionCase"
+    },
+    "commission_adjustment_created": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "commission_adjustment_created"
+            },
+            "object_type": {
+              "const": "CommissionCase"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/CommissionCase"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-04",
+      "x-affiliate-requirements": [
+        "AFF-REQ-C01",
+        "AFF-REQ-C02",
+        "AFF-REQ-C03",
+        "AFF-REQ-C04",
+        "AFF-REQ-C05",
+        "AFF-REQ-C06",
+        "AFF-REQ-C07",
+        "AFF-REQ-C08",
+        "AFF-REQ-C09",
+        "AFF-REQ-C10",
+        "AFF-REQ-C11",
+        "AFF-REQ-C12",
+        "AFF-REQ-C13",
+        "AFF-REQ-C14",
+        "AFF-REQ-D01",
+        "AFF-REQ-D02"
+      ],
+      "x-affiliate-primary-object": "CommissionCase"
+    },
+    "risk_fact_intake": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "risk_fact_intake"
+            },
+            "object_type": {
+              "const": "RiskFact"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/RiskFact"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-05",
+      "x-affiliate-requirements": [
+        "AFF-REQ-E01",
+        "AFF-REQ-E02",
+        "AFF-REQ-E03",
+        "AFF-REQ-E04",
+        "AFF-REQ-E05",
+        "AFF-REQ-E06",
+        "AFF-REQ-E07",
+        "AFF-REQ-E09",
+        "AFF-REQ-E12",
+        "AFF-REQ-D06",
+        "AFF-REQ-FND-101",
+        "AFF-REQ-J09",
+        "AFF-REQ-M01",
+        "AFF-REQ-M02",
+        "AFF-REQ-M03",
+        "AFF-REQ-M04",
+        "AFF-REQ-M05",
+        "AFF-REQ-M06",
+        "AFF-REQ-M07",
+        "AFF-REQ-M08",
+        "AFF-REQ-M09",
+        "AFF-REQ-M10",
+        "AFF-REQ-M11",
+        "AFF-REQ-M12",
+        "AFF-REQ-M13",
+        "AFF-REQ-M14",
+        "AFF-REQ-M15"
+      ],
+      "x-affiliate-primary-object": "RiskFact"
+    },
+    "risk_signal_evaluated": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "risk_signal_evaluated"
+            },
+            "object_type": {
+              "const": "RiskSignal"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/RiskSignal"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-05",
+      "x-affiliate-requirements": [
+        "AFF-REQ-E01",
+        "AFF-REQ-E02",
+        "AFF-REQ-E03",
+        "AFF-REQ-E04",
+        "AFF-REQ-E05",
+        "AFF-REQ-E06",
+        "AFF-REQ-E07",
+        "AFF-REQ-E09",
+        "AFF-REQ-E12",
+        "AFF-REQ-D06",
+        "AFF-REQ-FND-101",
+        "AFF-REQ-J09",
+        "AFF-REQ-M01",
+        "AFF-REQ-M02",
+        "AFF-REQ-M03",
+        "AFF-REQ-M04",
+        "AFF-REQ-M05",
+        "AFF-REQ-M06",
+        "AFF-REQ-M07",
+        "AFF-REQ-M08",
+        "AFF-REQ-M09",
+        "AFF-REQ-M10",
+        "AFF-REQ-M11",
+        "AFF-REQ-M12",
+        "AFF-REQ-M13",
+        "AFF-REQ-M14",
+        "AFF-REQ-M15"
+      ],
+      "x-affiliate-primary-object": "RiskSignal"
+    },
+    "settlement_gate_evaluated": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "settlement_gate_evaluated"
+            },
+            "object_type": {
+              "const": "SettlementGateEvaluation"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/SettlementGateEvaluation"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-05",
+      "x-affiliate-requirements": [
+        "AFF-REQ-E01",
+        "AFF-REQ-E02",
+        "AFF-REQ-E03",
+        "AFF-REQ-E04",
+        "AFF-REQ-E05",
+        "AFF-REQ-E06",
+        "AFF-REQ-E07",
+        "AFF-REQ-E09",
+        "AFF-REQ-E12",
+        "AFF-REQ-D06",
+        "AFF-REQ-FND-101",
+        "AFF-REQ-J09",
+        "AFF-REQ-M01",
+        "AFF-REQ-M02",
+        "AFF-REQ-M03",
+        "AFF-REQ-M04",
+        "AFF-REQ-M05",
+        "AFF-REQ-M06",
+        "AFF-REQ-M07",
+        "AFF-REQ-M08",
+        "AFF-REQ-M09",
+        "AFF-REQ-M10",
+        "AFF-REQ-M11",
+        "AFF-REQ-M12",
+        "AFF-REQ-M13",
+        "AFF-REQ-M14",
+        "AFF-REQ-M15"
+      ],
+      "x-affiliate-primary-object": "SettlementGateEvaluation"
+    },
+    "risk_case_reviewed": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "risk_case_reviewed"
+            },
+            "object_type": {
+              "const": "RiskCase"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/RiskCase"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-05",
+      "x-affiliate-requirements": [
+        "AFF-REQ-E01",
+        "AFF-REQ-E02",
+        "AFF-REQ-E03",
+        "AFF-REQ-E04",
+        "AFF-REQ-E05",
+        "AFF-REQ-E06",
+        "AFF-REQ-E07",
+        "AFF-REQ-E09",
+        "AFF-REQ-E12",
+        "AFF-REQ-D06",
+        "AFF-REQ-FND-101",
+        "AFF-REQ-J09",
+        "AFF-REQ-M01",
+        "AFF-REQ-M02",
+        "AFF-REQ-M03",
+        "AFF-REQ-M04",
+        "AFF-REQ-M05",
+        "AFF-REQ-M06",
+        "AFF-REQ-M07",
+        "AFF-REQ-M08",
+        "AFF-REQ-M09",
+        "AFF-REQ-M10",
+        "AFF-REQ-M11",
+        "AFF-REQ-M12",
+        "AFF-REQ-M13",
+        "AFF-REQ-M14",
+        "AFF-REQ-M15"
+      ],
+      "x-affiliate-primary-object": "RiskCase"
+    },
+    "quarantine_changed": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "quarantine_changed"
+            },
+            "object_type": {
+              "const": "QuarantineRecord"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/QuarantineRecord"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-05",
+      "x-affiliate-requirements": [
+        "AFF-REQ-E01",
+        "AFF-REQ-E02",
+        "AFF-REQ-E03",
+        "AFF-REQ-E04",
+        "AFF-REQ-E05",
+        "AFF-REQ-E06",
+        "AFF-REQ-E07",
+        "AFF-REQ-E09",
+        "AFF-REQ-E12",
+        "AFF-REQ-D06",
+        "AFF-REQ-FND-101",
+        "AFF-REQ-J09",
+        "AFF-REQ-M01",
+        "AFF-REQ-M02",
+        "AFF-REQ-M03",
+        "AFF-REQ-M04",
+        "AFF-REQ-M05",
+        "AFF-REQ-M06",
+        "AFF-REQ-M07",
+        "AFF-REQ-M08",
+        "AFF-REQ-M09",
+        "AFF-REQ-M10",
+        "AFF-REQ-M11",
+        "AFF-REQ-M12",
+        "AFF-REQ-M13",
+        "AFF-REQ-M14",
+        "AFF-REQ-M15"
+      ],
+      "x-affiliate-primary-object": "QuarantineRecord"
+    },
+    "risk_execution_changed": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "risk_execution_changed"
+            },
+            "object_type": {
+              "const": "RiskExecution"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/RiskExecution"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-05",
+      "x-affiliate-requirements": [
+        "AFF-REQ-E01",
+        "AFF-REQ-E02",
+        "AFF-REQ-E03",
+        "AFF-REQ-E04",
+        "AFF-REQ-E05",
+        "AFF-REQ-E06",
+        "AFF-REQ-E07",
+        "AFF-REQ-E09",
+        "AFF-REQ-E12",
+        "AFF-REQ-D06",
+        "AFF-REQ-FND-101",
+        "AFF-REQ-J09",
+        "AFF-REQ-M01",
+        "AFF-REQ-M02",
+        "AFF-REQ-M03",
+        "AFF-REQ-M04",
+        "AFF-REQ-M05",
+        "AFF-REQ-M06",
+        "AFF-REQ-M07",
+        "AFF-REQ-M08",
+        "AFF-REQ-M09",
+        "AFF-REQ-M10",
+        "AFF-REQ-M11",
+        "AFF-REQ-M12",
+        "AFF-REQ-M13",
+        "AFF-REQ-M14",
+        "AFF-REQ-M15"
+      ],
+      "x-affiliate-primary-object": "RiskExecution"
+    },
+    "credit_point_recorded": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "credit_point_recorded"
+            },
+            "object_type": {
+              "const": "CreditPointRecord"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/CreditPointRecord"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-05",
+      "x-affiliate-requirements": [
+        "AFF-REQ-E01",
+        "AFF-REQ-E02",
+        "AFF-REQ-E03",
+        "AFF-REQ-E04",
+        "AFF-REQ-E05",
+        "AFF-REQ-E06",
+        "AFF-REQ-E07",
+        "AFF-REQ-E09",
+        "AFF-REQ-E12",
+        "AFF-REQ-D06",
+        "AFF-REQ-FND-101",
+        "AFF-REQ-J09",
+        "AFF-REQ-M01",
+        "AFF-REQ-M02",
+        "AFF-REQ-M03",
+        "AFF-REQ-M04",
+        "AFF-REQ-M05",
+        "AFF-REQ-M06",
+        "AFF-REQ-M07",
+        "AFF-REQ-M08",
+        "AFF-REQ-M09",
+        "AFF-REQ-M10",
+        "AFF-REQ-M11",
+        "AFF-REQ-M12",
+        "AFF-REQ-M13",
+        "AFF-REQ-M14",
+        "AFF-REQ-M15"
+      ],
+      "x-affiliate-primary-object": "CreditPointRecord"
+    },
+    "credit_score_recalculated": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "credit_score_recalculated"
+            },
+            "object_type": {
+              "const": "CreditScoreSnapshot"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/CreditScoreSnapshot"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-05",
+      "x-affiliate-requirements": [
+        "AFF-REQ-E01",
+        "AFF-REQ-E02",
+        "AFF-REQ-E03",
+        "AFF-REQ-E04",
+        "AFF-REQ-E05",
+        "AFF-REQ-E06",
+        "AFF-REQ-E07",
+        "AFF-REQ-E09",
+        "AFF-REQ-E12",
+        "AFF-REQ-D06",
+        "AFF-REQ-FND-101",
+        "AFF-REQ-J09",
+        "AFF-REQ-M01",
+        "AFF-REQ-M02",
+        "AFF-REQ-M03",
+        "AFF-REQ-M04",
+        "AFF-REQ-M05",
+        "AFF-REQ-M06",
+        "AFF-REQ-M07",
+        "AFF-REQ-M08",
+        "AFF-REQ-M09",
+        "AFF-REQ-M10",
+        "AFF-REQ-M11",
+        "AFF-REQ-M12",
+        "AFF-REQ-M13",
+        "AFF-REQ-M14",
+        "AFF-REQ-M15"
+      ],
+      "x-affiliate-primary-object": "CreditScoreSnapshot"
+    },
+    "credit_level_changed": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "credit_level_changed"
+            },
+            "object_type": {
+              "const": "CreditLevelSnapshot"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/CreditLevelSnapshot"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-05",
+      "x-affiliate-requirements": [
+        "AFF-REQ-E01",
+        "AFF-REQ-E02",
+        "AFF-REQ-E03",
+        "AFF-REQ-E04",
+        "AFF-REQ-E05",
+        "AFF-REQ-E06",
+        "AFF-REQ-E07",
+        "AFF-REQ-E09",
+        "AFF-REQ-E12",
+        "AFF-REQ-D06",
+        "AFF-REQ-FND-101",
+        "AFF-REQ-J09",
+        "AFF-REQ-M01",
+        "AFF-REQ-M02",
+        "AFF-REQ-M03",
+        "AFF-REQ-M04",
+        "AFF-REQ-M05",
+        "AFF-REQ-M06",
+        "AFF-REQ-M07",
+        "AFF-REQ-M08",
+        "AFF-REQ-M09",
+        "AFF-REQ-M10",
+        "AFF-REQ-M11",
+        "AFF-REQ-M12",
+        "AFF-REQ-M13",
+        "AFF-REQ-M14",
+        "AFF-REQ-M15"
+      ],
+      "x-affiliate-primary-object": "CreditLevelSnapshot"
+    },
+    "credit_override_activated": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "credit_override_activated"
+            },
+            "object_type": {
+              "const": "CreditOverride"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/CreditOverride"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-05",
+      "x-affiliate-requirements": [
+        "AFF-REQ-E01",
+        "AFF-REQ-E02",
+        "AFF-REQ-E03",
+        "AFF-REQ-E04",
+        "AFF-REQ-E05",
+        "AFF-REQ-E06",
+        "AFF-REQ-E07",
+        "AFF-REQ-E09",
+        "AFF-REQ-E12",
+        "AFF-REQ-D06",
+        "AFF-REQ-FND-101",
+        "AFF-REQ-J09",
+        "AFF-REQ-M01",
+        "AFF-REQ-M02",
+        "AFF-REQ-M03",
+        "AFF-REQ-M04",
+        "AFF-REQ-M05",
+        "AFF-REQ-M06",
+        "AFF-REQ-M07",
+        "AFF-REQ-M08",
+        "AFF-REQ-M09",
+        "AFF-REQ-M10",
+        "AFF-REQ-M11",
+        "AFF-REQ-M12",
+        "AFF-REQ-M13",
+        "AFF-REQ-M14",
+        "AFF-REQ-M15"
+      ],
+      "x-affiliate-primary-object": "CreditOverride"
+    },
+    "credit_override_expired": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "credit_override_expired"
+            },
+            "object_type": {
+              "const": "CreditOverride"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/CreditOverride"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-05",
+      "x-affiliate-requirements": [
+        "AFF-REQ-E01",
+        "AFF-REQ-E02",
+        "AFF-REQ-E03",
+        "AFF-REQ-E04",
+        "AFF-REQ-E05",
+        "AFF-REQ-E06",
+        "AFF-REQ-E07",
+        "AFF-REQ-E09",
+        "AFF-REQ-E12",
+        "AFF-REQ-D06",
+        "AFF-REQ-FND-101",
+        "AFF-REQ-J09",
+        "AFF-REQ-M01",
+        "AFF-REQ-M02",
+        "AFF-REQ-M03",
+        "AFF-REQ-M04",
+        "AFF-REQ-M05",
+        "AFF-REQ-M06",
+        "AFF-REQ-M07",
+        "AFF-REQ-M08",
+        "AFF-REQ-M09",
+        "AFF-REQ-M10",
+        "AFF-REQ-M11",
+        "AFF-REQ-M12",
+        "AFF-REQ-M13",
+        "AFF-REQ-M14",
+        "AFF-REQ-M15"
+      ],
+      "x-affiliate-primary-object": "CreditOverride"
+    },
+    "credit_benefit_locked": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "credit_benefit_locked"
+            },
+            "object_type": {
+              "const": "CreditBenefitSnapshot"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/CreditBenefitSnapshot"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-05",
+      "x-affiliate-requirements": [
+        "AFF-REQ-E01",
+        "AFF-REQ-E02",
+        "AFF-REQ-E03",
+        "AFF-REQ-E04",
+        "AFF-REQ-E05",
+        "AFF-REQ-E06",
+        "AFF-REQ-E07",
+        "AFF-REQ-E09",
+        "AFF-REQ-E12",
+        "AFF-REQ-D06",
+        "AFF-REQ-FND-101",
+        "AFF-REQ-J09",
+        "AFF-REQ-M01",
+        "AFF-REQ-M02",
+        "AFF-REQ-M03",
+        "AFF-REQ-M04",
+        "AFF-REQ-M05",
+        "AFF-REQ-M06",
+        "AFF-REQ-M07",
+        "AFF-REQ-M08",
+        "AFF-REQ-M09",
+        "AFF-REQ-M10",
+        "AFF-REQ-M11",
+        "AFF-REQ-M12",
+        "AFF-REQ-M13",
+        "AFF-REQ-M14",
+        "AFF-REQ-M15"
+      ],
+      "x-affiliate-primary-object": "CreditBenefitSnapshot"
+    },
+    "settlement_run_started": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "settlement_run_started"
+            },
+            "object_type": {
+              "const": "SettlementRun"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/SettlementRun"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-06",
+      "x-affiliate-requirements": [
+        "AFF-REQ-D03",
+        "AFF-REQ-D04",
+        "AFF-REQ-D05",
+        "AFF-REQ-FND-102",
+        "AFF-REQ-FND-103",
+        "AFF-REQ-F03",
+        "AFF-REQ-F04",
+        "AFF-REQ-F11",
+        "AFF-REQ-F12",
+        "AFF-REQ-A15",
+        "AFF-REQ-FND-108",
+        "AFF-REQ-FND-110",
+        "AFF-REQ-FND-113"
+      ],
+      "x-affiliate-primary-object": "SettlementRun"
+    },
+    "settlement_run_completed": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "settlement_run_completed"
+            },
+            "object_type": {
+              "const": "SettlementRun"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/SettlementRun"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-06",
+      "x-affiliate-requirements": [
+        "AFF-REQ-D03",
+        "AFF-REQ-D04",
+        "AFF-REQ-D05",
+        "AFF-REQ-FND-102",
+        "AFF-REQ-FND-103",
+        "AFF-REQ-F03",
+        "AFF-REQ-F04",
+        "AFF-REQ-F11",
+        "AFF-REQ-F12",
+        "AFF-REQ-A15",
+        "AFF-REQ-FND-108",
+        "AFF-REQ-FND-110",
+        "AFF-REQ-FND-113"
+      ],
+      "x-affiliate-primary-object": "SettlementRun"
+    },
+    "settlement_run_failed": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "settlement_run_failed"
+            },
+            "object_type": {
+              "const": "SettlementRun"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/SettlementRun"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-06",
+      "x-affiliate-requirements": [
+        "AFF-REQ-D03",
+        "AFF-REQ-D04",
+        "AFF-REQ-D05",
+        "AFF-REQ-FND-102",
+        "AFF-REQ-FND-103",
+        "AFF-REQ-F03",
+        "AFF-REQ-F04",
+        "AFF-REQ-F11",
+        "AFF-REQ-F12",
+        "AFF-REQ-A15",
+        "AFF-REQ-FND-108",
+        "AFF-REQ-FND-110",
+        "AFF-REQ-FND-113"
+      ],
+      "x-affiliate-primary-object": "SettlementRun"
+    },
+    "settlement_case_changed": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "settlement_case_changed"
+            },
+            "object_type": {
+              "const": "SettlementCase"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/SettlementCase"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-06",
+      "x-affiliate-requirements": [
+        "AFF-REQ-D03",
+        "AFF-REQ-D04",
+        "AFF-REQ-D05",
+        "AFF-REQ-FND-102",
+        "AFF-REQ-FND-103",
+        "AFF-REQ-F03",
+        "AFF-REQ-F04",
+        "AFF-REQ-F11",
+        "AFF-REQ-F12",
+        "AFF-REQ-A15",
+        "AFF-REQ-FND-108",
+        "AFF-REQ-FND-110",
+        "AFF-REQ-FND-113"
+      ],
+      "x-affiliate-primary-object": "SettlementCase"
+    },
+    "wallet_ledger_entry_created": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "wallet_ledger_entry_created"
+            },
+            "object_type": {
+              "const": "LedgerEntry"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/LedgerEntry"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-06",
+      "x-affiliate-requirements": [
+        "AFF-REQ-D03",
+        "AFF-REQ-D04",
+        "AFF-REQ-D05",
+        "AFF-REQ-FND-102",
+        "AFF-REQ-FND-103",
+        "AFF-REQ-F03",
+        "AFF-REQ-F04",
+        "AFF-REQ-F11",
+        "AFF-REQ-F12",
+        "AFF-REQ-A15",
+        "AFF-REQ-FND-108",
+        "AFF-REQ-FND-110",
+        "AFF-REQ-FND-113"
+      ],
+      "x-affiliate-primary-object": "LedgerEntry"
+    },
+    "deposit_entry_changed": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "deposit_entry_changed"
+            },
+            "object_type": {
+              "const": "GuaranteeLine"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/GuaranteeLine"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-06",
+      "x-affiliate-requirements": [
+        "AFF-REQ-D03",
+        "AFF-REQ-D04",
+        "AFF-REQ-D05",
+        "AFF-REQ-FND-102",
+        "AFF-REQ-FND-103",
+        "AFF-REQ-F03",
+        "AFF-REQ-F04",
+        "AFF-REQ-F11",
+        "AFF-REQ-F12",
+        "AFF-REQ-A15",
+        "AFF-REQ-FND-108",
+        "AFF-REQ-FND-110",
+        "AFF-REQ-FND-113"
+      ],
+      "x-affiliate-primary-object": "GuaranteeLine"
+    },
+    "statement_generated": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "statement_generated"
+            },
+            "object_type": {
+              "const": "StatementVersion"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/StatementVersion"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-06",
+      "x-affiliate-requirements": [
+        "AFF-REQ-D03",
+        "AFF-REQ-D04",
+        "AFF-REQ-D05",
+        "AFF-REQ-FND-102",
+        "AFF-REQ-FND-103",
+        "AFF-REQ-F03",
+        "AFF-REQ-F04",
+        "AFF-REQ-F11",
+        "AFF-REQ-F12",
+        "AFF-REQ-A15",
+        "AFF-REQ-FND-108",
+        "AFF-REQ-FND-110",
+        "AFF-REQ-FND-113"
+      ],
+      "x-affiliate-primary-object": "StatementVersion"
+    },
+    "statement_recalculated": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "statement_recalculated"
+            },
+            "object_type": {
+              "const": "StatementVersion"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/StatementVersion"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-06",
+      "x-affiliate-requirements": [
+        "AFF-REQ-D03",
+        "AFF-REQ-D04",
+        "AFF-REQ-D05",
+        "AFF-REQ-FND-102",
+        "AFF-REQ-FND-103",
+        "AFF-REQ-F03",
+        "AFF-REQ-F04",
+        "AFF-REQ-F11",
+        "AFF-REQ-F12",
+        "AFF-REQ-A15",
+        "AFF-REQ-FND-108",
+        "AFF-REQ-FND-110",
+        "AFF-REQ-FND-113"
+      ],
+      "x-affiliate-primary-object": "StatementVersion"
+    },
+    "statement_correction_created": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "statement_correction_created"
+            },
+            "object_type": {
+              "const": "StatementVersion"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/StatementVersion"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-06",
+      "x-affiliate-requirements": [
+        "AFF-REQ-D03",
+        "AFF-REQ-D04",
+        "AFF-REQ-D05",
+        "AFF-REQ-FND-102",
+        "AFF-REQ-FND-103",
+        "AFF-REQ-F03",
+        "AFF-REQ-F04",
+        "AFF-REQ-F11",
+        "AFF-REQ-F12",
+        "AFF-REQ-A15",
+        "AFF-REQ-FND-108",
+        "AFF-REQ-FND-110",
+        "AFF-REQ-FND-113"
+      ],
+      "x-affiliate-primary-object": "StatementVersion"
+    },
+    "statement_finalized": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "statement_finalized"
+            },
+            "object_type": {
+              "const": "StatementVersion"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/StatementVersion"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-06",
+      "x-affiliate-requirements": [
+        "AFF-REQ-D03",
+        "AFF-REQ-D04",
+        "AFF-REQ-D05",
+        "AFF-REQ-FND-102",
+        "AFF-REQ-FND-103",
+        "AFF-REQ-F03",
+        "AFF-REQ-F04",
+        "AFF-REQ-F11",
+        "AFF-REQ-F12",
+        "AFF-REQ-A15",
+        "AFF-REQ-FND-108",
+        "AFF-REQ-FND-110",
+        "AFF-REQ-FND-113"
+      ],
+      "x-affiliate-primary-object": "StatementVersion"
+    },
+    "withdrawal_previewed": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "withdrawal_previewed"
+            },
+            "object_type": {
+              "const": "Withdrawal"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/Withdrawal"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-07",
+      "x-affiliate-requirements": [
+        "AFF-REQ-FND-104",
+        "AFF-REQ-FND-105",
+        "AFF-REQ-F07",
+        "AFF-REQ-F08",
+        "AFF-REQ-F09",
+        "AFF-REQ-FND-109"
+      ],
+      "x-affiliate-primary-object": "Withdrawal"
+    },
+    "withdrawal_submitted": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "withdrawal_submitted"
+            },
+            "object_type": {
+              "const": "Withdrawal"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/Withdrawal"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-07",
+      "x-affiliate-requirements": [
+        "AFF-REQ-FND-104",
+        "AFF-REQ-FND-105",
+        "AFF-REQ-F07",
+        "AFF-REQ-F08",
+        "AFF-REQ-F09",
+        "AFF-REQ-FND-109"
+      ],
+      "x-affiliate-primary-object": "Withdrawal"
+    },
+    "withdrawal_allocation_locked": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "withdrawal_allocation_locked"
+            },
+            "object_type": {
+              "const": "Withdrawal"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/Withdrawal"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-07",
+      "x-affiliate-requirements": [
+        "AFF-REQ-FND-104",
+        "AFF-REQ-FND-105",
+        "AFF-REQ-F07",
+        "AFF-REQ-F08",
+        "AFF-REQ-F09",
+        "AFF-REQ-FND-109"
+      ],
+      "x-affiliate-primary-object": "Withdrawal"
+    },
+    "withdrawal_status_changed": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "withdrawal_status_changed"
+            },
+            "object_type": {
+              "const": "Withdrawal"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/Withdrawal"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-07",
+      "x-affiliate-requirements": [
+        "AFF-REQ-FND-104",
+        "AFF-REQ-FND-105",
+        "AFF-REQ-F07",
+        "AFF-REQ-F08",
+        "AFF-REQ-F09",
+        "AFF-REQ-FND-109"
+      ],
+      "x-affiliate-primary-object": "Withdrawal"
+    },
+    "withdrawal_cancelled": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "withdrawal_cancelled"
+            },
+            "object_type": {
+              "const": "Withdrawal"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/Withdrawal"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-07",
+      "x-affiliate-requirements": [
+        "AFF-REQ-FND-104",
+        "AFF-REQ-FND-105",
+        "AFF-REQ-F07",
+        "AFF-REQ-F08",
+        "AFF-REQ-F09",
+        "AFF-REQ-FND-109"
+      ],
+      "x-affiliate-primary-object": "Withdrawal"
+    },
+    "payout_attempt_created": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "payout_attempt_created"
+            },
+            "object_type": {
+              "const": "PayoutAttempt"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/PayoutAttempt"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-08",
+      "x-affiliate-requirements": [
+        "AFF-REQ-FND-106",
+        "AFF-REQ-FND-107",
+        "AFF-REQ-F06",
+        "AFF-REQ-F10",
+        "AFF-REQ-J10",
+        "AFF-REQ-FND-111",
+        "AFF-REQ-FND-112"
+      ],
+      "x-affiliate-primary-object": "PayoutAttempt"
+    },
+    "payout_attempt_submitted": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "payout_attempt_submitted"
+            },
+            "object_type": {
+              "const": "PayoutAttempt"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/PayoutAttempt"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-08",
+      "x-affiliate-requirements": [
+        "AFF-REQ-FND-106",
+        "AFF-REQ-FND-107",
+        "AFF-REQ-F06",
+        "AFF-REQ-F10",
+        "AFF-REQ-J10",
+        "AFF-REQ-FND-111",
+        "AFF-REQ-FND-112"
+      ],
+      "x-affiliate-primary-object": "PayoutAttempt"
+    },
+    "payout_attempt_result_recorded": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "payout_attempt_result_recorded"
+            },
+            "object_type": {
+              "const": "PayoutAttempt"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/PayoutAttempt"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-08",
+      "x-affiliate-requirements": [
+        "AFF-REQ-FND-106",
+        "AFF-REQ-FND-107",
+        "AFF-REQ-F06",
+        "AFF-REQ-F10",
+        "AFF-REQ-J10",
+        "AFF-REQ-FND-111",
+        "AFF-REQ-FND-112"
+      ],
+      "x-affiliate-primary-object": "PayoutAttempt"
+    },
+    "payout_attempt_queried": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "payout_attempt_queried"
+            },
+            "object_type": {
+              "const": "PayoutAttempt"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/PayoutAttempt"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-08",
+      "x-affiliate-requirements": [
+        "AFF-REQ-FND-106",
+        "AFF-REQ-FND-107",
+        "AFF-REQ-F06",
+        "AFF-REQ-F10",
+        "AFF-REQ-J10",
+        "AFF-REQ-FND-111",
+        "AFF-REQ-FND-112"
+      ],
+      "x-affiliate-primary-object": "PayoutAttempt"
+    },
+    "payout_attempt_partial_result_recorded": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "payout_attempt_partial_result_recorded"
+            },
+            "object_type": {
+              "const": "PayoutAttempt"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/PayoutAttempt"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-08",
+      "x-affiliate-requirements": [
+        "AFF-REQ-FND-106",
+        "AFF-REQ-FND-107",
+        "AFF-REQ-F06",
+        "AFF-REQ-F10",
+        "AFF-REQ-J10",
+        "AFF-REQ-FND-111",
+        "AFF-REQ-FND-112"
+      ],
+      "x-affiliate-primary-object": "PayoutAttempt"
+    },
+    "payout_attempt_returned": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "payout_attempt_returned"
+            },
+            "object_type": {
+              "const": "PayoutAttempt"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/PayoutAttempt"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-08",
+      "x-affiliate-requirements": [
+        "AFF-REQ-FND-106",
+        "AFF-REQ-FND-107",
+        "AFF-REQ-F06",
+        "AFF-REQ-F10",
+        "AFF-REQ-J10",
+        "AFF-REQ-FND-111",
+        "AFF-REQ-FND-112"
+      ],
+      "x-affiliate-primary-object": "PayoutAttempt"
+    },
+    "withdrawal_reconciled": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "withdrawal_reconciled"
+            },
+            "object_type": {
+              "const": "ReconciliationRecord"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/ReconciliationRecord"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-08",
+      "x-affiliate-requirements": [
+        "AFF-REQ-FND-106",
+        "AFF-REQ-FND-107",
+        "AFF-REQ-F06",
+        "AFF-REQ-F10",
+        "AFF-REQ-J10",
+        "AFF-REQ-FND-111",
+        "AFF-REQ-FND-112"
+      ],
+      "x-affiliate-primary-object": "ReconciliationRecord"
+    },
+    "reversal_created": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/EventEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "const": "reversal_created"
+            },
+            "object_type": {
+              "const": "ReversalCase"
+            },
+            "data": {
+              "$ref": "p0-object-schemas.json#/definitions/ReversalCase"
+            }
+          }
+        }
+      ],
+      "x-affiliate-stage": "P0-LOOP-08",
+      "x-affiliate-requirements": [
+        "AFF-REQ-FND-106",
+        "AFF-REQ-FND-107",
+        "AFF-REQ-F06",
+        "AFF-REQ-F10",
+        "AFF-REQ-J10",
+        "AFF-REQ-FND-111",
+        "AFF-REQ-FND-112"
+      ],
+      "x-affiliate-primary-object": "ReversalCase"
+    }
+  }
+}

@@ -1,0 +1,442 @@
+"use strict";
+
+const decisionEvidence = "Product owner chat decision on 2026-11-19: Batch 2 questions 1 and 2 approved; generic MOD-06 ledger/payment-result calls remain prohibited.";
+
+function schema(name, required, properties, notes) {
+  return {
+    type: "object",
+    additionalProperties: false,
+    required,
+    properties,
+    "x-affiliate-stable-identity": notes.identity,
+    "x-affiliate-authority": notes.authority,
+    "x-affiliate-decision": notes.decision,
+  };
+}
+
+function stringSchema(enumValues) {
+  return enumValues ? {type: "string", enum: enumValues} : {type: "string", minLength: 1};
+}
+
+function arraySchema(items = {type: "string", minLength: 1}) {
+  return {type: "array", items};
+}
+
+function objectSchema() {
+  return {type: "object", additionalProperties: true};
+}
+
+function decision(name, type, replacementReason, definition) {
+  return {
+    schemaName: name,
+    decision: type === "A" ? "reject_both_rebuild_from_authoritative_slice" : "explicit_merge",
+    decisionEvidence,
+    selectedCanonicalDefinition: `${name}:owner-selected-candidate-v1`,
+    status: "owner_confirmed_candidate_definition",
+    replacementReason,
+    definition,
+  };
+}
+
+const definitions = {
+  ConfigVersion: schema(
+    "ConfigVersion",
+    ["config_family", "config_key", "version", "status", "values", "owner_role", "effective_from"],
+    {
+      config_family: stringSchema(),
+      config_key: stringSchema(),
+      version: {type: "integer", minimum: 1},
+      status: stringSchema(["draft", "validated", "pending_approval", "scheduled", "active", "superseded", "rolled_back"]),
+      values: objectSchema(),
+      owner_role: stringSchema(),
+      validation_ref: stringSchema(),
+      simulation_ref: stringSchema(),
+      approval_ref: stringSchema(),
+      effective_from: {type: "string", format: "date-time"},
+      effective_to: {type: "string", format: "date-time"},
+      rollback_target: stringSchema(),
+      reason_code: stringSchema(),
+      trace_id: stringSchema(),
+    },
+    {
+      identity: "config_family + config_key + version",
+      authority: "CPA Governance candidate semantic rebuild",
+      decision: "Group A reject both and rebuild",
+    },
+  ),
+  SimulationTask: schema(
+    "SimulationTask",
+    ["simulation_id", "simulation_type", "status", "config_change_request_id", "rule_version", "input_snapshot_ref"],
+    {
+      simulation_id: stringSchema(),
+      simulation_type: stringSchema(["shadow_run", "historical_replay", "validation_run"]),
+      status: stringSchema(["created", "queued", "running", "success", "failed", "cancelled", "data_blocked"]),
+      config_change_request_id: stringSchema(),
+      rule_version: stringSchema(),
+      input_snapshot_ref: stringSchema(),
+      result_summary: objectSchema(),
+      guardrail_result: stringSchema(["passed", "warning", "blocked"]),
+      operations_task_ref: stringSchema(),
+      trace_id: stringSchema(),
+    },
+    {
+      identity: "simulation_id",
+      authority: "CPA Governance candidate semantic rebuild",
+      decision: "Group A reject both and rebuild",
+    },
+  ),
+  ClickRiskEvidence: schema(
+    "ClickRiskEvidence",
+    ["evaluation_id", "click_id", "rule_id", "rule_version", "parameter_version", "effective_click_result", "evidence_refs", "evaluated_at"],
+    {
+      evaluation_id: stringSchema(),
+      click_id: stringSchema(),
+      rule_id: stringSchema(),
+      rule_version: stringSchema(),
+      parameter_version: stringSchema(),
+      effective_click_result: stringSchema(["valid", "invalid", "pending_review"]),
+      evidence_refs: arraySchema(),
+      evaluated_at: {type: "string", format: "date-time"},
+      reason_code: stringSchema(),
+      attribution_blocked: {type: "boolean"},
+      commission_counted: {type: "boolean"},
+      trace_id: stringSchema(),
+    },
+    {
+      identity: "evaluation_id",
+      authority: "CPA Promotion candidate semantic rebuild",
+      decision: "Group A reject both and rebuild as ClickRiskEvaluation semantics",
+    },
+  ),
+  InvestigationTask: schema(
+    "InvestigationTask",
+    ["task_id", "task_purpose", "source_ref", "workflow_state", "owner_role", "reason_code"],
+    {
+      task_id: stringSchema(),
+      task_purpose: stringSchema(["risk_investigation"]),
+      source_ref: objectSchema(),
+      workflow_state: stringSchema(["open", "processing", "pending_approval", "waiting_material", "execution_failed", "done"]),
+      owner_role: stringSchema(),
+      reason_code: stringSchema(),
+      case_group_id: stringSchema(),
+      affected_object_refs: arraySchema(),
+      commission_calculated: {type: "boolean"},
+      auto_settlement_blocked: {type: "boolean"},
+      evidence_refs: arraySchema(),
+      trace_id: stringSchema(),
+    },
+    {
+      identity: "task_id",
+      authority: "CPA Governance OperationsTask projection",
+      decision: "Group A reject both and use the unified task authority",
+    },
+  ),
+  LimitedExplanation: schema(
+    "LimitedExplanation",
+    ["explanation_id", "source_object_ref", "category_id", "category_version", "template_id", "template_version", "language", "reason_category", "affected_scope", "involved_time", "evidence_scope", "next_step", "expected_handling_path", "appeal_entry", "state"],
+    {
+      explanation_id: stringSchema(),
+      source_object_ref: objectSchema(),
+      category_id: stringSchema(),
+      category_version: {type: "integer", minimum: 1},
+      template_id: stringSchema(),
+      template_version: {type: "integer", minimum: 1},
+      language: stringSchema(),
+      reason_category: stringSchema(),
+      affected_scope: stringSchema(),
+      involved_time: stringSchema(),
+      evidence_scope: stringSchema(),
+      next_step: stringSchema(),
+      expected_handling_path: stringSchema(),
+      appeal_entry: stringSchema(["available", "unavailable", "check_status"]),
+      state: stringSchema(["pending", "rendered", "disclosure_checked", "issued", "superseded", "blocked"]),
+      issued_at: {type: "string", format: "date-time"},
+      trace_id: stringSchema(),
+    },
+    {
+      identity: "explanation_id",
+      authority: "CPA Limited Explanations candidate semantic rebuild",
+      decision: "Group A reject both and rebuild with seven mandatory elements",
+    },
+  ),
+  OnboardingGateConfig: schema(
+    "OnboardingGateConfig",
+    ["gate_enabled", "required_fields", "scope", "reason_required", "version", "approval_record", "effective_time"],
+    {
+      gate_enabled: {type: "boolean"},
+      required_fields: arraySchema(),
+      scope: objectSchema(),
+      reason_required: {type: "boolean"},
+      version: {type: "integer", minimum: 1},
+      approval_record: stringSchema(),
+      effective_time: {type: "string", format: "date-time"},
+      audit_id: stringSchema(),
+      reference_ranges: arraySchema({$ref: "#/definitions/ReferenceRange"}),
+      trace_id: stringSchema(),
+    },
+    {identity: "scope + version", authority: "CPA", decision: "Group B explicit merge"},
+  ),
+  TrafficProfile: schema(
+    "TrafficProfile",
+    ["partner_id", "profile_version", "status", "primary_countries", "channel_type", "site_or_app", "promotion_method", "expected_volume", "historical_platforms", "missing_fields", "limited_explanation"],
+    {
+      partner_id: stringSchema(),
+      profile_version: {type: "integer", minimum: 1},
+      status: stringSchema(["missing", "draft", "pending_review", "approved", "rejected"]),
+      primary_countries: arraySchema(),
+      channel_type: stringSchema(),
+      site_or_app: stringSchema(),
+      promotion_method: stringSchema(),
+      expected_volume: stringSchema(),
+      historical_platforms: arraySchema(),
+      missing_fields: arraySchema(),
+      limited_explanation: stringSchema(),
+      created_at: {type: "string", format: "date-time"},
+      updated_at: {type: "string", format: "date-time"},
+      trace_id: stringSchema(),
+    },
+    {identity: "partner_id + profile_version", authority: "CPA", decision: "Group B explicit merge"},
+  ),
+  TrafficProfileReview: schema(
+    "TrafficProfileReview",
+    ["partner_id", "profile_version", "result", "reason_code", "reviewer", "effective_time"],
+    {
+      partner_id: stringSchema(),
+      profile_version: {type: "integer", minimum: 1},
+      result: stringSchema(["approved", "rejected", "returned"]),
+      reason_code: stringSchema(),
+      reviewer: stringSchema(),
+      effective_time: {type: "string", format: "date-time"},
+      approval_record: stringSchema(),
+      audit_id: stringSchema(),
+      trace_id: stringSchema(),
+    },
+    {identity: "partner_id + profile_version + effective_time", authority: "CPA", decision: "Group B explicit merge"},
+  ),
+  OfficialPathLibraryItem: schema(
+    "OfficialPathLibraryItem",
+    ["official_path_id", "path", "page_name", "status", "version", "effective_time"],
+    {
+      official_path_id: stringSchema(),
+      path: stringSchema(),
+      page_name: stringSchema(),
+      status: stringSchema(["draft", "approved", "active", "disabled", "restored"]),
+      version: {type: "integer", minimum: 1},
+      effective_time: {type: "string", format: "date-time"},
+      platforms: arraySchema(),
+      countries: arraySchema(),
+      channels: arraySchema(),
+      risk_level: stringSchema(["low", "medium", "high"]),
+      approval_record: stringSchema(),
+      trace_id: stringSchema(),
+    },
+    {identity: "official_path_id + version", authority: "CPA Promotion", decision: "Group B explicit merge with authoritative lifecycle"},
+  ),
+  ClickRiskRule: schema(
+    "ClickRiskRule",
+    ["rule_id", "rule_version", "parameter_version", "risk_codes", "action", "status"],
+    {
+      rule_id: stringSchema(),
+      rule_version: stringSchema(),
+      parameter_version: stringSchema(),
+      risk_codes: arraySchema(),
+      action: stringSchema(["reject_effective_click", "pending_review"]),
+      status: stringSchema(["draft", "active", "disabled"]),
+      reference_ranges: arraySchema({$ref: "#/definitions/ReferenceRange"}),
+      shadow_run_required: {type: "boolean"},
+      trace_id: stringSchema(),
+    },
+    {identity: "rule_id + rule_version + parameter_version", authority: "CPA/CRM boundary", decision: "Group B explicit merge"},
+  ),
+  EventIntegritySnapshot: schema(
+    "EventIntegritySnapshot",
+    ["stage", "criticality", "status", "expected_count", "actual_count", "gap_count", "duplicate_count", "failure_count", "blocked_settlement", "task_id"],
+    {
+      stage: stringSchema(),
+      criticality: stringSchema(["critical", "secondary"]),
+      status: stringSchema(["complete", "gap_detected", "backfilling", "failed"]),
+      expected_count: {type: "integer", minimum: 0},
+      actual_count: {type: "integer", minimum: 0},
+      gap_count: {type: "integer", minimum: 0},
+      duplicate_count: {type: "integer", minimum: 0},
+      failure_count: {type: "integer", minimum: 0},
+      latency_p95_seconds: {type: "integer", minimum: 0},
+      blocked_settlement: {type: "boolean"},
+      task_id: stringSchema(),
+      trace_id: stringSchema(),
+    },
+    {identity: "stage + criticality + snapshot time", authority: "CPA data lineage", decision: "Group B explicit merge; stage enum owner-gated"},
+  ),
+  RiskCaseGroup: schema(
+    "RiskCaseGroup",
+    ["case_group_id", "member_ids", "group_reason", "status", "split_status", "rule_version"],
+    {
+      case_group_id: stringSchema(),
+      member_ids: arraySchema(),
+      group_reason: stringSchema(),
+      status: stringSchema(["auto_merged", "under_review", "confirmed", "cleared", "split"]),
+      split_status: stringSchema(["none", "pending", "completed"]),
+      rule_version: stringSchema(),
+      group_conclusion: stringSchema(),
+      impact_summary: objectSchema(),
+      confidence: stringSchema(["low", "medium", "high"]),
+      trace_id: stringSchema(),
+    },
+    {identity: "case_group_id", authority: "CPA Risk", decision: "Group B explicit merge"},
+  ),
+  RiskCaseSplitRequest: schema(
+    "RiskCaseSplitRequest",
+    ["case_group_id", "member_ids", "split_reason", "approver_id", "new_case_ref"],
+    {
+      case_group_id: stringSchema(),
+      member_ids: arraySchema(),
+      split_reason: stringSchema(),
+      approver_id: stringSchema(),
+      new_case_ref: stringSchema(),
+      impact_preview_id: stringSchema(),
+    },
+    {identity: "case_group_id + member set + split decision", authority: "CPA Risk", decision: "Group B explicit merge"},
+  ),
+  PartnerBaseline: schema(
+    "PartnerBaseline",
+    ["partner_id", "baseline_type", "baseline_version", "window_days", "sample_size", "minimum_sample_size", "confidence", "metric", "actual", "baseline", "deviation", "switched_at"],
+    {
+      partner_id: stringSchema(),
+      baseline_type: stringSchema(),
+      baseline_version: stringSchema(),
+      window_days: {type: "integer", minimum: 1},
+      sample_size: {type: "integer", minimum: 0},
+      minimum_sample_size: {type: "integer", minimum: 0},
+      confidence: stringSchema(["low", "medium", "high"]),
+      metric: stringSchema(),
+      actual: stringSchema(),
+      baseline: stringSchema(),
+      deviation: stringSchema(),
+      switched_at: {type: "string", format: "date-time"},
+      review_priority: stringSchema(["medium", "high", "urgent"]),
+      reference_ranges: arraySchema({$ref: "#/definitions/ReferenceRange"}),
+      trace_id: stringSchema(),
+    },
+    {identity: "partner_id + baseline_type + baseline_version", authority: "CPA Risk", decision: "Group B explicit merge; type enum owner-gated"},
+  ),
+  BaselineWindowConfig: schema(
+    "BaselineWindowConfig",
+    ["window_days", "min_clicks", "min_registrations", "review_priority", "reference_ranges", "version"],
+    {
+      window_days: {type: "integer", minimum: 1},
+      min_clicks: {type: "integer", minimum: 0},
+      min_registrations: {type: "integer", minimum: 0},
+      review_priority: stringSchema(["medium", "high", "urgent"]),
+      reference_ranges: arraySchema({$ref: "#/definitions/ReferenceRange"}),
+      version: {type: "integer", minimum: 1},
+    },
+    {identity: "version", authority: "CPA Risk", decision: "Group B explicit merge"},
+  ),
+  InvestigationSlaConfig: schema(
+    "InvestigationSlaConfig",
+    ["first_response_hours", "reminder_hours", "max_duration_days", "escalation_action", "reference_ranges", "version"],
+    {
+      first_response_hours: {type: "integer", minimum: 0},
+      reminder_hours: {type: "integer", minimum: 0},
+      max_duration_days: {type: "integer", minimum: 0},
+      escalation_action: stringSchema(["supervisor_review", "stronger_restriction", "manual_queue"]),
+      reference_ranges: arraySchema({$ref: "#/definitions/ReferenceRange"}),
+      version: {type: "integer", minimum: 1},
+    },
+    {identity: "version", authority: "CPA Risk/Governance", decision: "Group B explicit merge with time units"},
+  ),
+  QuarantineRecord: schema(
+    "QuarantineRecord",
+    ["quarantine_id", "source_type", "source_ref_id", "object_type", "object_id", "reason_code", "blocked_settlement", "blocked_amount", "blocked_since", "recheck_result", "release_condition"],
+    {
+      quarantine_id: stringSchema(),
+      source_type: stringSchema(["investigation", "event_gap", "d_plus_n", "cluster", "data_governance", "manual"]),
+      source_ref_id: stringSchema(),
+      object_type: stringSchema(),
+      object_id: stringSchema(),
+      reason_code: stringSchema(),
+      blocked_settlement: {type: "boolean"},
+      blocked_amount: stringSchema(),
+      blocked_since: {type: "string", format: "date-time"},
+      waiting_days: {type: "integer", minimum: 0},
+      recheck_result: stringSchema(),
+      release_condition: stringSchema(),
+      trace_id: stringSchema(),
+    },
+    {identity: "quarantine_id", authority: "CPA Risk/Governance", decision: "Group B explicit merge"},
+  ),
+  QuarantineQueueConfig: schema(
+    "QuarantineQueueConfig",
+    ["d_plus_n_days", "sort_weights", "refresh_interval_minutes", "export_policy", "reference_ranges", "version"],
+    {
+      d_plus_n_days: {type: "integer", minimum: 0},
+      sort_weights: objectSchema(),
+      refresh_interval_minutes: {type: "integer", minimum: 0},
+      export_policy: objectSchema(),
+      reference_ranges: arraySchema({$ref: "#/definitions/ReferenceRange"}),
+      version: {type: "integer", minimum: 1},
+    },
+    {identity: "version", authority: "CPA Risk/Governance", decision: "Group B explicit merge"},
+  ),
+  StagingRun: schema(
+    "StagingRun",
+    ["run_id", "environment", "contract_version", "automated_result", "fund_reconciliation_diff", "gate_result"],
+    {
+      run_id: stringSchema(),
+      environment: stringSchema(),
+      contract_version: stringSchema(),
+      automated_result: stringSchema(["passed", "failed", "running"]),
+      fund_reconciliation_diff: stringSchema(),
+      gate_result: stringSchema(["blocked", "pending_signoff", "passed"]),
+      scenario_id: stringSchema(),
+      failed_scenarios: arraySchema(),
+      log_ref: stringSchema(),
+      signoffs: arraySchema(),
+      trace_id: stringSchema(),
+    },
+    {identity: "run_id + environment + contract_version", authority: "CPA QA/release", decision: "Group B explicit merge"},
+  ),
+  StagingSignoff: schema(
+    "StagingSignoff",
+    ["run_id", "role", "signoff_user", "result", "signed_at"],
+    {
+      run_id: stringSchema(),
+      role: stringSchema(["risk", "finance", "compliance"]),
+      signoff_user: stringSchema(),
+      result: stringSchema(["approved", "rejected", "returned"]),
+      comment: stringSchema(),
+      signed_at: {type: "string", format: "date-time"},
+      trace_id: stringSchema(),
+    },
+    {identity: "run_id + role + signed_at", authority: "CPA QA/release", decision: "Group B explicit merge"},
+  ),
+};
+
+const groupA = new Set(["ConfigVersion", "SimulationTask", "ClickRiskEvidence", "InvestigationTask", "LimitedExplanation"]);
+const replacementReason = {
+  ConfigVersion: "Rebuild from Governance ConfigurationVersion semantics.",
+  SimulationTask: "Separate configuration shadow/replay evidence from the unified OperationsTask authority.",
+  ClickRiskEvidence: "Use Promotion ClickRiskEvaluation semantics without exposing thresholds.",
+  InvestigationTask: "Project risk work through the Governance OperationsTask authority.",
+  LimitedExplanation: "Rebuild with the mandatory seven-element explanation lifecycle.",
+};
+
+const schemaDecisions = Object.fromEntries(Object.entries(definitions).map(([name, definition]) => [
+  name,
+  decision(name, groupA.has(name) ? "A" : "B", replacementReason[name] || "Explicit field merge preserves both source semantics under the owning slice.", definition),
+]));
+
+const commandDecisions = {
+  createWalletLedgerEntries: {
+    decision: "generic_call_prohibited",
+    decisionEvidence,
+    allowedProducer: "controlled settlement, reversal, reconciliation, and correction domain commands",
+  },
+  recordPaymentResult: {
+    decision: "generic_call_prohibited",
+    decisionEvidence,
+    allowedProducer: "provider callback/query contract mapped through the payment adapter",
+  },
+};
+
+module.exports = {schemaDecisions, commandDecisions, decisionEvidence};

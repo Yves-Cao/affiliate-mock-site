@@ -3,7 +3,7 @@
 .export-center > .panel-header div { min-width: 0; display: grid; gap: 4px; }
 .export-center > .panel-header span { color: var(--muted); font-size: 12px; }
 .export-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; padding: 0 18px; }
-.export-stats span { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; background: #f8fbff; color: var(--muted); font-size: 12px; }
+.export-stats span { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; background: #f9fafb; color: var(--muted); font-size: 12px; }
 .export-stats b { color: var(--text); font-size: 15px; font-variant-numeric: tabular-nums; }
 .export-table-wrap { width: 100%; overflow-x: auto; border-top: 1px solid var(--border); }
 .export-table-wrap table { width: 100%; min-width: 1120px; border-collapse: collapse; }

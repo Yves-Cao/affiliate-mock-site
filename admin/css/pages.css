@@ -1,0 +1,10 @@
+/* 页面级补充样式（组件之外的少量布局） */
+.dt td { white-space: nowrap; }
+.dt td .sub { display: block; }
+.panel .stats { box-shadow: none; }
+a.stat { display: block; }
+.meta { color: var(--muted); }
+.timeline li b { display: block; font-weight: 500; color: var(--text); }
+.timeline li span { display: block; font-size: 12px; line-height: 18px; color: var(--muted); }
+.timeline li.done::before { background: var(--ok); }
+.kv dd .sub { margin-left: 6px; font-size: 12px; color: var(--muted); }

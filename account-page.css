@@ -9,8 +9,8 @@
 .account-completeness strong { color: var(--text); font: var(--font-text-20-b); }
 .account-completeness span { color: var(--muted); font-size: 12px; }
 .account-missing-list { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; color: var(--body-text); font-size: 13px; }
-.account-missing-list li { padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; background: #f8fbff; }
-.account-email-pref { display: flex !important; align-items: center; gap: 8px; margin-bottom: 10px; padding: 9px 10px; border: 1px solid var(--border); border-radius: 4px; background: #f8fbff; }
+.account-missing-list li { padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; background: #f9fafb; }
+.account-email-pref { display: flex !important; align-items: center; gap: 8px; margin-bottom: 10px; padding: 9px 10px; border: 1px solid var(--border); border-radius: 4px; background: #f9fafb; }
 .account-email-pref input { width: 16px; height: 16px; accent-color: var(--brand); }
 .account-email-pref span { color: var(--body-text) !important; font-size: 13px !important; }
 .account-two-column { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
@@ -30,7 +30,7 @@
 .account-panel label { min-width: 0; display: grid; gap: 5px; }
 .account-panel label > span { color: var(--muted); font-size: 12px; }
 .account-panel input:not([type="checkbox"]) { min-height: 34px; padding: 6px 9px; border: 1px solid var(--control-border); border-radius: 4px; background: #fff; color: var(--text); font: inherit; font-size: 13px; }
-.account-panel input:disabled { background: #f7f9fc; color: var(--muted); }
+.account-panel input:disabled { background: #f9fafb; color: var(--muted); }
 .account-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .account-finance-form { display: grid; gap: 14px; }
 .account-finance-form label { display: grid; gap: 6px; }
@@ -38,9 +38,9 @@
 .account-finance-form textarea { min-height: 96px; padding: 8px 10px; border: 1px solid var(--control-border); border-radius: 4px; background: var(--surface); color: var(--text); font: inherit; font-size: 13px; line-height: 1.6; resize: vertical; }
 .account-finance-form p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
 .account-todo-list { display: grid; gap: 9px; margin: 0; padding: 0; list-style: none; }
-.account-todo-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 11px; border: 1px solid var(--border); border-radius: 4px; background: #f8fbff; color: var(--body-text); font-size: 13px; }
+.account-todo-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 11px; border: 1px solid var(--border); border-radius: 4px; background: #f9fafb; color: var(--body-text); font-size: 13px; }
 .account-step-list { display: grid; gap: 10px; }
-.account-step-list > div { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; align-items: center; padding: 11px 12px; border: 1px solid var(--border); border-radius: 4px; background: #f8fbff; }
+.account-step-list > div { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; align-items: center; padding: 11px 12px; border: 1px solid var(--border); border-radius: 4px; background: #f9fafb; }
 .account-step-list > div::before { content: ""; width: 9px; height: 9px; grid-row: 1 / 3; border: 2px solid var(--control-border); border-radius: 50%; background: #fff; }
 .account-step-list > div.done { background: #fff; border-color: #b8d4ff; }
 .account-step-list > div.done::before { border-color: var(--brand); background: var(--brand); }

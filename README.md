@@ -1,12 +1,5 @@
 # Affiliate CPA Mock
 
-> **English Summary**
->
-> This static site publishes the current Affiliate CPA user-side and operations Mock at `affiliate.evecha.cn`. It also hosts Flow Diagrams v2 under `/flowcharts/`. Mock behavior and diagrams are review artifacts, not production integration claims.
-
-> **中文摘要**
->
-> 本静态站点在 `affiliate.evecha.cn` 发布当前 Affiliate CPA 用户端与运营端 Mock，并在 `/flowcharts/` 承载流程图 v2。Mock 行为与流程图仅用于评审，不代表生产集成已完成。
 
 ## Pages
 
@@ -44,7 +37,7 @@ The demo login is a presentation gate only, not authentication. A successful moc
 
 Hover the top-right account avatar to open account management and logout. Account management opens as a fullscreen mock dialog for the display timezone; logout clears the demo session.
 
-The active operations-admin entry is `admin-dev.html` (also available under `admin/index.html`). The former static admin bundle and standalone rebuild/customer-360 pages are preserved under `archive/` for version comparison and are not exposed by the active navigation.
+The operations-admin 0.1 mock (`admin-dev.html` and related files) was archived to `archive/admin-0.1/` on 2026-11-19; the active admin entry is the new 1.0 admin at `admin/index.html`. The former static admin bundle and standalone rebuild/customer-360 pages are preserved under `archive/` for version comparison and are not exposed by the active navigation.
 
 The normal user view keeps internal scenario controls out of the visible top bar.
 
@@ -78,21 +71,20 @@ Open `http://127.0.0.1:4179`.
 
 ## Operations Admin API Mock
 
-The v0.5 operations-admin development package adds an API-driven TradeMaster-style entry at `admin-dev.html`. It is intentionally separate from the retained static admin demo and does not alter the published user-side navigation.
+The 0.1 admin UI (`admin-dev.html`) is archived under `archive/admin-0.1/`. The 1.0 admin pages live in `admin/` (static, hash routing, `design-tokens.css`); this batch covers the global shell, dashboard, task queue and partner 360 (other menu entries show a "待生成" placeholder). Design source: `docs/PRD_SOURCE_CN/04-页面设计/页面设计/1.0版本管理端/`. The mock API below is kept and is not yet wired to the new UI (the new pages use synthetic in-memory data in `admin/js/data.js`).
 
 ```bash
 npm run mock:admin
 npm run serve
 ```
 
-- UI: `http://127.0.0.1:4179/admin-dev.html`
-- Customer 360 task context: `http://127.0.0.1:4179/admin-dev.html#/customer-360/DEMO-C01?tab=finance&task_id=DEMO-T01`
+- 1.0 admin UI: `http://127.0.0.1:4179/admin/index.html`
 - OpenAPI: `openapi/admin-api.yaml`
 - Target 30-tab OpenAPI skeleton: `openapi/affiliate-mock-openapi.yaml`
 - Mock API: `http://127.0.0.1:4020/admin/api/v1`
 - Fixtures: `fixtures/admin-core.json`
 
-The UI covers the partner -> client -> commission -> withdrawal -> integration-task chain and supports switching the local mock role and scenario. The mock implements Bearer authentication, pagination, filtering, detail queries, role-restricted actions, audit response fields, CORS, empty/forbidden/timeout/retry states, and masked synthetic contact data.
+The mock implements Bearer authentication, pagination, filtering, detail queries, role-restricted actions, audit response fields, CORS, empty/forbidden/timeout/retry states, and masked synthetic contact data.
 
 ```bash
 npm run test:admin-api

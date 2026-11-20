@@ -10,7 +10,7 @@
   background: var(--brand-gradient);
   color: #fff;
   font: var(--font-text-14-m);
-  box-shadow: 0 10px 26px rgba(0, 91, 255, .26);
+  box-shadow: 0 10px 26px rgba(26, 91, 255, .26);
 }
 /* overlay unified in drawer.css (.aff-drawer-overlay--top) */
 .sim-drawer { /* compact geometry unified in drawer.css (.aff-drawer--compact) */ }
@@ -20,7 +20,7 @@
 .sim-drawer header button { width: 36px; height: 36px; border: 0; border-radius: 4px; background: var(--surface-soft); font-size: 22px; }
 .sim-tabs { display: flex; gap: 4px; padding: 10px 14px; border-bottom: 1px solid var(--border); overflow-x: auto; }
 .sim-tabs button { min-height: 32px; padding: 5px 11px; border: 0; border-radius: 4px; background: transparent; color: var(--muted); font-size: 13px; white-space: nowrap; }
-.sim-tabs button.active { background: #eaf0ff; color: var(--brand); font-weight: 500; }
+.sim-tabs button.active { background: #e8efff; color: var(--brand); font-weight: 500; }
 .sim-body { flex: 1; min-height: 0; overflow-y: auto; padding: 18px 20px; }
 .sim-drawer > footer { display: flex; justify-content: flex-start; padding: 14px 20px; border-top: 1px solid var(--border); background: var(--surface); }
 .sim-section { display: grid; gap: 14px; }
@@ -40,8 +40,8 @@
   min-height: 32px; padding: 5px 10px; border: 1px solid var(--control-border); border-radius: 4px;
   background: #fff; color: var(--body-text); font-size: 13px;
 }
-.sim-time-actions button { flex: 1; background: #f8fbff; border-color: #b8d4ff; color: var(--brand); }
-.sim-settlement-run { display: grid; gap: 10px; padding: 12px; border: 1px solid #b8d4ff; border-radius: 4px; background: #f8fbff; }
+.sim-time-actions button { flex: 1; background: #f9fafb; border-color: #b8d4ff; color: var(--brand); }
+.sim-settlement-run { display: grid; gap: 10px; padding: 12px; border: 1px solid #b8d4ff; border-radius: 4px; background: #f9fafb; }
 .sim-settlement-run > div:first-child { display: grid; gap: 4px; }
 .sim-settlement-run strong { color: var(--blue-black); font-size: 13px; }
 .sim-settlement-run .button { justify-self: start; }
@@ -51,17 +51,17 @@
 .sim-settlement-run-meta dd { margin: 0; color: var(--body-text); font-variant-numeric: tabular-nums; text-align: right; word-break: break-word; }
 .sim-scenarios { display: grid; gap: 8px; }
 .sim-scenarios button { display: grid; gap: 4px; padding: 11px; border: 1px solid var(--border); border-radius: 4px; background: #fff; text-align: left; }
-.sim-scenarios button.active { border-color: var(--brand); background: #f0f7ff; }
+.sim-scenarios button.active { border-color: var(--brand); background: #e8efff; }
 .sim-scenarios strong { color: var(--blue-black); font-size: 13px; }
 .sim-scenarios span { color: var(--muted); font-size: 12px; }
 .sim-scenario-group { display: grid; gap: 8px; }
 .sim-scenario-group h4, .sim-checkpoints h4, .sim-object-cleanup h4 { margin: 0; color: var(--blue-black); font-size: 12px; font-weight: 600; }
-.sim-checkpoints { display: grid; gap: 8px; padding: 11px; border: 1px solid var(--border); border-radius: 4px; background: #fbfdff; }
+.sim-checkpoints { display: grid; gap: 8px; padding: 11px; border: 1px solid var(--border); border-radius: 4px; background: #f9fafb; }
 .sim-checkpoints label { display: flex; grid-template-columns: none; align-items: flex-start; gap: 8px; }
 .sim-checkpoints input { min-height: 16px; width: 16px; margin-top: 1px; accent-color: var(--brand); }
 .sim-checkpoints span { color: var(--body-text); font-size: 12px; line-height: 1.5; }
 .sim-state { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; margin: 0; }
-.sim-state div { padding: 10px; border: 1px solid var(--border); border-radius: 4px; background: #f8fbff; }
+.sim-state div { padding: 10px; border: 1px solid var(--border); border-radius: 4px; background: #f9fafb; }
 .sim-state dt { color: var(--muted); font-size: 11px; }
 .sim-state dd { margin: 4px 0 0; color: var(--text); font-size: 14px; font-weight: 500; }
 .sim-actions-row { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -81,7 +81,7 @@
 .sim-credit .sim-actions-row button:not(:disabled):hover { color: var(--brand); border-color: var(--brand); }
 .sim-drawer .danger { border-color: #f2b8b5; background: #fff; color: var(--danger); }
 .sim-error { margin: 0 0 14px; padding: 10px; border: 1px solid #f2b8b5; border-radius: 4px; background: #fff; color: var(--danger); font-size: 12px; }
-.sim-summary { display: grid; gap: 10px; margin-bottom: 16px; padding: 12px; border: 1px solid #b8d4ff; border-radius: 4px; background: #f8fbff; }
+.sim-summary { display: grid; gap: 10px; margin-bottom: 16px; padding: 12px; border: 1px solid #b8d4ff; border-radius: 4px; background: #f9fafb; }
 .sim-summary h3 { margin: 0; color: var(--blue-black); font: var(--font-text-14-m); }
 .sim-summary p { margin: 0; color: var(--body-text); font-size: 13px; }
 .sim-summary dl { display: grid; gap: 7px; margin: 0; }
@@ -94,7 +94,7 @@
 .sim-section ol strong { display: block; color: var(--blue-black); font-size: 13px; }
 .sim-section ol span { color: var(--muted); }
 .sim-section ol p { margin-top: 3px; }
-.sim-snapshot-preview { display: grid; gap: 8px; padding: 11px; border: 1px solid var(--border); border-radius: 4px; background: #fbfdff; }
+.sim-snapshot-preview { display: grid; gap: 8px; padding: 11px; border: 1px solid var(--border); border-radius: 4px; background: #f9fafb; }
 .sim-snapshot-preview.is-valid { border-color: #9ac9b0; background: #f5fff8; }
 .sim-snapshot-preview.is-invalid { border-color: #f2b8b5; background: #fff8f7; }
 .sim-snapshot-preview strong { color: var(--blue-black); font-size: 13px; }

@@ -1,0 +1,6405 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://affiliate.local/schemas/p0-full-candidate-object-schemas.json",
+  "title": "Affiliate CPA P0 full candidate object schemas",
+  "description": "Candidate schemas consolidated from existing Mock schema files. Twenty duplicate names now carry owner-selected candidate definitions; production canonical promotion remains gated.",
+  "type": "object",
+  "definitions": {
+    "Appeal": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "Appeal"
+    },
+    "AppealDecision": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "AppealDecision"
+    },
+    "AppealRemedyTask": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "AppealRemedyTask"
+    },
+    "ApprovalNode": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "ApprovalNode"
+    },
+    "ApprovalWorkflow": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "ApprovalWorkflow"
+    },
+    "BenefitDiffPreview": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "BenefitDiffPreview"
+    },
+    "CapBreakerTask": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "CapBreakerTask"
+    },
+    "CapBreakerThreshold": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "CapBreakerThreshold"
+    },
+    "ClientRiskSnapshot": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "ClientRiskSnapshot"
+    },
+    "ClusterCase": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "ClusterCase"
+    },
+    "ClusterConclusion": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "ClusterConclusion"
+    },
+    "ClusterException": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "ClusterException"
+    },
+    "ClusterFeature": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "ClusterFeature"
+    },
+    "ClusterGraph": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "ClusterGraph"
+    },
+    "ClusterHoldReviewTask": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "ClusterHoldReviewTask"
+    },
+    "ClusterImpact": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "ClusterImpact"
+    },
+    "ClusterRule": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "ClusterRule"
+    },
+    "ConfigDomainStatus": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "ConfigDomainStatus"
+    },
+    "ConfigOverviewMetric": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "ConfigOverviewMetric"
+    },
+    "ConfigVersion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "config_family",
+        "config_key",
+        "version",
+        "status",
+        "values",
+        "owner_role",
+        "effective_from"
+      ],
+      "properties": {
+        "config_family": {
+          "type": "string",
+          "minLength": 1
+        },
+        "config_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "validated",
+            "pending_approval",
+            "scheduled",
+            "active",
+            "superseded",
+            "rolled_back"
+          ]
+        },
+        "values": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "owner_role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "validation_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "simulation_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approval_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "effective_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "effective_to": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "rollback_target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "config_family + config_key + version",
+      "x-affiliate-authority": "CPA Governance candidate semantic rebuild",
+      "x-affiliate-decision": "Group A reject both and rebuild"
+    },
+    "Country": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "Country"
+    },
+    "CountryEntityMapping": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "CountryEntityMapping"
+    },
+    "CoveragePartner": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "CoveragePartner"
+    },
+    "CoverageSummary": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "CoverageSummary"
+    },
+    "CoverageTrend": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "CoverageTrend"
+    },
+    "CreditBenefitRule": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "CreditBenefitRule"
+    },
+    "CreditLevelHistory": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "CreditLevelHistory"
+    },
+    "CreditLevelOverride": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "CreditLevelOverride"
+    },
+    "CreditPointLedger": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "CreditPointLedger"
+    },
+    "D30FrozenCase": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "D30FrozenCase"
+    },
+    "ExternalRuleVersion": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "ExternalRuleVersion"
+    },
+    "FraudImpactChain": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "FraudImpactChain"
+    },
+    "FraudReference": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "FraudReference"
+    },
+    "GuaranteeBatch": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "GuaranteeBatch"
+    },
+    "GuaranteeOffsetTask": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "GuaranteeOffsetTask"
+    },
+    "GuaranteeRule": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "GuaranteeRule"
+    },
+    "HardRule": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "HardRule"
+    },
+    "HardRuleDraft": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "HardRuleDraft"
+    },
+    "HardRuleHit": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "HardRuleHit"
+    },
+    "HardRuleVersion": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "HardRuleVersion"
+    },
+    "HoldDraft": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "HoldDraft"
+    },
+    "HoldFormulaSnapshot": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "HoldFormulaSnapshot"
+    },
+    "HoldRule": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "HoldRule"
+    },
+    "ImpactChain": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "ImpactChain"
+    },
+    "IntegrationCallback": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "IntegrationCallback"
+    },
+    "IntegrationTask": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "IntegrationTask"
+    },
+    "IntegrationTaskSummary": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "IntegrationTaskSummary"
+    },
+    "LegalEntity": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "LegalEntity"
+    },
+    "MilestoneRule": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "MilestoneRule"
+    },
+    "OffsetExecution": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "OffsetExecution"
+    },
+    "OffsetPlan": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "OffsetPlan"
+    },
+    "PartnerCreditScore": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "PartnerCreditScore"
+    },
+    "PartnerPersonalBenefit": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "PartnerPersonalBenefit"
+    },
+    "PriceDiff": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "PriceDiff"
+    },
+    "PriceDraft": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "PriceDraft"
+    },
+    "PriceRule": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "PriceRule"
+    },
+    "PriceVersion": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "PriceVersion"
+    },
+    "QualificationRule": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "QualificationRule"
+    },
+    "QualityDimension": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "QualityDimension"
+    },
+    "QualityServiceRule": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "QualityServiceRule"
+    },
+    "QualitySummary": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "QualitySummary"
+    },
+    "QualityTrend": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "QualityTrend"
+    },
+    "ReleasePackage": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "ReleasePackage"
+    },
+    "RestoreTask": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "RestoreTask"
+    },
+    "RetryPolicy": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "RetryPolicy"
+    },
+    "ReviewSuggestion": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "ReviewSuggestion"
+    },
+    "RiskEvent": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "RiskEvent"
+    },
+    "RiskLevelMapping": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "RiskLevelMapping"
+    },
+    "RiskReviewAction": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "RiskReviewAction"
+    },
+    "RiskReviewTask": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "RiskReviewTask"
+    },
+    "RiskScoreHistory": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "RiskScoreHistory"
+    },
+    "RiskScoringRule": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "RiskScoringRule"
+    },
+    "RoiDimension": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "RoiDimension"
+    },
+    "RoiSummary": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "RoiSummary"
+    },
+    "RoiTrend": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "RoiTrend"
+    },
+    "SettlementCheckResult": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "SettlementCheckResult"
+    },
+    "SimulationResult": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "SimulationResult"
+    },
+    "SimulationTask": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "simulation_id",
+        "simulation_type",
+        "status",
+        "config_change_request_id",
+        "rule_version",
+        "input_snapshot_ref"
+      ],
+      "properties": {
+        "simulation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "simulation_type": {
+          "type": "string",
+          "enum": [
+            "shadow_run",
+            "historical_replay",
+            "validation_run"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "created",
+            "queued",
+            "running",
+            "success",
+            "failed",
+            "cancelled",
+            "data_blocked"
+          ]
+        },
+        "config_change_request_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rule_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "input_snapshot_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "result_summary": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "guardrail_result": {
+          "type": "string",
+          "enum": [
+            "passed",
+            "warning",
+            "blocked"
+          ]
+        },
+        "operations_task_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "simulation_id",
+      "x-affiliate-authority": "CPA Governance candidate semantic rebuild",
+      "x-affiliate-decision": "Group A reject both and rebuild"
+    },
+    "ViolationEvent": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "ViolationEvent"
+    },
+    "ViolationImpact": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "ViolationImpact"
+    },
+    "ViolationRule": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "ViolationRule"
+    },
+    "ViolationRuleDraft": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "ViolationRuleDraft"
+    },
+    "WorkflowSimulation": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "x-affiliate-object": "WorkflowSimulation"
+    },
+    "OnboardingGateConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gate_enabled",
+        "required_fields",
+        "scope",
+        "reason_required",
+        "version",
+        "approval_record",
+        "effective_time"
+      ],
+      "properties": {
+        "gate_enabled": {
+          "type": "boolean"
+        },
+        "required_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "scope": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "reason_required": {
+          "type": "boolean"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "approval_record": {
+          "type": "string",
+          "minLength": 1
+        },
+        "effective_time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "audit_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reference_ranges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ReferenceRange"
+          }
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "scope + version",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-decision": "Group B explicit merge"
+    },
+    "TrafficProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "partner_id",
+        "profile_version",
+        "status",
+        "primary_countries",
+        "channel_type",
+        "site_or_app",
+        "promotion_method",
+        "expected_volume",
+        "historical_platforms",
+        "missing_fields",
+        "limited_explanation"
+      ],
+      "properties": {
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "profile_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "missing",
+            "draft",
+            "pending_review",
+            "approved",
+            "rejected"
+          ]
+        },
+        "primary_countries": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "channel_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "site_or_app": {
+          "type": "string",
+          "minLength": 1
+        },
+        "promotion_method": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expected_volume": {
+          "type": "string",
+          "minLength": 1
+        },
+        "historical_platforms": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "missing_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "limited_explanation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "partner_id + profile_version",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-decision": "Group B explicit merge"
+    },
+    "TrafficProfileReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "partner_id",
+        "profile_version",
+        "result",
+        "reason_code",
+        "reviewer",
+        "effective_time"
+      ],
+      "properties": {
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "profile_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "result": {
+          "type": "string",
+          "enum": [
+            "approved",
+            "rejected",
+            "returned"
+          ]
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "effective_time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "approval_record": {
+          "type": "string",
+          "minLength": 1
+        },
+        "audit_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "partner_id + profile_version + effective_time",
+      "x-affiliate-authority": "CPA",
+      "x-affiliate-decision": "Group B explicit merge"
+    },
+    "OfficialPathLibraryItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "official_path_id",
+        "path",
+        "page_name",
+        "status",
+        "version",
+        "effective_time"
+      ],
+      "properties": {
+        "official_path_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "page_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "approved",
+            "active",
+            "disabled",
+            "restored"
+          ]
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "effective_time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "platforms": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "countries": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "channels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "risk_level": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "approval_record": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "official_path_id + version",
+      "x-affiliate-authority": "CPA Promotion",
+      "x-affiliate-decision": "Group B explicit merge with authoritative lifecycle"
+    },
+    "ClickRiskRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rule_id",
+        "rule_version",
+        "parameter_version",
+        "risk_codes",
+        "action",
+        "status"
+      ],
+      "properties": {
+        "rule_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rule_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parameter_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "risk_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "reject_effective_click",
+            "pending_review"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "active",
+            "disabled"
+          ]
+        },
+        "reference_ranges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ReferenceRange"
+          }
+        },
+        "shadow_run_required": {
+          "type": "boolean"
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "rule_id + rule_version + parameter_version",
+      "x-affiliate-authority": "CPA/CRM boundary",
+      "x-affiliate-decision": "Group B explicit merge"
+    },
+    "ClickRiskEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evaluation_id",
+        "click_id",
+        "rule_id",
+        "rule_version",
+        "parameter_version",
+        "effective_click_result",
+        "evidence_refs",
+        "evaluated_at"
+      ],
+      "properties": {
+        "evaluation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "click_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rule_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rule_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parameter_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "effective_click_result": {
+          "type": "string",
+          "enum": [
+            "valid",
+            "invalid",
+            "pending_review"
+          ]
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "evaluated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "attribution_blocked": {
+          "type": "boolean"
+        },
+        "commission_counted": {
+          "type": "boolean"
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "evaluation_id",
+      "x-affiliate-authority": "CPA Promotion candidate semantic rebuild",
+      "x-affiliate-decision": "Group A reject both and rebuild as ClickRiskEvaluation semantics"
+    },
+    "EventCriticalityConfig": {
+      "required": [
+        "event_type",
+        "criticality"
+      ],
+      "properties": {
+        "event_type": {
+          "type": "string"
+        },
+        "criticality": {
+          "type": "string",
+          "enum": [
+            "critical",
+            "secondary"
+          ]
+        },
+        "block_settlement": {
+          "type": "boolean"
+        },
+        "alert_after_minutes": {
+          "type": "integer"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true,
+      "x-affiliate-object": "EventCriticalityConfig"
+    },
+    "EventIntegritySnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stage",
+        "criticality",
+        "status",
+        "expected_count",
+        "actual_count",
+        "gap_count",
+        "duplicate_count",
+        "failure_count",
+        "blocked_settlement",
+        "task_id"
+      ],
+      "properties": {
+        "stage": {
+          "type": "string",
+          "minLength": 1
+        },
+        "criticality": {
+          "type": "string",
+          "enum": [
+            "critical",
+            "secondary"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "complete",
+            "gap_detected",
+            "backfilling",
+            "failed"
+          ]
+        },
+        "expected_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "actual_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "gap_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "duplicate_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failure_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "latency_p95_seconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "blocked_settlement": {
+          "type": "boolean"
+        },
+        "task_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "stage + criticality + snapshot time",
+      "x-affiliate-authority": "CPA data lineage",
+      "x-affiliate-decision": "Group B explicit merge; stage enum owner-gated"
+    },
+    "IntegrationEventGap": {
+      "required": [
+        "gap_id",
+        "stage",
+        "criticality",
+        "status"
+      ],
+      "properties": {
+        "gap_id": {
+          "type": "string"
+        },
+        "stage": {
+          "type": "string"
+        },
+        "criticality": {
+          "type": "string",
+          "enum": [
+            "critical",
+            "secondary"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "open",
+            "backfilling",
+            "closed",
+            "failed"
+          ]
+        },
+        "missing_event_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "affected_commission_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "blocked_amount": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "idempotency_key": {
+          "type": "string"
+        },
+        "task_id": {
+          "type": "string"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true,
+      "x-affiliate-object": "IntegrationEventGap"
+    },
+    "RiskCaseGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_group_id",
+        "member_ids",
+        "group_reason",
+        "status",
+        "split_status",
+        "rule_version"
+      ],
+      "properties": {
+        "case_group_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "member_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "group_reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "auto_merged",
+            "under_review",
+            "confirmed",
+            "cleared",
+            "split"
+          ]
+        },
+        "split_status": {
+          "type": "string",
+          "enum": [
+            "none",
+            "pending",
+            "completed"
+          ]
+        },
+        "rule_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "group_conclusion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "impact_summary": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "case_group_id",
+      "x-affiliate-authority": "CPA Risk",
+      "x-affiliate-decision": "Group B explicit merge"
+    },
+    "RiskCaseSplitRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_group_id",
+        "member_ids",
+        "split_reason",
+        "approver_id",
+        "new_case_ref"
+      ],
+      "properties": {
+        "case_group_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "member_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "split_reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approver_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "new_case_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "impact_preview_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "case_group_id + member set + split decision",
+      "x-affiliate-authority": "CPA Risk",
+      "x-affiliate-decision": "Group B explicit merge"
+    },
+    "PartnerBaseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "partner_id",
+        "baseline_type",
+        "baseline_version",
+        "window_days",
+        "sample_size",
+        "minimum_sample_size",
+        "confidence",
+        "metric",
+        "actual",
+        "baseline",
+        "deviation",
+        "switched_at"
+      ],
+      "properties": {
+        "partner_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "baseline_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "baseline_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "window_days": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sample_size": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "minimum_sample_size": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "metric": {
+          "type": "string",
+          "minLength": 1
+        },
+        "actual": {
+          "type": "string",
+          "minLength": 1
+        },
+        "baseline": {
+          "type": "string",
+          "minLength": 1
+        },
+        "deviation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "switched_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "review_priority": {
+          "type": "string",
+          "enum": [
+            "medium",
+            "high",
+            "urgent"
+          ]
+        },
+        "reference_ranges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ReferenceRange"
+          }
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "partner_id + baseline_type + baseline_version",
+      "x-affiliate-authority": "CPA Risk",
+      "x-affiliate-decision": "Group B explicit merge; type enum owner-gated"
+    },
+    "BaselineWindowConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "window_days",
+        "min_clicks",
+        "min_registrations",
+        "review_priority",
+        "reference_ranges",
+        "version"
+      ],
+      "properties": {
+        "window_days": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "min_clicks": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "min_registrations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "review_priority": {
+          "type": "string",
+          "enum": [
+            "medium",
+            "high",
+            "urgent"
+          ]
+        },
+        "reference_ranges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ReferenceRange"
+          }
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "x-affiliate-stable-identity": "version",
+      "x-affiliate-authority": "CPA Risk",
+      "x-affiliate-decision": "Group B explicit merge"
+    },
+    "InvestigationTask": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "task_id",
+        "task_purpose",
+        "source_ref",
+        "workflow_state",
+        "owner_role",
+        "reason_code"
+      ],
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "task_purpose": {
+          "type": "string",
+          "enum": [
+            "risk_investigation"
+          ]
+        },
+        "source_ref": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "workflow_state": {
+          "type": "string",
+          "enum": [
+            "open",
+            "processing",
+            "pending_approval",
+            "waiting_material",
+            "execution_failed",
+            "done"
+          ]
+        },
+        "owner_role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "case_group_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "affected_object_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "commission_calculated": {
+          "type": "boolean"
+        },
+        "auto_settlement_blocked": {
+          "type": "boolean"
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "task_id",
+      "x-affiliate-authority": "CPA Governance OperationsTask projection",
+      "x-affiliate-decision": "Group A reject both and use the unified task authority"
+    },
+    "InvestigationSlaConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "first_response_hours",
+        "reminder_hours",
+        "max_duration_days",
+        "escalation_action",
+        "reference_ranges",
+        "version"
+      ],
+      "properties": {
+        "first_response_hours": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reminder_hours": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_duration_days": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "escalation_action": {
+          "type": "string",
+          "enum": [
+            "supervisor_review",
+            "stronger_restriction",
+            "manual_queue"
+          ]
+        },
+        "reference_ranges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ReferenceRange"
+          }
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "x-affiliate-stable-identity": "version",
+      "x-affiliate-authority": "CPA Risk/Governance",
+      "x-affiliate-decision": "Group B explicit merge with time units"
+    },
+    "LimitedExplanation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "explanation_id",
+        "source_object_ref",
+        "category_id",
+        "category_version",
+        "template_id",
+        "template_version",
+        "language",
+        "reason_category",
+        "affected_scope",
+        "involved_time",
+        "evidence_scope",
+        "next_step",
+        "expected_handling_path",
+        "appeal_entry",
+        "state"
+      ],
+      "properties": {
+        "explanation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_object_ref": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "category_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "category_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "template_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "template_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "language": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason_category": {
+          "type": "string",
+          "minLength": 1
+        },
+        "affected_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "involved_time": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "next_step": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expected_handling_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "appeal_entry": {
+          "type": "string",
+          "enum": [
+            "available",
+            "unavailable",
+            "check_status"
+          ]
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "rendered",
+            "disclosure_checked",
+            "issued",
+            "superseded",
+            "blocked"
+          ]
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "explanation_id",
+      "x-affiliate-authority": "CPA Limited Explanations candidate semantic rebuild",
+      "x-affiliate-decision": "Group A reject both and rebuild with seven mandatory elements"
+    },
+    "QuarantineRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "quarantine_id",
+        "source_type",
+        "source_ref_id",
+        "object_type",
+        "object_id",
+        "reason_code",
+        "blocked_settlement",
+        "blocked_amount",
+        "blocked_since",
+        "recheck_result",
+        "release_condition"
+      ],
+      "properties": {
+        "quarantine_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_type": {
+          "type": "string",
+          "enum": [
+            "investigation",
+            "event_gap",
+            "d_plus_n",
+            "cluster",
+            "data_governance",
+            "manual"
+          ]
+        },
+        "source_ref_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "object_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "object_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "blocked_settlement": {
+          "type": "boolean"
+        },
+        "blocked_amount": {
+          "type": "string",
+          "minLength": 1
+        },
+        "blocked_since": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "waiting_days": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "recheck_result": {
+          "type": "string",
+          "minLength": 1
+        },
+        "release_condition": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "quarantine_id",
+      "x-affiliate-authority": "CPA Risk/Governance",
+      "x-affiliate-decision": "Group B explicit merge"
+    },
+    "QuarantineQueueConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "d_plus_n_days",
+        "sort_weights",
+        "refresh_interval_minutes",
+        "export_policy",
+        "reference_ranges",
+        "version"
+      ],
+      "properties": {
+        "d_plus_n_days": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sort_weights": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "refresh_interval_minutes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "export_policy": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "reference_ranges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ReferenceRange"
+          }
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "x-affiliate-stable-identity": "version",
+      "x-affiliate-authority": "CPA Risk/Governance",
+      "x-affiliate-decision": "Group B explicit merge"
+    },
+    "StagingRun": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_id",
+        "environment",
+        "contract_version",
+        "automated_result",
+        "fund_reconciliation_diff",
+        "gate_result"
+      ],
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "environment": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "automated_result": {
+          "type": "string",
+          "enum": [
+            "passed",
+            "failed",
+            "running"
+          ]
+        },
+        "fund_reconciliation_diff": {
+          "type": "string",
+          "minLength": 1
+        },
+        "gate_result": {
+          "type": "string",
+          "enum": [
+            "blocked",
+            "pending_signoff",
+            "passed"
+          ]
+        },
+        "scenario_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "failed_scenarios": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "log_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signoffs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "run_id + environment + contract_version",
+      "x-affiliate-authority": "CPA QA/release",
+      "x-affiliate-decision": "Group B explicit merge"
+    },
+    "StagingSignoff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_id",
+        "role",
+        "signoff_user",
+        "result",
+        "signed_at"
+      ],
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "risk",
+            "finance",
+            "compliance"
+          ]
+        },
+        "signoff_user": {
+          "type": "string",
+          "minLength": 1
+        },
+        "result": {
+          "type": "string",
+          "enum": [
+            "approved",
+            "rejected",
+            "returned"
+          ]
+        },
+        "comment": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "x-affiliate-stable-identity": "run_id + role + signed_at",
+      "x-affiliate-authority": "CPA QA/release",
+      "x-affiliate-decision": "Group B explicit merge"
+    },
+    "Money": {
+      "type": "object",
+      "required": [
+        "currency",
+        "amount"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "currency": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 3,
+          "example": "USD"
+        },
+        "amount": {
+          "type": "string",
+          "pattern": "^-?[0-9]+\\.[0-9]{2}$",
+          "example": "150.00"
+        }
+      }
+    },
+    "PageMeta": {
+      "type": "object",
+      "required": [
+        "page",
+        "page_size",
+        "total"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "page_size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pages": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "required": [
+        "code",
+        "message",
+        "trace_id",
+        "retryable"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "trace_id": {
+          "type": "string"
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    "SuccessEnvelope": {
+      "type": "object",
+      "required": [
+        "data",
+        "meta"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "meta": {
+          "$ref": "#/definitions/ResponseMeta"
+        }
+      }
+    },
+    "ErrorEnvelope": {
+      "type": "object",
+      "required": [
+        "error"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/Error"
+        }
+      }
+    },
+    "ResponseMeta": {
+      "type": "object",
+      "required": [
+        "request_id",
+        "scenario",
+        "data_as_of",
+        "rule_version"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "request_id": {
+          "type": "string"
+        },
+        "scenario": {
+          "type": "string"
+        },
+        "data_as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "rule_version": {
+          "type": "string"
+        },
+        "page": {
+          "type": "integer"
+        },
+        "page_size": {
+          "type": "integer"
+        },
+        "total": {
+          "type": "integer"
+        }
+      }
+    },
+    "ReferenceRange": {
+      "type": "object",
+      "required": [
+        "param_id",
+        "min",
+        "max",
+        "suggested",
+        "value_status"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "param_id": {
+          "type": "string",
+          "pattern": "^PARAM-[A-Z]+[0-9]+$"
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "suggested": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "value_status": {
+          "type": "string",
+          "enum": [
+            "pending_review",
+            "reference",
+            "external_reference"
+          ]
+        },
+        "owner_roles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "MaskedCustomer": {
+      "type": "object",
+      "required": [
+        "customer_id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "customer_id": {
+          "type": "string"
+        },
+        "display_id": {
+          "type": "string"
+        },
+        "country_code": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 2
+        }
+      }
+    },
+    "ApprovalRecord": {
+      "type": "object",
+      "required": [
+        "applicant_id",
+        "approver_id",
+        "self_review",
+        "submitted_at",
+        "approved_at",
+        "trace_id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "applicant_id": {
+          "type": "string"
+        },
+        "approver_id": {
+          "type": "string"
+        },
+        "self_review": {
+          "type": "boolean"
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "SUBMIT",
+            "APPROVE"
+          ]
+        },
+        "result": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "impact_confirmation": {
+          "type": "string"
+        },
+        "submitted_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "approved_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      }
+    },
+    "AuditRecord": {
+      "type": "object",
+      "required": [
+        "actor_id",
+        "action",
+        "object_id",
+        "occurred_at",
+        "trace_id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "actor_id": {
+          "type": "string"
+        },
+        "action": {
+          "type": "string"
+        },
+        "object_type": {
+          "type": "string"
+        },
+        "object_id": {
+          "type": "string"
+        },
+        "before_state": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "after_state": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "reason": {
+          "type": "string"
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      }
+    },
+    "ExportTask": {
+      "type": "object",
+      "required": [
+        "export_id",
+        "status",
+        "expires_at"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "export_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "created",
+            "queued",
+            "running",
+            "success",
+            "failed",
+            "cancelled"
+          ]
+        },
+        "file_name": {
+          "type": "string"
+        },
+        "row_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "download_url": {
+          "type": "string"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      }
+    },
+    "ImpactPreview": {
+      "type": "object",
+      "required": [
+        "preview_id",
+        "object_id",
+        "impact_type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "preview_id": {
+          "type": "string"
+        },
+        "object_id": {
+          "type": "string"
+        },
+        "impact_type": {
+          "type": "string"
+        },
+        "attribution_change": {
+          "type": "boolean"
+        },
+        "commission_change": {
+          "type": "boolean"
+        },
+        "credit_change": {
+          "type": "boolean"
+        },
+        "fund_change": {
+          "type": "boolean"
+        },
+        "amount": {
+          "$ref": "#/definitions/Money"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "ConfigDraft": {
+      "type": "object",
+      "required": [
+        "draft_id",
+        "domain",
+        "status",
+        "version"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "draft_id": {
+          "type": "string"
+        },
+        "domain": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "validating",
+            "simulation_pending",
+            "pending_approval",
+            "approved",
+            "scheduled",
+            "active",
+            "returned",
+            "rejected",
+            "cancelled",
+            "activation_failed"
+          ]
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "reason": {
+          "type": "string"
+        },
+        "reference_ranges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ReferenceRange"
+          }
+        }
+      }
+    },
+    "ActionRequest": {
+      "type": "object",
+      "required": [
+        "reason"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "self_review": {
+          "type": "boolean"
+        },
+        "approval_result": {
+          "type": "string",
+          "enum": [
+            "approved",
+            "rejected",
+            "returned"
+          ]
+        },
+        "approval_reason": {
+          "type": "string"
+        },
+        "impact_confirmation": {
+          "type": "string"
+        },
+        "preview_id": {
+          "type": "string"
+        }
+      }
+    },
+    "CxActionRequest": {
+      "type": "object",
+      "required": [
+        "reason"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "self_review": {
+          "type": "boolean"
+        },
+        "approval_result": {
+          "type": "string",
+          "enum": [
+            "approved",
+            "rejected",
+            "returned"
+          ]
+        },
+        "impact_confirmation": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        },
+        "result": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "risk",
+            "finance",
+            "compliance"
+          ]
+        },
+        "member_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "materials_required": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 8
+        }
+      }
+    },
+    "LinkEligibilityResult": {
+      "type": "object",
+      "required": [
+        "partner_id",
+        "eligible",
+        "profile_gate_required",
+        "blocking_reasons"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "partner_id": {
+          "type": "string"
+        },
+        "eligible": {
+          "type": "boolean"
+        },
+        "profile_gate_required": {
+          "type": "boolean"
+        },
+        "blocking_reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "profile_status": {
+          "type": "string"
+        },
+        "staging_required": {
+          "type": "boolean"
+        },
+        "realtime_hard_risk_required": {
+          "type": "boolean"
+        },
+        "next_action": {
+          "type": "string"
+        }
+      }
+    },
+    "OfficialDomainPolicy": {
+      "type": "object",
+      "required": [
+        "official_domain",
+        "blocked_patterns",
+        "version"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "official_domain": {
+          "type": "string"
+        },
+        "blocked_patterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "approval_record": {
+          "$ref": "./common.json#/definitions/ApprovalRecord"
+        },
+        "effective_time": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "AttributionIntegrityCheck": {
+      "type": "object",
+      "required": [
+        "check_id",
+        "period",
+        "missing_attribution_count",
+        "duplicate_attribution_count"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "check_id": {
+          "type": "string"
+        },
+        "period": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "missing_attribution_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "duplicate_attribution_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "task_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "completed_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "AttributionHealthSnapshot": {
+      "type": "object",
+      "required": [
+        "stage",
+        "health_score",
+        "previous_score",
+        "threshold_version"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "stage": {
+          "type": "string"
+        },
+        "health_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "previous_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "threshold_version": {
+          "type": "string"
+        },
+        "trend": {
+          "type": "string",
+          "enum": [
+            "up",
+            "flat",
+            "down"
+          ]
+        },
+        "task_id": {
+          "type": "string"
+        }
+      }
+    },
+    "BaselineDeviation": {
+      "type": "object",
+      "required": [
+        "partner_id",
+        "metric",
+        "actual",
+        "baseline",
+        "deviation",
+        "confidence"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "partner_id": {
+          "type": "string"
+        },
+        "metric": {
+          "type": "string"
+        },
+        "actual": {
+          "type": "number"
+        },
+        "baseline": {
+          "type": "number"
+        },
+        "deviation": {
+          "type": "number"
+        },
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        }
+      }
+    },
+    "RuleShadowRun": {
+      "type": "object",
+      "required": [
+        "shadow_run_id",
+        "rule_version",
+        "dataset",
+        "status",
+        "hit_count"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "shadow_run_id": {
+          "type": "string"
+        },
+        "rule_version": {
+          "type": "string"
+        },
+        "dataset": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "running",
+            "completed",
+            "failed",
+            "cancelled"
+          ]
+        },
+        "hit_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "false_positive_hint": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fund_impact": {
+          "$ref": "./common.json#/definitions/Money"
+        },
+        "diffs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ShadowRunDiff"
+          }
+        }
+      }
+    },
+    "ShadowRunDiff": {
+      "type": "object",
+      "required": [
+        "object_id",
+        "live_result",
+        "shadow_result"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "object_id": {
+          "type": "string"
+        },
+        "live_result": {
+          "type": "string"
+        },
+        "shadow_result": {
+          "type": "string"
+        },
+        "fund_impact": {
+          "$ref": "./common.json#/definitions/Money"
+        },
+        "false_positive_hint": {
+          "type": "boolean"
+        }
+      }
+    },
+    "PartnerOperationTag": {
+      "type": "object",
+      "required": [
+        "tag_id",
+        "partner_id",
+        "tag_type",
+        "value"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tag_id": {
+          "type": "string"
+        },
+        "partner_id": {
+          "type": "string"
+        },
+        "tag_type": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "audit_id": {
+          "type": "string"
+        }
+      }
+    },
+    "DataGovernancePolicy": {
+      "type": "object",
+      "required": [
+        "policy_id",
+        "data_type",
+        "retention_days",
+        "export_scope",
+        "deletion_rule",
+        "notification_sla"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "policy_id": {
+          "type": "string"
+        },
+        "data_type": {
+          "type": "string"
+        },
+        "retention_days": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "export_scope": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "deletion_rule": {
+          "type": "string"
+        },
+        "notification_sla": {
+          "type": "string"
+        },
+        "reference_ranges": {
+          "type": "array",
+          "items": {
+            "$ref": "./common.json#/definitions/ReferenceRange"
+          }
+        }
+      }
+    },
+    "DataBreachIncident": {
+      "type": "object",
+      "required": [
+        "incident_id",
+        "severity",
+        "detected_at",
+        "notification_due_at",
+        "owner"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "incident_id": {
+          "type": "string"
+        },
+        "severity": {
+          "type": "string"
+        },
+        "detected_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "notification_due_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "QualityEconomicsSnapshot": {
+      "type": "object",
+      "required": [
+        "partner_id",
+        "period",
+        "commission",
+        "loss",
+        "quality_metrics",
+        "snapshot_version"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "partner_id": {
+          "type": "string"
+        },
+        "period": {
+          "type": "string"
+        },
+        "commission": {
+          "$ref": "./common.json#/definitions/Money"
+        },
+        "loss": {
+          "$ref": "./common.json#/definitions/Money"
+        },
+        "quality_metrics": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "snapshot_version": {
+          "type": "string"
+        },
+        "p1_extensions": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "RiskCommissionLink": {
+      "type": "object",
+      "required": [
+        "case_group_id",
+        "commission_case_id",
+        "link_type",
+        "trace_id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "case_group_id": {
+          "type": "string"
+        },
+        "commission_case_id": {
+          "type": "string"
+        },
+        "link_type": {
+          "type": "string"
+        },
+        "trace_id": {
+          "type": "string"
+        },
+        "amount": {
+          "$ref": "./common.json#/definitions/Money"
+        },
+        "hold_status": {
+          "type": "string"
+        },
+        "guarantee_status": {
+          "type": "string"
+        }
+      }
+    },
+    "ContractQualityCheck": {
+      "type": "object",
+      "required": [
+        "contract_version",
+        "check_result",
+        "openapi",
+        "event_schema",
+        "mock_server",
+        "docs"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "contract_version": {
+          "type": "string"
+        },
+        "check_result": {
+          "type": "string",
+          "enum": [
+            "passed",
+            "failed"
+          ]
+        },
+        "openapi": {
+          "type": "string",
+          "enum": [
+            "passed",
+            "failed"
+          ]
+        },
+        "event_schema": {
+          "type": "string",
+          "enum": [
+            "passed",
+            "failed"
+          ]
+        },
+        "mock_server": {
+          "type": "string",
+          "enum": [
+            "passed",
+            "failed"
+          ]
+        },
+        "docs": {
+          "type": "string",
+          "enum": [
+            "passed",
+            "failed"
+          ]
+        },
+        "error_sample": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "QuarterlyAuditPack": {
+      "type": "object",
+      "required": [
+        "pack_id",
+        "period",
+        "status",
+        "reserved_only"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "pack_id": {
+          "type": "string"
+        },
+        "period": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "reserved_only": {
+          "type": "boolean"
+        }
+      }
+    },
+    "AssetLandingPatrolTask": {
+      "type": "object",
+      "required": [
+        "task_id",
+        "asset_id",
+        "status",
+        "reserved_only"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "type": "string"
+        },
+        "asset_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "reserved_only": {
+          "type": "boolean"
+        }
+      }
+    },
+    "SubChannelRiskState": {
+      "type": "object",
+      "required": [
+        "subchannel_id",
+        "status",
+        "reason_code",
+        "link_effect",
+        "reserved_only"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "subchannel_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "reason_code": {
+          "type": "string"
+        },
+        "link_effect": {
+          "type": "string"
+        },
+        "review_task": {
+          "type": "string"
+        },
+        "reserved_only": {
+          "type": "boolean"
+        }
+      }
+    },
+    "MultiLevelSchemaReserve": {
+      "type": "object",
+      "required": [
+        "parent_partner_id",
+        "hierarchy_path",
+        "reserved_only",
+        "enabled"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "parent_partner_id": {
+          "type": "string"
+        },
+        "hierarchy_path": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reserved_only": {
+          "type": "boolean"
+        },
+        "enabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "AdvancedTierPricing": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "reserved_only",
+        "enabled"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string"
+        },
+        "reserved_only": {
+          "type": "boolean"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "trigger_condition": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "x-affiliate-schema-sources": {
+    "Appeal": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "AppealDecision": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "AppealRemedyTask": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "ApprovalNode": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "ApprovalWorkflow": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "BenefitDiffPreview": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "CapBreakerTask": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "CapBreakerThreshold": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "ClientRiskSnapshot": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "ClusterCase": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "ClusterConclusion": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "ClusterException": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "ClusterFeature": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "ClusterGraph": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "ClusterHoldReviewTask": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "ClusterImpact": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "ClusterRule": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "ConfigDomainStatus": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "ConfigOverviewMetric": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "ConfigVersion": {
+      "sourceFiles": [
+        "admin.json",
+        "common.json"
+      ],
+      "status": "owner_resolved_rebuild"
+    },
+    "Country": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "CountryEntityMapping": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "CoveragePartner": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "CoverageSummary": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "CoverageTrend": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "CreditBenefitRule": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "CreditLevelHistory": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "CreditLevelOverride": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "CreditPointLedger": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "D30FrozenCase": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "ExternalRuleVersion": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "FraudImpactChain": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "FraudReference": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "GuaranteeBatch": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "GuaranteeOffsetTask": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "GuaranteeRule": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "HardRule": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "HardRuleDraft": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "HardRuleHit": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "HardRuleVersion": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "HoldDraft": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "HoldFormulaSnapshot": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "HoldRule": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "ImpactChain": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "IntegrationCallback": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "IntegrationTask": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "IntegrationTaskSummary": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "LegalEntity": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "MilestoneRule": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "OffsetExecution": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "OffsetPlan": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "PartnerCreditScore": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "PartnerPersonalBenefit": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "PriceDiff": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "PriceDraft": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "PriceRule": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "PriceVersion": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "QualificationRule": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "QualityDimension": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "QualityServiceRule": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "QualitySummary": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "QualityTrend": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "ReleasePackage": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "RestoreTask": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "RetryPolicy": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "ReviewSuggestion": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "RiskEvent": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "RiskLevelMapping": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "RiskReviewAction": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "RiskReviewTask": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "RiskScoreHistory": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "RiskScoringRule": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "RoiDimension": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "RoiSummary": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "RoiTrend": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "SettlementCheckResult": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "SimulationResult": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "SimulationTask": {
+      "sourceFiles": [
+        "admin.json",
+        "common.json"
+      ],
+      "status": "owner_resolved_rebuild"
+    },
+    "ViolationEvent": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "ViolationImpact": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "ViolationRule": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "ViolationRuleDraft": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "WorkflowSimulation": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "OnboardingGateConfig": {
+      "sourceFiles": [
+        "admin.json",
+        "cx.json"
+      ],
+      "status": "owner_resolved_explicit_merge"
+    },
+    "TrafficProfile": {
+      "sourceFiles": [
+        "admin.json",
+        "cx.json"
+      ],
+      "status": "owner_resolved_explicit_merge"
+    },
+    "TrafficProfileReview": {
+      "sourceFiles": [
+        "admin.json",
+        "cx.json"
+      ],
+      "status": "owner_resolved_explicit_merge"
+    },
+    "OfficialPathLibraryItem": {
+      "sourceFiles": [
+        "admin.json",
+        "cx.json"
+      ],
+      "status": "owner_resolved_explicit_merge"
+    },
+    "ClickRiskRule": {
+      "sourceFiles": [
+        "admin.json",
+        "cx.json"
+      ],
+      "status": "owner_resolved_explicit_merge"
+    },
+    "ClickRiskEvidence": {
+      "sourceFiles": [
+        "admin.json",
+        "cx.json"
+      ],
+      "status": "owner_resolved_rebuild"
+    },
+    "EventCriticalityConfig": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "EventIntegritySnapshot": {
+      "sourceFiles": [
+        "admin.json",
+        "cx.json"
+      ],
+      "status": "owner_resolved_explicit_merge"
+    },
+    "IntegrationEventGap": {
+      "sourceFiles": [
+        "admin.json"
+      ],
+      "status": "single_source"
+    },
+    "RiskCaseGroup": {
+      "sourceFiles": [
+        "admin.json",
+        "cx.json"
+      ],
+      "status": "owner_resolved_explicit_merge"
+    },
+    "RiskCaseSplitRequest": {
+      "sourceFiles": [
+        "admin.json",
+        "cx.json"
+      ],
+      "status": "owner_resolved_explicit_merge"
+    },
+    "PartnerBaseline": {
+      "sourceFiles": [
+        "admin.json",
+        "cx.json"
+      ],
+      "status": "owner_resolved_explicit_merge"
+    },
+    "BaselineWindowConfig": {
+      "sourceFiles": [
+        "admin.json",
+        "cx.json"
+      ],
+      "status": "owner_resolved_explicit_merge"
+    },
+    "InvestigationTask": {
+      "sourceFiles": [
+        "admin.json",
+        "cx.json"
+      ],
+      "status": "owner_resolved_rebuild"
+    },
+    "InvestigationSlaConfig": {
+      "sourceFiles": [
+        "admin.json",
+        "cx.json"
+      ],
+      "status": "owner_resolved_explicit_merge"
+    },
+    "LimitedExplanation": {
+      "sourceFiles": [
+        "admin.json",
+        "cx.json"
+      ],
+      "status": "owner_resolved_rebuild"
+    },
+    "QuarantineRecord": {
+      "sourceFiles": [
+        "admin.json",
+        "cx.json"
+      ],
+      "status": "owner_resolved_explicit_merge"
+    },
+    "QuarantineQueueConfig": {
+      "sourceFiles": [
+        "admin.json",
+        "cx.json"
+      ],
+      "status": "owner_resolved_explicit_merge"
+    },
+    "StagingRun": {
+      "sourceFiles": [
+        "admin.json",
+        "cx.json"
+      ],
+      "status": "owner_resolved_explicit_merge"
+    },
+    "StagingSignoff": {
+      "sourceFiles": [
+        "admin.json",
+        "cx.json"
+      ],
+      "status": "owner_resolved_explicit_merge"
+    },
+    "Money": {
+      "sourceFiles": [
+        "common.json"
+      ],
+      "status": "single_source"
+    },
+    "PageMeta": {
+      "sourceFiles": [
+        "common.json"
+      ],
+      "status": "single_source"
+    },
+    "Error": {
+      "sourceFiles": [
+        "common.json"
+      ],
+      "status": "single_source"
+    },
+    "SuccessEnvelope": {
+      "sourceFiles": [
+        "common.json"
+      ],
+      "status": "single_source"
+    },
+    "ErrorEnvelope": {
+      "sourceFiles": [
+        "common.json"
+      ],
+      "status": "single_source"
+    },
+    "ResponseMeta": {
+      "sourceFiles": [
+        "common.json"
+      ],
+      "status": "single_source"
+    },
+    "ReferenceRange": {
+      "sourceFiles": [
+        "common.json"
+      ],
+      "status": "single_source"
+    },
+    "MaskedCustomer": {
+      "sourceFiles": [
+        "common.json"
+      ],
+      "status": "single_source"
+    },
+    "ApprovalRecord": {
+      "sourceFiles": [
+        "common.json"
+      ],
+      "status": "single_source"
+    },
+    "AuditRecord": {
+      "sourceFiles": [
+        "common.json"
+      ],
+      "status": "single_source"
+    },
+    "ExportTask": {
+      "sourceFiles": [
+        "common.json"
+      ],
+      "status": "single_source"
+    },
+    "ImpactPreview": {
+      "sourceFiles": [
+        "common.json"
+      ],
+      "status": "single_source"
+    },
+    "ConfigDraft": {
+      "sourceFiles": [
+        "common.json"
+      ],
+      "status": "single_source"
+    },
+    "ActionRequest": {
+      "sourceFiles": [
+        "common.json"
+      ],
+      "status": "single_source"
+    },
+    "CxActionRequest": {
+      "sourceFiles": [
+        "cx.json"
+      ],
+      "status": "single_source"
+    },
+    "LinkEligibilityResult": {
+      "sourceFiles": [
+        "cx.json"
+      ],
+      "status": "single_source"
+    },
+    "OfficialDomainPolicy": {
+      "sourceFiles": [
+        "cx.json"
+      ],
+      "status": "single_source"
+    },
+    "AttributionIntegrityCheck": {
+      "sourceFiles": [
+        "cx.json"
+      ],
+      "status": "single_source"
+    },
+    "AttributionHealthSnapshot": {
+      "sourceFiles": [
+        "cx.json"
+      ],
+      "status": "single_source"
+    },
+    "BaselineDeviation": {
+      "sourceFiles": [
+        "cx.json"
+      ],
+      "status": "single_source"
+    },
+    "RuleShadowRun": {
+      "sourceFiles": [
+        "cx.json"
+      ],
+      "status": "single_source"
+    },
+    "ShadowRunDiff": {
+      "sourceFiles": [
+        "cx.json"
+      ],
+      "status": "single_source"
+    },
+    "PartnerOperationTag": {
+      "sourceFiles": [
+        "cx.json"
+      ],
+      "status": "single_source"
+    },
+    "DataGovernancePolicy": {
+      "sourceFiles": [
+        "cx.json"
+      ],
+      "status": "single_source"
+    },
+    "DataBreachIncident": {
+      "sourceFiles": [
+        "cx.json"
+      ],
+      "status": "single_source"
+    },
+    "QualityEconomicsSnapshot": {
+      "sourceFiles": [
+        "cx.json"
+      ],
+      "status": "single_source"
+    },
+    "RiskCommissionLink": {
+      "sourceFiles": [
+        "cx.json"
+      ],
+      "status": "single_source"
+    },
+    "ContractQualityCheck": {
+      "sourceFiles": [
+        "cx.json"
+      ],
+      "status": "single_source"
+    },
+    "QuarterlyAuditPack": {
+      "sourceFiles": [
+        "cx.json"
+      ],
+      "status": "single_source"
+    },
+    "AssetLandingPatrolTask": {
+      "sourceFiles": [
+        "cx.json"
+      ],
+      "status": "single_source"
+    },
+    "SubChannelRiskState": {
+      "sourceFiles": [
+        "cx.json"
+      ],
+      "status": "single_source"
+    },
+    "MultiLevelSchemaReserve": {
+      "sourceFiles": [
+        "cx.json"
+      ],
+      "status": "single_source"
+    },
+    "AdvancedTierPricing": {
+      "sourceFiles": [
+        "cx.json"
+      ],
+      "status": "single_source"
+    }
+  },
+  "x-affiliate-boundary": "candidate_mock_schema_not_production_canonical",
+  "x-affiliate-unresolved-schema-conflict-count": 0,
+  "x-affiliate-owner-resolved-schema-count": 20
+}

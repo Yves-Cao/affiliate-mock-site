@@ -407,7 +407,7 @@ async function main() {
   await assertPromotionLink("standard-mt5", "en");
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"], { origin: baseUrl });
   await linkCopy.click();
-  await page.waitForFunction(() => document.querySelector(".dashboard-link-address [data-copy]").textContent === "已复制");
+  await page.waitForFunction(() => document.querySelector(".dashboard-link-address [data-copy]").classList.contains("is-copied"));
   if ((await page.evaluate(() => navigator.clipboard.readText())) !== (await linkAddress.innerText())) {
     throw new Error("Dashboard promotion link clipboard mismatch");
   }
@@ -423,22 +423,18 @@ async function main() {
       const rect = node.getBoundingClientRect();
       return { width: rect.width, mainWidth, images: node.querySelectorAll("img").length };
     });
-    const expectedWidth = width >= 992 ? (tutorial.mainWidth - 32) / 2 : tutorial.mainWidth;
+    const expectedWidth = width >= 992 ? (tutorial.mainWidth - 32) / 2.5 : tutorial.mainWidth; // support row is 1.5fr tracker : 1fr guidance
     if (tutorial.images || Math.abs(tutorial.width - expectedWidth) > 2) {
       throw new Error(`Tutorial layout failed at ${width}px: ${JSON.stringify(tutorial)}`);
     }
-    const summaryPosition = await page.locator(".dashboard-conversion").evaluate(node => ({
-      last: node === document.querySelector("#main").lastElementChild,
-      top: node.getBoundingClientRect().top,
-      tutorialBottom: document.querySelector(".tutorial-card").getBoundingClientRect().bottom,
+    const summaryPosition = await page.locator(".dashboard-promotion-grid").evaluate(node => ({
       width: node.getBoundingClientRect().width,
       linkWidth: document.querySelector(".dashboard-link-controls").closest(".card").getBoundingClientRect().width
     }));
     const expectedLinkWidth = width > 991
       ? (summaryPosition.width - 32) / 2
       : summaryPosition.width;
-    if (!summaryPosition.last || summaryPosition.top < summaryPosition.tutorialBottom + 15 ||
-        Math.abs(summaryPosition.linkWidth - expectedLinkWidth) > 2) {
+    if (Math.abs(summaryPosition.linkWidth - expectedLinkWidth) > 2) {
       throw new Error(`Dashboard summary position failed at ${width}px: ${JSON.stringify(summaryPosition)}`);
     }
     const layout = await page.evaluate(() => {

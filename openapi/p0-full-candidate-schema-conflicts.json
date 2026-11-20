@@ -1,0 +1,3042 @@
+{
+  "id": "P0-FULL-CANDIDATE-SCHEMA-CONFLICTS",
+  "version": "0.2.0",
+  "status": "owner_decisions_recorded_candidate_only",
+  "boundary": "Candidate source reconciliation with owner-selected definitions; production canonical promotion is not claimed by this report.",
+  "counts": {
+    "conflictingSchemaNames": 20,
+    "ownerResolvedSchemaNames": 20,
+    "unresolvedSchemaNames": 0,
+    "sourceVariants": 40
+  },
+  "conflicts": {
+    "ConfigVersion": {
+      "schemaName": "ConfigVersion",
+      "status": "owner_confirmed_candidate_definition",
+      "variants": [
+        {
+          "sourceFile": "admin.json",
+          "definition": {
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "additionalProperties": true,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "object_type": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "version": {
+                "type": "integer"
+              },
+              "trace_id": {
+                "type": "string"
+              }
+            },
+            "x-affiliate-object": "ConfigVersion"
+          }
+        },
+        {
+          "sourceFile": "common.json",
+          "definition": {
+            "type": "object",
+            "required": [
+              "version_id",
+              "domain",
+              "version",
+              "status"
+            ],
+            "additionalProperties": true,
+            "properties": {
+              "version_id": {
+                "type": "string"
+              },
+              "domain": {
+                "type": "string"
+              },
+              "version": {
+                "type": "integer"
+              },
+              "status": {
+                "type": "string"
+              },
+              "effective_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "activated_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      ],
+      "differences": [
+        {
+          "compared": [
+            "admin.json",
+            "common.json"
+          ],
+          "topLevelKeysOnlyInFirst": [
+            "x-affiliate-object"
+          ],
+          "topLevelKeysOnlyInSecond": [],
+          "requiredOnlyInFirst": [
+            "id"
+          ],
+          "requiredOnlyInSecond": [
+            "version_id",
+            "domain",
+            "version",
+            "status"
+          ],
+          "propertiesOnlyInFirst": [
+            "id",
+            "object_type",
+            "name",
+            "created_at",
+            "updated_at",
+            "trace_id"
+          ],
+          "propertiesOnlyInSecond": [
+            "version_id",
+            "domain",
+            "effective_at",
+            "activated_at"
+          ],
+          "changedProperties": [
+            "id",
+            "object_type",
+            "name",
+            "created_at",
+            "updated_at",
+            "trace_id",
+            "version_id",
+            "domain",
+            "effective_at",
+            "activated_at"
+          ]
+        }
+      ],
+      "ownerDecision": {
+        "decision": "reject_both_rebuild_from_authoritative_slice",
+        "decisionEvidence": "Product owner chat decision on 2026-11-19: Batch 2 questions 1 and 2 approved; generic MOD-06 ledger/payment-result calls remain prohibited.",
+        "selectedCanonicalDefinition": "ConfigVersion:owner-selected-candidate-v1",
+        "replacementReason": "Rebuild from Governance ConfigurationVersion semantics."
+      }
+    },
+    "SimulationTask": {
+      "schemaName": "SimulationTask",
+      "status": "owner_confirmed_candidate_definition",
+      "variants": [
+        {
+          "sourceFile": "admin.json",
+          "definition": {
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "additionalProperties": true,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "object_type": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "version": {
+                "type": "integer"
+              },
+              "trace_id": {
+                "type": "string"
+              }
+            },
+            "x-affiliate-object": "SimulationTask"
+          }
+        },
+        {
+          "sourceFile": "common.json",
+          "definition": {
+            "type": "object",
+            "required": [
+              "simulation_id",
+              "type",
+              "status"
+            ],
+            "additionalProperties": true,
+            "properties": {
+              "simulation_id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "single",
+                  "combined"
+                ]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "created",
+                  "queued",
+                  "running",
+                  "success",
+                  "failed",
+                  "cancelled"
+                ]
+              },
+              "guardrail_result": {
+                "type": "string",
+                "enum": [
+                  "passed",
+                  "warning",
+                  "blocked"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "differences": [
+        {
+          "compared": [
+            "admin.json",
+            "common.json"
+          ],
+          "topLevelKeysOnlyInFirst": [
+            "x-affiliate-object"
+          ],
+          "topLevelKeysOnlyInSecond": [],
+          "requiredOnlyInFirst": [
+            "id"
+          ],
+          "requiredOnlyInSecond": [
+            "simulation_id",
+            "type",
+            "status"
+          ],
+          "propertiesOnlyInFirst": [
+            "id",
+            "object_type",
+            "name",
+            "created_at",
+            "updated_at",
+            "version",
+            "trace_id"
+          ],
+          "propertiesOnlyInSecond": [
+            "simulation_id",
+            "type",
+            "guardrail_result"
+          ],
+          "changedProperties": [
+            "id",
+            "object_type",
+            "status",
+            "name",
+            "created_at",
+            "updated_at",
+            "version",
+            "trace_id",
+            "simulation_id",
+            "type",
+            "guardrail_result"
+          ]
+        }
+      ],
+      "ownerDecision": {
+        "decision": "reject_both_rebuild_from_authoritative_slice",
+        "decisionEvidence": "Product owner chat decision on 2026-11-19: Batch 2 questions 1 and 2 approved; generic MOD-06 ledger/payment-result calls remain prohibited.",
+        "selectedCanonicalDefinition": "SimulationTask:owner-selected-candidate-v1",
+        "replacementReason": "Separate configuration shadow/replay evidence from the unified OperationsTask authority."
+      }
+    },
+    "OnboardingGateConfig": {
+      "schemaName": "OnboardingGateConfig",
+      "status": "owner_confirmed_candidate_definition",
+      "variants": [
+        {
+          "sourceFile": "admin.json",
+          "definition": {
+            "required": [
+              "id",
+              "gate_enabled",
+              "required_fields",
+              "scope",
+              "reason_required"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "onboarding-gate"
+              },
+              "gate_enabled": {
+                "type": "boolean",
+                "example": true
+              },
+              "required_fields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "channel_type",
+                  "primary_countries",
+                  "traffic_source",
+                  "expected_volume"
+                ]
+              },
+              "scope": {
+                "type": "string",
+                "example": "all_channels"
+              },
+              "reason_required": {
+                "type": "boolean",
+                "example": true
+              },
+              "approval_record": {
+                "type": "string"
+              },
+              "audit_id": {
+                "type": "string"
+              },
+              "reference_range": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "version": {
+                "type": "integer"
+              },
+              "trace_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true,
+            "x-affiliate-object": "OnboardingGateConfig"
+          }
+        },
+        {
+          "sourceFile": "cx.json",
+          "definition": {
+            "type": "object",
+            "required": [
+              "gate_enabled",
+              "required_fields",
+              "scope",
+              "reason_required",
+              "version"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "gate_enabled": {
+                "type": "boolean"
+              },
+              "required_fields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "scope": {
+                "type": "string"
+              },
+              "reason_required": {
+                "type": "boolean"
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "approval_record": {
+                "$ref": "./common.json#/definitions/ApprovalRecord"
+              },
+              "audit_id": {
+                "type": "string"
+              },
+              "effective_time": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "reference_ranges": {
+                "type": "array",
+                "items": {
+                  "$ref": "./common.json#/definitions/ReferenceRange"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "differences": [
+        {
+          "compared": [
+            "admin.json",
+            "cx.json"
+          ],
+          "topLevelKeysOnlyInFirst": [
+            "x-affiliate-object"
+          ],
+          "topLevelKeysOnlyInSecond": [
+            "type"
+          ],
+          "requiredOnlyInFirst": [
+            "id"
+          ],
+          "requiredOnlyInSecond": [
+            "version"
+          ],
+          "propertiesOnlyInFirst": [
+            "id",
+            "reference_range",
+            "created_at",
+            "updated_at",
+            "trace_id"
+          ],
+          "propertiesOnlyInSecond": [
+            "effective_time",
+            "reference_ranges"
+          ],
+          "changedProperties": [
+            "id",
+            "gate_enabled",
+            "required_fields",
+            "scope",
+            "reason_required",
+            "approval_record",
+            "reference_range",
+            "created_at",
+            "updated_at",
+            "version",
+            "trace_id",
+            "effective_time",
+            "reference_ranges"
+          ]
+        }
+      ],
+      "ownerDecision": {
+        "decision": "explicit_merge",
+        "decisionEvidence": "Product owner chat decision on 2026-11-19: Batch 2 questions 1 and 2 approved; generic MOD-06 ledger/payment-result calls remain prohibited.",
+        "selectedCanonicalDefinition": "OnboardingGateConfig:owner-selected-candidate-v1",
+        "replacementReason": "Explicit field merge preserves both source semantics under the owning slice."
+      }
+    },
+    "TrafficProfile": {
+      "schemaName": "TrafficProfile",
+      "status": "owner_confirmed_candidate_definition",
+      "variants": [
+        {
+          "sourceFile": "admin.json",
+          "definition": {
+            "required": [
+              "partner_id",
+              "profile_version"
+            ],
+            "properties": {
+              "partner_id": {
+                "type": "string"
+              },
+              "profile_version": {
+                "type": "string"
+              },
+              "primary_countries": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "channel_type": {
+                "type": "string"
+              },
+              "site_or_app": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "promotion_method": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "expected_volume": {
+                "type": "integer"
+              },
+              "historical_platforms": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "pending_review",
+                  "approved",
+                  "rejected"
+                ]
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "trace_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true,
+            "x-affiliate-object": "TrafficProfile"
+          }
+        },
+        {
+          "sourceFile": "cx.json",
+          "definition": {
+            "type": "object",
+            "required": [
+              "partner_id",
+              "profile_version",
+              "status"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "partner_id": {
+                "type": "string"
+              },
+              "profile_version": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "missing",
+                  "draft",
+                  "pending_review",
+                  "approved",
+                  "rejected"
+                ]
+              },
+              "primary_countries": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "channel_type": {
+                "type": "string"
+              },
+              "site_or_app": {
+                "type": "string"
+              },
+              "promotion_method": {
+                "type": "string"
+              },
+              "expected_volume": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "historical_platforms": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "missing_fields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "limited_explanation": {
+                "$ref": "#/definitions/LimitedExplanation"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      ],
+      "differences": [
+        {
+          "compared": [
+            "admin.json",
+            "cx.json"
+          ],
+          "topLevelKeysOnlyInFirst": [
+            "x-affiliate-object"
+          ],
+          "topLevelKeysOnlyInSecond": [
+            "type"
+          ],
+          "requiredOnlyInFirst": [],
+          "requiredOnlyInSecond": [
+            "status"
+          ],
+          "propertiesOnlyInFirst": [
+            "created_at",
+            "trace_id"
+          ],
+          "propertiesOnlyInSecond": [
+            "missing_fields",
+            "limited_explanation"
+          ],
+          "changedProperties": [
+            "profile_version",
+            "site_or_app",
+            "promotion_method",
+            "expected_volume",
+            "status",
+            "created_at",
+            "trace_id",
+            "missing_fields",
+            "limited_explanation"
+          ]
+        }
+      ],
+      "ownerDecision": {
+        "decision": "explicit_merge",
+        "decisionEvidence": "Product owner chat decision on 2026-11-19: Batch 2 questions 1 and 2 approved; generic MOD-06 ledger/payment-result calls remain prohibited.",
+        "selectedCanonicalDefinition": "TrafficProfile:owner-selected-candidate-v1",
+        "replacementReason": "Explicit field merge preserves both source semantics under the owning slice."
+      }
+    },
+    "TrafficProfileReview": {
+      "schemaName": "TrafficProfileReview",
+      "status": "owner_confirmed_candidate_definition",
+      "variants": [
+        {
+          "sourceFile": "admin.json",
+          "definition": {
+            "required": [
+              "profile_version",
+              "result"
+            ],
+            "properties": {
+              "profile_version": {
+                "type": "string"
+              },
+              "result": {
+                "type": "string",
+                "enum": [
+                  "approved",
+                  "rejected",
+                  "pending_review"
+                ]
+              },
+              "reason_code": {
+                "type": "string"
+              },
+              "reviewer": {
+                "type": "string"
+              },
+              "effective_time": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "audit_id": {
+                "type": "string"
+              },
+              "trace_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true,
+            "x-affiliate-object": "TrafficProfileReview"
+          }
+        },
+        {
+          "sourceFile": "cx.json",
+          "definition": {
+            "type": "object",
+            "required": [
+              "partner_id",
+              "profile_version",
+              "result",
+              "reason_code"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "partner_id": {
+                "type": "string"
+              },
+              "profile_version": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "result": {
+                "type": "string",
+                "enum": [
+                  "approved",
+                  "rejected",
+                  "returned"
+                ]
+              },
+              "reason_code": {
+                "type": "string"
+              },
+              "reviewer": {
+                "type": "string"
+              },
+              "effective_time": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "approval_record": {
+                "$ref": "./common.json#/definitions/ApprovalRecord"
+              }
+            }
+          }
+        }
+      ],
+      "differences": [
+        {
+          "compared": [
+            "admin.json",
+            "cx.json"
+          ],
+          "topLevelKeysOnlyInFirst": [
+            "x-affiliate-object"
+          ],
+          "topLevelKeysOnlyInSecond": [
+            "type"
+          ],
+          "requiredOnlyInFirst": [],
+          "requiredOnlyInSecond": [
+            "partner_id",
+            "reason_code"
+          ],
+          "propertiesOnlyInFirst": [
+            "audit_id",
+            "trace_id"
+          ],
+          "propertiesOnlyInSecond": [
+            "partner_id",
+            "approval_record"
+          ],
+          "changedProperties": [
+            "profile_version",
+            "result",
+            "audit_id",
+            "trace_id",
+            "partner_id",
+            "approval_record"
+          ]
+        }
+      ],
+      "ownerDecision": {
+        "decision": "explicit_merge",
+        "decisionEvidence": "Product owner chat decision on 2026-11-19: Batch 2 questions 1 and 2 approved; generic MOD-06 ledger/payment-result calls remain prohibited.",
+        "selectedCanonicalDefinition": "TrafficProfileReview:owner-selected-candidate-v1",
+        "replacementReason": "Explicit field merge preserves both source semantics under the owning slice."
+      }
+    },
+    "OfficialPathLibraryItem": {
+      "schemaName": "OfficialPathLibraryItem",
+      "status": "owner_confirmed_candidate_definition",
+      "variants": [
+        {
+          "sourceFile": "admin.json",
+          "definition": {
+            "required": [
+              "official_path_id",
+              "path",
+              "status",
+              "version"
+            ],
+            "properties": {
+              "official_path_id": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string",
+                "example": "/markets/standard"
+              },
+              "page_name": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "active",
+                  "disabled"
+                ]
+              },
+              "platforms": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "web",
+                    "android",
+                    "ios"
+                  ]
+                }
+              },
+              "countries": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "channels": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "risk_level": {
+                "type": "string",
+                "enum": [
+                  "low",
+                  "medium",
+                  "high"
+                ]
+              },
+              "version": {
+                "type": "string"
+              },
+              "effective_time": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "approval_record": {
+                "type": "string"
+              },
+              "trace_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true,
+            "x-affiliate-object": "OfficialPathLibraryItem"
+          }
+        },
+        {
+          "sourceFile": "cx.json",
+          "definition": {
+            "type": "object",
+            "required": [
+              "official_path_id",
+              "path",
+              "page_name",
+              "status",
+              "version"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "official_path_id": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              },
+              "page_name": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "enabled",
+                  "disabled",
+                  "pending",
+                  "deprecated"
+                ]
+              },
+              "platforms": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "countries": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "channels": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "risk_level": {
+                "type": "string"
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "effective_time": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      ],
+      "differences": [
+        {
+          "compared": [
+            "admin.json",
+            "cx.json"
+          ],
+          "topLevelKeysOnlyInFirst": [
+            "x-affiliate-object"
+          ],
+          "topLevelKeysOnlyInSecond": [
+            "type"
+          ],
+          "requiredOnlyInFirst": [],
+          "requiredOnlyInSecond": [
+            "page_name"
+          ],
+          "propertiesOnlyInFirst": [
+            "approval_record",
+            "trace_id"
+          ],
+          "propertiesOnlyInSecond": [],
+          "changedProperties": [
+            "path",
+            "status",
+            "platforms",
+            "risk_level",
+            "version",
+            "approval_record",
+            "trace_id"
+          ]
+        }
+      ],
+      "ownerDecision": {
+        "decision": "explicit_merge",
+        "decisionEvidence": "Product owner chat decision on 2026-11-19: Batch 2 questions 1 and 2 approved; generic MOD-06 ledger/payment-result calls remain prohibited.",
+        "selectedCanonicalDefinition": "OfficialPathLibraryItem:owner-selected-candidate-v1",
+        "replacementReason": "Explicit field merge preserves both source semantics under the owning slice."
+      }
+    },
+    "ClickRiskRule": {
+      "schemaName": "ClickRiskRule",
+      "status": "owner_confirmed_candidate_definition",
+      "variants": [
+        {
+          "sourceFile": "admin.json",
+          "definition": {
+            "required": [
+              "rule_id",
+              "risk_code",
+              "action",
+              "status",
+              "rule_version"
+            ],
+            "properties": {
+              "rule_id": {
+                "type": "string"
+              },
+              "risk_code": {
+                "type": "string",
+                "enum": [
+                  "proxy",
+                  "vpn",
+                  "datacenter_ip",
+                  "high_risk_asn",
+                  "abnormal_ua",
+                  "automation",
+                  "source_mismatch",
+                  "duplicate_click"
+                ]
+              },
+              "action": {
+                "type": "string",
+                "enum": [
+                  "reject_effective_click",
+                  "pending_review"
+                ]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "active",
+                  "disabled"
+                ]
+              },
+              "rule_version": {
+                "type": "string"
+              },
+              "parameter_version": {
+                "type": "string"
+              },
+              "reference_range": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "shadow_run_required": {
+                "type": "boolean"
+              },
+              "trace_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true,
+            "x-affiliate-object": "ClickRiskRule"
+          }
+        },
+        {
+          "sourceFile": "cx.json",
+          "definition": {
+            "type": "object",
+            "required": [
+              "rule_id",
+              "rule_version",
+              "parameter_version",
+              "risk_codes"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "rule_id": {
+                "type": "string"
+              },
+              "rule_version": {
+                "type": "string"
+              },
+              "parameter_version": {
+                "type": "string"
+              },
+              "risk_codes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "reference_ranges": {
+                "type": "array",
+                "items": {
+                  "$ref": "./common.json#/definitions/ReferenceRange"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "differences": [
+        {
+          "compared": [
+            "admin.json",
+            "cx.json"
+          ],
+          "topLevelKeysOnlyInFirst": [
+            "x-affiliate-object"
+          ],
+          "topLevelKeysOnlyInSecond": [
+            "type"
+          ],
+          "requiredOnlyInFirst": [
+            "risk_code",
+            "action",
+            "status"
+          ],
+          "requiredOnlyInSecond": [
+            "parameter_version",
+            "risk_codes"
+          ],
+          "propertiesOnlyInFirst": [
+            "risk_code",
+            "action",
+            "status",
+            "reference_range",
+            "shadow_run_required",
+            "trace_id"
+          ],
+          "propertiesOnlyInSecond": [
+            "risk_codes",
+            "reference_ranges"
+          ],
+          "changedProperties": [
+            "risk_code",
+            "action",
+            "status",
+            "reference_range",
+            "shadow_run_required",
+            "trace_id",
+            "risk_codes",
+            "reference_ranges"
+          ]
+        }
+      ],
+      "ownerDecision": {
+        "decision": "explicit_merge",
+        "decisionEvidence": "Product owner chat decision on 2026-11-19: Batch 2 questions 1 and 2 approved; generic MOD-06 ledger/payment-result calls remain prohibited.",
+        "selectedCanonicalDefinition": "ClickRiskRule:owner-selected-candidate-v1",
+        "replacementReason": "Explicit field merge preserves both source semantics under the owning slice."
+      }
+    },
+    "ClickRiskEvidence": {
+      "schemaName": "ClickRiskEvidence",
+      "status": "owner_confirmed_candidate_definition",
+      "variants": [
+        {
+          "sourceFile": "admin.json",
+          "definition": {
+            "required": [
+              "click_id",
+              "effective_click_result"
+            ],
+            "properties": {
+              "click_id": {
+                "type": "string"
+              },
+              "risk_codes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "rule_id": {
+                "type": "string"
+              },
+              "rule_version": {
+                "type": "string"
+              },
+              "parameter_version": {
+                "type": "string"
+              },
+              "evidence_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "effective_click_result": {
+                "type": "string",
+                "enum": [
+                  "valid",
+                  "invalid",
+                  "pending_review"
+                ]
+              },
+              "attribution_blocked": {
+                "type": "boolean"
+              },
+              "trace_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true,
+            "x-affiliate-object": "ClickRiskEvidence"
+          }
+        },
+        {
+          "sourceFile": "cx.json",
+          "definition": {
+            "type": "object",
+            "required": [
+              "click_id",
+              "risk_codes",
+              "rule_id",
+              "rule_version",
+              "parameter_version",
+              "effective_click_result"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "click_id": {
+                "type": "string"
+              },
+              "risk_codes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "rule_id": {
+                "type": "string"
+              },
+              "rule_version": {
+                "type": "string"
+              },
+              "parameter_version": {
+                "type": "string"
+              },
+              "evidence_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "effective_click_result": {
+                "type": "string",
+                "enum": [
+                  "valid",
+                  "invalid",
+                  "excluded"
+                ]
+              },
+              "attributed": {
+                "type": "boolean"
+              },
+              "commission_counted": {
+                "type": "boolean"
+              },
+              "trace_id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ],
+      "differences": [
+        {
+          "compared": [
+            "admin.json",
+            "cx.json"
+          ],
+          "topLevelKeysOnlyInFirst": [
+            "x-affiliate-object"
+          ],
+          "topLevelKeysOnlyInSecond": [
+            "type"
+          ],
+          "requiredOnlyInFirst": [],
+          "requiredOnlyInSecond": [
+            "risk_codes",
+            "rule_id",
+            "rule_version",
+            "parameter_version"
+          ],
+          "propertiesOnlyInFirst": [
+            "attribution_blocked"
+          ],
+          "propertiesOnlyInSecond": [
+            "attributed",
+            "commission_counted"
+          ],
+          "changedProperties": [
+            "effective_click_result",
+            "attribution_blocked",
+            "attributed",
+            "commission_counted"
+          ]
+        }
+      ],
+      "ownerDecision": {
+        "decision": "reject_both_rebuild_from_authoritative_slice",
+        "decisionEvidence": "Product owner chat decision on 2026-11-19: Batch 2 questions 1 and 2 approved; generic MOD-06 ledger/payment-result calls remain prohibited.",
+        "selectedCanonicalDefinition": "ClickRiskEvidence:owner-selected-candidate-v1",
+        "replacementReason": "Use Promotion ClickRiskEvaluation semantics without exposing thresholds."
+      }
+    },
+    "EventIntegritySnapshot": {
+      "schemaName": "EventIntegritySnapshot",
+      "status": "owner_confirmed_candidate_definition",
+      "variants": [
+        {
+          "sourceFile": "admin.json",
+          "definition": {
+            "required": [
+              "stage",
+              "criticality",
+              "status"
+            ],
+            "properties": {
+              "stage": {
+                "type": "string",
+                "enum": [
+                  "click",
+                  "registration",
+                  "kyc",
+                  "ftd",
+                  "effective_ftd",
+                  "quality_service",
+                  "settlement_check"
+                ]
+              },
+              "criticality": {
+                "type": "string",
+                "enum": [
+                  "critical",
+                  "secondary"
+                ]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "complete",
+                  "gap_detected",
+                  "backfilling",
+                  "failed"
+                ]
+              },
+              "expected_count": {
+                "type": "integer"
+              },
+              "actual_count": {
+                "type": "integer"
+              },
+              "gap_count": {
+                "type": "integer"
+              },
+              "duplicate_count": {
+                "type": "integer"
+              },
+              "latency_ms": {
+                "type": "integer"
+              },
+              "blocked_settlement": {
+                "type": "boolean"
+              },
+              "task_id": {
+                "type": "string"
+              },
+              "trace_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true,
+            "x-affiliate-object": "EventIntegritySnapshot"
+          }
+        },
+        {
+          "sourceFile": "cx.json",
+          "definition": {
+            "type": "object",
+            "required": [
+              "stage",
+              "criticality",
+              "expected_count",
+              "actual_count",
+              "gap_count",
+              "blocked_settlement"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "stage": {
+                "type": "string",
+                "enum": [
+                  "click",
+                  "registration",
+                  "kyc",
+                  "deposit",
+                  "trade",
+                  "commission"
+                ]
+              },
+              "criticality": {
+                "type": "string",
+                "enum": [
+                  "critical",
+                  "secondary"
+                ]
+              },
+              "expected_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "actual_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "gap_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "duplicate_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "failure_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "latency_p95_seconds": {
+                "type": "number",
+                "minimum": 0
+              },
+              "blocked_settlement": {
+                "type": "boolean"
+              },
+              "task_id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ],
+      "differences": [
+        {
+          "compared": [
+            "admin.json",
+            "cx.json"
+          ],
+          "topLevelKeysOnlyInFirst": [
+            "x-affiliate-object"
+          ],
+          "topLevelKeysOnlyInSecond": [
+            "type"
+          ],
+          "requiredOnlyInFirst": [
+            "status"
+          ],
+          "requiredOnlyInSecond": [
+            "expected_count",
+            "actual_count",
+            "gap_count",
+            "blocked_settlement"
+          ],
+          "propertiesOnlyInFirst": [
+            "status",
+            "latency_ms",
+            "trace_id"
+          ],
+          "propertiesOnlyInSecond": [
+            "failure_count",
+            "latency_p95_seconds"
+          ],
+          "changedProperties": [
+            "stage",
+            "status",
+            "expected_count",
+            "actual_count",
+            "gap_count",
+            "duplicate_count",
+            "latency_ms",
+            "trace_id",
+            "failure_count",
+            "latency_p95_seconds"
+          ]
+        }
+      ],
+      "ownerDecision": {
+        "decision": "explicit_merge",
+        "decisionEvidence": "Product owner chat decision on 2026-11-19: Batch 2 questions 1 and 2 approved; generic MOD-06 ledger/payment-result calls remain prohibited.",
+        "selectedCanonicalDefinition": "EventIntegritySnapshot:owner-selected-candidate-v1",
+        "replacementReason": "Explicit field merge preserves both source semantics under the owning slice."
+      }
+    },
+    "RiskCaseGroup": {
+      "schemaName": "RiskCaseGroup",
+      "status": "owner_confirmed_candidate_definition",
+      "variants": [
+        {
+          "sourceFile": "admin.json",
+          "definition": {
+            "required": [
+              "case_group_id",
+              "member_ids",
+              "group_reason",
+              "status"
+            ],
+            "properties": {
+              "case_group_id": {
+                "type": "string"
+              },
+              "member_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "group_reason": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "auto_merged",
+                  "pending_review",
+                  "split",
+                  "closed"
+                ]
+              },
+              "group_conclusion": {
+                "type": "string"
+              },
+              "impact_summary": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "confidence": {
+                "type": "number"
+              },
+              "split_status": {
+                "type": "string",
+                "enum": [
+                  "not_split",
+                  "split",
+                  "pending_review"
+                ]
+              },
+              "trace_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true,
+            "x-affiliate-object": "RiskCaseGroup"
+          }
+        },
+        {
+          "sourceFile": "cx.json",
+          "definition": {
+            "type": "object",
+            "required": [
+              "case_group_id",
+              "member_ids",
+              "group_reason",
+              "status",
+              "split_status"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "case_group_id": {
+                "type": "string"
+              },
+              "member_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "group_reason": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "auto_merged",
+                  "under_review",
+                  "confirmed",
+                  "cleared",
+                  "split"
+                ]
+              },
+              "group_conclusion": {
+                "type": "string"
+              },
+              "impact_summary": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "split_status": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "pending",
+                  "completed"
+                ]
+              },
+              "rule_version": {
+                "type": "string"
+              },
+              "trace_id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ],
+      "differences": [
+        {
+          "compared": [
+            "admin.json",
+            "cx.json"
+          ],
+          "topLevelKeysOnlyInFirst": [
+            "x-affiliate-object"
+          ],
+          "topLevelKeysOnlyInSecond": [
+            "type"
+          ],
+          "requiredOnlyInFirst": [],
+          "requiredOnlyInSecond": [
+            "split_status"
+          ],
+          "propertiesOnlyInFirst": [
+            "confidence"
+          ],
+          "propertiesOnlyInSecond": [
+            "rule_version"
+          ],
+          "changedProperties": [
+            "status",
+            "confidence",
+            "split_status",
+            "rule_version"
+          ]
+        }
+      ],
+      "ownerDecision": {
+        "decision": "explicit_merge",
+        "decisionEvidence": "Product owner chat decision on 2026-11-19: Batch 2 questions 1 and 2 approved; generic MOD-06 ledger/payment-result calls remain prohibited.",
+        "selectedCanonicalDefinition": "RiskCaseGroup:owner-selected-candidate-v1",
+        "replacementReason": "Explicit field merge preserves both source semantics under the owning slice."
+      }
+    },
+    "RiskCaseSplitRequest": {
+      "schemaName": "RiskCaseSplitRequest",
+      "status": "owner_confirmed_candidate_definition",
+      "variants": [
+        {
+          "sourceFile": "admin.json",
+          "definition": {
+            "required": [
+              "member_ids",
+              "split_reason"
+            ],
+            "properties": {
+              "member_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "split_reason": {
+                "type": "string",
+                "minLength": 1
+              },
+              "approver_id": {
+                "type": "string"
+              },
+              "new_case_ref": {
+                "type": "string"
+              },
+              "impact_preview_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "x-affiliate-object": "RiskCaseSplitRequest"
+          }
+        },
+        {
+          "sourceFile": "cx.json",
+          "definition": {
+            "type": "object",
+            "required": [
+              "case_group_id",
+              "member_ids",
+              "split_reason"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "case_group_id": {
+                "type": "string"
+              },
+              "member_ids": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "split_reason": {
+                "type": "string",
+                "minLength": 1
+              },
+              "approver_id": {
+                "type": "string"
+              },
+              "new_case_ref": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ],
+      "differences": [
+        {
+          "compared": [
+            "admin.json",
+            "cx.json"
+          ],
+          "topLevelKeysOnlyInFirst": [
+            "x-affiliate-object"
+          ],
+          "topLevelKeysOnlyInSecond": [
+            "type"
+          ],
+          "requiredOnlyInFirst": [],
+          "requiredOnlyInSecond": [
+            "case_group_id"
+          ],
+          "propertiesOnlyInFirst": [
+            "impact_preview_id"
+          ],
+          "propertiesOnlyInSecond": [
+            "case_group_id"
+          ],
+          "changedProperties": [
+            "member_ids",
+            "impact_preview_id",
+            "case_group_id"
+          ]
+        }
+      ],
+      "ownerDecision": {
+        "decision": "explicit_merge",
+        "decisionEvidence": "Product owner chat decision on 2026-11-19: Batch 2 questions 1 and 2 approved; generic MOD-06 ledger/payment-result calls remain prohibited.",
+        "selectedCanonicalDefinition": "RiskCaseSplitRequest:owner-selected-candidate-v1",
+        "replacementReason": "Explicit field merge preserves both source semantics under the owning slice."
+      }
+    },
+    "PartnerBaseline": {
+      "schemaName": "PartnerBaseline",
+      "status": "owner_confirmed_candidate_definition",
+      "variants": [
+        {
+          "sourceFile": "admin.json",
+          "definition": {
+            "required": [
+              "partner_id",
+              "baseline_type",
+              "confidence"
+            ],
+            "properties": {
+              "partner_id": {
+                "type": "string"
+              },
+              "baseline_type": {
+                "type": "string",
+                "enum": [
+                  "country_channel",
+                  "peer",
+                  "self"
+                ]
+              },
+              "window_days": {
+                "type": "integer"
+              },
+              "sample_size": {
+                "type": "integer"
+              },
+              "minimum_sample_size": {
+                "type": "integer"
+              },
+              "confidence": {
+                "type": "string",
+                "enum": [
+                  "low",
+                  "medium",
+                  "high"
+                ]
+              },
+              "metric": {
+                "type": "string"
+              },
+              "actual": {
+                "type": "number"
+              },
+              "baseline": {
+                "type": "number"
+              },
+              "deviation": {
+                "type": "number"
+              },
+              "baseline_version": {
+                "type": "string"
+              },
+              "switched_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "trace_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true,
+            "x-affiliate-object": "PartnerBaseline"
+          }
+        },
+        {
+          "sourceFile": "cx.json",
+          "definition": {
+            "type": "object",
+            "required": [
+              "partner_id",
+              "baseline_type",
+              "window",
+              "sample_size",
+              "confidence",
+              "baseline_version"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "partner_id": {
+                "type": "string"
+              },
+              "baseline_type": {
+                "type": "string",
+                "enum": [
+                  "partner",
+                  "peer",
+                  "country",
+                  "channel"
+                ]
+              },
+              "window": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "sample_size": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "confidence": {
+                "type": "string",
+                "enum": [
+                  "low",
+                  "medium",
+                  "high"
+                ]
+              },
+              "switched_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "baseline_version": {
+                "type": "string"
+              },
+              "review_priority": {
+                "type": "string"
+              },
+              "reference_ranges": {
+                "type": "array",
+                "items": {
+                  "$ref": "./common.json#/definitions/ReferenceRange"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "differences": [
+        {
+          "compared": [
+            "admin.json",
+            "cx.json"
+          ],
+          "topLevelKeysOnlyInFirst": [
+            "x-affiliate-object"
+          ],
+          "topLevelKeysOnlyInSecond": [
+            "type"
+          ],
+          "requiredOnlyInFirst": [],
+          "requiredOnlyInSecond": [
+            "window",
+            "sample_size",
+            "baseline_version"
+          ],
+          "propertiesOnlyInFirst": [
+            "window_days",
+            "minimum_sample_size",
+            "metric",
+            "actual",
+            "baseline",
+            "deviation",
+            "trace_id"
+          ],
+          "propertiesOnlyInSecond": [
+            "window",
+            "review_priority",
+            "reference_ranges"
+          ],
+          "changedProperties": [
+            "baseline_type",
+            "window_days",
+            "sample_size",
+            "minimum_sample_size",
+            "metric",
+            "actual",
+            "baseline",
+            "deviation",
+            "trace_id",
+            "window",
+            "review_priority",
+            "reference_ranges"
+          ]
+        }
+      ],
+      "ownerDecision": {
+        "decision": "explicit_merge",
+        "decisionEvidence": "Product owner chat decision on 2026-11-19: Batch 2 questions 1 and 2 approved; generic MOD-06 ledger/payment-result calls remain prohibited.",
+        "selectedCanonicalDefinition": "PartnerBaseline:owner-selected-candidate-v1",
+        "replacementReason": "Explicit field merge preserves both source semantics under the owning slice."
+      }
+    },
+    "BaselineWindowConfig": {
+      "schemaName": "BaselineWindowConfig",
+      "status": "owner_confirmed_candidate_definition",
+      "variants": [
+        {
+          "sourceFile": "admin.json",
+          "definition": {
+            "required": [
+              "window_days",
+              "min_clicks",
+              "min_registrations",
+              "review_priority"
+            ],
+            "properties": {
+              "window_days": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 365
+              },
+              "min_clicks": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "min_registrations": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "review_priority": {
+                "type": "string",
+                "enum": [
+                  "medium",
+                  "high",
+                  "urgent"
+                ]
+              },
+              "reference_range": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true,
+            "x-affiliate-object": "BaselineWindowConfig"
+          }
+        },
+        {
+          "sourceFile": "cx.json",
+          "definition": {
+            "type": "object",
+            "required": [
+              "min_clicks",
+              "min_registrations",
+              "window_days"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "min_clicks": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "min_registrations": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "window_days": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "review_priority": {
+                "type": "string"
+              },
+              "reference_ranges": {
+                "type": "array",
+                "items": {
+                  "$ref": "./common.json#/definitions/ReferenceRange"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "differences": [
+        {
+          "compared": [
+            "admin.json",
+            "cx.json"
+          ],
+          "topLevelKeysOnlyInFirst": [
+            "x-affiliate-object"
+          ],
+          "topLevelKeysOnlyInSecond": [
+            "type"
+          ],
+          "requiredOnlyInFirst": [
+            "review_priority"
+          ],
+          "requiredOnlyInSecond": [],
+          "propertiesOnlyInFirst": [
+            "reference_range"
+          ],
+          "propertiesOnlyInSecond": [
+            "reference_ranges"
+          ],
+          "changedProperties": [
+            "window_days",
+            "review_priority",
+            "reference_range",
+            "reference_ranges"
+          ]
+        }
+      ],
+      "ownerDecision": {
+        "decision": "explicit_merge",
+        "decisionEvidence": "Product owner chat decision on 2026-11-19: Batch 2 questions 1 and 2 approved; generic MOD-06 ledger/payment-result calls remain prohibited.",
+        "selectedCanonicalDefinition": "BaselineWindowConfig:owner-selected-candidate-v1",
+        "replacementReason": "Explicit field merge preserves both source semantics under the owning slice."
+      }
+    },
+    "InvestigationTask": {
+      "schemaName": "InvestigationTask",
+      "status": "owner_confirmed_candidate_definition",
+      "variants": [
+        {
+          "sourceFile": "admin.json",
+          "definition": {
+            "required": [
+              "task_id",
+              "status",
+              "link_restriction_level"
+            ],
+            "properties": {
+              "task_id": {
+                "type": "string"
+              },
+              "case_group_id": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "monitoring",
+                  "investigating",
+                  "action",
+                  "closed"
+                ]
+              },
+              "materials_required": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "due_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "response_sla_hours": {
+                "type": "integer"
+              },
+              "link_restriction_level": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "new_links",
+                  "new_and_existing_links"
+                ]
+              },
+              "commission_blocked": {
+                "type": "boolean"
+              },
+              "trace_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true,
+            "x-affiliate-object": "InvestigationTask"
+          }
+        },
+        {
+          "sourceFile": "cx.json",
+          "definition": {
+            "type": "object",
+            "required": [
+              "task_id",
+              "case_group_id",
+              "status",
+              "link_restriction_level",
+              "commission_calculated",
+              "auto_settlement_blocked"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "task_id": {
+                "type": "string"
+              },
+              "case_group_id": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "pending",
+                  "materials_requested",
+                  "under_review",
+                  "concluded",
+                  "cancelled"
+                ]
+              },
+              "materials_required": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "due_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "response_sla": {
+                "$ref": "#/definitions/InvestigationSlaConfig"
+              },
+              "link_restriction_level": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "new_links",
+                  "all_links"
+                ]
+              },
+              "commission_calculated": {
+                "type": "boolean"
+              },
+              "auto_settlement_blocked": {
+                "type": "boolean"
+              },
+              "conclusion": {
+                "type": "string"
+              },
+              "limited_explanation": {
+                "$ref": "#/definitions/LimitedExplanation"
+              }
+            }
+          }
+        }
+      ],
+      "differences": [
+        {
+          "compared": [
+            "admin.json",
+            "cx.json"
+          ],
+          "topLevelKeysOnlyInFirst": [
+            "x-affiliate-object"
+          ],
+          "topLevelKeysOnlyInSecond": [
+            "type"
+          ],
+          "requiredOnlyInFirst": [],
+          "requiredOnlyInSecond": [
+            "case_group_id",
+            "commission_calculated",
+            "auto_settlement_blocked"
+          ],
+          "propertiesOnlyInFirst": [
+            "response_sla_hours",
+            "commission_blocked",
+            "trace_id"
+          ],
+          "propertiesOnlyInSecond": [
+            "response_sla",
+            "commission_calculated",
+            "auto_settlement_blocked",
+            "conclusion",
+            "limited_explanation"
+          ],
+          "changedProperties": [
+            "status",
+            "response_sla_hours",
+            "link_restriction_level",
+            "commission_blocked",
+            "trace_id",
+            "response_sla",
+            "commission_calculated",
+            "auto_settlement_blocked",
+            "conclusion",
+            "limited_explanation"
+          ]
+        }
+      ],
+      "ownerDecision": {
+        "decision": "reject_both_rebuild_from_authoritative_slice",
+        "decisionEvidence": "Product owner chat decision on 2026-11-19: Batch 2 questions 1 and 2 approved; generic MOD-06 ledger/payment-result calls remain prohibited.",
+        "selectedCanonicalDefinition": "InvestigationTask:owner-selected-candidate-v1",
+        "replacementReason": "Project risk work through the Governance OperationsTask authority."
+      }
+    },
+    "InvestigationSlaConfig": {
+      "schemaName": "InvestigationSlaConfig",
+      "status": "owner_confirmed_candidate_definition",
+      "variants": [
+        {
+          "sourceFile": "admin.json",
+          "definition": {
+            "required": [
+              "first_response_hours",
+              "reminder_hours",
+              "max_duration_days",
+              "escalation_action"
+            ],
+            "properties": {
+              "first_response_hours": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 240
+              },
+              "reminder_hours": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "max_duration_days": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 90
+              },
+              "escalation_action": {
+                "type": "string",
+                "enum": [
+                  "supervisor_review",
+                  "stronger_restriction",
+                  "manual_queue"
+                ]
+              },
+              "reference_range": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true,
+            "x-affiliate-object": "InvestigationSlaConfig"
+          }
+        },
+        {
+          "sourceFile": "cx.json",
+          "definition": {
+            "type": "object",
+            "required": [
+              "first_response_hours",
+              "reminder_hours",
+              "max_duration_days",
+              "escalation_action"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "first_response_hours": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "reminder_hours": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "max_duration_days": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "escalation_action": {
+                "type": "string"
+              },
+              "reference_ranges": {
+                "type": "array",
+                "items": {
+                  "$ref": "./common.json#/definitions/ReferenceRange"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "differences": [
+        {
+          "compared": [
+            "admin.json",
+            "cx.json"
+          ],
+          "topLevelKeysOnlyInFirst": [
+            "x-affiliate-object"
+          ],
+          "topLevelKeysOnlyInSecond": [
+            "type"
+          ],
+          "requiredOnlyInFirst": [],
+          "requiredOnlyInSecond": [],
+          "propertiesOnlyInFirst": [
+            "reference_range"
+          ],
+          "propertiesOnlyInSecond": [
+            "reference_ranges"
+          ],
+          "changedProperties": [
+            "first_response_hours",
+            "reminder_hours",
+            "max_duration_days",
+            "escalation_action",
+            "reference_range",
+            "reference_ranges"
+          ]
+        }
+      ],
+      "ownerDecision": {
+        "decision": "explicit_merge",
+        "decisionEvidence": "Product owner chat decision on 2026-11-19: Batch 2 questions 1 and 2 approved; generic MOD-06 ledger/payment-result calls remain prohibited.",
+        "selectedCanonicalDefinition": "InvestigationSlaConfig:owner-selected-candidate-v1",
+        "replacementReason": "Explicit field merge preserves both source semantics under the owning slice."
+      }
+    },
+    "LimitedExplanation": {
+      "schemaName": "LimitedExplanation",
+      "status": "owner_confirmed_candidate_definition",
+      "variants": [
+        {
+          "sourceFile": "admin.json",
+          "definition": {
+            "required": [
+              "reason_category",
+              "evidence_scope",
+              "next_step",
+              "appeal_path"
+            ],
+            "properties": {
+              "reason_category": {
+                "type": "string"
+              },
+              "impact_scope": {
+                "type": "string"
+              },
+              "evidence_scope": {
+                "type": "string"
+              },
+              "next_step": {
+                "type": "string"
+              },
+              "expected_process_path": {
+                "type": "string"
+              },
+              "appeal_path": {
+                "type": "string"
+              },
+              "template_version": {
+                "type": "string"
+              },
+              "internal_details_exposed": {
+                "type": "boolean",
+                "example": false
+              }
+            },
+            "additionalProperties": false,
+            "x-affiliate-object": "LimitedExplanation"
+          }
+        },
+        {
+          "sourceFile": "cx.json",
+          "definition": {
+            "type": "object",
+            "required": [
+              "category",
+              "impact_scope",
+              "evidence_scope",
+              "next_step",
+              "appeal_path"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "category": {
+                "type": "string"
+              },
+              "impact_scope": {
+                "type": "string"
+              },
+              "time_scope": {
+                "type": "string"
+              },
+              "evidence_scope": {
+                "type": "string"
+              },
+              "next_step": {
+                "type": "string"
+              },
+              "appeal_path": {
+                "type": "string"
+              },
+              "trace_id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ],
+      "differences": [
+        {
+          "compared": [
+            "admin.json",
+            "cx.json"
+          ],
+          "topLevelKeysOnlyInFirst": [
+            "x-affiliate-object"
+          ],
+          "topLevelKeysOnlyInSecond": [
+            "type"
+          ],
+          "requiredOnlyInFirst": [
+            "reason_category"
+          ],
+          "requiredOnlyInSecond": [
+            "category",
+            "impact_scope"
+          ],
+          "propertiesOnlyInFirst": [
+            "reason_category",
+            "expected_process_path",
+            "template_version",
+            "internal_details_exposed"
+          ],
+          "propertiesOnlyInSecond": [
+            "category",
+            "time_scope",
+            "trace_id"
+          ],
+          "changedProperties": [
+            "reason_category",
+            "expected_process_path",
+            "template_version",
+            "internal_details_exposed",
+            "category",
+            "time_scope",
+            "trace_id"
+          ]
+        }
+      ],
+      "ownerDecision": {
+        "decision": "reject_both_rebuild_from_authoritative_slice",
+        "decisionEvidence": "Product owner chat decision on 2026-11-19: Batch 2 questions 1 and 2 approved; generic MOD-06 ledger/payment-result calls remain prohibited.",
+        "selectedCanonicalDefinition": "LimitedExplanation:owner-selected-candidate-v1",
+        "replacementReason": "Rebuild with the mandatory seven-element explanation lifecycle."
+      }
+    },
+    "QuarantineRecord": {
+      "schemaName": "QuarantineRecord",
+      "status": "owner_confirmed_candidate_definition",
+      "variants": [
+        {
+          "sourceFile": "admin.json",
+          "definition": {
+            "required": [
+              "quarantine_id",
+              "source_type",
+              "source_ref_id",
+              "blocked_settlement"
+            ],
+            "properties": {
+              "quarantine_id": {
+                "type": "string"
+              },
+              "source_type": {
+                "type": "string",
+                "enum": [
+                  "investigation",
+                  "case_group",
+                  "event_gap",
+                  "d_plus_n",
+                  "data_governance",
+                  "suspicious_traffic"
+                ]
+              },
+              "source_ref_id": {
+                "type": "string"
+              },
+              "object_type": {
+                "type": "string"
+              },
+              "object_id": {
+                "type": "string"
+              },
+              "reason_code": {
+                "type": "string"
+              },
+              "blocked_settlement": {
+                "type": "boolean"
+              },
+              "blocked_amount": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "blocked_since": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "waiting_days": {
+                "type": "integer"
+              },
+              "release_condition": {
+                "type": "string"
+              },
+              "recheck_result": {
+                "type": "string"
+              },
+              "trace_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true,
+            "x-affiliate-object": "QuarantineRecord"
+          }
+        },
+        {
+          "sourceFile": "cx.json",
+          "definition": {
+            "type": "object",
+            "required": [
+              "quarantine_id",
+              "source_type",
+              "source_ref_id",
+              "object_type",
+              "object_id",
+              "reason_code",
+              "blocked_settlement"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "quarantine_id": {
+                "type": "string"
+              },
+              "source_type": {
+                "type": "string",
+                "enum": [
+                  "investigation",
+                  "event_gap",
+                  "d_plus_n",
+                  "cluster",
+                  "cap_breaker",
+                  "manual"
+                ]
+              },
+              "source_ref_id": {
+                "type": "string"
+              },
+              "object_type": {
+                "type": "string"
+              },
+              "object_id": {
+                "type": "string"
+              },
+              "reason_code": {
+                "type": "string"
+              },
+              "blocked_settlement": {
+                "type": "boolean"
+              },
+              "blocked_amount": {
+                "$ref": "./common.json#/definitions/Money"
+              },
+              "blocked_since": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "waiting_days": {
+                "type": "number",
+                "minimum": 0
+              },
+              "recheck_result": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ],
+      "differences": [
+        {
+          "compared": [
+            "admin.json",
+            "cx.json"
+          ],
+          "topLevelKeysOnlyInFirst": [
+            "x-affiliate-object"
+          ],
+          "topLevelKeysOnlyInSecond": [
+            "type"
+          ],
+          "requiredOnlyInFirst": [],
+          "requiredOnlyInSecond": [
+            "object_type",
+            "object_id",
+            "reason_code"
+          ],
+          "propertiesOnlyInFirst": [
+            "release_condition",
+            "trace_id"
+          ],
+          "propertiesOnlyInSecond": [],
+          "changedProperties": [
+            "source_type",
+            "blocked_amount",
+            "waiting_days",
+            "release_condition",
+            "trace_id"
+          ]
+        }
+      ],
+      "ownerDecision": {
+        "decision": "explicit_merge",
+        "decisionEvidence": "Product owner chat decision on 2026-11-19: Batch 2 questions 1 and 2 approved; generic MOD-06 ledger/payment-result calls remain prohibited.",
+        "selectedCanonicalDefinition": "QuarantineRecord:owner-selected-candidate-v1",
+        "replacementReason": "Explicit field merge preserves both source semantics under the owning slice."
+      }
+    },
+    "QuarantineQueueConfig": {
+      "schemaName": "QuarantineQueueConfig",
+      "status": "owner_confirmed_candidate_definition",
+      "variants": [
+        {
+          "sourceFile": "admin.json",
+          "definition": {
+            "required": [
+              "d_plus_n_days",
+              "sort_weights",
+              "refresh_interval_minutes"
+            ],
+            "properties": {
+              "d_plus_n_days": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 180
+              },
+              "sort_weights": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number"
+                }
+              },
+              "refresh_interval_minutes": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 60
+              },
+              "export_expiry_hours": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 48
+              },
+              "reference_range": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "version": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true,
+            "x-affiliate-object": "QuarantineQueueConfig"
+          }
+        },
+        {
+          "sourceFile": "cx.json",
+          "definition": {
+            "type": "object",
+            "required": [
+              "d_plus_n_days",
+              "sort_weights",
+              "refresh_interval"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "d_plus_n_days": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "sort_weights": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number"
+                }
+              },
+              "refresh_interval": {
+                "type": "string"
+              },
+              "export_policy": {
+                "type": "string"
+              },
+              "reference_ranges": {
+                "type": "array",
+                "items": {
+                  "$ref": "./common.json#/definitions/ReferenceRange"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "differences": [
+        {
+          "compared": [
+            "admin.json",
+            "cx.json"
+          ],
+          "topLevelKeysOnlyInFirst": [
+            "x-affiliate-object"
+          ],
+          "topLevelKeysOnlyInSecond": [
+            "type"
+          ],
+          "requiredOnlyInFirst": [
+            "refresh_interval_minutes"
+          ],
+          "requiredOnlyInSecond": [
+            "refresh_interval"
+          ],
+          "propertiesOnlyInFirst": [
+            "refresh_interval_minutes",
+            "export_expiry_hours",
+            "reference_range",
+            "version"
+          ],
+          "propertiesOnlyInSecond": [
+            "refresh_interval",
+            "export_policy",
+            "reference_ranges"
+          ],
+          "changedProperties": [
+            "d_plus_n_days",
+            "refresh_interval_minutes",
+            "export_expiry_hours",
+            "reference_range",
+            "version",
+            "refresh_interval",
+            "export_policy",
+            "reference_ranges"
+          ]
+        }
+      ],
+      "ownerDecision": {
+        "decision": "explicit_merge",
+        "decisionEvidence": "Product owner chat decision on 2026-11-19: Batch 2 questions 1 and 2 approved; generic MOD-06 ledger/payment-result calls remain prohibited.",
+        "selectedCanonicalDefinition": "QuarantineQueueConfig:owner-selected-candidate-v1",
+        "replacementReason": "Explicit field merge preserves both source semantics under the owning slice."
+      }
+    },
+    "StagingRun": {
+      "schemaName": "StagingRun",
+      "status": "owner_confirmed_candidate_definition",
+      "variants": [
+        {
+          "sourceFile": "admin.json",
+          "definition": {
+            "required": [
+              "run_id",
+              "environment",
+              "contract_version",
+              "gate_result"
+            ],
+            "properties": {
+              "run_id": {
+                "type": "string"
+              },
+              "environment": {
+                "type": "string"
+              },
+              "contract_version": {
+                "type": "string"
+              },
+              "automated_result": {
+                "type": "string",
+                "enum": [
+                  "passed",
+                  "failed",
+                  "running"
+                ]
+              },
+              "fund_reconciliation_diff": {
+                "type": "string",
+                "pattern": "^-?[0-9]+\\.[0-9]{2}$"
+              },
+              "gate_result": {
+                "type": "string",
+                "enum": [
+                  "passed",
+                  "blocked"
+                ]
+              },
+              "failed_scenarios": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "log_ref": {
+                "type": "string"
+              },
+              "trace_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true,
+            "x-affiliate-object": "StagingRun"
+          }
+        },
+        {
+          "sourceFile": "cx.json",
+          "definition": {
+            "type": "object",
+            "required": [
+              "run_id",
+              "environment",
+              "contract_version",
+              "automated_result",
+              "fund_reconciliation_diff",
+              "gate_result"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "run_id": {
+                "type": "string"
+              },
+              "environment": {
+                "type": "string"
+              },
+              "contract_version": {
+                "type": "string"
+              },
+              "automated_result": {
+                "type": "string",
+                "enum": [
+                  "passed",
+                  "failed",
+                  "running"
+                ]
+              },
+              "fund_reconciliation_diff": {
+                "$ref": "./common.json#/definitions/Money"
+              },
+              "gate_result": {
+                "type": "string",
+                "enum": [
+                  "blocked",
+                  "pending_signoff",
+                  "passed"
+                ]
+              },
+              "scenario_id": {
+                "type": "string"
+              },
+              "signoffs": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/StagingSignoff"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "differences": [
+        {
+          "compared": [
+            "admin.json",
+            "cx.json"
+          ],
+          "topLevelKeysOnlyInFirst": [
+            "x-affiliate-object"
+          ],
+          "topLevelKeysOnlyInSecond": [
+            "type"
+          ],
+          "requiredOnlyInFirst": [],
+          "requiredOnlyInSecond": [
+            "automated_result",
+            "fund_reconciliation_diff"
+          ],
+          "propertiesOnlyInFirst": [
+            "failed_scenarios",
+            "log_ref",
+            "trace_id"
+          ],
+          "propertiesOnlyInSecond": [
+            "scenario_id",
+            "signoffs"
+          ],
+          "changedProperties": [
+            "fund_reconciliation_diff",
+            "gate_result",
+            "failed_scenarios",
+            "log_ref",
+            "trace_id",
+            "scenario_id",
+            "signoffs"
+          ]
+        }
+      ],
+      "ownerDecision": {
+        "decision": "explicit_merge",
+        "decisionEvidence": "Product owner chat decision on 2026-11-19: Batch 2 questions 1 and 2 approved; generic MOD-06 ledger/payment-result calls remain prohibited.",
+        "selectedCanonicalDefinition": "StagingRun:owner-selected-candidate-v1",
+        "replacementReason": "Explicit field merge preserves both source semantics under the owning slice."
+      }
+    },
+    "StagingSignoff": {
+      "schemaName": "StagingSignoff",
+      "status": "owner_confirmed_candidate_definition",
+      "variants": [
+        {
+          "sourceFile": "admin.json",
+          "definition": {
+            "required": [
+              "run_id",
+              "role",
+              "result"
+            ],
+            "properties": {
+              "run_id": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string",
+                "enum": [
+                  "risk",
+                  "finance",
+                  "compliance"
+                ]
+              },
+              "signoff_user": {
+                "type": "string"
+              },
+              "result": {
+                "type": "string",
+                "enum": [
+                  "approved",
+                  "rejected"
+                ]
+              },
+              "comment": {
+                "type": "string"
+              },
+              "signed_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "trace_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true,
+            "x-affiliate-object": "StagingSignoff"
+          }
+        },
+        {
+          "sourceFile": "cx.json",
+          "definition": {
+            "type": "object",
+            "required": [
+              "run_id",
+              "role",
+              "result"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "run_id": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string",
+                "enum": [
+                  "risk",
+                  "finance",
+                  "compliance"
+                ]
+              },
+              "signoff_user": {
+                "type": "string"
+              },
+              "result": {
+                "type": "string",
+                "enum": [
+                  "approved",
+                  "rejected",
+                  "returned"
+                ]
+              },
+              "comment": {
+                "type": "string"
+              },
+              "signed_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      ],
+      "differences": [
+        {
+          "compared": [
+            "admin.json",
+            "cx.json"
+          ],
+          "topLevelKeysOnlyInFirst": [
+            "x-affiliate-object"
+          ],
+          "topLevelKeysOnlyInSecond": [
+            "type"
+          ],
+          "requiredOnlyInFirst": [],
+          "requiredOnlyInSecond": [],
+          "propertiesOnlyInFirst": [
+            "trace_id"
+          ],
+          "propertiesOnlyInSecond": [],
+          "changedProperties": [
+            "result",
+            "trace_id"
+          ]
+        }
+      ],
+      "ownerDecision": {
+        "decision": "explicit_merge",
+        "decisionEvidence": "Product owner chat decision on 2026-11-19: Batch 2 questions 1 and 2 approved; generic MOD-06 ledger/payment-result calls remain prohibited.",
+        "selectedCanonicalDefinition": "StagingSignoff:owner-selected-candidate-v1",
+        "replacementReason": "Explicit field merge preserves both source semantics under the owning slice."
+      }
+    }
+  }
+}

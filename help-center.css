@@ -14,7 +14,7 @@
   background: var(--brand-gradient);
   color: #fff;
   cursor: pointer;
-  box-shadow: 0 10px 24px rgba(0, 91, 255, .26);
+  box-shadow: 0 10px 24px rgba(26, 91, 255, .26);
 }
 .help-launcher:hover { filter: brightness(1.08); }
 .help-launcher[aria-expanded="true"] {
@@ -48,7 +48,7 @@
   gap: 12px;
   padding: 14px 16px;
   border-bottom: 1px solid var(--border);
-  background: #f8fbff;
+  background: #f9fafb;
 }
 .help-assistant-head h2 { margin: 0; color: var(--text); font: var(--font-text-14-b); }
 .help-assistant-head p { margin: 3px 0 0; color: var(--muted); font-size: 11px; }
@@ -93,7 +93,7 @@
 }
 .help-drawer-search input:focus {
   border-color: var(--brand);
-  outline: 2px solid rgba(0, 91, 255, .12);
+  outline: 2px solid rgba(26, 91, 255, .12);
 }
 .help-assistant-section { display: grid; gap: 8px; }
 .help-assistant-section h3,
@@ -111,7 +111,7 @@
   min-height: 38px;
   padding: 8px 10px;
   border: 1px solid var(--border);
-  border-radius: 5px;
+  border-radius: 4px;
   background: #fff;
   color: var(--body-text);
   text-align: left;
@@ -121,7 +121,7 @@
 .help-question-list button:hover,
 .help-question-list button[aria-expanded="true"] {
   border-color: var(--brand);
-  background: #f0f7ff;
+  background: #e8efff;
 }
 .help-question-list i {
   color: var(--muted);
@@ -134,12 +134,12 @@
   gap: 4px;
   padding: 10px;
   border: 1px solid var(--border);
-  border-radius: 5px;
+  border-radius: 4px;
   background: #fff;
   text-align: left;
   cursor: pointer;
 }
-.help-result:hover, .help-article-row:hover { border-color: var(--brand); background: #f8fbff; }
+.help-result:hover, .help-article-row:hover { border-color: var(--brand); background: #f9fafb; }
 .help-result strong, .help-article-row strong { color: var(--text); font-size: 13px; }
 .help-result span, .help-article-row small { color: var(--muted); font-size: 12px; line-height: 1.5; }
 .help-result mark, .help-article-row mark { padding: 0 2px; border-radius: 2px; background: #dff0ff; color: inherit; }
@@ -147,8 +147,8 @@
   margin: 0;
   padding: 10px;
   border: 1px dashed var(--control-border);
-  border-radius: 5px;
-  background: #f8fbff;
+  border-radius: 4px;
+  background: #f9fafb;
   color: var(--muted);
   font-size: 12px;
 }
@@ -159,8 +159,8 @@
   gap: 10px;
   padding: 12px;
   border: 1px solid #b8d4ff;
-  border-radius: 5px;
-  background: #f0f7ff;
+  border-radius: 4px;
+  background: #e8efff;
   text-align: left;
   cursor: pointer;
 }
@@ -194,7 +194,7 @@
 }
 .help-assistant-composer input:focus {
   border-color: var(--brand);
-  outline: 2px solid rgba(0, 91, 255, .12);
+  outline: 2px solid rgba(26, 91, 255, .12);
 }
 .help-assistant-composer button {
   display: inline-flex;
@@ -211,7 +211,7 @@
 }
 .help-assistant-composer button:hover {
   border-color: var(--brand);
-  background: #f0f7ff;
+  background: #e8efff;
 }
 .help-assistant-composer svg { width: 100%; height: 100%; }
 
@@ -274,11 +274,11 @@
   min-height: 66px;
   padding: 11px 12px;
   border-bottom: 1px solid #e4eeff;
-  background: linear-gradient(90deg, #f8fbff 0%, #fff 100%);
+  background: linear-gradient(90deg, #f9fafb 0%, #fff 100%);
 }
-.help-toc-group > button:hover { background: #f0f7ff; }
+.help-toc-group > button:hover { background: #e8efff; }
 .help-toc-group > button:focus-visible,
-.help-toc-children button:focus-visible { outline: 2px solid rgba(0, 91, 255, .24); outline-offset: -2px; }
+.help-toc-children button:focus-visible { outline: 2px solid rgba(26, 91, 255, .24); outline-offset: -2px; }
 .help-toc-icon {
   display: inline-flex;
   align-items: center;
@@ -287,7 +287,7 @@
   height: 34px;
   padding: 8px;
   border: 1px solid #c7dcff;
-  border-radius: 5px;
+  border-radius: 4px;
   background: #eef6ff;
   color: var(--brand);
 }
@@ -328,7 +328,7 @@
 .help-toc-children button:hover {
   border-color: #b8d4ff;
   border-left-color: var(--brand);
-  background: #f8fbff;
+  background: #f9fafb;
   color: var(--brand);
 }
 .help-search-summary {
@@ -364,7 +364,7 @@
 .help-faq-list { display: grid; gap: 8px; }
 .help-faq-item {
   border: 1px solid var(--border);
-  border-radius: 5px;
+  border-radius: 4px;
   background: #fff;
   overflow: hidden;
 }

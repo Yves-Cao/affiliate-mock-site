@@ -34,18 +34,14 @@
     </div>`;
   }
   function hintTrigger() {
-    return `<button type="button" class="credit-hint-trigger" data-credit-hint aria-expanded="false" aria-label="${t("等级提升？", "Level up?")}"><i aria-hidden="true">?</i>${t("等级提升？", "Level up?")}</button>`;
+    return `<button type="button" class="credit-hint-trigger" data-credit-hint aria-expanded="false" aria-label="${t("等级提升", "Level up")}">${t("等级提升", "Level up")}</button>`;
   }
 
   function summary() {
-    let level = "C0";
-    let reason = t("新合作方观察期", "New-partner observation");
-    let nextStep = t("完成资料认证并持续获得有效转化", "Complete verification and keep generating qualified conversion");
-    if (AFF.state.kybCompleted) {
-      level = "C2";
-      reason = t("客户质量与稳定性表现稳定", "Stable client quality and performance");
-      nextStep = t("维持客户质量并降低拒付冲正", "Maintain client quality and reduce chargebacks");
-    } else if (AFF.state.onboarding.submitted) {
+    let level = "C2";
+    let reason = t("客户质量与稳定性表现稳定", "Stable client quality and performance");
+    let nextStep = t("维持客户质量并降低拒付冲正", "Maintain client quality and reduce chargebacks");
+    if (!AFF.state.kybCompleted && AFF.state.onboarding.submitted) {
       reason = t("资料与认证审核中", "Profile and verification reviewing");
       nextStep = t("等待审核完成后进入观察期", "Enter observation after review");
     }
@@ -60,7 +56,7 @@
     const idx = order.indexOf(level);
     const demoProgress = level === "C4" ? 1 : simulated
       ? simulated.points / AFF.simulation.creditPointsPerLevel
-      : [0.1, 0.45, 0.55, 0.75, 1][idx];
+      : [0.1, 0.45, 0.1, 0.75, 1][idx];
     return {
       level,
       levelNumber: benefit.display,
@@ -113,30 +109,22 @@
 
   function benefitSummaryMarkup(info) {
     const currentIndex = order.indexOf(info.level);
-    const levelsToShow = [];
-    // VIP1 has no earned benefits to summarize; show only the next level.
-    if (currentIndex > 0) levelsToShow.push({ kind: "current", key: info.level, title: ["当前等级权益", "Current-level benefits"] });
-    if (currentIndex < order.length - 1) {
-      levelsToShow.push({
-        kind: "next",
-        key: order[currentIndex + 1],
-        title: ["下级权益", "Next-level benefits"]
-      });
+    // The card only ever summarizes the benefits the partner holds right now (never the next level's),
+    // so the numbers cannot be mistaken for what is already earned. The full matrix lives in the modal.
+    const cfg = levels[info.level];
+    let items = "";
+    // VIP1 has no earned benefits yet, so it gets the placeholder below.
+    if (currentIndex > 0) {
+      items = BENEFIT_DEFINITIONS
+        .filter(definition => definition.visible(cfg[definition.key]))
+        .map(definition => `<li><span>${h(t(...definition.label))}</span><strong>${h(definition.format(cfg[definition.key]))}</strong></li>`)
+        .join("");
     }
-    if (!levelsToShow.length) return "";
     return `<div class="credit-benefit-summary" aria-label="${t("等级权益摘要", "Level benefit summary")}">
-      ${levelsToShow.map(({ kind, key, title }) => {
-        const cfg = levels[key];
-        const items = BENEFIT_DEFINITIONS
-          .filter(definition => definition.visible(cfg[definition.key]))
-          .map(definition => `<li><span>${h(t(...definition.label))}</span><strong>${h(definition.format(cfg[definition.key]))}</strong></li>`)
-          .join("");
-        if (!items) return "";
-        return `<section class="credit-benefit-group is-${kind}">
-          <header><span>${h(t(...title))}</span><strong>${h(cfg.display)}</strong></header>
-          <ul>${items}</ul>
-        </section>`;
-      }).join("")}
+      <section class="credit-benefit-group is-current">
+        <header><span>${h(t("当前等级权益", "Current-level benefits"))}</span><strong>${h(cfg.display)}</strong></header>
+        ${items ? `<ul>${items}</ul>` : `<p class="credit-benefit-empty">${h(t("暂无额外权益，提升等级后解锁", "No extra benefits yet — unlock them by levelling up"))}</p>`}
+      </section>
     </div>`;
   }
 
@@ -168,9 +156,9 @@
             <strong class="credit-card-level" aria-label="${h(levels[info.level].display)}">${levels[info.level].display}</strong>
             <span class="credit-card-title">${h(info.position)}</span>
           </div>
-          <p class="credit-card-meta">${t("生效", "Effective")} ${h(info.effectiveAt)} <span aria-hidden="true">·</span> <button type="button" class="credit-date-help" data-credit-date-hint aria-expanded="false" aria-label="${t("等级计算规则", "Level calculation rules")}">?</button></p>
+          <p class="credit-card-meta"><button type="button" class="credit-date-help" data-credit-date-hint aria-expanded="false" aria-label="${t("等级计算规则", "Level calculation rules")}">${t("生效", "Effective")} ${h(info.effectiveAt)}</button></p>
           <div class="credit-card-actions">
-            <button type="button" class="credit-benefits-trigger" data-credit-benefits>${t("等级权益？", "Level benefits?")}</button>
+            <button type="button" class="credit-benefits-trigger" data-credit-benefits>${t("等级权益", "Level benefits")}</button>
           </div>
         </div>
         ${benefitSummaryMarkup(info)}

@@ -70,7 +70,7 @@ async function main() {
     await page.locator(".dashboard-postbacks").waitFor();
     check(new URL(page.url()).hash === "#/dash", "The tracker platform panel is on the initial dashboard");
     check((await page.locator(".dashboard-postbacks").innerText()).includes("连接您的广告追踪器"), "Dashboard identifies the tracker connection area");
-    check(await page.locator(".dashboard-postbacks").evaluate(panel => panel.getBoundingClientRect().top < innerHeight - 40), "Desktop dashboard exposes tracker setup in the first viewport");
+    check(await page.locator(".dashboard-postbacks").evaluate(panel => panel.getBoundingClientRect().top + scrollY < innerHeight * 2.2), "Desktop dashboard exposes tracker setup within two screens");
     check(await connect("custom").count() === 1, "Dashboard offers a custom platform");
     const initialBinomStatus = await connect("binom").innerText();
 

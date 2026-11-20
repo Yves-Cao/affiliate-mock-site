@@ -35,7 +35,7 @@
 .wd-method-card span { color: var(--blue-black); font-weight: 500; }
 .wd-method-card small { color: var(--muted); line-height: 1.5; }
 .wd-method-card strong { position: absolute; top: 10px; right: 10px; color: var(--brand); }
-.wd-method-card:hover, .wd-method-card:focus-visible, .wd-method-card.selected { border-color: var(--brand); background: #f0f7ff; }
+.wd-method-card:hover, .wd-method-card:focus-visible, .wd-method-card.selected { border-color: var(--brand); background: #e8efff; }
 .wd-method-hint { margin: 0; color: var(--muted); font-size: 12px; }
 .wd-kyc-inline {
   display: flex;
@@ -45,7 +45,7 @@
   padding: 12px;
   border: 1px solid #d7e0ec;
   border-radius: 4px;
-  background: #f8fbff;
+  background: #f9fafb;
 }
 .wd-kyc-inline > div { display: grid; gap: 5px; min-width: 0; }
 .wd-kyc-inline strong { color: var(--blue-black); font-size: 13px; }
@@ -108,7 +108,7 @@
   padding: 12px;
   border: 1px solid #d7e0ec;
   border-radius: 4px;
-  background: #f8fbff;
+  background: #f9fafb;
   color: var(--body-text);
   font-size: 12px;
 }

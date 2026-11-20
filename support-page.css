@@ -10,8 +10,8 @@
   min-height: 68px;
   padding: 12px;
   border: 1px solid var(--border);
-  border-radius: 5px;
-  background: #f8fbff;
+  border-radius: 4px;
+  background: #f9fafb;
   text-align: left;
   cursor: pointer;
 }
@@ -31,7 +31,7 @@
 .support-table-wrap th, .support-table-wrap td { padding: 10px 12px; border-bottom: 1px solid var(--table-row-border); text-align: left; font-size: var(--table-body-size); white-space: nowrap; }
 .support-table-wrap th { background: var(--table-header-bg); color: var(--table-header-text); font-weight: var(--table-header-weight); }
 .support-timeline { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
-.support-timeline li { display: grid; gap: 5px; padding: 10px; border-left: 3px solid var(--brand); background: #f8fbff; }
+.support-timeline li { display: grid; gap: 5px; padding: 10px; border-left: 3px solid var(--brand); background: #f9fafb; }
 .support-timeline strong { color: var(--blue-black); font-size: 12px; }
 .support-timeline span, .support-timeline p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
 .support-textarea { display: grid; gap: 6px; }

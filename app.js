@@ -562,8 +562,9 @@ function syncTopbarLanguage() {
   if (clockLabels[0]) clockLabels[0].textContent = english ? "Server" : "服务器";
   if (clockLabels[1]) clockLabels[1].textContent = english ? "Local" : "本地";
   const accountLabels = document.querySelectorAll("#account-dropdown .account-menu-item span:last-child");
-  if (accountLabels[0]) accountLabels[0].textContent = english ? "Personal center" : "个人中心";
-  if (accountLabels[1]) accountLabels[1].textContent = english ? "Sign out" : "退出登录";
+  if (accountLabels[0]) accountLabels[0].textContent = english ? "Back to trading" : "返回继续交易";
+  if (accountLabels[1]) accountLabels[1].textContent = english ? "Personal center" : "个人中心";
+  if (accountLabels[2]) accountLabels[2].textContent = english ? "Sign out" : "退出登录";
   elements["kyc-banner"].querySelector("span").textContent = english
     ? "Your partner profile is incomplete; some features may be limited."
     : "您的账户资料未完善，部分功能可能受限。";
@@ -690,7 +691,13 @@ function handleAccountMenuKeydown(event) {
 async function copyText(text, target) {
   try {
     await navigator.clipboard.writeText(text);
-    if (target?.classList.contains("button")) {
+    if (target?.hasAttribute("data-copy-silent")) {
+      // Feedback is motion only (no label change): restart the CSS pulse.
+      target.classList.remove("is-copied");
+      void target.offsetWidth;
+      target.classList.add("is-copied");
+      setTimeout(() => target.classList.remove("is-copied"), 900);
+    } else if (target?.classList.contains("button")) {
       const originalText = target.textContent;
       target.textContent = "已复制";
       target.disabled = true;

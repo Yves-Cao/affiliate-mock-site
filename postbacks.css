@@ -6,7 +6,6 @@
 .dashboard-postbacks svg { width: 18px; height: 18px; flex: 0 0 18px; color: var(--side-icon); }
 .postback-manage-link { padding: 2px 0; border: 0; background: transparent; color: var(--brand); font-size: 12px; }
 .postback-custom-platform { display: flex; align-items: center; gap: 12px; width: calc(100% - 36px); min-height: 52px; margin: 0 18px; padding: 10px 0; border: 0; border-bottom: 1px solid var(--border); background: var(--surface); color: var(--body-text); font-size: 13px; text-align: left; }
-.postback-custom-platform > span:first-child { margin-right: auto; font-weight: 600; }
 .postback-platforms { padding: 14px 18px 16px; }
 .postback-platforms h3 { margin: 0 0 12px; color: var(--body-text); font-size: 13px; font-weight: 500; }
 .postback-platform-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px 12px; }
@@ -125,4 +124,37 @@
   .postback-parameter .field { grid-column: 1; }
   .postback-parameter .postback-icon { grid-column: 2; grid-row: 1 / span 2; align-self: end; }
   .postback-token-list { gap: 12px; }
+}
+
+/* Dashboard tracker picker v2: one uniform hairline grid, monochrome logos, colour on hover. */
+.route-dash .dashboard-postbacks .postback-intro { margin: 0 0 16px; color: var(--text-muted-1-0, #717680); font-size: 13px; line-height: 20px; }
+.route-dash .dashboard-postbacks .postback-platforms { padding: 0; }
+.route-dash .dashboard-postbacks .postback-platform-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--border); }
+.route-dash .dashboard-postbacks .postback-platform,
+.route-dash .dashboard-postbacks .postback-custom-platform {
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 6px;
+  width: auto; min-height: 84px; margin: 0; padding: 14px 12px; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; background: transparent; text-align: left; cursor: pointer;
+}
+.route-dash .dashboard-postbacks .postback-platform:nth-child(5n + 2),
+.route-dash .dashboard-postbacks .postback-platform:nth-child(5n + 3),
+.route-dash .dashboard-postbacks .postback-platform:nth-child(5n + 4),
+.route-dash .dashboard-postbacks .postback-platform:nth-child(5n + 5) { border-left: 1px solid var(--border); padding-left: 16px; }
+.route-dash .dashboard-postbacks .postback-platform:nth-child(5n + 1) { padding-left: 0; }
+.route-dash .dashboard-postbacks .postback-logo-slot { display: flex; align-items: center; width: 100%; height: 28px; }
+.route-dash .dashboard-postbacks .postback-platform img { width: auto; max-width: 104px; height: auto; max-height: 24px; object-position: left center; filter: grayscale(1); opacity: .85; mix-blend-mode: multiply; transition: filter .15s, opacity .15s; }
+.route-dash .dashboard-postbacks .postback-platform:hover img,
+.route-dash .dashboard-postbacks .postback-platform:focus-visible img { filter: none; opacity: 1; }
+.route-dash .dashboard-postbacks .postback-platform:hover,
+.route-dash .dashboard-postbacks .postback-platform:focus-visible { background: var(--surface-soft-1-0); }
+.route-dash .dashboard-postbacks .postback-custom-mark { display: flex; align-items: center; gap: 8px; height: 28px; }
+.route-dash .dashboard-postbacks .postback-custom-mark svg { width: 20px; height: 20px; color: var(--brand-1-0); }
+.route-dash .dashboard-postbacks .postback-custom-name { color: var(--text-strong-1-0); font-size: 14px; font-weight: 600; line-height: 20px; }
+.route-dash .dashboard-postbacks .postback-platform-state { position: relative; padding-left: 12px; color: var(--ok); font-size: 12px; line-height: 16px; text-align: left; }
+.route-dash .dashboard-postbacks .postback-platform-state::before { content: ""; position: absolute; left: 0; top: 50%; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: currentColor; }
+.route-dash .dashboard-postbacks .postback-platform-state.is-paused { color: var(--warning); }
+.route-dash .dashboard-postbacks .postback-platform-state.is-idle { color: var(--text-disabled-1-0); }
+@media (max-width: 767px) {
+  .route-dash .dashboard-postbacks .postback-platform-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route-dash .dashboard-postbacks .postback-platform:nth-child(n) { border-left: 0; padding-left: 0; }
+  .route-dash .dashboard-postbacks .postback-platform:nth-child(2n) { border-left: 1px solid var(--border); padding-left: 16px; }
 }

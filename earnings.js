@@ -459,7 +459,7 @@
     const rows = filteredRows();
     s.pageSize = [10, 20, 50].includes(Number(s.pageSize)) ? Number(s.pageSize) : 10;
     s.page = Math.min(Math.max(1, Number(s.page) || 1), Math.max(1, Math.ceil(rows.length / s.pageSize)));
-    return `<div class="earn-page">${stats()}
+    return `<div class="earn-page"><header class="page-intro"><h1>${t("收益数据", "Earnings")}</h1><p>${t("总收益、结算中与佣金流水。", "Total earnings, in-settlement commission and the commission ledger.")}</p></header>${stats()}
       <section class="card earn-panel">${tableToolbar(s)}
         ${table(rows)}
       </section>

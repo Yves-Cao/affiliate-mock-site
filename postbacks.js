@@ -278,16 +278,16 @@ AFF.postbacks = (() => {
         <h2>${icon("connect")}${t("连接您的广告追踪器", "Connect your ad tracker")}</h2>
         <button class="postback-manage-link" type="button" data-action="postback-manage">${t("回传配置", "Manage postbacks")}</button>
       </div>
-      <button class="postback-custom-platform" type="button" data-action="postback-connect" data-platform-id="custom">
-        <span>${t("自定义平台", "Custom platform")}</span>
-        ${platformStatus("custom")}${icon("chevron")}
-      </button>
+      <p class="postback-intro">${t("选择您使用的追踪平台，把点击与转化事件回传到它。", "Pick the tracker you use to send click and conversion events back to it.")}</p>
       <div class="postback-platforms">
-        <h3>${t("广告追踪平台", "Ad tracking platforms")}</h3>
-        <div class="postback-platform-grid">${platforms.slice(1).map(platform => `
+        <div class="postback-platform-grid">
+          <button class="postback-custom-platform postback-platform" type="button" data-action="postback-connect" data-platform-id="custom">
+            <span class="postback-custom-mark">${icon("connect")}<span class="postback-custom-name">${t("自定义平台", "Custom platform")}</span></span>
+            ${platformStatus("custom") || `<span class="postback-platform-state is-idle">${t("未连接", "Not connected")}</span>`}
+          </button>${platforms.slice(1).map(platform => `
           <button type="button" class="postback-platform" data-action="postback-connect" data-platform-id="${platform.id}" aria-label="${h(t(`配置 ${platform.name} 回传`, `Configure ${platform.name} postback`))}" title="${h(t(`配置 ${platform.name} 回传`, `Configure ${platform.name} postback`))}">
-            <img src="./assets/trackers/${platform.id}.png" alt="${platform.name}" width="126" height="42">
-            ${platformStatus(platform.id)}
+            <span class="postback-logo-slot"><img src="./assets/trackers/${platform.id}.png" alt="${platform.name}" width="126" height="42"></span>
+            ${platformStatus(platform.id) || `<span class="postback-platform-state is-idle">${t("未连接", "Not connected")}</span>`}
           </button>`).join("")}</div>
       </div>
     </section>`;
