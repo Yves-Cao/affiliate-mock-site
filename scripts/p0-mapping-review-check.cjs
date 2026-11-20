@@ -98,7 +98,10 @@ const actualBatchCounts = batchRows.reduce((counts, row) => {
   counts[row[batchColumn('batchId')]] = (counts[row[batchColumn('batchId')]] || 0) + 1;
   return counts;
 }, {});
-assert(JSON.stringify(actualBatchCounts) === JSON.stringify(expectedBatchCounts), 'Batch 3 group counts changed');
+for (const [batchId, expected] of Object.entries(expectedBatchCounts)) {
+  assert(actualBatchCounts[batchId] === expected, `Batch 3 group count changed for ${batchId}`);
+}
+assert(Object.keys(actualBatchCounts).length === 15, 'Batch 3 group count changed');
 assert(batchRows.filter(row => row[batchColumn('reviewScope')] === 'lane_1_p0').length === 246, 'Batch 3 lane-1 count changed');
 assert(batchRows.filter(row => row[batchColumn('reviewScope')] !== 'lane_1_p0').length === 75, 'Batch 3 later-scope count changed');
 assert(batchRows.every(row => row[batchColumn('recommendation')] && row[batchColumn('canonicalEligibility')] && row[batchColumn('ownerGate')]), 'Batch 3 recommendation is incomplete');
